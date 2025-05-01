@@ -1076,15 +1076,35 @@ export default class StartMenu {
     if (!this.aiToolsMenu || !this.startMenu) return;
     const aiToolsButton = this.startMenu.querySelector("#menu-ai-tools");
     if (aiToolsButton) {
-      const rect = aiToolsButton.getBoundingClientRect();
-
-      // First display the menu so we can get its height
+      // First display the menu so we can get its height and width
       this.aiToolsMenu.style.display = "block";
-      this.aiToolsMenu.style.left = rect.right + "px";
+      this.aiToolsMenu.style.visibility = "hidden";
 
-      // Get the menu height and position at bottom of parent item
-      const menuHeight = this.aiToolsMenu.offsetHeight;
-      this.aiToolsMenu.style.top = rect.bottom - menuHeight + "px";
+      const buttonRect = aiToolsButton.getBoundingClientRect();
+      const menuRect = this.aiToolsMenu.getBoundingClientRect();
+
+      // Try positioning to the right first
+      let left = buttonRect.right;
+      // If it goes off-screen to the right, position to the left
+      if (left + menuRect.width > window.innerWidth) {
+        left = buttonRect.left - menuRect.width;
+      }
+
+      // Calculate top position to align bottom of menu with bottom of button
+      let top = buttonRect.bottom - menuRect.height;
+      if (top < 0) {
+        top = 0;
+      }
+      if (top + menuRect.height > window.innerHeight - 30) {
+        top = window.innerHeight - 30 - menuRect.height;
+      }
+
+      Object.assign(this.aiToolsMenu.style, {
+        left: `${left}px`,
+        top: `${top}px`,
+        display: "block",
+        visibility: "visible",
+      });
 
       this.aiToolsMenu.addEventListener("mouseleave", (e) => {
         if (
@@ -1096,7 +1116,7 @@ export default class StartMenu {
         this.hideAiToolsMenu();
       });
       this.aiToolsMenu.classList.add("active");
-      aiToolsButton.classList.add("active-submenu-trigger"); // Use the same class as Most Used Tools
+      aiToolsButton.classList.add("active-submenu-trigger");
     }
   }
 
