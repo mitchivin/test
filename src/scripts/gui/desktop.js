@@ -12,6 +12,7 @@
  *   - Wallpaper selection adapts to ultrawide screens.
  */
 import { EVENTS } from "../utils/eventBus.js";
+import { isMobileDevice } from "../utils/device.js";
 
 /**
  * Desktop class manages the Windows XP desktop UI, including icon selection, drag, and wallpaper.
@@ -42,8 +43,12 @@ export default class Desktop {
     this.setupIconEvents();
     this.setupDesktopEvents();
     this.setupPointerSelectionEvents();
-    // Set the default wallpaper (no ultrawide logic)
-    this.desktop.style.backgroundImage = `url('./assets/gui/desktop/bliss.jpg')`;
+    // Set the default wallpaper
+    if (isMobileDevice()) {
+      this.desktop.style.backgroundImage = `url('./assets/gui/desktop/blissMobile.jpg')`;
+    } else {
+      this.desktop.style.backgroundImage = `url('./assets/gui/desktop/bliss.jpg')`;
+    }
     // Dynamically set background position for ultrawide screens
     const aspectRatio = window.innerWidth / window.innerHeight;
     if (aspectRatio > 2.3) { // 21:9 is ~2.33
