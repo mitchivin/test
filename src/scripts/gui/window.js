@@ -13,6 +13,7 @@
 import programData from "../utils/programRegistry.js";
 import { EVENTS } from "../utils/eventBus.js";
 import { createMenuBar, createToolbar } from "./windowBars.js";
+import { isMobileDevice } from "../utils/device.js";
 
 const TASKBAR_HEIGHT = 30; // Define constant taskbar height
 
@@ -334,7 +335,7 @@ export default class WindowManager {
    * @returns {HTMLElement|null} The created window element or null on error.
    */
   _createWindowElement(program) {
-    const isMobile = window.innerWidth <= 600;
+    const isMobile = isMobileDevice && isMobileDevice();
 
     const windowElement = document.createElement("div");
     windowElement.id = program.id;
@@ -420,6 +421,7 @@ export default class WindowManager {
    * @returns {string} HTML string for the window base.
    */
   _getWindowBaseHTML(program) {
+    const isMobile = isMobileDevice && isMobileDevice();
     return `
             <div class="window-inactive-mask"></div>
             <div class="title-bar">
@@ -431,7 +433,7 @@ export default class WindowManager {
                 </div>
                 <div class="title-bar-controls">
                     ${program.canMinimize !== false ? '<button class="xp-button" aria-label="Minimize" data-action="minimize"></button>' : ""}
-                    ${program.canMaximize !== false ? '<button class="xp-button" aria-label="Maximize" data-action="maximize"></button>' : ""}
+                    ${!isMobile && program.canMaximize !== false ? '<button class="xp-button" aria-label="Maximize" data-action="maximize"></button>' : ""}
                     <button class="xp-button" aria-label="Close" data-action="close"></button>
                 </div>
             </div>

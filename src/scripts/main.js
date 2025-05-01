@@ -11,7 +11,6 @@ import { eventBus, EVENTS } from "./utils/eventBus.js";
 import { initBootSequence } from "./utils/boot.js"; // Import the boot sequence initializer
 import { setupTooltips } from "./utils/tooltip.js";
 import { initRandomScanline } from "./utils/crtEffect.js";
-import { triggerSafariAddressBarHideTrick } from "./utils/device.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize core UI components with shared event bus for communication
@@ -37,7 +36,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Enable XP-style tooltips globally for all elements with data-tooltip
   setupTooltips("[data-tooltip]");
-
-  // Try to hide Safari address bar on mobile
-  triggerSafariAddressBarHideTrick();
 });
