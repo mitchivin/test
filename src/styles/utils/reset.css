@@ -1,0 +1,86 @@
+/* ==================================================
+   Modern CSS Reset for Windows XP Simulation
+   ==================================================
+   - Resets browser defaults and applies XP-specific adjustments.
+   - Ensures consistent look and feel across browsers.
+   ================================================== */
+
+/* =========================
+   1. Universal Box Sizing & Font Smoothing
+   ========================= */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Document */
+html {
+  font-size: 100%;
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Windows XP specific user interaction settings */
+.desktop,
+.desktop * {
+  cursor: default;
+}
+
+/* Remove list styles */
+ul,
+ol {
+  list-style: none;
+}
+
+/* Images */
+img,
+svg {
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Form elements */
+
+button {
+  cursor: pointer;
+}
+
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Project-wide rule to prevent all text selection */
+* {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  /* 'user-select' warning is safe to ignore; vendor prefixes included for compatibility */
+}
+
+/* ==================================================
+   END Modern CSS Reset
+   ================================================== */

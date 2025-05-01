@@ -1,0 +1,194 @@
+/* ==================================================
+   Boot & Login Screen Styles for Windows XP Simulation
+   ==================================================
+   - Handles boot animation, login screen, and transitions.
+   - Matches the look and feel of Windows XP.
+   ================================================== */
+
+/* =========================
+   1. Overlay Screens (Boot & Login)
+   ========================= */
+/* Common styles for overlay screens */
+#boot-screen,
+#login-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000; /* Above everything else */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Boot screen - black with loading bar */
+#boot-screen {
+  background-color: #000;
+  opacity: 0; /* Hidden initially */
+  pointer-events: none; /* Disabled initially */
+  cursor: none;
+}
+
+.loading-container {
+  padding: 40px; /* Increased padding */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0; /* Initially hidden */
+  animation: fadeIn 0.15s ease-in forwards; /* Changed from 0.3s to 0.15s */
+  animation-delay: 1.5s; /* Delay appearance by 1.5 seconds */
+}
+
+#boot-logo {
+  width: 370px; /* Reduced width */
+  height: auto;
+  display: block;
+  margin-bottom: 40px; /* Increased space below the logo */
+  position: relative; /* Enable positioning */
+  left: 20px; /* Move 20px to the right */
+}
+
+/* New XP Loading Bar Styles */
+.container {
+  width: 180px; /* Increased width */
+  height: 22px; /* Slimmer height for XP look */
+  border: 2px solid #b2b2b2;
+  border-radius: 7px;
+  margin: 0 auto; /* Centered horizontally */
+  padding: 2px 1px;
+  overflow: hidden;
+  font-size: 0;
+  flex-shrink: 0; /* Prevent flexbox from shrinking/stretching */
+  align-self: center; /* Added: Explicitly center vertically in parent */
+}
+
+.box {
+  width: 9px;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    #2838c7 0%,
+    #5979ef 17%,
+    #869ef3 32%,
+    #869ef3 45%,
+    #5979ef 59%,
+    #2838c7 100%
+  );
+  display: inline-block;
+  margin-right: 2px;
+  animation: loader 2s infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes loader {
+  0% {
+    transform: translate(-30px); /* Start further left */
+  }
+
+  100% {
+    transform: translate(
+      180px
+    ); /* End further right (adjusted for new width) */
+  }
+}
+
+/* Login screen - container for iframe */
+#login-screen {
+  background-color: #000; /* Reverted from transparent to original black */
+  pointer-events: none; /* Disabled initially */
+  padding: 0;
+  overflow: hidden; /* Hide potential iframe scrollbars */
+  opacity: 1;
+}
+
+/* Hide the desktop initially (remove if not used) */
+/* .desktop {
+    opacity: 0; 
+} */
+
+/* Boot Screen Bottom Corner Elements */
+.boot-bottom-left {
+  position: absolute;
+  bottom: 50px; /* Increased */
+  left: 100px; /* Decreased */
+  color: #fff;
+  font-size: 17px; /* Increased font size */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Left-align text */
+  line-height: 1.4; /* Reverted */
+  opacity: 0; /* Initially hidden */
+  animation: fadeIn 0.15s ease-in forwards; /* Changed from 0.3s to 0.15s */
+  animation-delay: 1.5s; /* Delay appearance by 1.5 seconds */
+}
+
+.boot-bottom-right {
+  position: absolute;
+  bottom: 50px; /* Increased */
+  right: 100px; /* Decreased */
+  opacity: 0; /* Initially hidden */
+  animation: fadeIn 0.15s ease-in forwards; /* Changed from 0.3s to 0.15s */
+  animation-delay: 1.5s; /* Delay appearance by 1.5 seconds */
+}
+
+.boot-bottom-right img {
+  display: block;
+  height: 35px; /* Fixed height */
+  width: auto; /* Maintain aspect ratio */
+}
+
+/* Animation for fading in elements */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fade-in for login content */
+.login-screen {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Media query to hide bottom elements and adjust logo/loader on mobile */
+@media (max-width: 768px) {
+  .boot-bottom-left,
+  .boot-bottom-right {
+    display: none;
+  }
+
+  #boot-logo {
+    width: 280px; /* Smaller logo */
+    left: auto; /* Remove fixed offset */
+    margin-left: auto; /* Center horizontally */
+    margin-right: auto;
+    margin-bottom: 30px; /* Reduced margin */
+  }
+
+  .container {
+    width: 150px; /* Smaller width */
+    height: 16px; /* Smaller height */
+    padding-top: 1px; /* Reduced vertical padding */
+    padding-bottom: 1px;
+    border-width: 1px; /* Thinner border */
+  }
+
+  /* Adjust keyframes for smaller container */
+  @keyframes loader {
+    0% {
+      transform: translate(-30px);
+    }
+    100% {
+      transform: translate(150px); /* Match new container width */
+    }
+  }
+}
+
+/* ==================================================
+   END Boot & Login Screen Styles
+   ================================================== */

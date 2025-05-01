@@ -1,0 +1,465 @@
+/* ==================================================
+   Taskbar Styles for Windows XP Simulation
+   ==================================================
+   - Handles taskbar, start button, quick launch, taskbar items, system tray, and clock.
+   - Matches the look and feel of Windows XP.
+   ================================================== */
+
+/* =========================
+   1. Root Variables
+   ========================= */
+:root {
+  --taskbar-height: 30px;
+  --taskbar-item-height: 24px; /* Set to 24px */
+  --taskbar-active-color: #184f8b;
+  --taskbar-hover-color: #3b98f7;
+  --taskbar-gradient-start: #2980d5;
+  --taskbar-gradient-end: #1e5aa0;
+  --taskbar-text-shadow: 1px 1px 1px rgb(0 0 0 / 60%);
+  --tray-spacing: 6px;
+  --icon-size-small: 16px;
+  --z-taskbar: 500;
+}
+
+/* Common font for UI elements */
+.taskbar,
+.start-menu,
+.menu-item,
+.all-programs-item {
+  font-family: Tahoma, Arial, sans-serif;
+}
+
+/* =========================
+   2. Taskbar Container
+   ========================= */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--taskbar-height);
+  background-image: url("../../../assets/gui/taskbar/taskbar-bg.webp");
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  z-index: var(--z-taskbar);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* =========================
+   3. Start Button
+   ========================= */
+/* Start button */
+.start-button {
+  position: relative;
+  height: var(--taskbar-height);
+  width: auto;
+  cursor: default !important;
+  border: none !important;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  box-shadow: none !important;
+  transition: filter 0.1s ease;
+  -webkit-tap-highlight-color: transparent; /* Prevents tap highlight on mobile */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.start-button:hover {
+  filter: brightness(1.15);
+}
+
+.start-button:active,
+.start-button.active {
+  filter: brightness(0.9);
+  background: transparent !important; /* Force transparent background */
+  border: none !important; /* Force no border */
+}
+
+.start-button:focus,
+.start-button:active {
+  outline: none !important;
+}
+
+/* Ensure no white box appears in Firefox */
+.start-button::-moz-focus-inner {
+  border: 0;
+}
+
+/* Ensure image has no border */
+.start-button img {
+  height: var(--taskbar-height);
+  display: block;
+  border: none;
+  -webkit-user-drag: none; /* Prevent dragging */
+}
+
+/* =========================
+   4. Quick Launch & Programs Area
+   ========================= */
+/* Quick launch */
+.quick-launch {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-left: 0;
+  margin-right: 10px;
+  border: none;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Programs area */
+.taskbar-programs {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 2px 0 0;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* =========================
+   5. Taskbar Items
+   ========================= */
+/* Taskbar program buttons */
+.taskbar-item {
+  height: var(--taskbar-item-height);
+  margin: 0 1px;
+  padding: 0 8px;
+  border-radius: 5px; /* Adjusted from 4px to 5px */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Ensures consistent horizontal alignment */
+  color: white;
+  font-size: 11px;
+  text-shadow: var(--taskbar-text-shadow);
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  border: 1px solid rgb(0 0 0 / 15%); /* Slightly lighter border */
+  background: linear-gradient(
+    to bottom,
+    #3590e8 0%,
+    #1e5aa0 100%
+  ); /* Slightly less bright gradient */
+
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 30%),
+    /* Less intense top highlight */ inset 0 -1px 1px rgb(0 0 0 / 13%),
+    /* Less intense bottom shadow */ inset 1px 0 0 rgb(255 255 255 / 22%),
+    inset -1px 0 0 rgb(0 0 0 / 8%),
+    0 1px 1px rgb(0 0 0 / 15%); /* Smaller outer shadow */
+
+  /* Added smooth transition for width changes */
+  transition: width 0.15s ease;
+  flex-shrink: 1; /* Allow items to shrink */
+}
+
+/* Only use icon-only mode as an absolute last resort */
+.taskbar-item.icon-only {
+  padding: 0 6px;
+  justify-content: center;
+  min-width: 36px; /* Minimum width for icon-only mode */
+}
+
+.taskbar-item.icon-only span {
+  display: none;
+}
+
+.taskbar-item.icon-only img {
+  margin-right: 0;
+}
+
+.taskbar-item:hover:not(.active) {
+  background: linear-gradient(
+    to bottom,
+    #4da2f8 0%,
+    #2678d8 100%
+  ); /* Less bright hover gradient */
+
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 35%),
+    inset 0 -1px 1px rgb(0 0 0 / 14%),
+    inset 1px 0 0 rgb(255 255 255 / 28%),
+    inset -1px 0 0 rgb(0 0 0 / 9%),
+    0 1px 2px rgb(0 0 0 / 20%); /* Slightly smaller outer shadow on hover */
+}
+
+.taskbar-item.active {
+  background: linear-gradient(
+    to top,
+    #1e62bc 0%,
+    #185294 100%
+  ); /* Slightly adjusted active gradient */
+
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 25%),
+    /* Less intense inner top shadow */ inset 0 -1px 0 rgb(255 255 255 / 12%),
+    /* Adjusted bottom highlight */ inset 1px 0 1px rgb(0 0 0 / 15%),
+    inset -1px 0 1px rgb(0 0 0 / 15%); /* Adjusted inner side shadows */
+}
+
+.taskbar-item.active:hover {
+  background: linear-gradient(
+    to top,
+    #226ac4 0%,
+    #1a5c9d 100%
+  ); /* Adjusted active hover gradient */
+
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 30%),
+    /* Adjusted active hover shadow */ inset 0 -1px 0 rgb(255 255 255 / 14%),
+    inset 1px 0 1px rgb(0 0 0 / 20%),
+    inset -1px 0 1px rgb(0 0 0 / 20%);
+}
+
+.taskbar-item img {
+  width: var(--icon-size-small);
+  height: var(--icon-size-small);
+  margin-right: 6px;
+  flex-shrink: 0;
+  position: relative;
+  display: block;
+}
+
+.taskbar-item span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  position: relative;
+  min-width: 0;
+}
+
+/* =========================
+   6. System Tray & Tray Icons
+   ========================= */
+/* System tray */
+.system-tray {
+  height: 100%;
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  /* Responsive width: remove fixed width and min-width */
+  width: auto;
+  min-width: 0;
+  flex-shrink: 0;
+  flex-grow: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-right: 0;
+}
+
+.system-tray img.system-tray-bg {
+  height: var(--taskbar-height);
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.tray-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 12px;
+  box-sizing: border-box;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Tray icons */
+.tray-icons {
+  display: flex;
+  align-items: center;
+  gap: var(--tray-spacing);
+  margin-right: 8px;
+  height: 100%;
+}
+
+.tray-icons > *,
+.tray-icons img {
+  cursor: pointer !important;
+}
+
+.tray-network-icon {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: 0;
+  transform: none;
+  margin: 1px 0 0 0;
+  object-fit: contain;
+  cursor: default;
+  display: flex;
+  align-items: center;
+}
+
+.system-tray img {
+  height: var(--taskbar-height);
+  display: block;
+}
+
+/* =========================
+   7. Clock
+   ========================= */
+/* Clock */
+.time {
+  position: static;
+  color: white;
+  font-size: 11px;
+  text-shadow: var(--taskbar-text-shadow);
+  white-space: nowrap;
+  z-index: 2;
+  padding: 0 0px 0 0;
+  margin-right: 0;
+}
+
+/* =========================
+   8. Balloon Tooltip Styles
+   ========================= */
+/* Start Menu styles moved to startmenu.css */
+
+/* === Balloon Tooltip Styles === */
+#balloon-root {
+  position: relative;
+}
+.balloon {
+  border: 1px solid black;
+  border-radius: 7px;
+  padding: 6px 28px 6px 10px;
+  background-color: #ffffe1;
+  font-size: 11px;
+  white-space: nowrap;
+  filter: drop-shadow(2px 2px 1px rgba(0, 0, 0, 0.4));
+  opacity: 0;
+  display: block;
+  animation: fadein 1s forwards;
+  z-index: 10;
+}
+.balloon.hide {
+  animation: fadeout 1s forwards;
+}
+@keyframes fadein {
+  0% {
+    opacity: 0;
+    display: block;
+  }
+  100% {
+    opacity: 1;
+    display: block;
+  }
+}
+@keyframes fadeout {
+  0% {
+    opacity: 1;
+    display: block;
+  }
+  99% {
+    opacity: 0;
+    display: block;
+  }
+  100% {
+    opacity: 0;
+    display: none;
+  }
+}
+.balloon:before {
+  content: "";
+  position: absolute;
+  display: block;
+  bottom: -19px;
+  right: 14px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 19px 19px 0;
+  border-color: transparent black transparent transparent;
+}
+.balloon:after {
+  content: "";
+  position: absolute;
+  display: block;
+  bottom: -17px;
+  right: 15px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 18px 18px 0;
+  border-color: transparent #ffffe1 transparent transparent;
+}
+.balloon__close {
+  all: unset;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  background-color: transparent;
+  cursor: default;
+  display: block;
+  box-sizing: border-box;
+}
+.balloon__close:active,
+.balloon__close:focus:active {
+  /* outline: none; */
+  background: #a00a0a !important;
+  background-color: #a00a0a !important;
+  background-image: none !important;
+}
+.balloon__close:before,
+.balloon__close:after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  height: 8px;
+  width: 2px;
+  background-color: rgba(170, 170, 170);
+}
+.balloon__close:before {
+  transform: rotate(45deg);
+}
+.balloon__close:after {
+  transform: rotate(-45deg);
+}
+.balloon__close:hover {
+  background-color: #dd0f0f;
+  border-color: white;
+  box-shadow: 1px 1px rgba(0, 0, 0, 0.1);
+}
+.balloon__header {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+}
+.balloon__header__img {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+}
+.balloon__text__first {
+  margin: 5px 0 0px;
+  line-height: 1.4;
+}
+.balloon__text__second {
+  margin-top: 8px;
+}
+/* === End Balloon Tooltip Styles === */
+/* ==================================================
+   END Taskbar Styles
+   ================================================== */

@@ -1,0 +1,760 @@
+/* ==================================================
+   Start Menu Styles for Windows XP Simulation
+   ==================================================
+   - Handles main start menu, submenus, menu items, and footer.
+   - Matches the look and feel of Windows XP.
+   ================================================== */
+
+/* =========================
+   1. Main Start Menu Container
+   ========================= */
+/* Windows XP Start Menu Styles */
+
+/* Main Start Menu container */
+.startmenu {
+  position: absolute;
+  bottom: calc(var(--taskbar-height) + 1px); /* Updated to use variable */
+  left: 0;
+  width: 355px;
+  height: 465px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--xp-bg-accent);
+  border-radius: 5px 5px 0 0; /* Changed from 5px 5px 5px 0 to make bottom right corner square */
+  border: 1px solid rgb(0 0 0 / 30%);
+  box-shadow:
+    3px 4px 8px rgb(0 0 0 / 65%),
+    0 0 4px rgb(0 0 0 / 40%),
+    inset 0 0 55px rgb(255 255 255 / 8%); /* Reduced external shadow spread */
+
+  z-index: var(--z-startmenu); /* Ensure this uses the variable */
+  overflow: hidden;
+  visibility: hidden; /* Start hidden */
+  opacity: 0;
+
+  /* Remove transition for closing to make it instant */
+  transition:
+    opacity 0s,
+    visibility 0s;
+  transform: translateZ(0); /* Force hardware acceleration */
+  will-change: opacity, visibility; /* Hint to browser for optimization */
+  cursor: default; /* Ensure default cursor throughout - consolidated */
+  font-family: Tahoma, Arial, sans-serif; /* Consolidated font family */
+}
+
+.startmenu.active {
+  visibility: visible;
+  opacity: 1;
+
+  /* Keep transition only for opening */
+  transition:
+    opacity 0.1s ease,
+    visibility 0s;
+}
+
+/* =============================================
+  Top Bar Section
+============================================= */
+.menutopbar {
+  width: 100%;
+  height: 51px;
+  flex: 0 0 51px;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(
+    to bottom,
+    rgb(24 104 206) 0%,
+    rgb(14 96 203) 12%,
+    rgb(14 96 203) 20%,
+    rgb(17 100 207) 32%,
+    rgb(22 103 207) 33%,
+    rgb(27 108 211) 47%,
+    rgb(30 112 217) 54%,
+    rgb(36 118 220) 60%,
+    rgb(41 122 224) 65%,
+    rgb(52 130 227) 77%,
+    rgb(55 134 229) 79%,
+    rgb(66 142 233) 90%,
+    rgb(71 145 235) 100%
+  );
+  border-radius: 5px 5px 0 0;
+  position: relative;
+  box-shadow: inset 0 -2px 3px rgb(10 36 106 / 40%);
+}
+
+.menutopbar::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    rgb(255 140 0 / 10%) 0%,
+    rgb(255 165 0 / 90%) 30%,
+    rgb(255 165 0 / 90%) 70%,
+    rgb(255 140 0 / 10%) 100%
+  );
+  box-shadow: 0 1px 2px rgb(255 255 255 / 30%);
+}
+
+/* Reduce profile icon size by additional 1.5px (total 2px reduction) */
+.userpicture {
+  width: 40px;
+  height: 40px;
+  border-radius: 3px;
+  margin: 7px 8px 8px;
+  border: 2px solid rgb(255 255 255 / 70%);
+  box-shadow:
+    0 0 0 1px rgb(0 95 184 / 60%),
+    inset 0 0 2px 1px rgb(255 255 255 / 35%);
+}
+
+.username {
+  font-size: 13.5px;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgb(0 0 0 / 60%);
+}
+
+/* =============================================
+  Middle Section
+============================================= */
+.start-menu-middle {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: inset 0 6px 10px -6px rgb(0 0 0 / 30%); /* Enhanced middle shadow */
+}
+
+/* Left section */
+.middle-left {
+  width: 52%; /* Increased from 49.5% to 52% (+2.5%) */
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  box-shadow:
+    inset -2px 0 3px -1px rgb(0 0 0 / 15%),
+    inset 0 3px 4px -3px rgb(0 0 0 / 20%);
+}
+
+/* Right section */
+.middle-right {
+  width: 48%; /* Decreased from 50.5% to 48% (-2.5%) */
+  display: flex;
+  flex-direction: column;
+  background-color: #d2e5fa;
+  border-left: 1px solid #a6bbd6;
+  box-shadow:
+    inset 2px 0 3px -1px rgb(255 255 255 / 70%),
+    inset 0 3px 4px -3px rgb(0 0 0 / 15%); /* Stronger shadow */
+}
+
+/* Right side - make items positioned correctly */
+.middle-right .menu-items {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Fill the full height */
+  justify-content: flex-start; /* Start items from the top */
+}
+
+/* Add this to maintain consistent spacing */
+.middle-right .menu-items::after {
+  content: "";
+  flex: 1;
+  min-height: 139px;
+}
+
+/* Menu items */
+.menu-items {
+  list-style: none;
+  padding: 0;
+  margin: 0; /* Keep basic resets */
+  width: 100%; /* Keep width */
+}
+
+/* Menu items list within the left section */
+.middle-left .menu-items {
+  /* Basic resets inherited from .menu-items */
+  flex: 1; /* Let list grow and shrink, basis 0 */
+  display: flex; /* Arrange children */
+  flex-direction: column; /* Stack children vertically */
+  overflow: hidden; /* Prevent visual overflow */
+}
+
+/* Item styling - consolidated rules */
+.menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 6px 8px;
+  margin: 0;
+  box-sizing: border-box;
+  transition: background-color 0.05s ease; /* Faster transition */
+}
+
+/* Left side menu items - allow them to grow equally */
+.middle-left .menu-item {
+  padding: 6px 7.5px 6px 9px;
+  flex: 1; /* Allow items to share space equally */
+  min-height: 0; /* Prevent content imposing min size */
+  display: flex;
+  align-items: center;
+
+  /* Ensure no explicit height */
+}
+
+/* Right side menu items - Adjusting height */
+.middle-right .menu-item {
+  padding: 8px 7.5px 8px 9px;
+  height: 36px;
+  flex: 0 0 36px;
+  box-sizing: border-box;
+}
+
+.middle-right .menu-item img {
+  width: 25px;
+  height: 25px;
+  margin-right: 7px;
+  margin-left: 1px;
+}
+
+.middle-right .menu-item .item-title {
+  font-size: 11.5px;
+  letter-spacing: normal;
+}
+
+.menu-item:hover {
+  background-color: #2f71cd;
+  color: white;
+  box-shadow:
+    inset 0 0 5px rgb(0 0 0 / 20%),
+    0 0 1px rgb(255 255 255 / 30%);
+}
+
+/* Make all text in menu items turn white on hover */
+.menu-item:hover .item-title,
+.menu-item:hover .item-description {
+  color: white !important;
+  text-shadow: 0 0 1px rgb(0 0 0 / 30%);
+  transition: color 0.05s ease; /* Match transition speed */
+}
+
+/* Apply transition to all components that change on hover */
+.menu-item .item-title,
+.menu-item .item-description,
+.menu-item img {
+  transition:
+    color 0.05s ease,
+    filter 0.05s ease;
+}
+
+/* Icons */
+.middle-left .menu-item img {
+  width: 30px;
+  height: 30px;
+  margin-right: 7px;
+  filter: drop-shadow(1px 1px 1px rgb(0 0 0 / 30%));
+}
+
+/* Menu item content */
+.item-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Menu item text - combined selectors for standardization */
+.item-title,
+.item-description {
+  font-size: 12px;
+  letter-spacing: normal; /* Consistent letter spacing */
+  font-weight: normal; /* Reset to normal by default */
+}
+
+/* Apply bold ONLY to specific items - using ID selectors for reliability */
+#menu-internet .item-title,
+.all-programs-button span, /* Changed from .all-programs-button to target span */
+#menu-instagram .item-title,
+#menu-linkedin .item-title,
+#menu-github .item-title,
+#menu-program4 .item-title /* Right (Most Used Tools) */ {
+  font-weight: 600;
+}
+
+/* Descriptions (now applies to My Web Work as well) */
+.item-description {
+  font-size: 9.5px;
+  color: #777;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+.menu-item:hover .item-description {
+  color: white;
+  text-shadow: 0 0 1px rgb(0 0 0 / 30%);
+}
+
+/* Divider */
+.menu-divider {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    #d2d2d2 50%,
+    transparent 100%
+  );
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Left side menu items - use fixed height */
+.middle-left .menu-divider {
+  list-style: none;
+  padding: 0;
+  margin: 0; /* Changed from 2px 0 */
+  height: 1px;
+  flex: 0 0 auto; /* Keep non-growing */
+}
+
+/* All Programs section - Fixed height flex item */
+.all-programs-container {
+  flex: 0 0 35px; /* Fixed height, no grow/shrink */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Use the same weight on All Programs as Internet and Email */
+.all-programs-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 35px;
+  font-weight: 600; /* Changed from 700 to 600 to match Internet and Email */
+  font-size: 12px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 30%);
+  padding-left: 10px; /* Increased from 7px to 10px */
+}
+
+.all-programs-button span {
+  margin-right: 10px;
+  line-height: 18px;
+}
+
+.all-programs-button img {
+  width: 18px;
+  height: 18px;
+}
+
+.all-programs-button:hover {
+  background-color: #2f71cd;
+  color: white;
+  box-shadow:
+    inset 0 0 5px rgb(0 0 0 / 20%),
+    0 0 2px rgb(255 255 255 / 20%);
+}
+
+/* =============================================
+  Footer Section
+============================================= */
+.start-menu-footer {
+  width: 100%;
+  flex: 0 0 46px;
+  height: 46px;
+  background-color: #0f61cb;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-bottom-right-radius: 0; /* Changed from 5px to 0 to match the square corner */
+  border-top: 1px solid rgb(0 0 0 / 30%); /* Match the border of the start menu */
+  box-shadow: inset 0 1px 4px rgb(0 0 0 / 20%); /* Enhanced inner shadow */
+}
+
+/* Match footer gradient style to header gradient style */
+.start-menu-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgb(66 142 233) 0%,
+    rgb(55 134 229) 10%,
+    rgb(52 130 227) 21%,
+    rgb(41 122 224) 35%,
+    rgb(36 118 220) 40%,
+    rgb(30 112 217) 46%,
+    rgb(27 108 211) 53%,
+    rgb(22 103 207) 67%,
+    rgb(17 100 207) 68%,
+    rgb(14 96 203) 80%,
+    rgb(14 96 203) 88%,
+    rgb(24 104 206) 100%
+  );
+  z-index: 0;
+}
+
+.footer-buttons {
+  display: flex;
+  height: 100%;
+  padding-right: 2px;
+  position: relative;
+  z-index: 1;
+  align-items: center;
+}
+
+.footer-button {
+  display: inline-flex; /* Keep inline-flex for tighter bounding box */
+  align-items: center;
+  height: 30px;
+  padding: 0; /* Remove padding */
+  margin: 0 5px; /* Keep spacing between buttons */
+  color: white;
+  font-size: 12.5px;
+  text-shadow: 1px 1px 1px rgb(0 0 0 / 40%);
+  box-shadow: none;
+  transition: none;
+}
+
+/* Add padding to the text for spacing */
+.footer-button span {
+  padding: 0 3px;
+}
+
+.footer-button img {
+  width: 24px;
+  height: 24px;
+  margin-right: 7px;
+  border-radius: 3px;
+  box-shadow: none;
+  transition: filter 0.1s ease;
+}
+
+/* Remove background highlight, only brighten icon */
+.footer-button:hover {
+  box-shadow: none;
+  background-color: transparent; /* Remove background highlight */
+}
+
+.footer-button:hover img {
+  filter: brightness(1.2); /* Keep icon brightness effect */
+}
+
+/* =============================================
+  Submenus (All Programs, Most Used Tools, AI Tools)
+============================================= */
+
+/* Base styles for submenu containers */
+.all-programs-menu,
+.most-used-tools-menu, /* Renamed from .creative-suite-menu */
+.ai-tools-menu {
+  position: absolute;
+  background-color: var(--xp-bg-main);
+  border: 1px solid var(--xp-border-main);
+  box-shadow: 2px 2px 5px rgb(0 0 0 / 30%);
+  z-index: calc(
+    var(--z-startmenu) + 1
+  ); /* Ensure submenus are above main menu */
+  padding: 2px; /* Add padding around the list */
+  min-width: 170px; /* Minimum width */
+  display: none; /* Hidden by default */
+}
+
+/* Specific style for the blue gradient strip on left */
+.all-programs-menu::before,
+.most-used-tools-menu::before, /* Renamed */
+.ai-tools-menu::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #1c57ad 0%, #2a70ce 50%, #5b9fe2 100%);
+  z-index: 1;
+}
+
+/* Container for submenu items */
+.all-programs-items,
+.most-used-tools-items, /* Renamed */
+.ai-tools-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 380px; /* Limit height for scroll */
+  overflow-y: auto;
+  width: 100%;
+}
+
+/* Individual submenu items */
+.all-programs-item,
+.most-used-tools-item, /* Renamed */
+.ai-tools-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 3px 8px 3px 30px;
+  margin: 0;
+  font-size: 11px;
+  color: #000;
+  border: none;
+  white-space: nowrap;
+  min-height: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: default;
+
+  /* Remove transition from the item itself */
+}
+
+/* Hover effect for submenu items */
+.all-programs-item:hover,
+.most-used-tools-item:hover, /* Renamed */
+.ai-tools-item:hover {
+  background-color: #2f71cd;
+  color: white;
+  padding-left: 30px; /* Ensure consistent padding */
+}
+
+/* Create a background overlay that can transition smoothly */
+.all-programs-item::after,
+.most-used-tools-item::after,
+.ai-tools-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: transparent;
+  pointer-events: none;
+  z-index: -1;
+  transition: background-color 0.05s linear;
+}
+
+.all-programs-item:hover::after,
+.most-used-tools-item:hover::after,
+.ai-tools-item:hover::after {
+  background-color: #2f71cd;
+}
+
+/* Highlight extension for hover */
+.all-programs-item:hover::before,
+.most-used-tools-item:hover::before, /* Renamed */
+.ai-tools-item:hover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  background-color: #2f71cd;
+  z-index: 1;
+  transition: background-color 0.05s linear; /* Match the timing */
+}
+
+/* Make text and icon in submenu items transition together */
+.all-programs-item *,
+.most-used-tools-item *,
+.ai-tools-item * {
+  transition: color 0.05s linear;
+  z-index: 2; /* Keep content above the overlay */
+}
+
+/* Apply color changes to both icon and text simultaneously */
+.all-programs-item:hover *,
+.most-used-tools-item:hover *,
+.ai-tools-item:hover * {
+  color: white;
+  filter: brightness(1.1);
+}
+
+/* Icons within submenu items */
+.all-programs-item img,
+.most-used-tools-item img, /* Renamed */
+.ai-tools-item img {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+/* Separator within All Programs */
+.all-programs-separator {
+  height: 1px;
+  background-color: #d1d1d1;
+  margin: 3px 0;
+  padding: 0;
+  border: none;
+  flex-shrink: 0; /* Prevent shrinking */
+  width: calc(100% - 2px); /* Account for container padding */
+  margin-left: 1px; /* Align with padding */
+}
+
+/* Arrow indicator styling */
+.mut-menu-arrow, /* Renamed from .cs-menu-arrow */
+.ai-tools-arrow {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%) scaleX(0.5);
+  font-size: 10px;
+  color: inherit; /* Inherit color from parent */
+}
+
+/* Active state for the submenu trigger */
+.active-submenu-trigger {
+  /* Define styles when a submenu is active, e.g., persistent hover state */
+  background-color: #e5f3ff; /* Example: light blue background */
+
+  /* Add other styles as needed */
+}
+
+/* All program items same height but smaller than social items */
+.middle-right .menu-item#menu-program1,
+.middle-right .menu-item#menu-program2,
+.middle-right .menu-item#menu-program3,
+.middle-right .menu-item#menu-program4,
+.middle-right .menu-item#menu-program5 {
+  padding: 8px 7.5px 8px 9px; /* Match social items padding */
+  height: 36px; /* Changed from 38px */
+  flex: 0 0 36px; /* Changed from 38px */
+  box-sizing: border-box;
+}
+
+/* Make program 6 the same height as others */
+.middle-right .menu-item#menu-program6 {
+  padding: 8px 7.5px 8px 9px;
+  height: 36px; /* Changed from 38px */
+  flex: 0 0 36px; /* Changed from 38px */
+  box-sizing: border-box;
+}
+
+/* Make only program items in right section not bold */
+.middle-right .menu-item#menu-program1 .item-title,
+.middle-right .menu-item#menu-program2 .item-title,
+.middle-right .menu-item#menu-program3 .item-title,
+.middle-right .menu-item#menu-program4 .item-title,
+.middle-right .menu-item#menu-program5 .item-title,
+.middle-right .menu-item#menu-program6 .item-title {
+  font-weight: normal;
+}
+
+/* Make portfolio items bold */
+.middle-right .menu-item#menu-internet .item-title {
+  font-weight: 600;
+}
+
+/* Ensure portfolio items have the same height as program items */
+.middle-right .menu-item#menu-internet {
+  padding: 8px 7.5px 8px 9px;
+  height: 36px; /* Changed from 38px */
+  flex: 0 0 36px; /* Changed from 38px */
+  box-sizing: border-box;
+}
+
+/* Style for right section divider to match left section style but with shadow blue */
+.right-section-divider {
+  list-style: none;
+  padding: 0;
+  height: 1px;
+  flex: 0 0 auto;
+  width: 70%; /* Changed from 85% to 70% to make it narrower */
+  margin: 0 auto;
+}
+
+.right-section-divider .divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    #94bddf 50%,
+    /* Changed from #b6d3ed to #94bddf for a darker blue */ transparent 100%
+  );
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Style exception for our specific right section divider */
+.middle-right .right-section-divider,
+.middle-right .right-section-divider .divider {
+  display: block;
+}
+
+.most-used-tools-item.disabled,
+.ai-tools-item.disabled {
+  color: #999 !important;
+  opacity: 0.93 !important;
+  cursor: default !important;
+  background: none !important;
+  filter: grayscale(0.25) !important;
+  box-shadow: none !important;
+  position: relative;
+}
+.most-used-tools-item.disabled:hover,
+.ai-tools-item.disabled:hover,
+.most-used-tools-item.disabled:focus,
+.ai-tools-item.disabled:focus {
+  background: none !important;
+  color: #999 !important;
+  filter: grayscale(0.25) !important;
+  box-shadow: none !important;
+}
+.most-used-tools-item.disabled::before,
+.ai-tools-item.disabled::before,
+.most-used-tools-item.disabled::after,
+.ai-tools-item.disabled::after,
+.most-used-tools-item.disabled:hover::before,
+.ai-tools-item.disabled:hover::before,
+.most-used-tools-item.disabled:hover::after,
+.ai-tools-item.disabled:hover::after {
+  background: none !important;
+  content: none !important;
+  box-shadow: none !important;
+}
+.most-used-tools-item.disabled img,
+.ai-tools-item.disabled img {
+  filter: grayscale(0.25) !important;
+  opacity: 0.6 !important;
+}
+.most-used-tools-item.disabled:hover img,
+.ai-tools-item.disabled:hover img {
+  filter: grayscale(1);
+}
+
+:root {
+  --z-startmenu: 1500;
+}
+
+/* Media query to disable log off button on mobile */
+@media (max-width: 768px) {
+  .footer-button[data-action="log-off"] {
+    opacity: 0.5;
+    pointer-events: none; /* Prevent clicks */
+    cursor: default;
+    filter: grayscale(1);
+  }
+
+  .footer-button[data-action="log-off"]:hover {
+    background-color: transparent; /* Remove hover effect */
+  }
+}
+
+/* ==================================================
+   END Start Menu Styles
+   ================================================== */

@@ -1,0 +1,90 @@
+/* ==================================================
+   Main Stylesheet for Windows XP Simulation
+   ==================================================
+   - Imports all core and utility stylesheets.
+   - Defines z-index hierarchy and global overrides.
+   ================================================== */
+
+/* =========================
+   1. Imports
+   ========================= */
+@import url("utils/reset.css");
+@import url("gui/desktop.css");
+@import url("gui/taskbar.css");
+@import url("gui/startMenu.css");
+@import url("gui/window.css");
+@import url("utils/iframeApp.css");
+
+/* =========================
+   2. Z-Index Hierarchy
+   ========================= */
+:root {
+  --z-base: 1;
+  --z-window: 100;
+  --z-taskbar: 500;
+  --z-tooltip: 1000;
+  --z-startmenu: 1500;
+}
+
+/* =========================
+   3. Window States & Maximized Styles
+   ========================= */
+.window.maximized {
+  position: absolute;
+  border-radius: 0;
+  border-width: 0;
+  overflow: hidden;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  max-height: none !important;
+  min-height: 0 !important;
+}
+
+.window.maximized .title-bar {
+  border-radius: 0;
+}
+
+/* Prevent internal scrollbars when maximized */
+.window.maximized .window-body {
+  overflow: hidden !important;
+}
+
+.window-maximize.restore {
+  background-image: url("../assets/gui/desktop/restore.webp");
+  background-size: 10px 10px;
+}
+
+/* Add styles here to override or supplement xp.css */
+
+/* =========================
+   4. Global Layout & Body Styles
+   ========================= */
+/* Ensure body fills viewport for absolute positioning */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars on body */
+}
+
+/* Prevent double-tap to zoom on desktop icons (mobile) */
+.desktop-icon {
+  touch-action: manipulation;
+}
+
+#boot-screen,
+#login-screen {
+  cursor: default !important;
+}
+
+#windows-container {
+  position: absolute;
+  z-index: 100;
+}
+
+/* ==================================================
+   END Main Stylesheet
+   ================================================== */

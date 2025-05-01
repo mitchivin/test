@@ -1,0 +1,144 @@
+/* ==================================================
+   Desktop Styles for Windows XP Simulation
+   ==================================================
+   - Handles desktop background, icon grid, selection overlays, and icon states.
+   - Matches the look and feel of Windows XP.
+   ================================================== */
+
+/* =========================
+   1. Root Variables
+   ========================= */
+:root {
+  --desktop-selection-color: rgb(49 106 197 / 15%);
+  --desktop-selection-hover: rgb(49 106 197 / 25%);
+  --taskbar-height: 30px;
+  --selection-border: 1px dotted rgba(255, 255, 255, 0.5);
+  --icon-border-radius: 3px;
+  --xp-bg-main: #ece9d8;
+  --xp-bg-accent: #0f61cb;
+  --xp-border-main: #aca899;
+  --icon-hover-bg: rgb(49 106 197 / 22%);
+  --icon-selected-bg: rgb(49 106 197 / 50%);
+}
+
+/* =========================
+   2. Desktop Container & Background
+   ========================= */
+/* Main desktop container */
+.desktop {
+  width: 100%;
+  height: 100%;
+
+  /* Background image is now dynamically set by JavaScript */
+  background-size: cover;
+  background-position: center;
+}
+
+/* =========================
+   3. Selection Overlay & Box
+   ========================= */
+/* Selection overlay – sits behind everything, handles drag logic */
+.selection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - var(--taskbar-height));
+  pointer-events: auto;
+  cursor: default;
+}
+
+/* Selection box (must live inside .selection-overlay) */
+.selection-box {
+  position: absolute;
+  border: var(--selection-border);
+  background-color: var(--desktop-selection-color);
+  border-radius: var(--icon-border-radius);
+  pointer-events: none;
+}
+
+/* When desktop icons are hovered by box (no border) */
+.desktop-icon.hover-by-selection {
+  background-color: var(--desktop-selection-hover);
+}
+
+/* Hover effect for selected icons */
+.desktop-icon.selected:hover {
+  background-color: rgb(49 106 197 / 30%);
+}
+
+/* =========================
+   4. Desktop Icon Grid & Icons
+   ========================= */
+/* Desktop icon grid */
+.desktop-icons {
+  padding: 16px 0 0 16px;
+  display: grid;
+  grid-template-columns: 90px;
+  grid-auto-rows: 90px;
+  grid-gap: 6px;
+  place-content: start start;
+  height: calc(100% - 30px);
+}
+
+/* Individual icon */
+.desktop-icon {
+  width: 90px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  cursor: default;
+  padding: 6px;
+  border-radius: var(--icon-border-radius);
+  position: relative;
+  z-index: 5;
+}
+
+/* Hover effect */
+.desktop-icon:hover {
+  background-color: var(--icon-hover-bg);
+}
+
+/* Selected state */
+.desktop-icon.selected,
+.desktop-icon.selected:hover {
+  background-color: var(--icon-selected-bg);
+  border: 1px dotted rgba(255, 255, 255, 0.5);
+  border-radius: var(--icon-border-radius);
+}
+
+/* Hover-by-selection highlight */
+.desktop-icon.hover-by-selection {
+  background-color: var(--icon-hover-bg);
+}
+
+/* Icon image */
+.desktop-icon img {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 6px;
+}
+
+/* Icon label */
+.desktop-icon span {
+  font-size: 12px;
+  line-height: 15px;
+  text-align: center;
+  color: white;
+  text-shadow:
+    1px 1px 1px rgb(0 0 0 / 90%),
+    0 0 3px rgb(0 0 0 / 80%);
+  font-family: Tahoma, Arial, sans-serif;
+  font-weight: 400;
+  white-space: normal;
+  overflow: visible;
+  max-width: 100%;
+  display: block;
+}
+
+/* ==================================================
+   END Desktop Styles
+   ================================================== */
