@@ -489,7 +489,7 @@ export default class StartMenu {
                         ${renderMenuItem({
                           id: "resume",
                           icon: "./assets/gui/desktop/resume.webp",
-                          title: "Resume",
+                          title: "My Resume",
                           programName: "resume",
                           action: "open-program"
                         })}

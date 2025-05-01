@@ -142,3 +142,20 @@
 /* ==================================================
    END Desktop Styles
    ================================================== */
+
+@media (max-width: 768px) {
+  .desktop-icons {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: 90px;
+    grid-auto-rows: 90px;
+    grid-gap: 6px;
+    place-content: start center;
+    padding: 18px 0 0 0;
+    height: auto;
+    width: 100vw;
+    justify-content: center;
+    align-items: start;
+  }
+}

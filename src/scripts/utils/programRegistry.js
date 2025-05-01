@@ -374,7 +374,7 @@ const programData = {
       // --- End MenuBar Configuration ---
     },
   ),
-  resume: createProgram("resume", "Resume", "desktop/resume.webp", "resume", {
+  resume: createProgram("resume", "My Resume", "desktop/resume.webp", "resume", {
     dimensions: { width: 700, height: 800 },
     statusBarText: "Skills and experience overview",
     toolbarConfig: {
