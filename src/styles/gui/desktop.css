@@ -158,4 +158,19 @@
     justify-content: center;
     align-items: start;
   }
+  .desktop-icon {
+    width: 90px;
+    height: 90px;
+    padding: 6px;
+  }
+  .desktop-icon img {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 8px;
+  }
+  .desktop-icon span {
+    font-size: 13.5px;
+    line-height: 16px;
+    max-width: 100%;
+  }
 }
