@@ -198,21 +198,15 @@
 
 /* Left side menu items - allow them to grow equally */
 .middle-left .menu-item {
-  padding: 6px 7.5px 6px 9px;
-  flex: 1; /* Allow items to share space equally */
-  min-height: 0; /* Prevent content imposing min size */
-  display: flex;
-  align-items: center;
-
-  /* Ensure no explicit height */
+  /* Inherits general .menu-item styles */
+  flex: 1; /* Allow them to grow and take available space */
 }
 
-/* Right side menu items - Adjusting height */
+/* Right side menu items */
 .middle-right .menu-item {
-  padding: 8px 7.5px 8px 9px;
-  height: 36px;
-  flex: 0 0 36px;
-  box-sizing: border-box;
+  /* Inherits general .menu-item styles */
+  padding: 4px 8px; /* Further reduced top/bottom padding by 1px each */
+  font-weight: bold;
 }
 
 .middle-right .menu-item img {

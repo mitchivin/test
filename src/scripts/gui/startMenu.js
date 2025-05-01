@@ -66,6 +66,12 @@ const ALL_PROGRAMS_ITEMS = [
   },
   {
     type: "url",
+    url: "https://github.com/mitchivin",
+    icon: "./assets/gui/start-menu/github.webp",
+    label: "GitHub",
+  },
+  {
+    type: "url",
     url: "https://www.linkedin.com/in/mitchivin",
     icon: "./assets/gui/start-menu/linkedin.webp",
     label: "LinkedIn",
@@ -75,12 +81,6 @@ const ALL_PROGRAMS_ITEMS = [
     url: "https://www.behance.net/mitch_ivin",
     icon: "./assets/gui/start-menu/behance.webp",
     label: "Behance",
-  },
-  {
-    type: "url",
-    url: "https://github.com/mitchivin",
-    icon: "./assets/gui/start-menu/github.webp",
-    label: "GitHub",
   },
 ];
 
@@ -469,16 +469,16 @@ export default class StartMenu {
                 </div>
                 <div class="middle-section middle-right">
                     <ul class="menu-items">
+                        <li class="menu-item" id="menu-github" data-action="open-url" data-url="https://github.com/mitchivin">
+                            <img src="./assets/gui/start-menu/github.webp" alt="GitHub">
+                            <div class="item-content">
+                                <span class="item-title" style="font-weight: bold;">GitHub</span>
+                            </div>
+                        </li>
                         <li class="menu-item" id="menu-instagram" data-action="open-url" data-url="https://www.instagram.com/mitchivin">
                             <img src="./assets/gui/start-menu/instagram.webp" alt="Instagram">
                             <div class="item-content">
                                 <span class="item-title">Instagram</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-linkedin" data-action="open-url" data-url="https://www.linkedin.com/in/mitchivin">
-                            <img src="./assets/gui/start-menu/linkedin.webp" alt="LinkedIn">
-                            <div class="item-content">
-                                <span class="item-title">LinkedIn</span>
                             </div>
                         </li>
                         <li class="menu-item" id="menu-behance" data-action="open-url" data-url="https://www.behance.net/mitch_ivin">
@@ -487,10 +487,10 @@ export default class StartMenu {
                                 <span class="item-title" style="font-weight: bold;">Behance</span>
                             </div>
                         </li>
-                        <li class="menu-item" id="menu-github" data-action="open-url" data-url="https://github.com/mitchivin">
-                            <img src="./assets/gui/start-menu/github.webp" alt="GitHub">
+                        <li class="menu-item" id="menu-linkedin" data-action="open-url" data-url="https://www.linkedin.com/in/mitchivin">
+                            <img src="./assets/gui/start-menu/linkedin.webp" alt="LinkedIn">
                             <div class="item-content">
-                                <span class="item-title" style="font-weight: bold;">GitHub</span>
+                                <span class="item-title">LinkedIn</span>
                             </div>
                         </li>
                         <li class="menu-divider right-section-divider"><hr class="divider"></li>

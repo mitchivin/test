@@ -43,7 +43,7 @@ export default class Desktop {
     this.setupDesktopEvents();
     this.setupPointerSelectionEvents();
     // Set the default wallpaper (no ultrawide logic)
-    this.desktop.style.backgroundImage = `url('./assets/gui/desktop/bliss.webp')`;
+    this.desktop.style.backgroundImage = `url('./assets/gui/desktop/bliss.jpg')`;
 
     this.eventBus.subscribe(EVENTS.WINDOW_CREATED, () => this.clearSelection());
     this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, () => this.clearSelection());
