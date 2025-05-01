@@ -259,6 +259,33 @@ export default class StartMenu {
     this.aiToolsMenu = null;
     this.activeWindowOverlay = null; // Keep track of which overlay is active
 
+    // Only disable certain programs on mobile at runtime
+    if (isMobileDevice()) {
+      for (const item of ALL_PROGRAMS_ITEMS) {
+        if ([
+          'mediaPlayer',
+          'my-pictures',
+          'notepad',
+          'cmd',
+          'info',
+        ].includes(item.programName)) {
+          item.disabled = true;
+        }
+      }
+    } else {
+      for (const item of ALL_PROGRAMS_ITEMS) {
+        if ([
+          'mediaPlayer',
+          'my-pictures',
+          'notepad',
+          'cmd',
+          'info',
+        ].includes(item.programName)) {
+          item.disabled = false;
+        }
+      }
+    }
+
     this.createStartMenuElement();
     this.setupEventListeners();
 
@@ -405,6 +432,28 @@ export default class StartMenu {
    * @returns {string} HTML string for the start menu.
    */
   getMenuTemplate() {
+    const isMobile = isMobileDevice();
+    // Helper to render a menu item with optional disabling
+    function renderMenuItem({ id, icon, title, description, programName, action, url }) {
+      const shouldDisable = isMobile && [
+        "mediaPlayer",
+        "my-pictures",
+        "notepad",
+        "cmd",
+        "info",
+      ].includes(programName);
+      const disabledClass = shouldDisable ? " disabled" : "";
+      const dataAction = shouldDisable ? "" : (action ? `data-action=\"${action}\"` : "");
+      const dataProgram = shouldDisable ? "" : (programName ? `data-program-name=\"${programName}\"` : "");
+      const dataUrl = url ? `data-url=\"${url}\"` : "";
+      return `<li class=\"menu-item${disabledClass}\" id=\"menu-${programName || id}\" ${dataAction} ${dataProgram} ${dataUrl} tabindex=\"${shouldDisable ? '-1' : '0'}\" aria-disabled=\"${shouldDisable ? 'true' : 'false'}\">
+        <img src=\"${icon}\" alt=\"${title}\">
+        <div class=\"item-content\">
+          <span class=\"item-title\">${title}</span>
+          ${description ? `<span class=\"item-description\">${description}</span>` : ""}
+        </div>
+      </li>`;
+    }
     return `
             <div class="menutopbar">
                 <img src="./assets/gui/start-menu/user.webp" alt="User" class="userpicture">
@@ -413,51 +462,58 @@ export default class StartMenu {
             <div class="start-menu-middle">
                 <div class="middle-section middle-left">
                     <ul class="menu-items">
-                        <li class="menu-item" id="menu-internet" data-action="open-program" data-program-name="internet">
-                            <img src="./assets/gui/desktop/internet.webp" alt="My Projects">
-                            <div class="item-details" style="display: flex; flex-direction: column;">
-                                <span class="item-title">My Projects</span>
-                                <span class="item-description">View my work</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-contact" data-action="open-program" data-program-name="contact">
-                            <img src="./assets/gui/desktop/contact.webp" alt="Contact Me">
-                            <div class="item-details" style="display: flex; flex-direction: column;">
-                                <span class="item-title" style="font-weight: bold;">Contact Me</span>
-                                <span class="item-description">Send me a message</span>
-                            </div>
-                        </li>
+                        ${renderMenuItem({
+                          id: "internet",
+                          icon: "./assets/gui/desktop/internet.webp",
+                          title: "My Projects",
+                          description: "View my work",
+                          programName: "internet",
+                          action: "open-program"
+                        })}
+                        ${renderMenuItem({
+                          id: "contact",
+                          icon: "./assets/gui/desktop/contact.webp",
+                          title: "Contact Me",
+                          description: "Send me a message",
+                          programName: "contact",
+                          action: "open-program"
+                        })}
                         <li class="menu-divider"><hr class="divider"></li>
-                        <li class="menu-item" id="menu-about" data-action="open-program" data-program-name="about">
-                            <img src="./assets/gui/desktop/about.webp" alt="About Me">
-                            <div class="item-content">
-                                <span class="item-title">About Me</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-resume" data-action="open-program" data-program-name="resume">
-                            <img src="./assets/gui/desktop/resume.webp" alt="Resume">
-                            <div class="item-content">
-                                <span class="item-title">Resume</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-mediaPlayer" data-action="open-program" data-program-name="mediaPlayer">
-                            <img src="./assets/gui/start-menu/mediaPlayer.webp" alt="Media Player">
-                            <div class="item-content">
-                                <span class="item-title">Media Player</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-photos" data-action="open-program" data-program-name="my-pictures">
-                            <img src="./assets/gui/start-menu/photos.webp" alt="My Photos">
-                            <div class="item-details">
-                                <span class="item-title">My Photos</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-notepad" data-action="open-program" data-program-name="notepad">
-                            <img src="./assets/gui/start-menu/notepad.webp" alt="Notepad">
-                            <div class="item-content">
-                                <span class="item-title">Notepad</span>
-                            </div>
-                        </li>
+                        ${renderMenuItem({
+                          id: "about",
+                          icon: "./assets/gui/desktop/about.webp",
+                          title: "About Me",
+                          programName: "about",
+                          action: "open-program"
+                        })}
+                        ${renderMenuItem({
+                          id: "resume",
+                          icon: "./assets/gui/desktop/resume.webp",
+                          title: "Resume",
+                          programName: "resume",
+                          action: "open-program"
+                        })}
+                        ${renderMenuItem({
+                          id: "mediaPlayer",
+                          icon: "./assets/gui/start-menu/mediaPlayer.webp",
+                          title: "Media Player",
+                          programName: "mediaPlayer",
+                          action: "open-program"
+                        })}
+                        ${renderMenuItem({
+                          id: "my-pictures",
+                          icon: "./assets/gui/start-menu/photos.webp",
+                          title: "My Photos",
+                          programName: "my-pictures",
+                          action: "open-program"
+                        })}
+                        ${renderMenuItem({
+                          id: "notepad",
+                          icon: "./assets/gui/start-menu/notepad.webp",
+                          title: "Notepad",
+                          programName: "notepad",
+                          action: "open-program"
+                        })}
                     </ul>
                     <div class="all-programs-container">
                         <li class="menu-divider"><hr class="divider"></li>
@@ -469,30 +525,34 @@ export default class StartMenu {
                 </div>
                 <div class="middle-section middle-right">
                     <ul class="menu-items">
-                        <li class="menu-item" id="menu-github" data-action="open-url" data-url="https://github.com/mitchivin">
-                            <img src="./assets/gui/start-menu/github.webp" alt="GitHub">
-                            <div class="item-content">
-                                <span class="item-title" style="font-weight: bold;">GitHub</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-instagram" data-action="open-url" data-url="https://www.instagram.com/mitchivin">
-                            <img src="./assets/gui/start-menu/instagram.webp" alt="Instagram">
-                            <div class="item-content">
-                                <span class="item-title">Instagram</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-behance" data-action="open-url" data-url="https://www.behance.net/mitch_ivin">
-                            <img src="./assets/gui/start-menu/behance.webp" alt="Behance">
-                            <div class="item-content">
-                                <span class="item-title" style="font-weight: bold;">Behance</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-linkedin" data-action="open-url" data-url="https://www.linkedin.com/in/mitchivin">
-                            <img src="./assets/gui/start-menu/linkedin.webp" alt="LinkedIn">
-                            <div class="item-content">
-                                <span class="item-title">LinkedIn</span>
-                            </div>
-                        </li>
+                        ${renderMenuItem({
+                          id: "github",
+                          icon: "./assets/gui/start-menu/github.webp",
+                          title: "GitHub",
+                          url: "https://github.com/mitchivin",
+                          action: "open-url"
+                        })}
+                        ${renderMenuItem({
+                          id: "instagram",
+                          icon: "./assets/gui/start-menu/instagram.webp",
+                          title: "Instagram",
+                          url: "https://www.instagram.com/mitchivin",
+                          action: "open-url"
+                        })}
+                        ${renderMenuItem({
+                          id: "behance",
+                          icon: "./assets/gui/start-menu/behance.webp",
+                          title: "Behance",
+                          url: "https://www.behance.net/mitch_ivin",
+                          action: "open-url"
+                        })}
+                        ${renderMenuItem({
+                          id: "linkedin",
+                          icon: "./assets/gui/start-menu/linkedin.webp",
+                          title: "LinkedIn",
+                          url: "https://www.linkedin.com/in/mitchivin",
+                          action: "open-url"
+                        })}
                         <li class="menu-divider right-section-divider"><hr class="divider"></li>
                         <li class="menu-item" id="menu-program4" data-action="toggle-most-used-tools">
                             <img src="./assets/gui/start-menu/most-used.webp" alt="Most Used Tools">
@@ -507,18 +567,20 @@ export default class StartMenu {
                             </div>
                         </li>
                         <li class="menu-divider right-section-divider"><hr class="divider"></li>
-                        <li class="menu-item" id="menu-cmd" data-action="open-program" data-program-name="cmd">
-                            <img src="./assets/gui/start-menu/cmd.webp" alt="Command Prompt">
-                            <div class="item-content">
-                                <span class="item-title" style="font-weight: normal; padding: 5px 0;">Command Prompt</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-help-support" data-action="open-program" data-program-name="info">
-                            <img src="./assets/gui/start-menu/help.webp" alt="System Information">
-                            <div class="item-details">
-                                <span class="item-title">System Information</span>
-                            </div>
-                        </li>
+                        ${renderMenuItem({
+                          id: "cmd",
+                          icon: "./assets/gui/start-menu/cmd.webp",
+                          title: "Command Prompt",
+                          programName: "cmd",
+                          action: "open-program"
+                        })}
+                        ${renderMenuItem({
+                          id: "info",
+                          icon: "./assets/gui/start-menu/help.webp",
+                          title: "System Information",
+                          programName: "info",
+                          action: "open-program"
+                        })}
                     </ul>
                 </div>
             </div>
@@ -609,6 +671,16 @@ export default class StartMenu {
     );
     if (!target) return;
 
+    // Prevent any action for disabled all-programs-item on mobile
+    if (
+      target.classList.contains("all-programs-item") &&
+      target.classList.contains("disabled")
+    ) {
+      event.stopPropagation();
+      event.preventDefault();
+      return;
+    }
+
     // Prevent closing the menu if a disabled item in Most Used Tools or AI Tools is clicked
     if (
       (target.classList.contains("most-used-tools-item") ||
@@ -623,6 +695,16 @@ export default class StartMenu {
     const action = target.dataset.action;
     const programName = target.dataset.programName;
     const url = target.dataset.url;
+
+    // Handle Most Used Tools and AI Tools popouts on both desktop and mobile
+    if (action === "toggle-most-used-tools") {
+      this.showMostUsedToolsMenu();
+      return;
+    }
+    if (action === "toggle-ai-tools") {
+      this.showAiToolsMenu();
+      return;
+    }
 
     // Check if the click is on an item in the Most Used Tools submenu
     const isInMostUsedToolsMenu = target.classList.contains(
@@ -697,7 +779,7 @@ export default class StartMenu {
     // Setup Most Used Tools submenu (previously Creative Suite)
     const mostUsedToolsButton = this.startMenu.querySelector("#menu-program4"); // Keep ID for now
     if (mostUsedToolsButton) {
-      mostUsedToolsButton.setAttribute("data-action", "toggle-most-used-tools"); // Renamed action
+      mostUsedToolsButton.setAttribute("data-action", "toggle-most-used-tools"); // Ensure action is set
       mostUsedToolsButton.style.position = "relative";
       mostUsedToolsButton.style.width = "100%";
       const mutArrowSpan = document.createElement("span"); // Renamed variable
@@ -711,23 +793,22 @@ export default class StartMenu {
       mostUsedToolsButton.appendChild(mutArrowSpan);
       mostUsedToolsButton.addEventListener("mouseenter", () =>
         this.showMostUsedToolsMenu(),
-      ); // Renamed show method
+      );
       mostUsedToolsButton.addEventListener("mouseleave", (e) => {
-        // Check related target against the correct menu class
         if (
           e.relatedTarget &&
           (e.relatedTarget.closest(".most-used-tools-menu") ||
             e.relatedTarget === this.mostUsedToolsMenu)
         )
           return;
-        this.hideMostUsedToolsMenu(); // Renamed hide method
+        this.hideMostUsedToolsMenu();
       });
     }
 
     // Setup A.I. Tools submenu
     const aiToolsButton = this.startMenu.querySelector("#menu-ai-tools");
     if (aiToolsButton) {
-      aiToolsButton.setAttribute("data-action", "toggle-ai-tools");
+      aiToolsButton.setAttribute("data-action", "toggle-ai-tools"); // Ensure action is set
       aiToolsButton.style.position = "relative";
       aiToolsButton.style.width = "100%";
       const aiArrowSpan = document.createElement("span");
@@ -741,7 +822,7 @@ export default class StartMenu {
       aiToolsButton.appendChild(aiArrowSpan);
       aiToolsButton.addEventListener("mouseenter", () =>
         this.showAiToolsMenu(),
-      ); // New show method
+      );
       aiToolsButton.addEventListener("mouseleave", (e) => {
         if (
           e.relatedTarget &&
@@ -749,7 +830,7 @@ export default class StartMenu {
             e.relatedTarget === this.aiToolsMenu)
         )
           return;
-        this.hideAiToolsMenu(); // New hide method
+        this.hideAiToolsMenu();
       });
     }
   }

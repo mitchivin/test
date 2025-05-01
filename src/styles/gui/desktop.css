@@ -31,7 +31,7 @@
 
   /* Background image is now dynamically set by JavaScript */
   background-size: cover;
-  background-position: center;
+  background-position: top center;
 }
 
 /* =========================

@@ -271,10 +271,11 @@
 
 /* Apply bold ONLY to specific items - using ID selectors for reliability */
 #menu-internet .item-title,
-.all-programs-button span, /* Changed from .all-programs-button to target span */
+#menu-contact .item-title,
 #menu-instagram .item-title,
 #menu-linkedin .item-title,
 #menu-github .item-title,
+#menu-behance .item-title,
 #menu-program4 .item-title /* Right (Most Used Tools) */ {
   font-weight: 600;
 }
@@ -731,6 +732,38 @@
   filter: grayscale(1);
 }
 
+.all-programs-item.disabled {
+  color: #999 !important;
+  opacity: 0.93 !important;
+  cursor: default !important;
+  background: none !important;
+  filter: grayscale(0.25) !important;
+  box-shadow: none !important;
+  position: relative;
+}
+.all-programs-item.disabled:hover,
+.all-programs-item.disabled:focus {
+  background: none !important;
+  color: #999 !important;
+  filter: grayscale(0.25) !important;
+  box-shadow: none !important;
+}
+.all-programs-item.disabled::before,
+.all-programs-item.disabled::after,
+.all-programs-item.disabled:hover::before,
+.all-programs-item.disabled:hover::after {
+  background: none !important;
+  content: none !important;
+  box-shadow: none !important;
+}
+.all-programs-item.disabled img {
+  filter: grayscale(0.25) !important;
+  opacity: 0.6 !important;
+}
+.all-programs-item.disabled:hover img {
+  filter: grayscale(1);
+}
+
 :root {
   --z-startmenu: 1500;
 }
@@ -746,6 +779,13 @@
 
   .footer-button[data-action="log-off"]:hover {
     background-color: transparent; /* Remove hover effect */
+  }
+
+  .menu-item.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
+    filter: grayscale(1);
   }
 }
 
