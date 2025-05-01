@@ -11,6 +11,7 @@ import { eventBus, EVENTS } from "./utils/eventBus.js";
 import { initBootSequence } from "./utils/boot.js"; // Import the boot sequence initializer
 import { setupTooltips } from "./utils/tooltip.js";
 import { initRandomScanline } from "./utils/crtEffect.js";
+import { isMobileDevice } from "./utils/device.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize core UI components with shared event bus for communication
@@ -36,4 +37,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Enable XP-style tooltips globally for all elements with data-tooltip
   setupTooltips("[data-tooltip]");
+
+  // Pinch-to-zoom overlay logic for mobile
+  if (isMobileDevice()) {
+    let overlay = document.getElementById('zoom-overlay');
+    let zooming = false;
+    let lastScale = 1;
+    window.addEventListener('touchmove', function(event) {
+      if (event.touches.length === 2 && event.scale !== undefined && event.scale !== 1) {
+        overlay.style.display = 'block';
+        zooming = true;
+        lastScale = event.scale;
+      }
+    }, { passive: false });
+    window.addEventListener('touchend', function(event) {
+      if (zooming) {
+        overlay.style.display = 'none';
+        zooming = false;
+        lastScale = 1;
+      }
+    });
+    window.addEventListener('touchcancel', function(event) {
+      if (zooming) {
+        overlay.style.display = 'none';
+        zooming = false;
+        lastScale = 1;
+      }
+    });
+  }
 });
