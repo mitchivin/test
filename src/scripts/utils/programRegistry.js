@@ -302,7 +302,7 @@ const programData = {
             key: "new",
             enabled: true,
             icon: "./assets/gui/toolbar/new.webp",
-            text: "New",
+            text: "New Message",
             action: "newMessage",
           },
           {

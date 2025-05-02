@@ -14,6 +14,7 @@
 @import url("gui/startMenu.css");
 @import url("gui/window.css");
 @import url("utils/iframeApp.css");
+@import url("gui/addressBar.css");
 
 /* =========================
    2. Z-Index Hierarchy
@@ -93,15 +94,15 @@ body {
   .desktop-icons-top {
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95vw;
     z-index: 11;
-    width: auto;
     display: flex;
     justify-content: stretch;
     align-items: center;
     gap: 8px;
-    padding: 16px 16px 0 16px;
+    padding: 16px 0 0 0;
     margin: 0;
     box-sizing: border-box;
     height: auto;

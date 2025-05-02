@@ -369,20 +369,29 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   toolbarWrapper.className = "toolbar-container";
   const toolbarRow = document.createElement("div");
   toolbarRow.className = "toolbar-row";
-  if (isBottom || isMobileDevice && isMobileDevice()) toolbarRow.classList.add("toolbar-bottom");
+  if (isBottom) toolbarRow.classList.add("toolbar-bottom");
   const isMobile = isMobileDevice && isMobileDevice();
   let buttons = toolbarConfig.buttons;
   if (isMobile && windowId === 'resume-window') {
     buttons = buttons.filter(btn => !['actual-size', 'zoom-in', 'zoom-out'].includes(btn.key));
   }
   buttons.forEach((buttonConfig) => {
-    if (isMobile && buttonConfig.type === "separator") return; // Skip dividers on mobile
+    // On mobile, skip dividers except for internet window (My Projects)
+    if (isMobile && buttonConfig.type === "separator" && windowId !== 'internet-window') return; // Skip dividers on mobile except My Projects
+    // On mobile, skip disabled buttons except for back in internet window
+    if (
+      isMobile &&
+      !buttonConfig.enabled &&
+      !(windowId === 'internet-window' && buttonConfig.key === 'back')
+    ) return;
+    // On mobile, skip forward button in internet window
+    if (isMobile && windowId === 'internet-window' && buttonConfig.key === 'forward') return;
     if (buttonConfig.type === "separator") {
       const separator = document.createElement("div");
       separator.className = "vertical_line";
       toolbarRow.appendChild(separator);
     } else if (buttonConfig.key) {
-      if (isMobile && !buttonConfig.enabled) return; // Skip disabled buttons on mobile
+      if (isMobile && !buttonConfig.enabled && !(windowId === 'internet-window' && (buttonConfig.key === 'back' || buttonConfig.key === 'forward'))) return;
       // Add 'Home' text to home button on mobile
       if (isMobile && buttonConfig.key === 'home') {
         buttonConfig.text = 'Home';
@@ -433,36 +442,32 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   });
   // --- Add divider and close button on mobile only ---
   if (isMobile) {
-    // Spacer to push minimize/close buttons to the right
+    // Insert divider after the first group of buttons (left group)
+    const firstDivider = document.createElement("div");
+    firstDivider.className = "vertical_line";
+    // Find the first non-disabled, non-separator button after the left group
+    // For simplicity, insert after the first group (before the first separator or after the last left button)
+    // We'll insert after the first group of buttons (before the first separator or at index 2)
+    const toolbarButtons = Array.from(toolbarRow.children).filter(
+      el => el.classList.contains('toolbar-button')
+    );
+    if (toolbarButtons.length > 0) {
+      // Insert after the first group (after the first button)
+      toolbarRow.insertBefore(firstDivider, toolbarButtons[1] || toolbarRow.children[0].nextSibling);
+    }
+    // Spacer to push close button to the right
     const spacer = document.createElement("div");
     spacer.style.flex = "1";
     toolbarRow.appendChild(spacer);
-    // Divider to the left of minimize button
-    const minDivider = document.createElement("div");
-    minDivider.className = "vertical_line";
-    toolbarRow.appendChild(minDivider);
-    // Minimize button (match other toolbar buttons)
-    const minimizeBtn = document.createElement("div");
-    minimizeBtn.className = "toolbar-button toolbar-minimize-button";
-    minimizeBtn.setAttribute("aria-label", "Minimize");
-    minimizeBtn.innerHTML = `<img alt="minimize" width="25" height="25" src="assets/gui/toolbar/min.webp" />`;
-    minimizeBtn.addEventListener("click", function(e) {
-      e.stopPropagation();
-      // Find the parent window element and dispatch the minimize event (handled by WindowManager)
-      let parent = toolbarWrapper.parentElement;
-      while (parent && !parent.classList.contains("app-window")) {
-        parent = parent.parentElement;
-      }
-      if (parent) {
-        parent.dispatchEvent(new CustomEvent("minimize-window", { bubbles: false }));
-      }
-    });
-    toolbarRow.appendChild(minimizeBtn);
+    // Divider before the close button
+    const closeDivider = document.createElement("div");
+    closeDivider.className = "vertical_line";
+    toolbarRow.appendChild(closeDivider);
     // Close button (match other toolbar buttons)
     const closeBtn = document.createElement("div");
     closeBtn.className = "toolbar-button toolbar-close-button";
     closeBtn.setAttribute("aria-label", "Close");
-    closeBtn.innerHTML = `<img alt="close" width="25" height="25" src="assets/gui/toolbar/delete.webp" />`;
+    closeBtn.innerHTML = `<img alt="close" width="25" height="25" src="assets/gui/toolbar/delete.webp" /><span>Close</span>`;
     closeBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       // Find the parent window element and dispatch the close event
@@ -475,6 +480,16 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
       }
     });
     toolbarRow.appendChild(closeBtn);
+  }
+  if (isMobile && windowId === 'internet-window') {
+    // Find the forward button
+    const forwardBtn = toolbarRow.querySelector('.toolbar-button.forward');
+    const homeBtn = toolbarRow.querySelector('.toolbar-button.home');
+    if (forwardBtn && homeBtn) {
+      const divider = document.createElement('div');
+      divider.className = 'vertical_line';
+      toolbarRow.insertBefore(divider, homeBtn);
+    }
   }
   toolbarWrapper.appendChild(toolbarRow);
   return toolbarWrapper;

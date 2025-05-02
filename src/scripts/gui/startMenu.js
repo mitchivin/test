@@ -29,6 +29,12 @@ const ALL_PROGRAMS_ITEMS = [
   },
   {
     type: "program",
+    programName: "resume",
+    icon: "./assets/gui/desktop/resume.webp",
+    label: "My Resume",
+  },
+  {
+    type: "program",
     programName: "contact",
     icon: "./assets/gui/desktop/contact.webp",
     label: "Contact Me",
@@ -525,6 +531,7 @@ export default class StartMenu {
                 </div>
                 <div class="middle-section middle-right">
                     <ul class="menu-items">
+                        ${isMobile ? `
                         ${renderMenuItem({
                           id: "github",
                           icon: "./assets/gui/start-menu/github.webp",
@@ -555,17 +562,17 @@ export default class StartMenu {
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
                         ${renderMenuItem({
-                          id: "cmd",
-                          icon: "./assets/gui/start-menu/cmd.webp",
-                          title: "Command Prompt",
-                          programName: "cmd",
-                          action: "open-program"
-                        })}
-                        ${renderMenuItem({
                           id: "info",
                           icon: "./assets/gui/start-menu/help.webp",
                           title: "System Information",
                           programName: "info",
+                          action: "open-program"
+                        })}
+                        ${renderMenuItem({
+                          id: "cmd",
+                          icon: "./assets/gui/start-menu/cmd.webp",
+                          title: "Command Prompt",
+                          programName: "cmd",
                           action: "open-program"
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
@@ -581,6 +588,64 @@ export default class StartMenu {
                                 <span class="item-title">A.I. Utilities</span>
                             </div>
                         </li>
+                        ` : `
+                        ${renderMenuItem({
+                          id: "github",
+                          icon: "./assets/gui/start-menu/github.webp",
+                          title: "GitHub",
+                          url: "https://github.com/mitchivin",
+                          action: "open-url"
+                        })}
+                        ${renderMenuItem({
+                          id: "instagram",
+                          icon: "./assets/gui/start-menu/instagram.webp",
+                          title: "Instagram",
+                          url: "https://www.instagram.com/mitchivin",
+                          action: "open-url"
+                        })}
+                        ${renderMenuItem({
+                          id: "behance",
+                          icon: "./assets/gui/start-menu/behance.webp",
+                          title: "Behance",
+                          url: "https://www.behance.net/mitch_ivin",
+                          action: "open-url"
+                        })}
+                        ${renderMenuItem({
+                          id: "linkedin",
+                          icon: "./assets/gui/start-menu/linkedin.webp",
+                          title: "LinkedIn",
+                          url: "https://www.linkedin.com/in/mitchivin",
+                          action: "open-url"
+                        })}
+                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+                        <li class="menu-item" id="menu-program4" data-action="toggle-most-used-tools">
+                            <img src="./assets/gui/start-menu/most-used.webp" alt="Most Used Tools">
+                            <div class="item-content">
+                                <span class="item-title">Most Used Tools</span>
+                            </div>
+                        </li>
+                        <li class="menu-item" id="menu-ai-tools" data-action="toggle-ai-tools">
+                            <img src="./assets/gui/start-menu/ai-utilities.webp" alt="A.I. Utilities">
+                            <div class="item-content">
+                                <span class="item-title">A.I. Utilities</span>
+                            </div>
+                        </li>
+                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+                        ${renderMenuItem({
+                          id: "cmd",
+                          icon: "./assets/gui/start-menu/cmd.webp",
+                          title: "Command Prompt",
+                          programName: "cmd",
+                          action: "open-program"
+                        })}
+                        ${renderMenuItem({
+                          id: "info",
+                          icon: "./assets/gui/start-menu/help.webp",
+                          title: "System Information",
+                          programName: "info",
+                          action: "open-program"
+                        })}
+                        `}
                     </ul>
                 </div>
             </div>

@@ -83,16 +83,22 @@ function setRealVh() {
 
 // Dynamically scale desktop icons to fit the row on mobile with gap
 function scaleDesktopIconsToFitMobile() {
-  const container = document.querySelector('.desktop-icons');
-  if (!container) return;
-  const icons = Array.from(container.children).filter(child => child.classList.contains('desktop-icon'));
-  if (icons.length === 0) return;
+  // Scale both .desktop-icons and .desktop-icons-top
+  const containers = [
+    document.querySelector('.desktop-icons'),
+    document.querySelector('.desktop-icons-top')
+  ];
+  containers.forEach(container => {
+    if (!container) return;
+    const icons = Array.from(container.children).filter(child => child.classList.contains('desktop-icon'));
+    if (icons.length === 0) return;
 
-  const gap = 8; // px, must match your CSS
-  const iconWidth = 90; // px, must match your CSS
-  const availableWidth = container.offsetWidth;
-  const totalIconWidth = icons.length * iconWidth + (icons.length - 1) * gap;
-  // Calculate scale factor (never above 1)
-  const scale = Math.min(1, availableWidth / totalIconWidth);
-  container.style.setProperty('--icon-scale', scale);
+    const gap = 8; // px, must match your CSS
+    const iconWidth = 90; // px, must match your CSS
+    const availableWidth = container.offsetWidth;
+    const totalIconWidth = icons.length * iconWidth + (icons.length - 1) * gap;
+    // Calculate scale factor (never above 1)
+    const scale = Math.min(1, availableWidth / totalIconWidth);
+    container.style.setProperty('--icon-scale', scale);
+  });
 }

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AddressBar Demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/xp.css@0.2.3/dist/XP.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="AddressBar.css" />
+</head>
+<body style="margin:0;padding:0;">
+  <!--
+    Address bar markup for Windows XP-style UI.
+    To use: copy the entire .addressbar-container section into your layout.
+    See reusable/README.md for usage and customization tips.
+  -->
+  <!-- Container for static positioning -->
+  <div class="addressbar-container">
+    <!-- Flex row for address bar elements -->
+    <div class="addressbar-row">
+      <!-- Container for the 'Address' label (fixed width, centered text) -->
+      <div class="address-label-container">
+        <span style="color: #7f7c73; font-size: 11px;">Address</span> <!-- Basic inline styles -->
+      </div>
+      <!-- Main address input field container -->
+      <div class="addressbar">
+        <!-- Inner flex container for icon and title -->
+        <div style="display: flex; align-items: center;">
+          <!-- Icon displayed in the address bar -->
+          <img style="margin: 0 3px 0 0" alt="icon" width="14" height="14" src="../assets/aboutme.webp" /> <!-- Adjusted margin -->
+          <!-- Text displayed in the address bar -->
+          <span class="addressbar-title">About Me</span>
+        </div>
+        <!-- Dropdown icon (visual only in this example) -->
+        <img alt="dropdown" class="dropdownIcon" width="16" height="18" src="../assets/tooldropdown.webp" style="filter: grayscale(100%); opacity: 0.6;" />
+      </div>
+      <!-- Container for the 'Go' button elements -->
+      <div class="go-button-container">
+        <!-- Go icon -->
+        <img alt="go" class="goIcon" width="20" height="20" src="../assets/go.webp" style="filter: grayscale(100%); opacity: 0.6;" />
+        <!-- Go text label -->
+        <span>Go</span> <!-- Inline style removed -->
+      </div>
+    </div>
+  </div>
+  <script src="AddressBar.js"></script>
+</body>
+</html>

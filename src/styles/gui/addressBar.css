@@ -1,0 +1,118 @@
+/* Address bar styles for Windows XP-like UI */
+.addressbar-container {
+  all: initial;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  position: static;
+  z-index: auto;
+}
+.addressbar-row {
+  padding: 0;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  box-sizing: border-box;
+  position: static;
+  background: #ece9d8;
+  border-bottom: 2px solid #d7d4ca;
+  height: 34px;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  overflow: hidden !important;
+}
+.addressbar {
+  display: flex;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  width: 100%;
+  align-items: center;
+  margin: 0;
+  justify-content: space-between;
+  flex: 1 1 auto;
+  min-width: 150px;
+  max-width: 100%;
+  padding-left: 1px;
+  padding-right: 0;
+  height: 22px;
+  box-sizing: border-box;
+}
+.addressbar-title {
+  font-family: Tahoma, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #222;
+  margin-left: 2px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.addressbar-row, .addressbar-row * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+.address-label-container {
+  width: 60px;
+  min-width: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Tahoma, sans-serif;
+  color: #7f7c73;
+  font-size: 11px;
+}
+.go-button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 64px;
+  min-width: 64px;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  color: #a0a0a0;
+  white-space: nowrap;
+}
+.goIcon {
+  flex-shrink: 0;
+}
+.goIcon:hover {
+  filter: brightness(1.1);
+}
+.goIcon[style*="not-allowed"],
+.addressbar .dropdownIcon[style*="not-allowed"],
+.addressbar-row > span[style*="not-allowed"] {
+  cursor: not-allowed !important;
+}
+.dropdownIcon {
+  flex-shrink: 0;
+}
+.dropdownIcon:hover {
+  filter: brightness(1.1);
+}
+.dropdownIcon[style*="not-allowed"] {
+  pointer-events: none;
+}
+.addressbar .dropdownIcon {
+  filter: grayscale(100%) opacity(0.6) !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+.addressbar .dropdownIcon:hover {
+  filter: grayscale(100%) opacity(0.6) !important;
+  cursor: not-allowed !important;
+} 

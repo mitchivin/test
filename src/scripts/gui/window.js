@@ -14,6 +14,7 @@ import programData from "../utils/programRegistry.js";
 import { EVENTS } from "../utils/eventBus.js";
 import { createMenuBar, createToolbar } from "./windowBars.js";
 import { isMobileDevice } from "../utils/device.js";
+import { createAddressBar } from "./addressBar.js";
 
 const TASKBAR_HEIGHT = 30; // Define constant taskbar height
 
@@ -67,9 +68,7 @@ class WindowTemplates {
       programConfig.menuBarConfig &&
       programConfig.menuBarConfig.items
     ) {
-      // Find the window element (the parent of the container)
       let parentWindowElement = container.closest(".window, .app-window");
-      // If not found (e.g., not yet attached), fallback to null
       menuBarContainer = createMenuBar(
         programConfig.menuBarConfig,
         windowId,
@@ -93,6 +92,15 @@ class WindowTemplates {
       );
     }
 
+    // --- Create Address Bar for My Projects (internet) app ---
+    let addressBar = null;
+    if (programConfig && programConfig.id === "internet-window") {
+      addressBar = createAddressBar({
+        icon: "./assets/gui/desktop/internet.webp",
+        title: "My Projects"
+      });
+    }
+
     // --- Create and Append iframe ---
     const iframe = document.createElement("iframe");
     Object.assign(iframe, { src: appPath, title: `${windowId}-content` });
@@ -106,17 +114,14 @@ class WindowTemplates {
     for (const [attr, value] of Object.entries(attrs))
       iframe.setAttribute(attr, value);
 
-    // --- Append Toolbar and iframe in correct order ---
+    // --- Append Toolbar, Address Bar, and iframe in correct order ---
     const isMobile = isMobileDevice && isMobileDevice();
     if (toolbarWrapper && !isMyPictures) {
-      if (isMobile) {
-        container.appendChild(iframe);
-        container.appendChild(toolbarWrapper);
-      } else {
-        container.appendChild(toolbarWrapper);
-        container.appendChild(iframe);
-      }
+      container.appendChild(toolbarWrapper);
+      if (addressBar) container.appendChild(addressBar);
+      container.appendChild(iframe);
     } else {
+      if (addressBar) container.appendChild(addressBar);
       container.appendChild(iframe);
     }
 
@@ -442,7 +447,7 @@ export default class WindowManager {
                 <div class="title-bar-controls">
                     ${program.canMinimize !== false ? '<button class="xp-button" aria-label="Minimize" data-action="minimize"></button>' : ""}
                     ${!isMobile && program.canMaximize !== false ? '<button class="xp-button" aria-label="Maximize" data-action="maximize"></button>' : ""}
-                    <button class="xp-button" aria-label="Close" data-action="close"></button>
+                    ${!isMobile ? '<button class="xp-button" aria-label="Close" data-action="close"></button>' : ""}
                 </div>
             </div>
         `;

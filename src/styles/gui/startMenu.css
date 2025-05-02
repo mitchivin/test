@@ -789,10 +789,11 @@
     filter: grayscale(1);
   }
 
-  .middle-right .menu-item {
-    height: 38px !important;
-    min-height: 38px !important;
-    max-height: 38px !important;
+  .startmenu .menu-item,
+  .startmenu .item-right {
+    height: calc(36px - 2px);
+    min-height: calc(36px - 2px);
+    line-height: calc(32px - 2px);
   }
 }
 
