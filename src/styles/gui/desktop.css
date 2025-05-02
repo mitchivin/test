@@ -145,22 +145,29 @@
 
 @media (max-width: 768px) {
   .desktop {
-    height: calc(100vh - var(--taskbar-height));
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-end; /* Anchor children to the bottom */
     align-items: center;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    overflow: hidden;
   }
   .desktop-icons {
+    margin-bottom: calc(10vh + var(--taskbar-height, 30px)); /* 10vh above taskbar */
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: none;
     grid-auto-columns: 90px;
     grid-auto-rows: 90px;
     grid-gap: 6px;
-    margin-top: 500px;
-    margin-bottom: 60px;
     padding: 0;
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+    width: auto;
+    justify-content: center;
+    height: auto;
   }
   .desktop-icon {
     width: 90px;
