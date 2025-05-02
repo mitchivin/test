@@ -155,7 +155,7 @@
     grid-auto-rows: 90px;
     grid-gap: 6px;
     place-content: end center;
-    padding: 18px 0 100px 0;
+    padding: 18px 0 calc(100px + env(safe-area-inset-bottom, 0px)) 0;
     height: 100%;
     width: 100vw;
     justify-content: center;
