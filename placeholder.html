@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placeholder App</title>
+  <style>
+    body {
+      background: #ece9d8;
+      color: #222;
+      font-family: Tahoma, Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .placeholder {
+      text-align: center;
+      font-size: 1.3rem;
+      background: #fff;
+      border: 1px solid #b5b2a3;
+      border-radius: 8px;
+      padding: 32px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .app-name {
+      color: #0f61cb;
+      font-weight: bold;
+      margin-top: 12px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="placeholder">
+    This is a placeholder app window.<br>
+    <span class="app-name" id="appName"></span>
+  </div>
+  <script>
+    // Show app name if provided in URL (?app=about)
+    const params = new URLSearchParams(window.location.search);
+    const app = params.get('app');
+    if (app) {
+      document.getElementById('appName').textContent = app.charAt(0).toUpperCase() + app.slice(1);
+    }
+  </script>
+</body>
+</html>

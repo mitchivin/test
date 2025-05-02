@@ -62,7 +62,7 @@ const createProgram = (key, title, icon, path, extraProps = {}) => ({
   title,
   icon: `./assets/gui/${icon}`,
   ...defaults.iframe,
-  appPath: `${appPath}${path}/index.html`,
+  appPath: `placeholder.html?app=${key}`,
   ...extraProps,
 });
 
