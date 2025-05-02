@@ -85,6 +85,33 @@ body {
   z-index: 100;
 }
 
+.desktop-icons-top {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-icons-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 11;
+    width: auto;
+    display: flex;
+    justify-content: stretch;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 16px 0 16px;
+    margin: 0;
+    box-sizing: border-box;
+    height: auto;
+  }
+  .desktop-icons {
+    /* Optionally hide the bottom icons on mobile: */
+    /* display: none; */
+  }
+}
+
 /* ==================================================
    END Main Stylesheet
    ================================================== */

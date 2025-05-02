@@ -98,6 +98,8 @@ export default class Desktop {
    */
   setupIconEvents() {
     this.getIcons().forEach((icon) => {
+      // If the icon is an anchor (for social links), let the default action happen
+      if (icon.tagName === 'A') return;
       const iconSpan = icon.querySelector("span");
       const iconId = iconSpan
         ? iconSpan.textContent.trim().toLowerCase().replace(/\s+/g, "-")
@@ -116,7 +118,21 @@ export default class Desktop {
             this.selectIcon(icon, true);
           }
           let programName = icon.getAttribute("data-program-name");
-          this.eventBus.publish(EVENTS.PROGRAM_OPEN, { programName });
+          // Special case: social icons in .desktop-icons-top
+          if (
+            icon.closest('.desktop-icons-top') &&
+            ["github", "instagram", "behance", "linkedin"].includes(programName)
+          ) {
+            const urls = {
+              github: "https://github.com/mitchivin",
+              instagram: "https://www.instagram.com/mitchivin",
+              behance: "https://www.behance.net/mitch_ivin",
+              linkedin: "https://www.linkedin.com/in/mitchivin",
+            };
+            window.open(urls[programName], "_blank");
+          } else {
+            this.eventBus.publish(EVENTS.PROGRAM_OPEN, { programName });
+          }
 
           // Reset last click time to prevent triple click issues
           this.lastClickTimes[iconId] = 0;

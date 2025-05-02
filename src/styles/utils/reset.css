@@ -81,6 +81,15 @@ a {
   /* 'user-select' warning is safe to ignore; vendor prefixes included for compatibility */
 }
 
+.desktop-icons-top a {
+  pointer-events: auto !important;
+  user-select: auto !important;
+}
+
+.desktop-icons-top * {
+  pointer-events: auto !important;
+}
+
 /* ==================================================
    END Modern CSS Reset
    ================================================== */

@@ -234,14 +234,19 @@ export function showNetworkBalloon() {
   balloonRoot.style.position = "absolute";
   balloonRoot.style.zIndex = "10010";
   document.body.appendChild(balloonRoot);
+  const isMobile = isMobileDevice && isMobileDevice();
+  const headerText = "Welcome to my Portfolio";
+  const mainText = isMobile
+    ? "Hey, I'm Mitch - I thought I'd mix things up a bit.<br>For the best experience, view this site on desktop."
+    : "Hey, I'm Mitch - I thought i'd mix things up a bit.<br>Deliberately different. Meant to be explored.";
   balloonRoot.innerHTML = `
     <div class="balloon">
       <button class="balloon__close" aria-label="Close"></button>
       <div class="balloon__header">
         <img class="balloon__header__img" src="assets/gui/taskbar/welcome.webp" alt="welcome" />
-        <span class="balloon__header__text">Welcome to my Portfolio</span>
+        <span class="balloon__header__text">${headerText}</span>
       </div>
-      <p class="balloon__text__first">Hey, I'm Mitch - I thought i'd mix things up a bit.<br>Deliberately different. Meant to be explored.</p>
+      <p class="balloon__text__first">${mainText}</p>
       <div class="balloon-pointer-anchor" style="position:absolute;bottom:-19px;right:14px;width:0;height:0;"></div>
     </div>
   `;
