@@ -287,7 +287,10 @@
 @media (max-width: 768px) {
   .app-window,
   .window-body.iframe-container {
-    height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px));
     max-height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px));
+  }
+  .app-window .window-body {
+    flex: 1 1 auto;
+    min-height: 0;
   }
 }
