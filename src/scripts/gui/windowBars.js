@@ -199,12 +199,10 @@ function injectToolbarCSS() {
 }
 .toolbar-row.toolbar-bottom {
   justify-content: center;
+  border-top: 2px solid #d7d4ca;
 }
 .toolbar-row:not(.toolbar-bottom) {
   border-bottom: 2px solid #d7d4ca;
-}
-.toolbar-row.toolbar-bottom {
-  border-top: 2px solid #d7d4ca;
 }
 `;
   document.head.appendChild(style);
@@ -371,7 +369,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   toolbarWrapper.className = "toolbar-container";
   const toolbarRow = document.createElement("div");
   toolbarRow.className = "toolbar-row";
-  if (isBottom) toolbarRow.classList.add("toolbar-bottom");
+  if (isBottom || isMobileDevice && isMobileDevice()) toolbarRow.classList.add("toolbar-bottom");
   const isMobile = isMobileDevice && isMobileDevice();
   let buttons = toolbarConfig.buttons;
   if (isMobile && windowId === 'resume-window') {

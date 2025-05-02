@@ -93,11 +93,6 @@ class WindowTemplates {
       );
     }
 
-    // --- Append Toolbar *before* iframe if it exists AND it's NOT My Pictures ---
-    if (toolbarWrapper && !isMyPictures) {
-      container.appendChild(toolbarWrapper);
-    }
-
     // --- Create and Append iframe ---
     const iframe = document.createElement("iframe");
     Object.assign(iframe, { src: appPath, title: `${windowId}-content` });
@@ -110,7 +105,20 @@ class WindowTemplates {
     };
     for (const [attr, value] of Object.entries(attrs))
       iframe.setAttribute(attr, value);
-    container.appendChild(iframe);
+
+    // --- Append Toolbar and iframe in correct order ---
+    const isMobile = isMobileDevice && isMobileDevice();
+    if (toolbarWrapper && !isMyPictures) {
+      if (isMobile) {
+        container.appendChild(iframe);
+        container.appendChild(toolbarWrapper);
+      } else {
+        container.appendChild(toolbarWrapper);
+        container.appendChild(iframe);
+      }
+    } else {
+      container.appendChild(iframe);
+    }
 
     // --- Append Toolbar *after* iframe if it exists AND it IS My Pictures ---
     if (toolbarWrapper && isMyPictures) {

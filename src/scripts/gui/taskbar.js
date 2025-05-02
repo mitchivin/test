@@ -80,6 +80,7 @@ export default class Taskbar {
     this.programsContainer = document.querySelector(".taskbar-programs");
     this.systemTray = document.querySelector(".system-tray");
 
+    // Always use the desktop start button asset
     this._setStartButtonImage();
     window.addEventListener("resize", () => this._setStartButtonImage());
 
@@ -219,11 +220,7 @@ export default class Taskbar {
   _setStartButtonImage() {
     const img = this.startButton.querySelector("img");
     if (!img) return;
-    if (isMobileDevice && isMobileDevice()) {
-      img.src = "assets/gui/taskbar/start-button-mobile.webp";
-    } else {
-      img.src = "assets/gui/taskbar/start-button.webp";
-    }
+    img.src = "assets/gui/taskbar/start-button.webp";
   }
 }
 
