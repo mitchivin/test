@@ -549,6 +549,11 @@ export default class WindowManager {
       () => this.toggleMaximize(windowElement),
     );
 
+    // Listen for custom minimize-window event (from toolbar)
+    windowElement.addEventListener("minimize-window", (e) => {
+      this.minimizeWindow(windowElement);
+    });
+
     if (titleBar) {
       this._bindControl(titleBar, "dblclick", () =>
         this.toggleMaximize(windowElement),

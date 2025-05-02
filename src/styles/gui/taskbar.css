@@ -466,4 +466,8 @@
   .startmenu .menu-item {
     letter-spacing: -0.2px;
   }
+  .tray-icons {
+    gap: calc(var(--tray-spacing) - 2px);
+    margin-right: 6px;
+  }
 }

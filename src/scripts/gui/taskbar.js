@@ -13,6 +13,7 @@
 import StartMenu from "./startMenu.js";
 import { EVENTS } from "../utils/eventBus.js";
 import { setupTooltips } from "../utils/tooltip.js";
+import { isMobileDevice } from "../utils/device.js";
 
 /**
  * Clock class for managing the system clock display and time updates.
@@ -78,6 +79,9 @@ export default class Taskbar {
     this.startMenuComponent = new StartMenu(this.eventBus);
     this.programsContainer = document.querySelector(".taskbar-programs");
     this.systemTray = document.querySelector(".system-tray");
+
+    this._setStartButtonImage();
+    window.addEventListener("resize", () => this._setStartButtonImage());
 
     this.setupStartButtonEffects();
     this.setupResponsiveTaskbar();
@@ -210,6 +214,16 @@ export default class Taskbar {
       item.style.width = `${itemWidth}px`;
       item.classList.toggle("icon-only", useIconOnly);
     });
+  }
+
+  _setStartButtonImage() {
+    const img = this.startButton.querySelector("img");
+    if (!img) return;
+    if (isMobileDevice && isMobileDevice()) {
+      img.src = "assets/gui/taskbar/start-button-mobile.webp";
+    } else {
+      img.src = "assets/gui/taskbar/start-button.webp";
+    }
   }
 }
 

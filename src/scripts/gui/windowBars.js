@@ -435,10 +435,31 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   });
   // --- Add divider and close button on mobile only ---
   if (isMobile) {
-    // Divider
-    const divider = document.createElement("div");
-    divider.className = "vertical_line";
-    toolbarRow.appendChild(divider);
+    // Spacer to push minimize/close buttons to the right
+    const spacer = document.createElement("div");
+    spacer.style.flex = "1";
+    toolbarRow.appendChild(spacer);
+    // Divider to the left of minimize button
+    const minDivider = document.createElement("div");
+    minDivider.className = "vertical_line";
+    toolbarRow.appendChild(minDivider);
+    // Minimize button (match other toolbar buttons)
+    const minimizeBtn = document.createElement("div");
+    minimizeBtn.className = "toolbar-button toolbar-minimize-button";
+    minimizeBtn.setAttribute("aria-label", "Minimize");
+    minimizeBtn.innerHTML = `<img alt="minimize" width="25" height="25" src="assets/gui/toolbar/min.webp" />`;
+    minimizeBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      // Find the parent window element and dispatch the minimize event (handled by WindowManager)
+      let parent = toolbarWrapper.parentElement;
+      while (parent && !parent.classList.contains("app-window")) {
+        parent = parent.parentElement;
+      }
+      if (parent) {
+        parent.dispatchEvent(new CustomEvent("minimize-window", { bubbles: false }));
+      }
+    });
+    toolbarRow.appendChild(minimizeBtn);
     // Close button (match other toolbar buttons)
     const closeBtn = document.createElement("div");
     closeBtn.className = "toolbar-button toolbar-close-button";
