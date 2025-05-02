@@ -45,6 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Set --real-vh CSS variable for true viewport height on mobile
   setRealVh();
+
+  // Dynamically scale desktop icons to fit the row on mobile with gap
+  scaleDesktopIconsToFitMobile();
 });
 
 // Landscape block overlay for mobile
@@ -76,4 +79,20 @@ function handleOrientationBlock() {
 function setRealVh() {
   const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight) * 0.01;
   document.documentElement.style.setProperty('--real-vh', `${vh}px`);
+}
+
+// Dynamically scale desktop icons to fit the row on mobile with gap
+function scaleDesktopIconsToFitMobile() {
+  const container = document.querySelector('.desktop-icons');
+  if (!container) return;
+  const icons = Array.from(container.children).filter(child => child.classList.contains('desktop-icon'));
+  if (icons.length === 0) return;
+
+  const gap = 8; // px, must match your CSS
+  const iconWidth = 90; // px, must match your CSS
+  const availableWidth = container.offsetWidth;
+  const totalIconWidth = icons.length * iconWidth + (icons.length - 1) * gap;
+  // Calculate scale factor (never above 1)
+  const scale = Math.min(1, availableWidth / totalIconWidth);
+  container.style.setProperty('--icon-scale', scale);
 }

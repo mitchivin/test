@@ -469,3 +469,11 @@
 /* ==================================================
    END Taskbar Styles
    ================================================== */
+
+@media (max-width: 768px) {
+  /* ... existing mobile styles ... */
+  .startmenu .item-title,
+  .startmenu .menu-item {
+    letter-spacing: -0.2px;
+  }
+}

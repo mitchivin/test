@@ -162,7 +162,7 @@
     display: flex;
     justify-content: stretch;
     align-items: center;
-    gap: 0;
+    gap: 8px;
     padding: 0;
     margin: 0;
     margin-bottom: clamp(30px, 16vh, 120px + var(--taskbar-height, 30px));
@@ -182,7 +182,8 @@
     align-items: center;
     justify-content: center;
     border: 1px solid transparent;
-    /* border: 1px solid red; */
+    transform: scale(var(--icon-scale, 1));
+    transition: transform 0.2s;
   }
   .desktop-icon img {
     width: 50px;

@@ -1,6 +1,8 @@
 // windowBars.js
 // Handles creation and initialization of menubar and toolbar for windows in the XP simulation
 
+import { isMobileDevice } from "../utils/device.js";
+
 // --- CSS Injection Helpers ---
 function injectMenuBarCSS() {
   if (document.getElementById("xp-menubar-css")) return;
@@ -370,12 +372,51 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   const toolbarRow = document.createElement("div");
   toolbarRow.className = "toolbar-row";
   if (isBottom) toolbarRow.classList.add("toolbar-bottom");
-  toolbarConfig.buttons.forEach((buttonConfig) => {
+  const isMobile = isMobileDevice && isMobileDevice();
+  let buttons = toolbarConfig.buttons;
+  if (isMobile && windowId === 'resume-window') {
+    buttons = buttons.filter(btn => !['actual-size', 'zoom-in', 'zoom-out'].includes(btn.key));
+  }
+  buttons.forEach((buttonConfig) => {
+    if (isMobile && buttonConfig.type === "separator") return; // Skip dividers on mobile
     if (buttonConfig.type === "separator") {
       const separator = document.createElement("div");
       separator.className = "vertical_line";
       toolbarRow.appendChild(separator);
     } else if (buttonConfig.key) {
+      if (isMobile && !buttonConfig.enabled) return; // Skip disabled buttons on mobile
+      // Add 'Home' text to home button on mobile
+      if (isMobile && buttonConfig.key === 'home') {
+        buttonConfig.text = 'Home';
+      }
+      // In About Me window on mobile, replace 'photos' and 'videos' buttons with new ones using correct icons and actions
+      if (isMobile && windowId === 'about-window') {
+        if (buttonConfig.key === 'photos') {
+          buttonConfig = {
+            key: 'projects',
+            enabled: true,
+            icon: './assets/gui/desktop/internet.webp', // My Projects icon
+            text: 'My Projects',
+            action: 'openProjects',
+          };
+        } else if (buttonConfig.key === 'videos') {
+          buttonConfig = {
+            key: 'resume',
+            enabled: true,
+            icon: './assets/gui/desktop/resume.webp', // My Resume icon
+            text: 'My Resume',
+            action: 'openResume',
+          };
+        }
+      }
+      // Rename save button to Download everywhere
+      if (buttonConfig.key === 'save') {
+        buttonConfig.text = 'Download';
+      }
+      // Use Contact Me program icon for the contact button
+      if (buttonConfig.key === 'email') {
+        buttonConfig.icon = './assets/gui/desktop/contact.webp';
+      }
       const buttonDiv = document.createElement("div");
       buttonDiv.className = `toolbar-button ${buttonConfig.key}`;
       if (!buttonConfig.enabled) buttonDiv.classList.add("disabled");
