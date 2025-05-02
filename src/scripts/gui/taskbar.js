@@ -246,8 +246,11 @@ export function showNetworkBalloon() {
     const pointerX = pointerRect.left + window.scrollX;
     // Calculate the difference
     const offsetX = iconCenterX - pointerX;
+    // Adjust for scale transform (1.03)
+    const scale = 1.03;
+    const deltaX = (balloonRect.width * (scale - 1)) / 2;
     // Set the balloon position so the pointer aligns with the icon center
-    balloonRoot.style.left = balloonRect.left + offsetX + "px";
+    balloonRoot.style.left = balloonRect.left + offsetX - deltaX + 10 + "px";
     balloonRoot.style.top =
       iconRect.top - balloonRect.height - 20 + window.scrollY + "px";
   }, 0);
