@@ -273,10 +273,10 @@ const crtCss = `/* CRT Effect - Enhanced Version */
 .crt,
 .crt-effect {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
+    top: -30px;
+    left: -30px;
+    width: calc(100vw + 60px);
+    height: calc(100vh + 60px);
     z-index: 100000;
     pointer-events: none;
     border-radius: var(--crt-curvature);
@@ -290,10 +290,10 @@ const crtCss = `/* CRT Effect - Enhanced Version */
     content: '';
     display: block;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
+    top: -30px;
+    left: -30px;
+    width: calc(100vw + 60px);
+    height: calc(100vh + 60px);
     background: repeating-linear-gradient(
         0deg,
         rgb(0 0 0 / var(--crt-scanline-opacity)),
@@ -313,10 +313,10 @@ const crtCss = `/* CRT Effect - Enhanced Version */
     content: '';
     display: block;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
+    top: -30px;
+    left: -30px;
+    width: calc(100vw + 60px);
+    height: calc(100vh + 60px);
     background: repeating-linear-gradient(
         90deg,
         rgb(0 0 0 / calc(var(--crt-scanline-opacity) * 0.7)),

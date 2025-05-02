@@ -149,7 +149,7 @@
     flex-direction: column;
     justify-content: flex-end; /* Anchor children to the bottom */
     align-items: center;
-    height: 100vh;
+    height: calc(var(--real-vh, 1vh) * 100);
     width: 100vw;
     position: relative;
     overflow: hidden;
@@ -168,6 +168,8 @@
     width: auto;
     justify-content: center;
     height: auto;
+    max-height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px) - 20px);
+    overflow-y: auto;
   }
   .desktop-icon {
     width: 90px;

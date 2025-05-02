@@ -42,6 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
   handleOrientationBlock();
   window.addEventListener('orientationchange', handleOrientationBlock);
   window.addEventListener('resize', handleOrientationBlock);
+
+  // Set --real-vh CSS variable for true viewport height on mobile
+  setRealVh();
 });
 
 // Landscape block overlay for mobile
@@ -67,4 +70,10 @@ function handleOrientationBlock() {
   if (block) {
     block.style.display = (isMobile && isLandscape) ? 'flex' : 'none';
   }
+}
+
+// Set --real-vh CSS variable for true viewport height on mobile
+function setRealVh() {
+  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight) * 0.01;
+  document.documentElement.style.setProperty('--real-vh', `${vh}px`);
 }
