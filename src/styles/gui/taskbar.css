@@ -98,24 +98,14 @@
 /* =========================
    4. Quick Launch & Programs Area
    ========================= */
-/* Quick launch */
-.quick-launch {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  margin-left: 0;
-  margin-right: 10px;
-  border: none;
-  flex-shrink: 0; /* Prevent shrinking */
-}
-
 /* Programs area */
 .taskbar-programs {
   flex-grow: 1;
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 2px 0 0;
+  padding: 0;
+  margin: 0 4px;
   overflow: hidden;
   min-width: 0;
 }

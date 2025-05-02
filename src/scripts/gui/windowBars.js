@@ -433,6 +433,30 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
       toolbarRow.appendChild(buttonDiv);
     }
   });
+  // --- Add divider and close button on mobile only ---
+  if (isMobile) {
+    // Divider
+    const divider = document.createElement("div");
+    divider.className = "vertical_line";
+    toolbarRow.appendChild(divider);
+    // Close button (match other toolbar buttons)
+    const closeBtn = document.createElement("div");
+    closeBtn.className = "toolbar-button toolbar-close-button";
+    closeBtn.setAttribute("aria-label", "Close");
+    closeBtn.innerHTML = `<img alt="close" width="25" height="25" src="assets/gui/toolbar/delete.webp" />`;
+    closeBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      // Find the parent window element and dispatch the close event
+      let parent = toolbarWrapper.parentElement;
+      while (parent && !parent.classList.contains("app-window")) {
+        parent = parent.parentElement;
+      }
+      if (parent) {
+        parent.dispatchEvent(new CustomEvent("request-close-window", { bubbles: false }));
+      }
+    });
+    toolbarRow.appendChild(closeBtn);
+  }
   toolbarWrapper.appendChild(toolbarRow);
   return toolbarWrapper;
 }

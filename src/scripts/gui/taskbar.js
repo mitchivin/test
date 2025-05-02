@@ -179,7 +179,7 @@ export default class Taskbar {
       document.querySelector(".quick-launch")?.offsetWidth || 0;
     const systemTrayWidth = this.systemTray.offsetWidth;
     return (
-      taskbarWidth - startButtonWidth - quickLaunchWidth - systemTrayWidth - 30
+      taskbarWidth - startButtonWidth - quickLaunchWidth - systemTrayWidth
     );
   }
 
