@@ -153,6 +153,7 @@
     width: 100vw;
     position: relative;
     overflow: hidden;
+    background-position: bottom center !important;
   }
   .desktop-icons {
     margin-bottom: clamp(30px, 16vh, 120px + var(--taskbar-height, 30px)); /* Higher above taskbar */
