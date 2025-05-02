@@ -146,6 +146,10 @@
 @media (max-width: 768px) {
   .desktop {
     height: calc(100vh - var(--taskbar-height));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   .desktop-icons {
     display: grid;
@@ -154,12 +158,9 @@
     grid-auto-columns: 90px;
     grid-auto-rows: 90px;
     grid-gap: 6px;
-    place-content: end center;
-    padding: 18px 0 calc(100px + env(safe-area-inset-bottom, 0px)) 0;
-    height: 100%;
-    width: 100vw;
-    justify-content: center;
-    align-items: end;
+    margin-top: 500px;
+    margin-bottom: 60px;
+    padding: 0;
   }
   .desktop-icon {
     width: 90px;
