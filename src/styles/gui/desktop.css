@@ -155,7 +155,7 @@
     overflow: hidden;
   }
   .desktop-icons {
-    margin-bottom: calc(10vh + var(--taskbar-height, 30px)); /* 10vh above taskbar */
+    margin-bottom: clamp(30px, 16vh, 120px + var(--taskbar-height, 30px)); /* Higher above taskbar */
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 90px;
