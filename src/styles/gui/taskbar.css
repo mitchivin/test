@@ -348,7 +348,7 @@
   display: block;
   animation: fadein 1s forwards;
   z-index: 10;
-  transform: scale(1.03); /* Scale up by 5% */
+  transform: scale(0.93); /* Scale reduced by 0.1 */
 }
 .balloon.hide {
   animation: fadeout 1s forwards;
