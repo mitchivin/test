@@ -45,7 +45,7 @@ const makeId = (name) => `${name}-window`;
  * @constant
  * @type {string}
  */
-const appPath = "./src/apps/";
+const appPath = "src/apps/";
 
 /**
  * Creates a program configuration with consistent properties
