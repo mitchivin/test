@@ -95,6 +95,8 @@
   border-radius: var(--icon-border-radius);
   position: relative;
   z-index: 5;
+  border: 1px solid transparent;
+  /* border: 1px solid red; */
 }
 
 /* Hover effect */
@@ -147,7 +149,7 @@
   .desktop {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Anchor children to the bottom */
+    justify-content: flex-end;
     align-items: center;
     height: calc(var(--real-vh, 1vh) * 100);
     width: 100vw;
@@ -156,26 +158,31 @@
     background-position: bottom center !important;
   }
   .desktop-icons {
-    margin-bottom: clamp(30px, 16vh, 120px + var(--taskbar-height, 30px)); /* Higher above taskbar */
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 90px;
-    grid-auto-rows: 90px;
-    grid-gap: 6px;
+    width: 95vw;
+    display: flex;
+    justify-content: stretch;
+    align-items: center;
+    gap: 0;
     padding: 0;
-    margin-top: 0;
-    margin-left: 0;
-    margin-right: 0;
-    width: auto;
-    justify-content: center;
+    margin: 0;
+    margin-bottom: clamp(30px, 16vh, 120px + var(--taskbar-height, 30px));
+    /* border: 2px solid blue; */
+    box-sizing: border-box;
     height: auto;
-    max-height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px) - 20px);
-    overflow-y: auto;
   }
   .desktop-icon {
-    width: 90px;
+    flex: 1 1 0;
+    min-width: 0;
     height: 90px;
-    padding: 6px;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    /* border: 1px solid red; */
   }
   .desktop-icon img {
     width: 50px;
