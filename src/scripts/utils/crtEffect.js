@@ -255,6 +255,20 @@ const crtCss = `/* CRT Effect - Enhanced Version */
     }
 }
 
+@keyframes crt-vertical-loop {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(10px); /* Subtle movement, adjust as needed */
+    }
+}
+
+@keyframes scanline-drift {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 10px; } /* Adjust for subtle drift */
+}
+
 /* CRT overlay effect */
 .crt,
 .crt-effect {
@@ -267,6 +281,7 @@ const crtCss = `/* CRT Effect - Enhanced Version */
     pointer-events: none;
     border-radius: var(--crt-curvature);
     overflow: hidden;
+    /* Removed vertical loop animation from container */
 }
 
 /* Horizontal scan lines - enhanced for more visibility */
@@ -289,6 +304,7 @@ const crtCss = `/* CRT Effect - Enhanced Version */
     pointer-events: none;
     z-index: 100000;
     mix-blend-mode: multiply;
+    animation: scanline-drift 6s linear infinite;
 }
 
 /* Vertical scan lines - enhanced for more visibility */
@@ -305,7 +321,7 @@ const crtCss = `/* CRT Effect - Enhanced Version */
         90deg,
         rgb(0 0 0 / calc(var(--crt-scanline-opacity) * 0.7)),
         rgb(0 0 0 / calc(var(--crt-scanline-opacity) * 0.7))
-        var(--cr        idth),
+        var(--crt-scanline-width),
         transparent var(--crt-scanline-width),
         transparent calc(var(--crt-scanline-width) + var(--crt-scanline-gap))
     );
@@ -313,6 +329,7 @@ const crtCss = `/* CRT Effect - Enhanced Version */
     opacity: 0.7; /* Increased from 0.5 */
     z-index: 100000;
     mix-blend-mode: multiply;
+    animation: scanline-drift 6s linear infinite;
 }
 
 /* Moving scanline effect - very subtle version */

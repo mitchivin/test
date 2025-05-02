@@ -204,9 +204,10 @@
 
 /* Right side menu items */
 .middle-right .menu-item {
-  /* Inherits general .menu-item styles */
-  padding: 4px 8px; /* Further reduced top/bottom padding by 1px each */
-  font-weight: bold;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+  padding: 8px 7.5px 8px 9px;
 }
 
 .middle-right .menu-item img {
@@ -787,8 +788,30 @@
     cursor: default;
     filter: grayscale(1);
   }
+
+  .middle-right .menu-item {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+  }
 }
 
 /* ==================================================
    END Start Menu Styles
    ================================================== */
+
+.menu-items .menu-divider .divider {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  display: block;
+}
+
+.divider-darkblue .divider {
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    #a1c4fc 50%, /* dark blue */
+    transparent 100%
+  );
+}

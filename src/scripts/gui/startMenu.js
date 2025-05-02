@@ -514,9 +514,9 @@ export default class StartMenu {
                           programName: "notepad",
                           action: "open-program"
                         })}
+                        <li class="menu-divider"><hr class="divider"></li>
                     </ul>
                     <div class="all-programs-container">
-                        <li class="menu-divider"><hr class="divider"></li>
                         <div class="all-programs-button" id="menu-all-programs" data-action="toggle-all-programs">
                             <span>All Programs</span>
                             <img src="./assets/gui/start-menu/arrow.webp" alt="All Programs">
@@ -553,20 +553,7 @@ export default class StartMenu {
                           url: "https://www.linkedin.com/in/mitchivin",
                           action: "open-url"
                         })}
-                        <li class="menu-divider right-section-divider"><hr class="divider"></li>
-                        <li class="menu-item" id="menu-program4" data-action="toggle-most-used-tools">
-                            <img src="./assets/gui/start-menu/most-used.webp" alt="Most Used Tools">
-                            <div class="item-content">
-                                <span class="item-title">Most Used Tools</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-ai-tools" data-action="toggle-ai-tools">
-                            <img src="./assets/gui/start-menu/ai-utilities.webp" alt="A.I. Utilities">
-                            <div class="item-content">
-                                <span class="item-title">A.I. Utilities</span>
-                            </div>
-                        </li>
-                        <li class="menu-divider right-section-divider"><hr class="divider"></li>
+                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
                         ${renderMenuItem({
                           id: "cmd",
                           icon: "./assets/gui/start-menu/cmd.webp",
@@ -581,6 +568,19 @@ export default class StartMenu {
                           programName: "info",
                           action: "open-program"
                         })}
+                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+                        <li class="menu-item" id="menu-program4" data-action="toggle-most-used-tools">
+                            <img src="./assets/gui/start-menu/most-used.webp" alt="Most Used Tools">
+                            <div class="item-content">
+                                <span class="item-title">Most Used Tools</span>
+                            </div>
+                        </li>
+                        <li class="menu-item" id="menu-ai-tools" data-action="toggle-ai-tools">
+                            <img src="./assets/gui/start-menu/ai-utilities.webp" alt="A.I. Utilities">
+                            <div class="item-content">
+                                <span class="item-title">A.I. Utilities</span>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>

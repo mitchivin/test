@@ -260,8 +260,8 @@ export function showNetworkBalloon() {
   closeBtn.onclick = () => hideBalloon();
   // Remove balloon.onclick handler so clicking the balloon does nothing
   balloon.classList.remove("hide");
-  balloonTimeouts.push(setTimeout(() => balloon.classList.add("hide"), 15000)); // Start fade out after 15s
-  balloonTimeouts.push(setTimeout(() => hideBalloon(), 16000)); // Remove after 16s
+  balloonTimeouts.push(setTimeout(() => balloon.classList.add("hide"), 7000)); // Start fade out after 7s
+  balloonTimeouts.push(setTimeout(() => hideBalloon(), 8000)); // Remove after 8s
   function hideBalloon() {
     balloon.classList.add("hide");
     balloonTimeouts.push(setTimeout(() => clearBalloon(), 1000));
