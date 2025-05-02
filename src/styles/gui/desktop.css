@@ -144,6 +144,9 @@
    ================================================== */
 
 @media (max-width: 768px) {
+  .desktop {
+    height: calc(100vh - var(--taskbar-height));
+  }
   .desktop-icons {
     display: grid;
     grid-auto-flow: column;
@@ -151,12 +154,12 @@
     grid-auto-columns: 90px;
     grid-auto-rows: 90px;
     grid-gap: 6px;
-    place-content: start center;
-    padding: 18px 0 0 0;
-    height: auto;
+    place-content: end center;
+    padding: 18px 0 100px 0;
+    height: 100%;
     width: 100vw;
     justify-content: center;
-    align-items: start;
+    align-items: end;
   }
   .desktop-icon {
     width: 90px;
@@ -173,4 +176,34 @@
     line-height: 16px;
     max-width: 100%;
   }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  #landscape-block {
+    display: flex;
+  }
+  .desktop, .desktop-icons, .selection-overlay {
+    filter: blur(2px) grayscale(0.2);
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+#landscape-block {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(30,30,30,0.97);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.5rem;
+  font-family: Tahoma, Arial, sans-serif;
+  padding: 32px;
+  box-sizing: border-box;
 }
