@@ -79,6 +79,8 @@ export default class Taskbar {
     this.startMenuComponent = new StartMenu(this.eventBus);
     this.programsContainer = document.querySelector(".taskbar-programs");
     this.systemTray = document.querySelector(".system-tray");
+    this.taskbar = document.querySelector(".taskbar"); // Cache taskbar
+    this.quickLaunch = document.querySelector(".quick-launch"); // Cache quick-launch
 
     // Always use the desktop start button asset
     this._setStartButtonImage();
@@ -163,6 +165,7 @@ export default class Taskbar {
 
   /**
    * Updates the taskbar layout, adjusting program item widths based on available space
+   * This ensures the taskbar remains usable and visually balanced regardless of window count.
    */
   updateTaskbarLayout() {
     const taskbarItems = document.querySelectorAll(".taskbar-item");
@@ -178,14 +181,11 @@ export default class Taskbar {
   }
 
   _calculateAvailableWidth() {
-    const taskbarWidth = document.querySelector(".taskbar").offsetWidth;
+    const taskbarWidth = this.taskbar.offsetWidth;
     const startButtonWidth = this.startButton.offsetWidth;
-    const quickLaunchWidth =
-      document.querySelector(".quick-launch")?.offsetWidth || 0;
+    const quickLaunchWidth = this.quickLaunch?.offsetWidth || 0;
     const systemTrayWidth = this.systemTray.offsetWidth;
-    return (
-      taskbarWidth - startButtonWidth - quickLaunchWidth - systemTrayWidth
-    );
+    return taskbarWidth - startButtonWidth - quickLaunchWidth - systemTrayWidth;
   }
 
   _determineLayoutMode(itemCount, availableWidth) {
@@ -228,7 +228,7 @@ export default class Taskbar {
     if (isMobile) return; // Disable tray tooltips on mobile
     const trayIcons = document.querySelectorAll(".tray-icons .tray-icon");
     trayIcons.forEach((icon) => {
-      icon.addEventListener("mouseenter", (e) => {
+      icon.addEventListener("mouseenter", () => {
         const tooltipText = icon.getAttribute("data-tooltip");
         if (tooltipText) {
           this.showTooltip(icon, tooltipText);

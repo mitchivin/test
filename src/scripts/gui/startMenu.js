@@ -268,25 +268,21 @@ export default class StartMenu {
     // Only disable certain programs on mobile at runtime
     if (isMobileDevice()) {
       for (const item of ALL_PROGRAMS_ITEMS) {
-        if ([
-          'mediaPlayer',
-          'my-pictures',
-          'notepad',
-          'cmd',
-          'info',
-        ].includes(item.programName)) {
+        if (
+          ["mediaPlayer", "my-pictures", "notepad", "cmd", "info"].includes(
+            item.programName,
+          )
+        ) {
           item.disabled = true;
         }
       }
     } else {
       for (const item of ALL_PROGRAMS_ITEMS) {
-        if ([
-          'mediaPlayer',
-          'my-pictures',
-          'notepad',
-          'cmd',
-          'info',
-        ].includes(item.programName)) {
+        if (
+          ["mediaPlayer", "my-pictures", "notepad", "cmd", "info"].includes(
+            item.programName,
+          )
+        ) {
           item.disabled = false;
         }
       }
@@ -440,23 +436,37 @@ export default class StartMenu {
   getMenuTemplate() {
     const isMobile = isMobileDevice();
     // Helper to render a menu item with optional disabling
-    function renderMenuItem({ id, icon, title, description, programName, action, url }) {
-      const shouldDisable = isMobile && [
-        "mediaPlayer",
-        "my-pictures",
-        "notepad",
-        "cmd",
-        "info",
-      ].includes(programName);
+    function renderMenuItem({
+      id,
+      icon,
+      title,
+      description,
+      programName,
+      action,
+      url,
+    }) {
+      const shouldDisable =
+        isMobile &&
+        ["mediaPlayer", "my-pictures", "notepad", "cmd", "info"].includes(
+          programName,
+        );
       const disabledClass = shouldDisable ? " disabled" : "";
-      const dataAction = shouldDisable ? "" : (action ? `data-action=\"${action}\"` : "");
-      const dataProgram = shouldDisable ? "" : (programName ? `data-program-name=\"${programName}\"` : "");
-      const dataUrl = url ? `data-url=\"${url}\"` : "";
-      return `<li class=\"menu-item${disabledClass}\" id=\"menu-${programName || id}\" ${dataAction} ${dataProgram} ${dataUrl} tabindex=\"${shouldDisable ? '-1' : '0'}\" aria-disabled=\"${shouldDisable ? 'true' : 'false'}\">
-        <img src=\"${icon}\" alt=\"${title}\">
-        <div class=\"item-content\">
-          <span class=\"item-title\">${title}</span>
-          ${description ? `<span class=\"item-description\">${description}</span>` : ""}
+      const dataAction = shouldDisable
+        ? ""
+        : action
+          ? `data-action="${action}"`
+          : "";
+      const dataProgram = shouldDisable
+        ? ""
+        : programName
+          ? `data-program-name="${programName}"`
+          : "";
+      const dataUrl = url ? `data-url="${url}"` : "";
+      return `<li class="menu-item${disabledClass}" id="menu-${programName || id}" ${dataAction} ${dataProgram} ${dataUrl} tabindex="${shouldDisable ? "-1" : "0"}" aria-disabled="${shouldDisable ? "true" : "false"}">
+        <img src="${icon}" alt="${title}">
+        <div class="item-content">
+          <span class="item-title">${title}</span>
+          ${description ? `<span class="item-description">${description}</span>` : ""}
         </div>
       </li>`;
     }
@@ -474,7 +484,7 @@ export default class StartMenu {
                           title: "My Projects",
                           description: "View my work",
                           programName: "internet",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         ${renderMenuItem({
                           id: "contact",
@@ -482,7 +492,7 @@ export default class StartMenu {
                           title: "Contact Me",
                           description: "Send me a message",
                           programName: "contact",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         <li class="menu-divider"><hr class="divider"></li>
                         ${renderMenuItem({
@@ -490,35 +500,35 @@ export default class StartMenu {
                           icon: "./assets/gui/desktop/about.webp",
                           title: "About Me",
                           programName: "about",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         ${renderMenuItem({
                           id: "resume",
                           icon: "./assets/gui/desktop/resume.webp",
                           title: "My Resume",
                           programName: "resume",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         ${renderMenuItem({
                           id: "mediaPlayer",
                           icon: "./assets/gui/start-menu/mediaPlayer.webp",
                           title: "Media Player",
                           programName: "mediaPlayer",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         ${renderMenuItem({
                           id: "my-pictures",
                           icon: "./assets/gui/start-menu/photos.webp",
                           title: "My Photos",
                           programName: "my-pictures",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         ${renderMenuItem({
                           id: "notepad",
                           icon: "./assets/gui/start-menu/notepad.webp",
                           title: "Notepad",
                           programName: "notepad",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         <li class="menu-divider"><hr class="divider"></li>
                     </ul>
@@ -531,34 +541,36 @@ export default class StartMenu {
                 </div>
                 <div class="middle-section middle-right">
                     <ul class="menu-items">
-                        ${isMobile ? `
+                        ${
+                          isMobile
+                            ? `
                         ${renderMenuItem({
                           id: "github",
                           icon: "./assets/gui/start-menu/github.webp",
                           title: "GitHub",
                           url: "https://github.com/mitchivin",
-                          action: "open-url"
+                          action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "instagram",
                           icon: "./assets/gui/start-menu/instagram.webp",
                           title: "Instagram",
                           url: "https://www.instagram.com/mitchivin",
-                          action: "open-url"
+                          action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "behance",
                           icon: "./assets/gui/start-menu/behance.webp",
                           title: "Behance",
                           url: "https://www.behance.net/mitch_ivin",
-                          action: "open-url"
+                          action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "linkedin",
                           icon: "./assets/gui/start-menu/linkedin.webp",
                           title: "LinkedIn",
                           url: "https://www.linkedin.com/in/mitchivin",
-                          action: "open-url"
+                          action: "open-url",
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
                         ${renderMenuItem({
@@ -566,14 +578,14 @@ export default class StartMenu {
                           icon: "./assets/gui/start-menu/help.webp",
                           title: "System Information",
                           programName: "info",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         ${renderMenuItem({
                           id: "cmd",
                           icon: "./assets/gui/start-menu/cmd.webp",
                           title: "Command Prompt",
                           programName: "cmd",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
                         <li class="menu-item" id="menu-program4" data-action="toggle-most-used-tools">
@@ -588,34 +600,35 @@ export default class StartMenu {
                                 <span class="item-title">A.I. Utilities</span>
                             </div>
                         </li>
-                        ` : `
+                        `
+                            : `
                         ${renderMenuItem({
                           id: "github",
                           icon: "./assets/gui/start-menu/github.webp",
                           title: "GitHub",
                           url: "https://github.com/mitchivin",
-                          action: "open-url"
+                          action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "instagram",
                           icon: "./assets/gui/start-menu/instagram.webp",
                           title: "Instagram",
                           url: "https://www.instagram.com/mitchivin",
-                          action: "open-url"
+                          action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "behance",
                           icon: "./assets/gui/start-menu/behance.webp",
                           title: "Behance",
                           url: "https://www.behance.net/mitch_ivin",
-                          action: "open-url"
+                          action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "linkedin",
                           icon: "./assets/gui/start-menu/linkedin.webp",
                           title: "LinkedIn",
                           url: "https://www.linkedin.com/in/mitchivin",
-                          action: "open-url"
+                          action: "open-url",
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
                         <li class="menu-item" id="menu-program4" data-action="toggle-most-used-tools">
@@ -636,16 +649,17 @@ export default class StartMenu {
                           icon: "./assets/gui/start-menu/cmd.webp",
                           title: "Command Prompt",
                           programName: "cmd",
-                          action: "open-program"
+                          action: "open-program",
                         })}
                         ${renderMenuItem({
                           id: "info",
                           icon: "./assets/gui/start-menu/help.webp",
                           title: "System Information",
                           programName: "info",
-                          action: "open-program"
+                          action: "open-program",
                         })}
-                        `}
+                        `
+                        }
                     </ul>
                 </div>
             </div>

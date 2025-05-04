@@ -12,9 +12,8 @@
  */
 import programData from "../utils/programRegistry.js";
 import { EVENTS } from "../utils/eventBus.js";
-import { createMenuBar, createToolbar } from "./windowBars.js";
+import { createMenuBar, createToolbar, createAddressBar } from "./windowBars.js";
 import { isMobileDevice } from "../utils/device.js";
-import { createAddressBar } from "./addressBar.js";
 
 const TASKBAR_HEIGHT = 30; // Define constant taskbar height
 
@@ -97,7 +96,7 @@ class WindowTemplates {
     if (programConfig && programConfig.id === "internet-window") {
       addressBar = createAddressBar({
         icon: "./assets/gui/desktop/internet.webp",
-        title: "My Projects"
+        title: "My Projects",
       });
     }
 
@@ -115,7 +114,6 @@ class WindowTemplates {
       iframe.setAttribute(attr, value);
 
     // --- Append Toolbar, Address Bar, and iframe in correct order ---
-    const isMobile = isMobileDevice && isMobileDevice();
     if (toolbarWrapper && !isMyPictures) {
       container.appendChild(toolbarWrapper);
       if (addressBar) container.appendChild(addressBar);
@@ -162,6 +160,7 @@ export default class WindowManager {
         ),
       ) || 100;
     this.windowsContainer = document.getElementById("windows-container");
+    this.taskbarPrograms = document.querySelector(".taskbar-programs"); // Cache taskbar-programs
     this.zIndexStack = []; // Array to track window stacking order (IDs)
     // --- Multi-column cascade state ---
     this.cascadeColumn = 0;
@@ -268,7 +267,6 @@ export default class WindowManager {
   openProgram(programName) {
     const program = this.programData[programName];
     if (!program || !program.id) {
-      // (Removed commented-out error for invalid program data)
       return;
     }
 
@@ -348,8 +346,6 @@ export default class WindowManager {
    * @returns {HTMLElement|null} The created window element or null on error.
    */
   _createWindowElement(program) {
-    const isMobile = isMobileDevice && isMobileDevice();
-
     const windowElement = document.createElement("div");
     windowElement.id = program.id;
     windowElement.className = "app-window";
@@ -361,7 +357,7 @@ export default class WindowManager {
     windowElement.innerHTML = this._getWindowBaseHTML(program);
 
     // --- Mobile Maximized Logic ---
-    if (isMobile) {
+    if (isMobileDevice && isMobileDevice()) {
       windowElement.classList.add("maximized");
       windowElement.style.position = "fixed";
       windowElement.style.left = "0";
@@ -422,6 +418,12 @@ export default class WindowManager {
     // --- Listen for request-close-window event from menu bar popout ---
     windowElement.addEventListener("request-close-window", () => {
       this.closeWindow(windowElement);
+    });
+    windowElement.addEventListener("request-minimize-window", () => {
+      this.minimizeWindow(windowElement);
+    });
+    windowElement.addEventListener("request-maximize-window", () => {
+      this.toggleMaximize(windowElement);
     });
 
     return windowElement;
@@ -514,7 +516,6 @@ export default class WindowManager {
    * @returns {HTMLElement} The created taskbar item element.
    */
   _createTaskbarItem(windowElement, program) {
-    const taskbarPrograms = document.querySelector(".taskbar-programs");
     const taskbarItem = document.createElement("div");
     taskbarItem.className = "taskbar-item";
     taskbarItem.id = `taskbar-${windowElement.id}`;
@@ -530,7 +531,7 @@ export default class WindowManager {
       });
     });
 
-    taskbarPrograms.appendChild(taskbarItem);
+    this.taskbarPrograms.appendChild(taskbarItem);
     return taskbarItem;
   }
 
@@ -563,7 +564,7 @@ export default class WindowManager {
     );
 
     // Listen for custom minimize-window event (from toolbar)
-    windowElement.addEventListener("minimize-window", (e) => {
+    windowElement.addEventListener("minimize-window", () => {
       this.minimizeWindow(windowElement);
     });
 
@@ -1349,6 +1350,8 @@ export default class WindowManager {
 
   /**
    * Update the zIndexStack array for window stacking order.
+   * This ensures the most recently focused window is always on top.
+   *
    * @private
    * @param {string} windowId - The window ID.
    * @param {string} action - 'add' or 'remove'.
@@ -1368,6 +1371,8 @@ export default class WindowManager {
 
   /**
    * Apply z-index values to windows based on stack order.
+   * This is the core of the window stacking logic: higher in the stack = higher z-index.
+   *
    * @private
    * @returns {void}
    */
@@ -1382,6 +1387,8 @@ export default class WindowManager {
 
   /**
    * Find the topmost non-minimized window.
+   * This is used to determine which window should be active if the current one is closed or minimized.
+   *
    * @private
    * @returns {HTMLElement|null} The top window or null.
    */

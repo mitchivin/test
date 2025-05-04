@@ -29,7 +29,6 @@
   overflow: hidden;
   max-width: calc(100vw - 10px);
   max-height: calc(100vh - 40px);
-  box-sizing: border-box;
   z-index: var(--z-window);
 }
 
@@ -50,7 +49,6 @@
   display: flex;
   justify-content: space-between;
   width: calc(100% + 2px);
-  box-sizing: border-box;
   position: relative;
 }
 
@@ -95,7 +93,6 @@
   margin: 0;
   padding: 0;
   border: none !important;
-  box-sizing: border-box;
   background-color: var(--xp-bg-main);
   flex: 1;
   display: flex;
@@ -225,7 +222,6 @@
   background-color: #f3f3f3;
   color: #aaa;
   border-top: 1px solid #e0e0e0;
-  /* Optionally, you can add more styles for a more obvious inactive look */
 }
 
 .iframe-overlay {
@@ -280,6 +276,25 @@
   overflow: hidden !important;
 }
 
+/* === Robust App Window & Iframe Sizing (Prevents Horizontal Scroll) === */
+.app-window .window-body,
+.iframe-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.app-window .window-body > iframe,
+.iframe-container > iframe {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  display: block;
+  box-sizing: border-box;
+}
+
 /* ==================================================
    END Window Styles
    ================================================== */
@@ -295,7 +310,11 @@
   }
   .app-window.maximized,
   .window.maximized {
-    height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)) !important;
-    max-height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)) !important;
+    height: calc(
+      var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)
+    ) !important;
+    max-height: calc(
+      var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)
+    ) !important;
   }
 }

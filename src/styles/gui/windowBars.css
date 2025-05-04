@@ -1,21 +1,57 @@
+/* ==================================================
+   Window Bars, Toolbar, and Address Bar Styles for XP Simulation
+   ==================================================
+   - Handles menubar, toolbar, and address bar for windows.
+   - Matches the look and feel of Windows XP.
+   ================================================== */
+
+.window-body.iframe-container .menu-bar {
+  display: flex;
+  align-items: center;
+  background: #ece9d8;
+  height: 22px;
+  min-height: 22px;
+  max-height: 22px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  flex-grow: 0;
+  overflow: hidden;
+  padding: 0 8px 0 0;
+  font-size: 11px;
+  user-select: none;
+  position: relative;
+  z-index: 30;
+  border-bottom: 2px solid #d7d4ca;
+  cursor: default;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #222;
+  padding: 6px 8px;
+  border-radius: 5px;
+  transition: box-shadow 0.13s, border 0.13s, background 0.13s;
+  border: 1.5px solid transparent;
+  box-shadow: none;
+  margin: 0;
+  user-select: none;
+}
+
 /* Address bar styles for Windows XP-like UI */
 .addressbar-container {
-  all: initial;
-  box-sizing: border-box;
   width: 100%;
-  margin: 0;
-  padding: 0;
   border: none;
   background: none;
   position: static;
   z-index: auto;
 }
 .addressbar-row {
-  padding: 0;
   display: flex;
   width: 100%;
   align-items: center;
-  box-sizing: border-box;
   position: static;
   background: #ece9d8;
   border-bottom: 2px solid #d7d4ca;
@@ -23,18 +59,16 @@
   height: 34px !important;
   min-height: 34px !important;
   max-height: 34px !important;
-  box-sizing: border-box !important;
   flex-shrink: 0 !important;
   flex-grow: 0 !important;
   overflow: hidden !important;
 }
-.addressbar {
+.window-body .addressbar, .iframe-container .addressbar {
   display: flex;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: white !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
   width: 100%;
   align-items: center;
-  margin: 0;
   justify-content: space-between;
   flex: 1 1 auto;
   min-width: 150px;
@@ -42,11 +76,8 @@
   padding-left: 1px;
   padding-right: 0;
   height: 22px;
-  box-sizing: border-box;
 }
 .addressbar-title {
-  font-family: Tahoma, sans-serif;
-  font-size: 12px;
   font-weight: 500;
   color: #222;
   margin-left: 2px;
@@ -57,12 +88,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.addressbar-row, .addressbar-row * {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-}
 .address-label-container {
   width: 60px;
   min-width: 60px;
@@ -70,9 +95,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: Tahoma, sans-serif;
   color: #7f7c73;
-  font-size: 11px;
 }
 .go-button-container {
   display: flex;
@@ -82,8 +105,6 @@
   flex-shrink: 0;
   width: 64px;
   min-width: 64px;
-  font-family: Tahoma, sans-serif;
-  font-size: 11px;
   color: #a0a0a0;
   white-space: nowrap;
 }

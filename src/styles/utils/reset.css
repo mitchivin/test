@@ -63,8 +63,8 @@ table {
 
 /* Form elements */
 
-button {
-  cursor: pointer;
+button, input, select, textarea {
+  font-size: 11px;
 }
 
 /* Links */
@@ -78,12 +78,10 @@ a {
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
-  /* 'user-select' warning is safe to ignore; vendor prefixes included for compatibility */
 }
 
 .desktop-icons-top a {
   pointer-events: auto !important;
-  user-select: auto !important;
 }
 
 .desktop-icons-top * {
@@ -93,3 +91,28 @@ a {
 /* ==================================================
    END Modern CSS Reset
    ================================================== */
+
+:root {
+  --z-base: 1;
+  --z-window: 100;
+  --z-taskbar: 500;
+  --z-tooltip: 1000;
+  --z-startmenu: 1500;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars on body */
+}
+
+#windows-container {
+  position: absolute;
+  z-index: 100;
+}
+
+.desktop-icons-top {
+  display: none;
+}

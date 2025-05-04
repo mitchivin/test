@@ -8,6 +8,8 @@
  * @module programRegistry
  */
 
+import { isMobileDevice } from "./device.js";
+
 // ==================================================
 //  Program Registry for Windows XP Simulation
 // ==================================================
@@ -40,24 +42,15 @@ const defaults = {
 const makeId = (name) => `${name}-window`;
 
 /**
- * Base path for application content
- *
- * @constant
- * @type {string}
- */
-const appPath = "src/apps/";
-
-/**
  * Creates a program configuration with consistent properties
  *
  * @param {string} key - Unique program identifier
  * @param {string} title - Window title displayed in titlebar
  * @param {string} icon - Relative path to program icon
- * @param {string} path - Path to application directory (relative to src/apps/)
  * @param {Object} [extraProps={}] - Additional program-specific properties
  * @returns {Object} Complete program configuration object
  */
-const createProgram = (key, title, icon, path, extraProps = {}) => ({
+const createProgram = (key, title, icon, extraProps = {}) => ({
   id: makeId(key),
   title,
   icon: `./assets/gui/${icon}`,
@@ -65,6 +58,48 @@ const createProgram = (key, title, icon, path, extraProps = {}) => ({
   appPath: `placeholder.html?app=${key}`,
   ...extraProps,
 });
+
+// Shared dropdown templates
+const VIEW_DROPDOWN = [
+  { key: "close", text: "Close", enabled: true, action: "exitProgram" },
+  { type: "separator" },
+  { key: "maximize", text: "Maximize", enabled: isMobileDevice() ? false : true, action: "maximizeWindow" },
+  { key: "minimize", text: "Minimize", enabled: true, action: "minimizeWindow" },
+];
+
+const FILE_DROPDOWN_DISABLED = [
+  { key: "new", text: "New", enabled: false, action: "fileNew" },
+  { key: "open", text: "Open...", enabled: false, action: "fileOpen" },
+  { key: "save", text: "Save", enabled: false, action: "fileSave" },
+  { key: "saveAs", text: "Save As...", enabled: false, action: "fileSaveAs" },
+  { type: "separator" },
+  { key: "pageSetup", text: "Page Setup...", enabled: false, action: "pageSetup" },
+  { key: "print", text: "Print...", enabled: false, action: "filePrint" },
+  { type: "separator" },
+  { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
+];
+
+const FILE_DROPDOWN_EXIT_ONLY = [
+  { key: "open", text: "Open...", enabled: false, action: "fileOpen" },
+  { key: "saveAs", text: "Save as...", enabled: false, action: "fileSaveAs" },
+  { type: "separator" },
+  { key: "print", text: "Print", enabled: false, action: "filePrint" },
+  { key: "pageSetup", text: "Print Setup", enabled: false, action: "pageSetup" },
+  { type: "separator" },
+  { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
+];
+
+const FILE_DROPDOWN_NOTEPAD = [
+  { key: "new", text: "New", enabled: true, action: "fileNew" },
+  { key: "open", text: "Open...", enabled: false, action: "fileOpen" },
+  { key: "save", text: "Save", enabled: false, action: "fileSave" },
+  { key: "saveAs", text: "Save As...", enabled: false, action: "fileSaveAs" },
+  { type: "separator" },
+  { key: "pageSetup", text: "Page Setup...", enabled: false, action: "pageSetup" },
+  { key: "print", text: "Print...", enabled: false, action: "filePrint" },
+  { type: "separator" },
+  { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
+];
 
 // =========================
 // 2. Program Data Registry
@@ -84,89 +119,44 @@ const programData = {
     "mediaPlayer",
     "Media Player",
     "start-menu/mediaPlayer.webp",
-    "mediaPlayer",
     {
       dimensions: { width: 750, height: 500 },
     },
   ),
 
   // System and Utility Programs
-  info: createProgram(
-    "info",
-    "System Information",
-    "start-menu/help.webp",
-    "info",
-    {
-      dimensions: { width: 390, height: 475 },
-      canMinimize: false,
-      canMaximize: false,
-    },
-  ),
-  cmd: createProgram("cmd", "Command Prompt", "start-menu/cmd.webp", "cmd", {
+  info: createProgram("info", "System Information", "start-menu/help.webp", {
+    dimensions: { width: 390, height: 475 },
+    canMinimize: false,
+    canMaximize: false,
+  }),
+  cmd: createProgram("cmd", "Command Prompt", "start-menu/cmd.webp", {
     dimensions: { width: 500, height: 350 },
   }),
-  notepad: createProgram(
-    "notepad",
-    "Notepad",
-    "start-menu/notepad.webp",
-    "notepad",
-    // --- Add MenuBar Configuration for Notepad ---
-    {
-      menuBarConfig: {
-        items: [
-          {
-            key: "file",
-            text: "File",
-            enabled: true,
-            dropdown: [
-              { key: "new", text: "New", enabled: false, action: "fileNew" },
-              {
-                key: "open",
-                text: "Open...",
-                enabled: false,
-                action: "fileOpen",
-              },
-              { key: "save", text: "Save", enabled: false, action: "fileSave" },
-              {
-                key: "saveAs",
-                text: "Save As...",
-                enabled: false,
-                action: "fileSaveAs",
-              },
-              { type: "separator" },
-              {
-                key: "pageSetup",
-                text: "Page Setup...",
-                enabled: false,
-                action: "pageSetup",
-              },
-              {
-                key: "print",
-                text: "Print...",
-                enabled: false,
-                action: "filePrint",
-              },
-              { type: "separator" },
-              {
-                key: "exit",
-                text: "Exit",
-                enabled: true,
-                action: "exitProgram",
-              }, // Action to close window
-            ],
-          },
-          { key: "edit", text: "Edit", enabled: false },
-          { key: "format", text: "Format", enabled: false },
-          { key: "view", text: "View", enabled: false },
-          { key: "help", text: "Help", enabled: false },
-        ],
-      },
+  notepad: createProgram("notepad", "Notepad", "start-menu/notepad.webp", {
+    menuBarConfig: {
+      items: [
+        {
+          key: "file",
+          text: "File",
+          enabled: true,
+          dropdown: FILE_DROPDOWN_NOTEPAD,
+        },
+        { key: "edit", text: "Edit", enabled: false },
+        { key: "format", text: "Format", enabled: false },
+        {
+          key: "view",
+          text: "View",
+          enabled: true,
+          dropdown: VIEW_DROPDOWN,
+        },
+        { key: "help", text: "Help", enabled: false },
+      ],
     },
-    // --- End MenuBar Configuration ---
-  ),
+  }),
 
   // Portfolio Content
-  about: createProgram("about", "About Me", "desktop/about.webp", "about", {
+  about: createProgram("about", "About Me", "desktop/about.webp", {
     dimensions: { width: 800, height: 600 },
     statusBarText: "Getting to know the designer",
     // --- Toolbar Configuration for About Me ---
@@ -223,158 +213,93 @@ const programData = {
           key: "file",
           text: "File",
           enabled: true,
-          dropdown: [
-            { key: "new", text: "New", enabled: false, action: "fileNew" },
-            {
-              key: "open",
-              text: "Open...",
-              enabled: false,
-              action: "fileOpen",
-            },
-            { key: "save", text: "Save", enabled: false, action: "fileSave" },
-            {
-              key: "saveAs",
-              text: "Save As...",
-              enabled: false,
-              action: "fileSaveAs",
-            },
-            { type: "separator" },
-            {
-              key: "pageSetup",
-              text: "Page Setup...",
-              enabled: false,
-              action: "pageSetup",
-            },
-            {
-              key: "print",
-              text: "Print...",
-              enabled: false,
-              action: "filePrint",
-            },
-            { type: "separator" },
-            { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
-          ],
+          dropdown: FILE_DROPDOWN_EXIT_ONLY,
         },
-        { key: "view", text: "View", enabled: false },
+        {
+          key: "view",
+          text: "View",
+          enabled: true,
+          dropdown: VIEW_DROPDOWN,
+        },
         { key: "help", text: "Help", enabled: false },
       ],
     },
-    // --- End MenuBar Configuration ---
   }),
-  contact: createProgram(
-    "contact",
-    "Contact Me",
-    "desktop/contact.webp",
-    "contact",
-    {
-      dimensions: { width: 600, height: 450 },
-      statusBarText: "Let's start a conversation",
-      toolbarConfig: {
-        buttons: [
-          {
-            key: "send",
-            enabled: true,
-            icon: "./assets/gui/toolbar/send.webp",
-            text: "Send",
-            action: "sendMessage",
-          },
-          { type: "separator" },
-          {
-            key: "cut",
-            enabled: false,
-            icon: "./assets/gui/toolbar/cut.webp",
-            text: null,
-          },
-          {
-            key: "copy",
-            enabled: false,
-            icon: "./assets/gui/toolbar/copy.webp",
-            text: null,
-          },
-          {
-            key: "paste",
-            enabled: false,
-            icon: "./assets/gui/toolbar/paste.webp",
-            text: null,
-          },
-          { type: "separator" },
-          {
-            key: "new",
-            enabled: true,
-            icon: "./assets/gui/toolbar/new.webp",
-            text: "New Message",
-            action: "newMessage",
-          },
-          {
-            key: "attach",
-            enabled: false,
-            icon: "./assets/gui/toolbar/attach.webp",
-            text: null,
-          },
-          { type: "separator" },
-          {
-            key: "sign",
-            enabled: false,
-            icon: "./assets/gui/toolbar/sign.webp",
-            text: null,
-          },
-        ],
-      },
-      // --- MenuBar Configuration for Contact Me ---
-      menuBarConfig: {
-        items: [
-          {
-            key: "file",
-            text: "File",
-            enabled: true,
-            dropdown: [
-              { key: "new", text: "New", enabled: false, action: "fileNew" },
-              {
-                key: "open",
-                text: "Open...",
-                enabled: false,
-                action: "fileOpen",
-              },
-              { key: "save", text: "Save", enabled: false, action: "fileSave" },
-              {
-                key: "saveAs",
-                text: "Save As...",
-                enabled: false,
-                action: "fileSaveAs",
-              },
-              { type: "separator" },
-              {
-                key: "pageSetup",
-                text: "Page Setup...",
-                enabled: false,
-                action: "pageSetup",
-              },
-              {
-                key: "print",
-                text: "Print...",
-                enabled: false,
-                action: "filePrint",
-              },
-              { type: "separator" },
-              {
-                key: "exit",
-                text: "Exit",
-                enabled: true,
-                action: "exitProgram",
-              },
-            ],
-          },
-          { key: "edit", text: "Edit", enabled: false },
-          { key: "view", text: "View", enabled: false },
-          { key: "tools", text: "Tools", enabled: false },
-          { key: "message", text: "Message", enabled: false },
-          { key: "help", text: "Help", enabled: false },
-        ],
-      },
-      // --- End MenuBar Configuration ---
+  contact: createProgram("contact", "Contact Me", "desktop/contact.webp", {
+    dimensions: { width: 600, height: 450 },
+    statusBarText: "Let's start a conversation",
+    toolbarConfig: {
+      buttons: [
+        {
+          key: "send",
+          enabled: true,
+          icon: "./assets/gui/toolbar/send.webp",
+          text: "Send",
+          action: "sendMessage",
+        },
+        { type: "separator" },
+        {
+          key: "cut",
+          enabled: false,
+          icon: "./assets/gui/toolbar/cut.webp",
+          text: null,
+        },
+        {
+          key: "copy",
+          enabled: false,
+          icon: "./assets/gui/toolbar/copy.webp",
+          text: null,
+        },
+        {
+          key: "paste",
+          enabled: false,
+          icon: "./assets/gui/toolbar/paste.webp",
+          text: null,
+        },
+        { type: "separator" },
+        {
+          key: "new",
+          enabled: true,
+          icon: "./assets/gui/toolbar/new.webp",
+          text: "New Message",
+          action: "newMessage",
+        },
+        {
+          key: "attach",
+          enabled: false,
+          icon: "./assets/gui/toolbar/attach.webp",
+          text: null,
+        },
+        { type: "separator" },
+        {
+          key: "sign",
+          enabled: false,
+          icon: "./assets/gui/toolbar/sign.webp",
+          text: null,
+        },
+      ],
     },
-  ),
-  resume: createProgram("resume", "My Resume", "desktop/resume.webp", "resume", {
+    // --- MenuBar Configuration for Contact Me ---
+    menuBarConfig: {
+      items: [
+        {
+          key: "file",
+          text: "File",
+          enabled: true,
+          dropdown: FILE_DROPDOWN_EXIT_ONLY,
+        },
+        { key: "edit", text: "Edit", enabled: false },
+        { key: "view", text: "View", enabled: true, dropdown: VIEW_DROPDOWN },
+        { key: "tools", text: "Tools", enabled: false },
+        { key: "message", text: "Message", enabled: true, dropdown: [
+          { key: "newMessage", text: "New Message", enabled: true, action: "newMessage" },
+          { key: "sendMessage", text: "Send Message", enabled: true, action: "sendMessage" },
+        ] },
+        { key: "help", text: "Help", enabled: false },
+      ],
+    },
+  }),
+  resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
     dimensions: { width: 700, height: 800 },
     statusBarText: "Skills and experience overview",
     toolbarConfig: {
@@ -431,44 +356,13 @@ const programData = {
           key: "file",
           text: "File",
           enabled: true,
-          dropdown: [
-            { key: "new", text: "New", enabled: false, action: "fileNew" },
-            {
-              key: "open",
-              text: "Open...",
-              enabled: false,
-              action: "fileOpen",
-            },
-            { key: "save", text: "Save", enabled: false, action: "fileSave" },
-            {
-              key: "saveAs",
-              text: "Save As...",
-              enabled: false,
-              action: "fileSaveAs",
-            },
-            { type: "separator" },
-            {
-              key: "pageSetup",
-              text: "Page Setup...",
-              enabled: false,
-              action: "pageSetup",
-            },
-            {
-              key: "print",
-              text: "Print...",
-              enabled: false,
-              action: "filePrint",
-            },
-            { type: "separator" },
-            { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
-          ],
+          dropdown: FILE_DROPDOWN_EXIT_ONLY,
         },
-        { key: "view", text: "View", enabled: false },
+        { key: "view", text: "View", enabled: true, dropdown: VIEW_DROPDOWN },
         { key: "tools", text: "Tools", enabled: false },
         { key: "help", text: "Help", enabled: false },
       ],
     },
-    // --- End MenuBar Configuration ---
   }),
 
   // Media Programs
@@ -476,7 +370,6 @@ const programData = {
     "my-pictures",
     "My Photos",
     "start-menu/photos.webp",
-    "photos",
     {
       dimensions: { width: 440, height: 561 },
       // --- Toolbar Configuration for My Photos (Updated) ---
@@ -534,161 +427,83 @@ const programData = {
             key: "file",
             text: "File",
             enabled: true,
-            dropdown: [
-              { key: "new", text: "New", enabled: false, action: "fileNew" },
-              {
-                key: "open",
-                text: "Open...",
-                enabled: false,
-                action: "fileOpen",
-              },
-              { key: "save", text: "Save", enabled: false, action: "fileSave" },
-              {
-                key: "saveAs",
-                text: "Save As...",
-                enabled: false,
-                action: "fileSaveAs",
-              },
-              { type: "separator" },
-              {
-                key: "pageSetup",
-                text: "Page Setup...",
-                enabled: false,
-                action: "pageSetup",
-              },
-              {
-                key: "print",
-                text: "Print...",
-                enabled: false,
-                action: "filePrint",
-              },
-              { type: "separator" },
-              {
-                key: "exit",
-                text: "Exit",
-                enabled: true,
-                action: "exitProgram",
-              },
-            ],
+            dropdown: FILE_DROPDOWN_EXIT_ONLY,
           },
           { key: "edit", text: "Edit", enabled: false },
-          { key: "view", text: "View", enabled: false },
+          { key: "view", text: "View", enabled: true, dropdown: VIEW_DROPDOWN },
           { key: "help", text: "Help", enabled: false },
         ],
       },
-      // --- End MenuBar Configuration ---
     },
   ),
 
   // Project Showcase Programs
-  internet: createProgram(
-    "internet",
-    "My Projects",
-    "desktop/internet.webp",
-    "internet",
-    {
-      dimensions: { width: 1030, height: 780 },
-      statusBarText: "Projects ready to explore",
-      // --- Toolbar Configuration for My Projects ---
-      toolbarConfig: {
-        buttons: [
-          {
-            key: "back",
-            enabled: false,
-            icon: "./assets/gui/toolbar/back.webp",
-            text: "Back",
-            action: "navigateBack",
-          },
-          {
-            key: "forward",
-            enabled: false,
-            icon: "./assets/gui/toolbar/forward.webp",
-            text: null,
-            action: "navigateForward",
-          },
-          {
-            key: "home",
-            enabled: true,
-            icon: "./assets/gui/toolbar/home.webp",
-            text: null,
-            action: "navigateHome",
-          },
-          { type: "separator" },
-          {
-            key: "search",
-            enabled: false,
-            icon: "./assets/gui/toolbar/search.webp",
-            text: "Search",
-            action: "openSearch",
-          },
-          {
-            key: "favourites",
-            enabled: false,
-            icon: "./assets/gui/toolbar/star.webp",
-            text: "Favourites",
-          },
-          { type: "separator" },
-          {
-            key: "print",
-            enabled: false,
-            icon: "./assets/gui/toolbar/print.webp",
-            text: "Print",
-          },
-        ],
-      },
-      // --- MenuBar Configuration for My Projects ---
-      menuBarConfig: {
-        items: [
-          {
-            key: "file",
-            text: "File",
-            enabled: true,
-            dropdown: [
-              { key: "new", text: "New", enabled: false, action: "fileNew" },
-              {
-                key: "open",
-                text: "Open...",
-                enabled: false,
-                action: "fileOpen",
-              },
-              { key: "save", text: "Save", enabled: false, action: "fileSave" },
-              {
-                key: "saveAs",
-                text: "Save As...",
-                enabled: false,
-                action: "fileSaveAs",
-              },
-              { type: "separator" },
-              {
-                key: "pageSetup",
-                text: "Page Setup...",
-                enabled: false,
-                action: "pageSetup",
-              },
-              {
-                key: "print",
-                text: "Print...",
-                enabled: false,
-                action: "filePrint",
-              },
-              { type: "separator" },
-              {
-                key: "exit",
-                text: "Exit",
-                enabled: true,
-                action: "exitProgram",
-              },
-            ],
-          },
-          { key: "edit", text: "Edit", enabled: false },
-          { key: "view", text: "View", enabled: false },
-          { key: "tools", text: "Tools", enabled: false },
-          { key: "help", text: "Help", enabled: false },
-        ],
-      },
-      // --- End MenuBar Configuration ---
+  internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
+    dimensions: { width: 1030, height: 780 },
+    statusBarText: "Projects ready to explore",
+    // --- Toolbar Configuration for My Projects ---
+    toolbarConfig: {
+      buttons: [
+        {
+          key: "back",
+          enabled: false,
+          icon: "./assets/gui/toolbar/back.webp",
+          text: "Back",
+          action: "navigateBack",
+        },
+        {
+          key: "forward",
+          enabled: false,
+          icon: "./assets/gui/toolbar/forward.webp",
+          text: null,
+          action: "navigateForward",
+        },
+        {
+          key: "home",
+          enabled: true,
+          icon: "./assets/gui/toolbar/home.webp",
+          text: null,
+          action: "navigateHome",
+        },
+        { type: "separator" },
+        {
+          key: "search",
+          enabled: false,
+          icon: "./assets/gui/toolbar/search.webp",
+          text: "Search",
+          action: "openSearch",
+        },
+        {
+          key: "favourites",
+          enabled: false,
+          icon: "./assets/gui/toolbar/star.webp",
+          text: "Favourites",
+        },
+        { type: "separator" },
+        {
+          key: "print",
+          enabled: false,
+          icon: "./assets/gui/toolbar/print.webp",
+          text: "Print",
+        },
+      ],
     },
-  ),
+    // --- MenuBar Configuration for My Projects ---
+    menuBarConfig: {
+      items: [
+        {
+          key: "file",
+          text: "File",
+          enabled: true,
+          dropdown: FILE_DROPDOWN_EXIT_ONLY,
+        },
+        { key: "edit", text: "Edit", enabled: false },
+        { key: "view", text: "View", enabled: true, dropdown: VIEW_DROPDOWN },
+        { key: "tools", text: "Tools", enabled: false },
+        { key: "help", text: "Help", enabled: false },
+      ],
+    },
+  }),
 
   // Special format entries with custom properties
 };

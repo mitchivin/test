@@ -51,10 +51,11 @@ export default class Desktop {
     }
     // Dynamically set background position for ultrawide screens
     const aspectRatio = window.innerWidth / window.innerHeight;
-    if (aspectRatio > 2.3) { // 21:9 is ~2.33
-      this.desktop.style.backgroundPosition = 'center center';
+    if (aspectRatio > 2.3) {
+      // 21:9 is ~2.33
+      this.desktop.style.backgroundPosition = "center center";
     } else {
-      this.desktop.style.backgroundPosition = 'top center';
+      this.desktop.style.backgroundPosition = "top center";
     }
 
     this.eventBus.subscribe(EVENTS.WINDOW_CREATED, () => this.clearSelection());
@@ -97,17 +98,20 @@ export default class Desktop {
    * @returns {void}
    */
   setupIconEvents() {
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     this.getIcons().forEach((icon) => {
       // If the icon is an anchor (for social links), let the default action happen
-      if (icon.tagName === 'A') return;
+      if (icon.tagName === "A") return;
       const iconSpan = icon.querySelector("span");
       const iconId = iconSpan
         ? iconSpan.textContent.trim().toLowerCase().replace(/\s+/g, "-")
         : "";
 
       // Combined click/tap handling for selection and opening
-      icon.addEventListener("click", (e) => {
+      const handleIconActivate = (e) => {
         e.stopPropagation();
+        // Prevent both click and touchend from firing for the same tap
+        if (isTouch && e.type === "click") return;
         const now = Date.now();
         const DOUBLE_CLICK_THRESHOLD = 400; // ms
         const lastTime = this.lastClickTimes[iconId] || 0;
@@ -120,7 +124,7 @@ export default class Desktop {
           let programName = icon.getAttribute("data-program-name");
           // Special case: social icons in .desktop-icons-top
           if (
-            icon.closest('.desktop-icons-top') &&
+            icon.closest(".desktop-icons-top") &&
             ["github", "instagram", "behance", "linkedin"].includes(programName)
           ) {
             const urls = {
@@ -142,7 +146,13 @@ export default class Desktop {
           // Record the time for potential double-click detection
           this.lastClickTimes[iconId] = now;
         }
-      });
+      };
+
+      if (isTouch) {
+        icon.addEventListener("touchend", handleIconActivate);
+      } else {
+        icon.addEventListener("click", handleIconActivate);
+      }
     });
   }
 
@@ -224,6 +234,7 @@ export default class Desktop {
 
   /**
    * Highlight desktop icons that intersect with the selection rectangle.
+   * Uses bounding box intersection logic to determine which icons are selected.
    * @param {number} left - Left X of selection box (relative to desktop)
    * @param {number} top - Top Y of selection box (relative to desktop)
    * @param {number} width - Width of selection box

@@ -13,33 +13,29 @@
 /* Main Start Menu container */
 .startmenu {
   position: absolute;
-  bottom: calc(var(--taskbar-height) + 1px); /* Updated to use variable */
+  bottom: calc(var(--taskbar-height) + 1px);
   left: 0;
   width: 355px;
   height: 465px;
   display: flex;
   flex-direction: column;
   background-color: var(--xp-bg-accent);
-  border-radius: 5px 5px 0 0; /* Changed from 5px 5px 5px 0 to make bottom right corner square */
+  border-radius: 5px 5px 0 0;
   border: 1px solid rgb(0 0 0 / 30%);
   box-shadow:
     3px 4px 8px rgb(0 0 0 / 65%),
     0 0 4px rgb(0 0 0 / 40%),
-    inset 0 0 55px rgb(255 255 255 / 8%); /* Reduced external shadow spread */
-
-  z-index: var(--z-startmenu); /* Ensure this uses the variable */
+    inset 0 0 55px rgb(255 255 255 / 8%);
+  z-index: var(--z-startmenu);
   overflow: hidden;
-  visibility: hidden; /* Start hidden */
+  visibility: hidden;
   opacity: 0;
-
-  /* Remove transition for closing to make it instant */
   transition:
     opacity 0s,
     visibility 0s;
-  transform: translateZ(0); /* Force hardware acceleration */
-  will-change: opacity, visibility; /* Hint to browser for optimization */
-  cursor: default; /* Ensure default cursor throughout - consolidated */
-  font-family: Tahoma, Arial, sans-serif; /* Consolidated font family */
+  transform: translateZ(0);
+  will-change: opacity, visibility;
+  cursor: default;
 }
 
 .startmenu.active {
@@ -375,9 +371,9 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  border-bottom-right-radius: 0; /* Changed from 5px to 0 to match the square corner */
-  border-top: 1px solid rgb(0 0 0 / 30%); /* Match the border of the start menu */
-  box-shadow: inset 0 1px 4px rgb(0 0 0 / 20%); /* Enhanced inner shadow */
+  border-bottom-right-radius: 0;
+  border-top: 1px solid rgb(0 0 0 / 30%);
+  box-shadow: inset 0 1px 4px rgb(0 0 0 / 20%);
 }
 
 /* Match footer gradient style to header gradient style */
@@ -455,7 +451,7 @@
 
 /* Base styles for submenu containers */
 .all-programs-menu,
-.most-used-tools-menu, /* Renamed from .creative-suite-menu */
+.most-used-tools-menu,
 .ai-tools-menu {
   position: absolute;
   background-color: var(--xp-bg-main);
@@ -463,15 +459,15 @@
   box-shadow: 2px 2px 5px rgb(0 0 0 / 30%);
   z-index: calc(
     var(--z-startmenu) + 1
-  ); /* Ensure submenus are above main menu */
-  padding: 2px; /* Add padding around the list */
-  min-width: 170px; /* Minimum width */
-  display: none; /* Hidden by default */
+  );
+  padding: 2px;
+  min-width: 170px;
+  display: none;
 }
 
 /* Specific style for the blue gradient strip on left */
 .all-programs-menu::before,
-.most-used-tools-menu::before, /* Renamed */
+.most-used-tools-menu::before,
 .ai-tools-menu::before {
   content: "";
   position: absolute;
@@ -485,19 +481,19 @@
 
 /* Container for submenu items */
 .all-programs-items,
-.most-used-tools-items, /* Renamed */
+.most-used-tools-items,
 .ai-tools-items {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 380px; /* Limit height for scroll */
+  max-height: 380px;
   overflow-y: auto;
   width: 100%;
 }
 
 /* Individual submenu items */
 .all-programs-item,
-.most-used-tools-item, /* Renamed */
+.most-used-tools-item,
 .ai-tools-item {
   position: relative;
   display: flex;
@@ -512,13 +508,11 @@
   width: 100%;
   box-sizing: border-box;
   cursor: default;
-
-  /* Remove transition from the item itself */
 }
 
 /* Hover effect for submenu items */
 .all-programs-item:hover,
-.most-used-tools-item:hover, /* Renamed */
+.most-used-tools-item:hover,
 .ai-tools-item:hover {
   background-color: #2f71cd;
   color: white;
@@ -546,7 +540,7 @@
 
 /* Highlight extension for hover */
 .all-programs-item:hover::before,
-.most-used-tools-item:hover::before, /* Renamed */
+.most-used-tools-item:hover::before,
 .ai-tools-item:hover::before {
   content: "";
   position: absolute;
@@ -577,7 +571,7 @@
 
 /* Icons within submenu items */
 .all-programs-item img,
-.most-used-tools-item img, /* Renamed */
+.most-used-tools-item img,
 .ai-tools-item img {
   width: 16px;
   height: 16px;
@@ -601,7 +595,7 @@
 }
 
 /* Arrow indicator styling */
-.mut-menu-arrow, /* Renamed from .cs-menu-arrow */
+.mut-menu-arrow,
 .ai-tools-arrow {
   position: absolute;
   right: 8px;
@@ -625,17 +619,17 @@
 .middle-right .menu-item#menu-program3,
 .middle-right .menu-item#menu-program4,
 .middle-right .menu-item#menu-program5 {
-  padding: 8px 7.5px 8px 9px; /* Match social items padding */
-  height: 36px; /* Changed from 38px */
-  flex: 0 0 36px; /* Changed from 38px */
+  padding: 8px 7.5px 8px 9px;
+  height: 36px;
+  flex: 0 0 36px;
   box-sizing: border-box;
 }
 
 /* Make program 6 the same height as others */
 .middle-right .menu-item#menu-program6 {
   padding: 8px 7.5px 8px 9px;
-  height: 36px; /* Changed from 38px */
-  flex: 0 0 36px; /* Changed from 38px */
+  height: 36px;
+  flex: 0 0 36px;
   box-sizing: border-box;
 }
 
@@ -657,8 +651,8 @@
 /* Ensure portfolio items have the same height as program items */
 .middle-right .menu-item#menu-internet {
   padding: 8px 7.5px 8px 9px;
-  height: 36px; /* Changed from 38px */
-  flex: 0 0 36px; /* Changed from 38px */
+  height: 36px;
+  flex: 0 0 36px;
   box-sizing: border-box;
 }
 
@@ -668,7 +662,7 @@
   padding: 0;
   height: 1px;
   flex: 0 0 auto;
-  width: 70%; /* Changed from 85% to 70% to make it narrower */
+  width: 70%;
   margin: 0 auto;
 }
 
@@ -679,7 +673,7 @@
     to right,
     transparent 0%,
     #94bddf 50%,
-    /* Changed from #b6d3ed to #94bddf for a darker blue */ transparent 100%
+    transparent 100%
   );
   border: 0;
   margin: 0;
@@ -812,7 +806,7 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    #a1c4fc 50%, /* dark blue */
-    transparent 100%
+    #a1c4fc 50%,
+    /* dark blue */ transparent 100%
   );
 }

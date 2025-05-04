@@ -13,19 +13,12 @@
 @import url("gui/taskbar.css");
 @import url("gui/startMenu.css");
 @import url("gui/window.css");
-@import url("utils/iframeApp.css");
-@import url("gui/addressBar.css");
+@import url("gui/windowBars.css");
 
 /* =========================
    2. Z-Index Hierarchy
    ========================= */
-:root {
-  --z-base: 1;
-  --z-window: 100;
-  --z-taskbar: 500;
-  --z-tooltip: 1000;
-  --z-startmenu: 1500;
-}
+/* (Moved to reset.css) */
 
 /* =========================
    3. Window States & Maximized Styles
@@ -62,57 +55,188 @@
 /* =========================
    4. Global Layout & Body Styles
    ========================= */
-/* Ensure body fills viewport for absolute positioning */
-html,
-body {
+/* (Moved to reset.css) */
+
+/* ==================================================
+   END Main Stylesheet
+   ================================================== */
+
+/* ==================================================
+   Iframe App Styles for Windows XP Simulation
+   ==================================================
+   - Handles iframe-based app containers, overlays, and layout fixes.
+   - Ensures consistent rendering across app windows.
+   ================================================== */
+
+/* =========================
+   1. Window Body & Links
+   ========================= */
+/**
+ * Common styles for iframe-based applications
+ * Ensures consistent rendering across different application windows
+ */
+
+/* Common settings for all application containers */
+.window-body a {
+  color: #0088e4;
+}
+
+/* Ensure main container fills the window body */
+.window-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Common styles for all iframe containers */
+.iframe-container {
+  /* This class is added in windowManager.js when using preloaded iframes */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Base styles for iframe containers */
+/* Applies to iframes directly within .window-body or .iframe-container */
+.window-body > iframe,
+.iframe-container > iframe {
+  width: 100%;
   height: 100%;
+  border: none;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevent scrollbars on body */
+  display: block;
 }
 
-/* Prevent double-tap to zoom on desktop icons (mobile) */
-.desktop-icon {
-  touch-action: manipulation;
-}
-
-#boot-screen,
-#login-screen {
-  cursor: default !important;
-}
-
-#windows-container {
+/* Style for iframe overlay used during window drag operations */
+.iframe-overlay {
   position: absolute;
-  z-index: 100;
-}
-
-.desktop-icons-top {
+  inset: 0;
+  background-color: transparent;
+  z-index: 1;
   display: none;
 }
 
-@media (max-width: 768px) {
-  .desktop-icons-top {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 95vw;
-    z-index: 11;
-    display: flex;
-    justify-content: stretch;
-    align-items: center;
-    gap: 8px;
-    padding: 16px 0 0 0;
-    margin: 0;
-    box-sizing: border-box;
-    height: auto;
-  }
+/* Fix for layout shift issue */
+html,
+body {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Prevent iframe scroll from affecting parent */
+iframe {
+  overflow: hidden;
+}
+
+/* Make sure iframe links don't cause layout shifts */
+iframe a {
+  scroll-behavior: auto;
+}
+
+/* Fixed positioning for desktop to prevent shifting */
+.desktop {
+  position: fixed !important;
+  inset: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ==================================================
+   END Iframe App Styles
+   ================================================== */
+
+/* ==================================================
+   XP.css-Inspired Custom Scrollbar Styles (Global)
+   ==================================================
+   - Ensures all scrollable areas (windows, menus, lists) use a consistent Windows XP look.
+   - Applies to .window-body, .all-programs-items, .most-used-tools-items, .ai-tools-items, .menu-items, and any scrollable container.
+   - Uses both ::-webkit-scrollbar (WebKit) and scrollbar-color/width (Firefox) for cross-browser support.
+   - Colors and sizing match XP.css and Windows XP visual style.
+   ================================================== */
+
+/* Why: This ensures a professional, immersive, and consistent XP look for all scrollable UI elements, regardless of browser. */
+
+/* WebKit browsers (Chrome, Edge, Safari) */
+.window-body,
+.all-programs-items,
+.most-used-tools-items,
+.ai-tools-items,
+.menu-items,
+.desktop-icons {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #316ac5 #ece9d8; /* thumb, track */
+}
+
+.window-body::-webkit-scrollbar,
+.all-programs-items::-webkit-scrollbar,
+.most-used-tools-items::-webkit-scrollbar,
+.ai-tools-items::-webkit-scrollbar,
+.menu-items::-webkit-scrollbar,
+.desktop-icons::-webkit-scrollbar {
+  width: 13px;
+  background: #ece9d8;
+}
+
+.window-body::-webkit-scrollbar-thumb,
+.all-programs-items::-webkit-scrollbar-thumb,
+.most-used-tools-items::-webkit-scrollbar-thumb,
+.ai-tools-items::-webkit-scrollbar-thumb,
+.menu-items::-webkit-scrollbar-thumb,
+.desktop-icons::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #eaf1fb 0%, #316ac5 100%);
+  border-radius: 7px;
+  border: 2px solid #ece9d8;
+  min-height: 40px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+
+.window-body::-webkit-scrollbar-thumb:hover,
+.all-programs-items::-webkit-scrollbar-thumb:hover,
+.most-used-tools-items::-webkit-scrollbar-thumb:hover,
+.ai-tools-items::-webkit-scrollbar-thumb:hover,
+.menu-items::-webkit-scrollbar-thumb:hover,
+.desktop-icons::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #dbe8fa 0%, #184f8b 100%);
+}
+
+.window-body::-webkit-scrollbar-track,
+.all-programs-items::-webkit-scrollbar-track,
+.most-used-tools-items::-webkit-scrollbar-track,
+.ai-tools-items::-webkit-scrollbar-track,
+.menu-items::-webkit-scrollbar-track,
+.desktop-icons::-webkit-scrollbar-track {
+  background: #ece9d8;
+  border-radius: 7px;
+}
+
+/* Hide scrollbar corner (where vertical and horizontal meet) */
+.window-body::-webkit-scrollbar-corner,
+.all-programs-items::-webkit-scrollbar-corner,
+.most-used-tools-items::-webkit-scrollbar-corner,
+.ai-tools-items::-webkit-scrollbar-corner,
+.menu-items::-webkit-scrollbar-corner,
+.desktop-icons::-webkit-scrollbar-corner {
+  background: #ece9d8;
+}
+
+/* Accessibility: Ensure thumb is always visible and has good contrast */
+@media (forced-colors: active) {
+  .window-body,
+  .all-programs-items,
+  .most-used-tools-items,
+  .ai-tools-items,
+  .menu-items,
   .desktop-icons {
-    /* Optionally hide the bottom icons on mobile: */
-    /* display: none; */
+    scrollbar-color: ButtonText ButtonFace;
   }
 }
 
 /* ==================================================
-   END Main Stylesheet
+   END XP.css-Inspired Custom Scrollbar Styles
    ================================================== */
