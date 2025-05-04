@@ -91,6 +91,17 @@ const FILE_DROPDOWN_NOTEPAD = [
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
 
+// Custom File dropdown for Contact App
+const FILE_DROPDOWN_CONTACT = [
+  { key: "newMessage", text: "New Message", enabled: true, action: "newMessage" },
+  { key: "sendMessage", text: "Send Message", enabled: true, action: "sendMessage" },
+  { type: "separator" },
+  { key: "print", text: "Print", enabled: false, action: "filePrint" },
+  { key: "pageSetup", text: "Print Setup", enabled: false, action: "pageSetup" },
+  { type: "separator" },
+  { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
+];
+
 // =========================
 // 2. Program Data Registry
 // =========================
@@ -149,6 +160,7 @@ const programData = {
   about: createProgram("about", "About Me", "desktop/about.webp", {
     dimensions: { width: 800, height: 600 },
     statusBarText: "Getting to know the designer",
+    appPath: "src/apps/about/about.html",
     toolbarConfig: {
       buttons: [
         {
@@ -213,60 +225,10 @@ const programData = {
       ],
     },
   }),
-  contact: createProgram("contact", "Contact Me", "desktop/contact.webp", {
-    dimensions: { width: 600, height: 450 },
-    statusBarText: "Let's start a conversation",
-    toolbarConfig: {
-      buttons: [
-        {
-          key: "send",
-          enabled: true,
-          icon: "./assets/gui/toolbar/send.webp",
-          text: "Send",
-          action: "sendMessage",
-        },
-        { type: "separator" },
-        {
-          key: "cut",
-          enabled: false,
-          icon: "./assets/gui/toolbar/cut.webp",
-          text: null,
-        },
-        {
-          key: "copy",
-          enabled: false,
-          icon: "./assets/gui/toolbar/copy.webp",
-          text: null,
-        },
-        {
-          key: "paste",
-          enabled: false,
-          icon: "./assets/gui/toolbar/paste.webp",
-          text: null,
-        },
-        { type: "separator" },
-        {
-          key: "new",
-          enabled: true,
-          icon: "./assets/gui/toolbar/new.webp",
-          text: "New Message",
-          action: "newMessage",
-        },
-        {
-          key: "attach",
-          enabled: false,
-          icon: "./assets/gui/toolbar/attach.webp",
-          text: null,
-        },
-        { type: "separator" },
-        {
-          key: "sign",
-          enabled: false,
-          icon: "./assets/gui/toolbar/sign.webp",
-          text: null,
-        },
-      ],
-    },
+  resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
+    dimensions: { width: 536, height: 750 },
+    statusBarText: "Reviewing professional background",
+    appPath: "src/apps/resume/resume.html",
     menuBarConfig: {
       items: [
         {
@@ -275,49 +237,18 @@ const programData = {
           enabled: true,
           dropdown: FILE_DROPDOWN_EXIT_ONLY,
         },
-        { key: "edit", text: "Edit", enabled: false },
         { key: "view", text: "View", enabled: true, dropdown: VIEW_DROPDOWN },
-        { key: "tools", text: "Tools", enabled: false },
-        { key: "message", text: "Message", enabled: true, dropdown: [
-          { key: "newMessage", text: "New Message", enabled: true, action: "newMessage" },
-          { key: "sendMessage", text: "Send Message", enabled: true, action: "sendMessage" },
-        ] },
         { key: "help", text: "Help", enabled: false },
       ],
     },
-  }),
-  resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
-    dimensions: { width: 700, height: 800 },
-    statusBarText: "Skills and experience overview",
     toolbarConfig: {
       buttons: [
         {
-          key: "actual-size",
+          key: "save",
           enabled: true,
-          icon: "./assets/gui/toolbar/size.webp",
-          text: null,
-          action: "setActualSize",
-        },
-        {
-          key: "zoom-out",
-          enabled: true,
-          icon: "./assets/gui/toolbar/zoomout.webp",
-          text: null,
-          action: "zoomOut",
-        },
-        {
-          key: "zoom-in",
-          enabled: true,
-          icon: "./assets/gui/toolbar/zoomin.webp",
-          text: "Zoom",
-          action: "zoomIn",
-        },
-        { type: "separator" },
-        {
-          key: "print",
-          enabled: false,
-          icon: "./assets/gui/toolbar/print.webp",
-          text: null,
+          icon: "./assets/gui/toolbar/save.webp",
+          text: "Download",
+          action: "saveResume",
         },
         { type: "separator" },
         {
@@ -327,26 +258,6 @@ const programData = {
           text: "Contact Me",
           action: "openContact",
         },
-        {
-          key: "save",
-          enabled: true,
-          icon: "./assets/gui/toolbar/save.webp",
-          text: "Download",
-          action: "saveResume",
-        },
-      ],
-    },
-    menuBarConfig: {
-      items: [
-        {
-          key: "file",
-          text: "File",
-          enabled: true,
-          dropdown: FILE_DROPDOWN_EXIT_ONLY,
-        },
-        { key: "view", text: "View", enabled: true, dropdown: VIEW_DROPDOWN },
-        { key: "tools", text: "Tools", enabled: false },
-        { key: "help", text: "Help", enabled: false },
       ],
     },
   }),
@@ -421,8 +332,22 @@ const programData = {
 
   // Project Showcase Programs
   internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
-    dimensions: { width: 1030, height: 780 },
-    statusBarText: "Projects ready to explore",
+    dimensions: { width: 900, height: 650 },
+    statusBarText: "Exploring the portfolio",
+    appPath: "src/apps/projects/projects.html",
+    menuBarConfig: {
+      items: [
+        {
+          key: "file",
+          text: "File",
+          enabled: true,
+          dropdown: FILE_DROPDOWN_EXIT_ONLY,
+        },
+        { key: "view", text: "View", enabled: true, dropdown: VIEW_DROPDOWN },
+        { key: "tools", text: "Tools", enabled: false },
+        { key: "help", text: "Help", enabled: false },
+      ],
+    },
     toolbarConfig: {
       buttons: [
         {
@@ -436,36 +361,71 @@ const programData = {
           key: "forward",
           enabled: false,
           icon: "./assets/gui/toolbar/forward.webp",
-          text: null,
+          text: "Forward",
           action: "navigateForward",
         },
         {
           key: "home",
           enabled: true,
           icon: "./assets/gui/toolbar/home.webp",
-          text: null,
+          text: "Home",
           action: "navigateHome",
         },
+      ],
+    },
+  }),
+  contact: createProgram("contact", "Contact Me", "desktop/contact.webp", {
+    dimensions: { width: 600, height: 450 },
+    statusBarText: "Let's start a conversation",
+    appPath: "src/apps/contact/contact.html",
+    toolbarConfig: {
+      buttons: [
+        {
+          key: "send",
+          enabled: true,
+          icon: "./assets/gui/toolbar/send.webp",
+          text: "Send",
+          action: "sendMessage",
+        },
         { type: "separator" },
         {
-          key: "search",
+          key: "cut",
           enabled: false,
-          icon: "./assets/gui/toolbar/search.webp",
-          text: "Search",
-          action: "openSearch",
+          icon: "./assets/gui/toolbar/cut.webp",
+          text: null,
         },
         {
-          key: "favourites",
+          key: "copy",
           enabled: false,
-          icon: "./assets/gui/toolbar/star.webp",
-          text: "Favourites",
+          icon: "./assets/gui/toolbar/copy.webp",
+          text: null,
+        },
+        {
+          key: "paste",
+          enabled: false,
+          icon: "./assets/gui/toolbar/paste.webp",
+          text: null,
         },
         { type: "separator" },
         {
-          key: "print",
+          key: "new",
+          enabled: true,
+          icon: "./assets/gui/toolbar/new.webp",
+          text: "New Message",
+          action: "newMessage",
+        },
+        {
+          key: "attach",
           enabled: false,
-          icon: "./assets/gui/toolbar/print.webp",
-          text: "Print",
+          icon: "./assets/gui/toolbar/attach.webp",
+          text: null,
+        },
+        { type: "separator" },
+        {
+          key: "sign",
+          enabled: false,
+          icon: "./assets/gui/toolbar/sign.webp",
+          text: null,
         },
       ],
     },
@@ -475,7 +435,7 @@ const programData = {
           key: "file",
           text: "File",
           enabled: true,
-          dropdown: FILE_DROPDOWN_EXIT_ONLY,
+          dropdown: FILE_DROPDOWN_CONTACT,
         },
         { key: "edit", text: "Edit", enabled: false },
         { key: "view", text: "View", enabled: true, dropdown: VIEW_DROPDOWN },

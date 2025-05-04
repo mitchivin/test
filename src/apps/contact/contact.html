@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Me</title>
+    <!-- XP.css (Keep for standalone, might be inherited later) -->
+    <link rel="stylesheet" href="https://unpkg.com/xp.css@0.2.3/dist/XP.css" crossorigin="anonymous"/>
+    <!-- Updated CSS link -->
+    <link rel="stylesheet" href="contact.css" />
+    <style>
+      body {
+        background: #ece9d8; /* XP default background */
+        color: #000; /* XP default text color */
+        margin: 0;
+        padding: 0;
+        overflow: auto; /* Allow scrolling within the app frame */
+        font-family: Tahoma, Verdana, sans-serif; /* Default XP font */
+        font-size: 11px; /* Default XP font size */
+      }
+      .app-root {
+        width: 100%;
+        height: 100%; /* Fill the iframe body */
+        box-sizing: border-box;
+        padding: 10px; /* Add some padding */
+      }
+      /* Add any other base styles needed for all apps */
+    </style>
+  </head>
+  <body>
+    <div class="content-wrapper">
+        <div class="field">
+            <label for="contact-to">To:</label>
+            <input type="text" id="contact-to" class="input readonly" value="mitchellivin@gmail.com" readonly />
+        </div>
+        <div class="field">
+            <label for="contact-from">From:</label>
+            <input type="text" id="contact-from" class="input" placeholder="Your email address" />
+        </div>
+        <div class="field">
+            <label for="contact-subject">Subject:</label>
+            <input type="text" id="contact-subject" class="input" placeholder="Subject of your message" />
+        </div>
+        <textarea id="contact-message" class="textarea" placeholder="Write your message here"></textarea>
+    </div>
+  </body>
+</html> 

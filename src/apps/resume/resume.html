@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Resume</title>
+    <!-- XP.css: Use CDN link, adjust if using local dependency -->
+    <link rel="stylesheet" href="https://unpkg.com/xp.css">
+    <style>
+      html, body {
+        height: 100%; /* Ensure html and body have height */
+        margin: 0;
+        padding: 0;
+        overflow: auto; /* Allow scrolling in BOTH directions */
+      }
+      body {
+        background: #ece9d8; /* XP default background */
+        color: #000; /* XP default text color */
+        /* margin/padding moved to html, body rule */
+        font-family: Tahoma, Verdana, sans-serif; /* Default XP font */
+        font-size: 11px; /* Default XP font size */
+      }
+      .app-root {
+        width: 100%;
+        height: 100%; /* Fill the iframe body */
+        box-sizing: border-box;
+        padding: 10px; /* Keep padding */
+      }
+      /* Style for the resume image */
+      .resume-image {
+        display: block; /* Treat as block for margin centering */
+        margin-left: auto; /* Center horizontally */
+        margin-right: auto; /* Center horizontally */
+        max-width: 100%; /* Don't exceed container width */
+        max-height: 100%; /* Don't exceed container height */
+        object-fit: contain; /* Scale while preserving aspect ratio */
+        /* Add margin: auto; if needed for centering, though flexbox on parent handles it */
+        /* margin: auto; */ 
+      }
+
+      /* Zoom cursor on hover */
+      .resume-image {
+        cursor: zoom-in;
+      }
+
+      /* Styles for the zoomed state - DEFAULT (smaller window) */
+      .resume-image.zoomed {
+        max-width: none;
+        max-height: none;
+        width: 160%; /* Default zoom relative to container */
+        height: auto;
+        cursor: zoom-out;
+      }
+
+      /* Override zoom style for WIDER viewports (likely maximized) */
+      @media (min-width: 700px) { /* Adjust breakpoint as needed */
+        .resume-image.zoomed {
+          width: 850px; /* Fixed width for larger views */
+          max-width: 90vw; /* Capped by viewport */
+        }
+      }
+
+      /* Style for cursor during drag */
+      .resume-image.dragging {
+          cursor: grabbing;
+      }
+
+      /* Add any other base styles needed for all apps */
+    </style>
+  </head>
+  <body>
+    <div class="app-root" id="appRoot">
+      <!-- Replaced placeholder div with actual resume image -->
+      <img 
+        id="resumeImage" 
+        src="../../../assets/apps/resume/resume.webp"
+        alt="Mitch Ivin Resume"
+        class="resume-image"
+      />
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const resumeImage = document.getElementById('resumeImage');
+        const scroller = document.body; // Target body for scrolling
+        
+        let isDragging = false;
+        let startX, startY, startScrollLeft, startScrollTop;
+        let didDrag = false; // Flag to distinguish click from drag
+
+        if (resumeImage) {
+          resumeImage.addEventListener('dragstart', (e) => e.preventDefault());
+
+          // --- Zoom Logic --- 
+          resumeImage.addEventListener('click', (e) => {
+            if (didDrag) { // If we just finished dragging, don't toggle zoom
+                didDrag = false;
+                return; 
+            }
+
+            const isZoomed = resumeImage.classList.contains('zoomed');
+
+            if (!isZoomed) {
+              // --- Zooming IN --- 
+              // Store pre-zoom state
+              const clickX = e.offsetX; // Click position relative to image element
+              const clickY = e.offsetY;
+              const originalWidth = resumeImage.clientWidth;
+              const originalHeight = resumeImage.clientHeight;
+
+              // Apply zoom class
+              resumeImage.classList.add('zoomed');
+
+              // Use requestAnimationFrame to ensure dimensions are updated after class change
+              requestAnimationFrame(() => {
+                const zoomedWidth = resumeImage.clientWidth;
+                const zoomedHeight = resumeImage.clientHeight;
+                const scale = zoomedWidth / originalWidth; // Assuming uniform scale
+
+                // Calculate where the clicked point is in the zoomed image's coordinate space
+                const targetX = clickX * scale;
+                const targetY = clickY * scale;
+
+                // Calculate the scroll needed to center the target point
+                // (We want targetX - scrollLeft = viewportCenterX)
+                // (We want targetY - scrollTop = viewportCenterY)
+                // Let's try centering based on the viewport dimensions
+                const viewportWidth = scroller.clientWidth;
+                const viewportHeight = scroller.clientHeight;
+
+                let targetScrollLeft = targetX - viewportWidth / 2;
+                let targetScrollTop = targetY - viewportHeight / 2;
+
+                // Clamp scroll values to be within bounds
+                targetScrollLeft = Math.max(0, Math.min(targetScrollLeft, scroller.scrollWidth - viewportWidth));
+                targetScrollTop = Math.max(0, Math.min(targetScrollTop, scroller.scrollHeight - viewportHeight));
+
+                scroller.scrollTo({
+                  left: targetScrollLeft,
+                  top: targetScrollTop,
+                  behavior: 'auto' // Use 'smooth' for animation if desired
+                });
+              });
+
+            } else {
+              // --- Zooming OUT --- 
+              resumeImage.classList.remove('zoomed');
+              // Reset scroll position
+              scroller.scrollTo({ left: 0, top: 0, behavior: 'auto' });
+            }
+          });
+
+          // --- Panning Logic (remains the same) ---
+          resumeImage.addEventListener('mousedown', (e) => {
+            if (!resumeImage.classList.contains('zoomed')) return; 
+            
+            isDragging = true;
+            didDrag = false;
+            resumeImage.classList.add('dragging');
+            startX = e.clientX;
+            startY = e.clientY;
+            startScrollLeft = scroller.scrollLeft;
+            startScrollTop = scroller.scrollTop;
+            e.preventDefault(); 
+          });
+
+          document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); 
+            didDrag = true;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            scroller.scrollLeft = startScrollLeft - dx;
+            scroller.scrollTop = startScrollTop - dy;
+          });
+
+          document.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            resumeImage.classList.remove('dragging');
+          });
+          
+          document.addEventListener('mouseleave', () => {
+             if (isDragging) {
+                 isDragging = false;
+                 resumeImage.classList.remove('dragging');
+             }
+          });
+
+        } else {
+          console.error("Resume image element not found.");
+        }
+      });
+    </script>
+  </body>
+</html> 

@@ -1,0 +1,100 @@
+/* Base styles for iframe context */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Body shouldn't scroll */
+    font-family: 'Tahoma', Arial, sans-serif;
+    font-size: 11px;
+    color: #000;
+    background-color: #ece9d8;
+    box-sizing: border-box;
+}
+
+/* Primary layout: Flex column with padding and consistent gap */
+body {
+    display: flex; /* Make body a flex container */
+    flex-direction: column; /* Stack children vertically */
+    /* Removed padding and gap */
+}
+
+/* New wrapper rule */
+.content-wrapper {
+    flex: 1; /* Grow to fill body */
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
+    min-height: 0; /* Prevent overflow issues */
+    overflow: hidden; /* Hide potential overflow from wrapper itself */
+}
+
+/* Field row container (label + input) */
+.field {
+    display: flex;
+    align-items: center; /* Vertically align label and input */
+    gap: 2px;
+    flex-shrink: 0; /* Prevent rows from shrinking */
+}
+
+/* Label styling */
+label {
+    display: inline-block; /* Reinforce block context */
+    min-width: 40px; /* Ensure consistent label width */
+    text-align: right; /* Align text to the right */
+    padding-right: 6px; /* Add padding to the right of the text */
+    flex-shrink: 0;
+}
+
+/* Shared input/textarea base styles */
+.input,
+.textarea {
+    font-family: inherit;
+    font-size: inherit;
+    border: 1px solid #7b9ebd;
+    padding: 3px 8px;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    border-radius: 2px;
+    box-shadow:
+        inset 1.75px 1.75px 0 #888,
+        inset -1.75px -1.75px 0 #fff,
+        inset 0 0 3px 1px #d6d6d6;
+    color: #000;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+    color: #999;
+    opacity: 1;
+    font-style: italic;
+}
+
+/* Input-specific styles */
+.input {
+    flex: 1; /* Allow input to grow and fill remaining space */
+    min-width: 0; /* Allow input to shrink if needed */
+    height: 22px; /* Maintain consistent input height */
+}
+
+.input.readonly {
+    background-color: #f0f0f0;
+    cursor: default;
+    user-select: none;
+}
+
+/* Textarea-specific styles */
+.textarea {
+    flex: 1; /* Grow to fill remaining vertical space */
+    resize: none;
+    line-height: 1.4;
+    padding: 5px 8px; /* Slightly more vertical padding */
+    min-height: 50px; /* Ensure it's not too small initially */
+    overflow: auto; /* Explicitly handle overflow/scrollbar */
+    border: none; /* Remove the inherited border */
+    /* Restore original box-shadow values */
+    box-shadow:
+        inset 1.75px 1.75px 0 #888,
+        inset -1.75px -1.75px 0 #fff,
+        inset 0 0 3px 1px #d6d6d6;
+} 

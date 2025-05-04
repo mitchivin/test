@@ -1282,7 +1282,8 @@ export default class WindowManager {
       if (
         e.button !== 0 ||
         e.target.tagName === "BUTTON" ||
-        (windowElement.windowState && windowElement.windowState.isMaximized)
+        (windowElement.windowState && windowElement.windowState.isMaximized) ||
+        isMobileDevice()
       )
         return;
       startX = e.clientX;
@@ -1300,7 +1301,8 @@ export default class WindowManager {
       (e) => {
         if (
           e.target.tagName === "BUTTON" ||
-          (windowElement.windowState && windowElement.windowState.isMaximized)
+          (windowElement.windowState && windowElement.windowState.isMaximized) ||
+          isMobileDevice()
         )
           return;
         const touch = e.touches[0];
