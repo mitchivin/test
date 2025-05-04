@@ -63,22 +63,11 @@ const createProgram = (key, title, icon, extraProps = {}) => ({
 const VIEW_DROPDOWN = [
   { key: "close", text: "Close", enabled: true, action: "exitProgram" },
   { type: "separator" },
-  { key: "maximize", text: "Maximize", enabled: isMobileDevice() ? false : true, action: "maximizeWindow" },
+  { key: "maximize", text: "Maximize", enabled: !isMobileDevice(), action: "maximizeWindow" },
   { key: "minimize", text: "Minimize", enabled: true, action: "minimizeWindow" },
 ];
 
-const FILE_DROPDOWN_DISABLED = [
-  { key: "new", text: "New", enabled: false, action: "fileNew" },
-  { key: "open", text: "Open...", enabled: false, action: "fileOpen" },
-  { key: "save", text: "Save", enabled: false, action: "fileSave" },
-  { key: "saveAs", text: "Save As...", enabled: false, action: "fileSaveAs" },
-  { type: "separator" },
-  { key: "pageSetup", text: "Page Setup...", enabled: false, action: "pageSetup" },
-  { key: "print", text: "Print...", enabled: false, action: "filePrint" },
-  { type: "separator" },
-  { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
-];
-
+// Common File menu variant: Only Exit enabled
 const FILE_DROPDOWN_EXIT_ONLY = [
   { key: "open", text: "Open...", enabled: false, action: "fileOpen" },
   { key: "saveAs", text: "Save as...", enabled: false, action: "fileSaveAs" },
@@ -89,6 +78,7 @@ const FILE_DROPDOWN_EXIT_ONLY = [
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
 
+// File menu for Notepad (New enabled)
 const FILE_DROPDOWN_NOTEPAD = [
   { key: "new", text: "New", enabled: true, action: "fileNew" },
   { key: "open", text: "Open...", enabled: false, action: "fileOpen" },
@@ -159,7 +149,6 @@ const programData = {
   about: createProgram("about", "About Me", "desktop/about.webp", {
     dimensions: { width: 800, height: 600 },
     statusBarText: "Getting to know the designer",
-    // --- Toolbar Configuration for About Me ---
     toolbarConfig: {
       buttons: [
         {
@@ -181,7 +170,7 @@ const programData = {
           enabled: false,
           icon: "./assets/gui/toolbar/up.webp",
           text: null,
-        }, // Assuming up.webp for bent arrow
+        },
         { type: "separator" },
         {
           key: "photos",
@@ -189,24 +178,23 @@ const programData = {
           icon: "./assets/gui/start-menu/photos.webp",
           text: "My Photos",
           action: "openPhotos",
-        }, // Use My Photos program icon
+        },
         {
           key: "videos",
           enabled: true,
           icon: "./assets/gui/start-menu/mediaPlayer.webp",
           text: "Media Player",
           action: "openMediaPlayer",
-        }, // Use Media Player program icon
+        },
         { type: "separator" },
         {
           key: "views",
           enabled: false,
           icon: "./assets/gui/toolbar/views.webp",
           text: null,
-        }, // Assuming views.webp for grid
+        },
       ],
     },
-    // --- MenuBar Configuration for About Me ---
     menuBarConfig: {
       items: [
         {
@@ -279,7 +267,6 @@ const programData = {
         },
       ],
     },
-    // --- MenuBar Configuration for Contact Me ---
     menuBarConfig: {
       items: [
         {
@@ -336,7 +323,7 @@ const programData = {
         {
           key: "email",
           enabled: true,
-          icon: "./assets/gui/toolbar/email.webp",
+          icon: "./assets/gui/desktop/contact.webp",
           text: "Contact Me",
           action: "openContact",
         },
@@ -344,12 +331,11 @@ const programData = {
           key: "save",
           enabled: true,
           icon: "./assets/gui/toolbar/save.webp",
-          text: "Save",
+          text: "Download",
           action: "saveResume",
         },
       ],
     },
-    // --- MenuBar Configuration for Resume ---
     menuBarConfig: {
       items: [
         {
@@ -372,10 +358,8 @@ const programData = {
     "start-menu/photos.webp",
     {
       dimensions: { width: 440, height: 561 },
-      // --- Toolbar Configuration for My Photos (Updated) ---
       toolbarConfig: {
         buttons: [
-          // Active Buttons
           {
             key: "previous",
             enabled: true,
@@ -398,7 +382,6 @@ const programData = {
             action: "nextImage",
           },
           { type: "separator" },
-          // Disabled Buttons
           {
             key: "print",
             enabled: false,
@@ -420,7 +403,6 @@ const programData = {
           },
         ],
       },
-      // --- MenuBar Configuration for My Photos ---
       menuBarConfig: {
         items: [
           {
@@ -441,7 +423,6 @@ const programData = {
   internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
     dimensions: { width: 1030, height: 780 },
     statusBarText: "Projects ready to explore",
-    // --- Toolbar Configuration for My Projects ---
     toolbarConfig: {
       buttons: [
         {
@@ -488,7 +469,6 @@ const programData = {
         },
       ],
     },
-    // --- MenuBar Configuration for My Projects ---
     menuBarConfig: {
       items: [
         {

@@ -15,6 +15,8 @@
 @import url("gui/startMenu.css");
 @import url("gui/window.css");
 @import url("gui/windowBars.css");
+@import url("gui/boot.css");
+@import url("utils/crtEffect.css"); /* Import CRT effect styles */
 
 /* =========================
    2. Z-Index Hierarchy

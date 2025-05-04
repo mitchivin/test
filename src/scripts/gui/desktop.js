@@ -125,11 +125,10 @@ export default class Desktop {
             this.selectIcon(icon, true);
           }
           let programName = icon.getAttribute("data-program-name");
-          // Special case: social icons in .desktop-icons-top
-          if (
-            icon.closest(".desktop-icons-top") &&
-            ["github", "instagram", "behance", "linkedin"].includes(programName)
-          ) {
+          const socialKeys = ["github", "instagram", "behance", "linkedin"];
+
+          // Special case: social icons (check programName directly)
+          if (socialKeys.includes(programName)) {
             const urls = {
               github: "https://github.com/mitchivin",
               instagram: "https://www.instagram.com/mitchivin",
@@ -138,6 +137,7 @@ export default class Desktop {
             };
             window.open(urls[programName], "_blank");
           } else {
+            // Default action: open program via event bus
             this.eventBus.publish(EVENTS.PROGRAM_OPEN, { programName });
           }
 

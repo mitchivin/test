@@ -153,9 +153,10 @@
   display: block;
 }
 
-/* ==================================================
-   END Desktop Styles
-   ================================================== */
+/* Hide second icon row by default */
+.desktop-icons-second-row {
+  display: none;
+}
 
 @media (max-width: 768px) {
   .desktop {
@@ -177,14 +178,30 @@
     gap: 8px;
     padding: 0;
     margin: 0;
-    margin-bottom: clamp(30px, 16vh, 120px + var(--taskbar-height, 30px));
+    margin-bottom: clamp(30px, 12vh, 120px + var(--taskbar-height, 30px));
     box-sizing: border-box;
     height: auto;
   }
+  .desktop-icons-second-row {
+    display: flex; /* Show on mobile */
+    width: 95vw;
+    justify-content: stretch;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    height: auto;
+    margin-bottom: 40px; /* Reduced from 70px */
+  }
+  .desktop-icons .desktop-icon[data-program-name="contact"] { order: 1; }
+  .desktop-icons .desktop-icon[data-program-name="resume"] { order: 2; }
+  .desktop-icons .desktop-icon[data-program-name="internet"] { order: 3; }
+  .desktop-icons .desktop-icon[data-program-name="about"] { order: 4; }
   .desktop-icon {
     flex: 1 1 0;
     min-width: 0;
-    height: 90px;
+    height: 94px;
     padding: 0;
     margin: 0;
     box-sizing: border-box;
@@ -199,14 +216,14 @@
   .desktop-icon img {
     width: 50px;
     height: 50px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
   .desktop-icon span {
     font-size: 13.5px;
     line-height: 16px;
     max-width: 100%;
   }
-}
+} /* Close @media (max-width: 768px) */
 
 @media (max-width: 768px) and (orientation: landscape) {
   #landscape-block {

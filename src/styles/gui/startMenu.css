@@ -529,7 +529,7 @@
   background-color: transparent;
   pointer-events: none;
   z-index: -1;
-  transition: background-color 0.05s linear;
+  transition: background-color 0.05s ease; /* Standardize to ease */
 }
 
 .all-programs-item:hover::after,
@@ -550,14 +550,14 @@
   width: 30px;
   background-color: #2f71cd;
   z-index: 1;
-  transition: background-color 0.05s linear; /* Match the timing */
+  transition: background-color 0.05s ease; /* Standardize to ease */
 }
 
 /* Make text and icon in submenu items transition together */
 .all-programs-item *,
 .most-used-tools-item *,
 .ai-tools-item * {
-  transition: color 0.05s linear;
+  transition: color 0.05s ease; /* Standardize to ease */
   z-index: 2; /* Keep content above the overlay */
 }
 

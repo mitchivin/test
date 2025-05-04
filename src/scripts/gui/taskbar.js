@@ -222,23 +222,6 @@ export default class Taskbar {
     if (!img) return;
     img.src = "assets/gui/taskbar/start-button.webp";
   }
-
-  setupTrayTooltips() {
-    const isMobile = isMobileDevice && isMobileDevice();
-    if (isMobile) return; // Disable tray tooltips on mobile
-    const trayIcons = document.querySelectorAll(".tray-icons .tray-icon");
-    trayIcons.forEach((icon) => {
-      icon.addEventListener("mouseenter", () => {
-        const tooltipText = icon.getAttribute("data-tooltip");
-        if (tooltipText) {
-          this.showTooltip(icon, tooltipText);
-        }
-      });
-      icon.addEventListener("mouseleave", () => {
-        this.hideTooltip();
-      });
-    });
-  }
 }
 
 // --- Balloon Tooltip for Network Icon ---

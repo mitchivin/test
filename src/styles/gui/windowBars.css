@@ -5,6 +5,7 @@
    - Matches the look and feel of Windows XP.
    ================================================== */
 
+/* --- Menu Bar Styles (Previously Injected) --- */
 .window-body.iframe-container .menu-bar {
   display: flex;
   align-items: center;
@@ -17,20 +18,95 @@
   flex-grow: 0;
   overflow: hidden;
   padding: 0 8px 0 0;
+  font-family: Tahoma, Arial, sans-serif;
   font-size: 11px;
-  -webkit-user-select: none;
   user-select: none;
   position: relative;
   z-index: 30;
   border-bottom: 2px solid #d7d4ca;
   cursor: default;
 }
+.window-body.iframe-container .menu-bar .menu-item {
+  flex: 1 1 0;
+  text-align: center;
+  max-width: fit-content;
+  padding: 0 12px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.window-body.iframe-container .menu-item:not(.disabled):hover,
+.window-body.iframe-container .menu-item.active {
+  background: #0a6fc2;
+  color: #fff;
+}
+.window-body.iframe-container .menu-item.disabled {
+  color: #bcbcbc;
+  cursor: default;
+}
+.window-body.iframe-container .menu-item.disabled:hover {
+    background: none;
+    color: #bcbcbc;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+.window-body.iframe-container .dropdown-menu {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 130px;
+  background: #ece9d8;
+  border: 1px solid #b5b2a3;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-size: 11px;
+  font-family: Tahoma, Arial, sans-serif;
+  z-index: 1000;
+  margin-top: 1px;
+  border-radius: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.window-body.iframe-container .dropdown-menu.show {
+  display: block;
+}
+.window-body.iframe-container .menu-option {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2px 10px 2px 24px;
+  cursor: default;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background: none;
+  text-align: left;
+  transition: background 0.13s;
+}
+.window-body.iframe-container .menu-option:hover:not(.disabled) {
+  background: #0a6fc2;
+  color: #fff;
+}
+.window-body.iframe-container .menu-option.disabled {
+  color: #bcbcbc;
+  cursor: default;
+}
+.window-body.iframe-container .menu-separator {
+  border-top: 1px solid #d7d4ca;
+  margin: 2px 0;
+  height: 0;
+}
 
+/* --- Toolbar Styles (Previously Injected) --- */
 .toolbar-button {
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
+  font-family: 'Tahoma', Arial, sans-serif;
   color: #222;
   padding: 6px 8px;
   border-radius: 5px;
@@ -38,11 +114,88 @@
   border: 1.5px solid transparent;
   box-shadow: none;
   margin: 0;
-  -webkit-user-select: none;
   user-select: none;
 }
+.toolbar-button.disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+.toolbar-button.disabled:hover,
+.toolbar-button.disabled:active {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+.toolbar-button:not(.disabled):hover {
+  background: #ecebe2;
+  border: 1.5px solid #b9b6aa;
+  box-shadow: none;
+}
+.toolbar-button:not(.disabled):active {
+  border: 1.5px solid #888;
+  box-shadow: inset 2px 2px 5px #b9b6aa, inset -1.5px -1.5px 3px #fff;
+  background: #e4e3dc;
+}
+.toolbar-button > img + span {
+  margin-left: 5px;
+}
+.toolbar-button > img:only-child {
+  margin-right: 0;
+}
+.toolbar-container {
+  all: initial; /* Reset inherited styles */
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  position: static;
+  z-index: auto;
+}
+.toolbar-row {
+  all: unset; /* Reset inherited styles, stronger than initial */
+  display: flex;
+  flex-direction: row;
+  background: #ece9d8;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  flex-grow: 0;
+  overflow: hidden;
+  padding: 0 8px 0 4px;
+  align-items: center;
+  z-index: 20;
+  position: static;
+  width: 100%;
+  user-select: none;
+}
+.vertical_line {
+  width: 1px;
+  height: 26px;
+  background: #d7d4ca;
+  margin: 0 4px;
+}
+.toolbar-row img, .toolbar-row span {
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+.toolbar-row > * {
+  margin: 0;
+}
+.toolbar-row.toolbar-bottom {
+  justify-content: center;
+  border-top: 2px solid #d7d4ca;
+}
+.toolbar-row:not(.toolbar-bottom) {
+  border-bottom: 2px solid #d7d4ca;
+}
 
-/* Address bar styles for Windows XP-like UI */
+/* --- Address Bar Styles (Existing + Refinements) --- */
 .addressbar-container {
   width: 100%;
   border: none;
@@ -58,26 +211,27 @@
   background: #ece9d8;
   border-bottom: 2px solid #d7d4ca;
   height: 34px;
-  height: 34px !important;
-  min-height: 34px !important;
-  max-height: 34px !important;
-  flex-shrink: 0 !important;
-  flex-grow: 0 !important;
-  overflow: hidden !important;
+  min-height: 34px;
+  max-height: 34px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  overflow: hidden;
+  padding: 0 4px; /* Added horizontal padding */
 }
-.window-body .addressbar, .iframe-container .addressbar {
+/* Ensure .addressbar class targets only the address bar itself */
+.addressbar-row > .addressbar {
   display: flex;
-  background: white !important;
-  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   width: 100%;
   align-items: center;
   justify-content: space-between;
   flex: 1 1 auto;
   min-width: 150px;
   max-width: 100%;
-  padding-left: 1px;
-  padding-right: 0;
+  padding: 0 1px 0 3px; /* Adjusted padding */
   height: 22px;
+  margin: 0 4px; /* Added margin */
 }
 .addressbar-title {
   font-weight: 500;
@@ -91,51 +245,48 @@
   text-overflow: ellipsis;
 }
 .address-label-container {
-  width: 60px;
-  min-width: 60px;
+  width: 55px; /* Reduced width slightly */
+  min-width: 55px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #7f7c73;
+  font-size: 11px; /* Ensure font size */
 }
 .go-button-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px; /* Reduced gap */
   flex-shrink: 0;
-  width: 64px;
-  min-width: 64px;
+  width: 55px; /* Reduced width slightly */
+  min-width: 55px;
   color: #a0a0a0;
   white-space: nowrap;
+  font-size: 11px; /* Ensure font size */
+  cursor: default;
 }
-.goIcon {
+.go-button-container > img {
+  width: 20px;
+  height: 20px;
+  filter: grayscale(100%) opacity(0.6);
+}
+.addressbar-row > .addressbar > div > img {
+  margin: 0 3px 0 0;
+  width: 14px;
+  height: 14px;
+}
+.addressbar-row > .addressbar > .dropdownIcon {
+  width: 16px;
+  height: 18px;
+  filter: grayscale(100%) opacity(0.6);
+  cursor: default;
+  pointer-events: none; /* Disable interaction */
   flex-shrink: 0;
 }
-.goIcon:hover {
-  filter: brightness(1.1);
-}
-.goIcon[style*="not-allowed"],
-.addressbar .dropdownIcon[style*="not-allowed"],
-.addressbar-row > span[style*="not-allowed"] {
-  cursor: not-allowed !important;
-}
-.dropdownIcon {
-  flex-shrink: 0;
-}
-.dropdownIcon:hover {
-  filter: brightness(1.1);
-}
-.dropdownIcon[style*="not-allowed"] {
-  pointer-events: none;
-}
-.addressbar .dropdownIcon {
-  filter: grayscale(100%) opacity(0.6) !important;
-  cursor: not-allowed !important;
-  pointer-events: none !important;
-}
-.addressbar .dropdownIcon:hover {
-  filter: grayscale(100%) opacity(0.6) !important;
-  cursor: not-allowed !important;
+
+/* Ensure consistent cursor */
+.toolbar-button, .addressbar-row span, .go-button-container span {
+  cursor: default;
 } 
