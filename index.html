@@ -11,14 +11,14 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0"
     />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <link rel="icon" href="./assets/gui/boot/favicon.png" type="image/png" />
     <title>Mitch Ivin | Graphic Design</title>
 
     <!-- Preload Critical Assets -->
-    <link rel="preload" href="./assets/gui/desktop/bliss.webp" as="image" />
+    <link rel="preload" href="./assets/gui/desktop/bliss.jpg" as="image" />
     <link rel="preload" href="./assets/gui/desktop/about.webp" as="image" />
     <link rel="preload" href="./assets/gui/desktop/internet.webp" as="image" />
     <link rel="preload" href="./assets/gui/desktop/contact.webp" as="image" />
@@ -67,7 +67,7 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="./src/styles/main.css" />
-    <link rel="stylesheet" href="./src/styles/utils/boot.css" />
+    <link rel="stylesheet" href="./src/styles/gui/boot.css" />
   </head>
   <body>
     <!-- Boot Screen -->
@@ -253,6 +253,6 @@
     <div class="flicker"></div>
 
     <!-- Boot sequence script (now a module) -->
-    <script type="module" src="./src/scripts/utils/boot.js"></script>
+    <script type="module" src="./src/scripts/gui/boot.js"></script> /* Moved from utils */
   </body>
 </html>

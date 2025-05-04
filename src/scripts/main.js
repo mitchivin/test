@@ -8,9 +8,12 @@ import Desktop from "./gui/desktop.js";
 import Taskbar from "./gui/taskbar.js";
 import WindowManager from "./gui/window.js";
 import { eventBus, EVENTS } from "./utils/eventBus.js";
-import { initBootSequence } from "./utils/boot.js"; // Import the boot sequence initializer
-import { setupTooltips } from "./utils/tooltip.js";
+import { initBootSequence } from "./gui/boot.js"; // Import the boot sequence initializer
+import { setupTooltips } from "./gui/tooltip.js"; // Ensure path is correct
 import { initRandomScanline } from "./utils/crtEffect.js";
+
+// Variable to track the time of the last touchstart event
+let lastTouchStartTime = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize core UI components with shared event bus for communication
@@ -48,6 +51,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Dynamically scale desktop icons to fit the row on mobile with gap
   scaleDesktopIconsToFitMobile();
+
+  // Prevent double-tap zoom on mobile via JavaScript
+  document.addEventListener('touchstart', (event) => {
+    const now = Date.now();
+    const timeSinceLastTouch = now - lastTouchStartTime;
+    const doubleTapThreshold = 300; // Milliseconds
+
+    if (timeSinceLastTouch < doubleTapThreshold && event.touches.length === 1) {
+      // Prevent the default zoom behavior on double tap
+      event.preventDefault();
+    }
+
+    lastTouchStartTime = now;
+  }, { passive: false }); // Required to allow preventDefault on touch events
+
 });
 
 // Landscape block overlay for mobile

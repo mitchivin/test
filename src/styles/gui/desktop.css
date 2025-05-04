@@ -29,9 +29,24 @@
   width: 100%;
   height: 100%;
 
-  /* Background image is now dynamically set by JavaScript */
+  /* Background image and position are now set by classes below */
   background-size: cover;
+}
+
+/* Wallpaper classes */
+.desktop.wallpaper-default {
+  background-image: url('../../../assets/gui/desktop/bliss.jpg');
   background-position: top center;
+}
+
+.desktop.wallpaper-mobile {
+  background-image: url('../../../assets/gui/desktop/blissMobile.jpg');
+  background-position: top center; /* Adjust if needed for mobile */
+}
+
+/* Background position override for ultrawide */
+.desktop.bg-pos-ultrawide {
+  background-position: center center;
 }
 
 /* =========================

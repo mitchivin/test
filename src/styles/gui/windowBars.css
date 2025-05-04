@@ -18,6 +18,7 @@
   overflow: hidden;
   padding: 0 8px 0 0;
   font-size: 11px;
+  -webkit-user-select: none;
   user-select: none;
   position: relative;
   z-index: 30;
@@ -37,6 +38,7 @@
   border: 1.5px solid transparent;
   box-shadow: none;
   margin: 0;
+  -webkit-user-select: none;
   user-select: none;
 }
 

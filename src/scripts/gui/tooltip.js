@@ -11,6 +11,8 @@
  *   - If the tooltip would overflow the viewport, it is repositioned to stay visible.
  */
 
+import { isMobileDevice } from "../utils/device.js";
+
 /**
  * Set up tooltips for all elements matching the selector. Tooltips are shown on hover and hidden on mouse leave or click.
  *
@@ -90,11 +92,16 @@ export function setupTooltips(
       left: `${left}px`,
     });
   };
-  document.querySelectorAll(selector).forEach((element) => {
-    element.addEventListener("mouseenter", () => showTooltip(element));
-    element.addEventListener("mouseleave", hideTooltip);
-    element.addEventListener("click", hideImmediately);
-  });
+
+  // Only attach hover/click tooltip listeners on non-mobile devices
+  // Balloon tooltips triggered separately by click handlers are unaffected
+  if (!isMobileDevice()) {
+    document.querySelectorAll(selector).forEach((element) => {
+      element.addEventListener("mouseenter", () => showTooltip(element));
+      element.addEventListener("mouseleave", hideTooltip);
+      element.addEventListener("click", hideImmediately);
+    });
+  }
 }
 
 /**

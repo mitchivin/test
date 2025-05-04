@@ -11,8 +11,8 @@
  * @module boot
  */
 
-import { showNetworkBalloon } from "../gui/taskbar.js";
-import { isMobileDevice } from "./device.js";
+import { showNetworkBalloon } from "./taskbar.js";
+import { isMobileDevice } from "../utils/device.js";
 
 // =========================
 // 1. Boot Sequence Initialization

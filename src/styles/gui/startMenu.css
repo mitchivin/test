@@ -686,47 +686,9 @@
   display: block;
 }
 
+/* Consolidated Disabled Menu Item Styles */
 .most-used-tools-item.disabled,
-.ai-tools-item.disabled {
-  color: #999 !important;
-  opacity: 0.93 !important;
-  cursor: default !important;
-  background: none !important;
-  filter: grayscale(0.25) !important;
-  box-shadow: none !important;
-  position: relative;
-}
-.most-used-tools-item.disabled:hover,
-.ai-tools-item.disabled:hover,
-.most-used-tools-item.disabled:focus,
-.ai-tools-item.disabled:focus {
-  background: none !important;
-  color: #999 !important;
-  filter: grayscale(0.25) !important;
-  box-shadow: none !important;
-}
-.most-used-tools-item.disabled::before,
-.ai-tools-item.disabled::before,
-.most-used-tools-item.disabled::after,
-.ai-tools-item.disabled::after,
-.most-used-tools-item.disabled:hover::before,
-.ai-tools-item.disabled:hover::before,
-.most-used-tools-item.disabled:hover::after,
-.ai-tools-item.disabled:hover::after {
-  background: none !important;
-  content: none !important;
-  box-shadow: none !important;
-}
-.most-used-tools-item.disabled img,
-.ai-tools-item.disabled img {
-  filter: grayscale(0.25) !important;
-  opacity: 0.6 !important;
-}
-.most-used-tools-item.disabled:hover img,
-.ai-tools-item.disabled:hover img {
-  filter: grayscale(1);
-}
-
+.ai-tools-item.disabled,
 .all-programs-item.disabled {
   color: #999 !important;
   opacity: 0.93 !important;
@@ -736,25 +698,45 @@
   box-shadow: none !important;
   position: relative;
 }
+
+.most-used-tools-item.disabled:hover,
+.ai-tools-item.disabled:hover,
 .all-programs-item.disabled:hover,
+.most-used-tools-item.disabled:focus,
+.ai-tools-item.disabled:focus,
 .all-programs-item.disabled:focus {
   background: none !important;
   color: #999 !important;
   filter: grayscale(0.25) !important;
   box-shadow: none !important;
 }
+
+.most-used-tools-item.disabled::before,
+.ai-tools-item.disabled::before,
 .all-programs-item.disabled::before,
+.most-used-tools-item.disabled::after,
+.ai-tools-item.disabled::after,
 .all-programs-item.disabled::after,
+.most-used-tools-item.disabled:hover::before,
+.ai-tools-item.disabled:hover::before,
 .all-programs-item.disabled:hover::before,
+.most-used-tools-item.disabled:hover::after,
+.ai-tools-item.disabled:hover::after,
 .all-programs-item.disabled:hover::after {
   background: none !important;
   content: none !important;
   box-shadow: none !important;
 }
+
+.most-used-tools-item.disabled img,
+.ai-tools-item.disabled img,
 .all-programs-item.disabled img {
   filter: grayscale(0.25) !important;
   opacity: 0.6 !important;
 }
+
+.most-used-tools-item.disabled:hover img,
+.ai-tools-item.disabled:hover img,
 .all-programs-item.disabled:hover img {
   filter: grayscale(1);
 }

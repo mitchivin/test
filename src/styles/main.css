@@ -8,7 +8,8 @@
 /* =========================
    1. Imports
    ========================= */
-@import url("utils/reset.css");
+@import url("reset.css"); /* Moved from utils */
+/* @import url("utils/fonts.css"); */ /* Removed - File missing */
 @import url("gui/desktop.css");
 @import url("gui/taskbar.css");
 @import url("gui/startMenu.css");

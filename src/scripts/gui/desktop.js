@@ -43,20 +43,23 @@ export default class Desktop {
     this.setupIconEvents();
     this.setupDesktopEvents();
     this.setupPointerSelectionEvents();
-    // Set the default wallpaper
+
+    // Set the default wallpaper class
+    this.desktop.classList.remove('wallpaper-default', 'wallpaper-mobile'); // Clear existing first
     if (isMobileDevice()) {
-      this.desktop.style.backgroundImage = `url('./assets/gui/desktop/blissMobile.jpg')`;
+      this.desktop.classList.add('wallpaper-mobile');
     } else {
-      this.desktop.style.backgroundImage = `url('./assets/gui/desktop/bliss.jpg')`;
+      this.desktop.classList.add('wallpaper-default');
     }
-    // Dynamically set background position for ultrawide screens
+
+    // Set background position class for ultrawide screens
+    this.desktop.classList.remove('bg-pos-ultrawide'); // Clear existing first
     const aspectRatio = window.innerWidth / window.innerHeight;
     if (aspectRatio > 2.3) {
       // 21:9 is ~2.33
-      this.desktop.style.backgroundPosition = "center center";
-    } else {
-      this.desktop.style.backgroundPosition = "top center";
+      this.desktop.classList.add('bg-pos-ultrawide');
     }
+    // No 'else' needed if the default classes handle the non-ultrawide case
 
     this.eventBus.subscribe(EVENTS.WINDOW_CREATED, () => this.clearSelection());
     this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, () => this.clearSelection());

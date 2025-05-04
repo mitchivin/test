@@ -174,7 +174,6 @@ export default class WindowManager {
     const taskbar = document.querySelector(".taskbar");
     if (windowsContainer && taskbar) {
       if (taskbar.parentElement === windowsContainer) {
-        // (Removed commented-out warning about .taskbar DOM placement)
       }
     }
   }

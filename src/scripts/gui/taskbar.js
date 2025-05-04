@@ -12,7 +12,7 @@
  */
 import StartMenu from "./startMenu.js";
 import { EVENTS } from "../utils/eventBus.js";
-import { setupTooltips } from "../utils/tooltip.js";
+import { setupTooltips } from "./tooltip.js"; // Corrected path from utils
 import { isMobileDevice } from "../utils/device.js";
 
 /**
