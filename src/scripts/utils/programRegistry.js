@@ -102,6 +102,30 @@ const FILE_DROPDOWN_CONTACT = [
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
 
+// Add menu item arrays for abstraction
+// Placeholders for future tools (intentionally omitted for codebase cleanliness)
+const MOST_USED_TOOLS_ITEMS = [
+  // Example for future expansion:
+  // {
+  //   type: "program",
+  //   programName: "photoshop",
+  //   icon: "./assets/gui/start-menu/vanity-apps/photoshop.webp",
+  //   label: "Adobe Photoshop",
+  //   disabled: true,
+  // },
+];
+
+const AI_TOOLS_ITEMS = [
+  // Example for future expansion:
+  // {
+  //   type: "program",
+  //   programName: "chatgpt",
+  //   icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
+  //   label: "ChatGPT",
+  //   disabled: true,
+  // },
+];
+
 // =========================
 // 2. Program Data Registry
 // =========================
@@ -185,18 +209,18 @@ const programData = {
         },
         { type: "separator" },
         {
-          key: "photos",
+          key: "projects",
           enabled: true,
-          icon: "./assets/gui/start-menu/photos.webp",
-          text: "My Photos",
-          action: "openPhotos",
+          icon: "./assets/gui/desktop/internet.webp",
+          text: "My Projects",
+          action: "openInternet",
         },
         {
-          key: "videos",
+          key: "resume",
           enabled: true,
-          icon: "./assets/gui/start-menu/mediaPlayer.webp",
-          text: "Media Player",
-          action: "openMediaPlayer",
+          icon: "./assets/gui/desktop/resume.webp",
+          text: "My Resume",
+          action: "openResume",
         },
         { type: "separator" },
         {
@@ -206,6 +230,12 @@ const programData = {
           text: null,
         },
       ],
+    },
+    addressBarConfig: {
+      enabled: true,
+      icon: "./assets/gui/desktop/about.webp",
+      title: "About Me",
+      canNavigate: false
     },
     menuBarConfig: {
       items: [
@@ -244,19 +274,19 @@ const programData = {
     toolbarConfig: {
       buttons: [
         {
-          key: "save",
-          enabled: true,
-          icon: "./assets/gui/toolbar/save.webp",
-          text: "Download",
-          action: "saveResume",
-        },
-        { type: "separator" },
-        {
           key: "email",
           enabled: true,
           icon: "./assets/gui/desktop/contact.webp",
           text: "Contact Me",
           action: "openContact",
+        },
+        { type: "separator" },
+        {
+          key: "save",
+          enabled: true,
+          icon: "./assets/gui/toolbar/save.webp",
+          text: "Download",
+          action: "saveResume",
         },
       ],
     },

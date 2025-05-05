@@ -60,12 +60,10 @@ class WindowTemplates {
     const isMyPictures =
       programConfig && programConfig.id === "my-pictures-window";
 
-    // --- BEGIN: Dynamically Generate MenuBar based on programConfig ---
+    // --- Dynamically Generate MenuBar based on programConfig ---
     let menuBarContainer = null;
     if (
-      programConfig &&
-      programConfig.menuBarConfig &&
-      programConfig.menuBarConfig.items
+      programConfig?.menuBarConfig?.items
     ) {
       let parentWindowElement = container.closest(".window, .app-window");
       menuBarContainer = createMenuBar(
@@ -73,34 +71,29 @@ class WindowTemplates {
         windowId,
         parentWindowElement,
       );
+      // Append Menu Bar FIRST if it exists
       if (menuBarContainer) container.appendChild(menuBarContainer);
     }
-    // --- END: Dynamically Generate MenuBar ---
 
-    // --- Generate Toolbar (if config exists) but don't append yet ---
+    // --- Generate Toolbar (if config exists) ---
     let toolbarWrapper = null;
     if (
-      programConfig &&
-      programConfig.toolbarConfig &&
-      programConfig.toolbarConfig.buttons
+      programConfig?.toolbarConfig?.buttons
     ) {
       toolbarWrapper = createToolbar(
         programConfig.toolbarConfig,
         windowId,
-        isMyPictures,
+        isMyPictures, // Pass flag for My Pictures specific layout
       );
     }
 
-    // --- Create Address Bar for My Projects (internet) app ---
+    // --- Create Address Bar (if config exists) ---
     let addressBar = null;
-    if (programConfig && programConfig.id === "internet-window") {
-      addressBar = createAddressBar({
-        icon: "./assets/gui/desktop/internet.webp",
-        title: "My Projects",
-      });
+    if (programConfig?.addressBarConfig?.enabled) { // Check the new config
+      addressBar = createAddressBar(programConfig.addressBarConfig);
     }
 
-    // --- Create and Append iframe ---
+    // --- Create and Prepare iframe ---
     const iframe = document.createElement("iframe");
     Object.assign(iframe, { src: appPath, title: `${windowId}-content` });
     const attrs = {
@@ -114,16 +107,16 @@ class WindowTemplates {
       iframe.setAttribute(attr, value);
 
     // --- Append Toolbar, Address Bar, and iframe in correct order ---
+    // Exception: My Pictures toolbar goes below iframe
     if (toolbarWrapper && !isMyPictures) {
       container.appendChild(toolbarWrapper);
-      if (addressBar) container.appendChild(addressBar);
-      container.appendChild(iframe);
-    } else {
-      if (addressBar) container.appendChild(addressBar);
-      container.appendChild(iframe);
     }
+    if (addressBar) { // Append Address Bar AFTER Toolbar (if toolbar exists)
+      container.appendChild(addressBar);
+    }
+    container.appendChild(iframe); // Append iframe AFTER Address Bar (if it exists)
 
-    // --- Append Toolbar *after* iframe if it exists AND it IS My Pictures ---
+    // --- Append My Pictures Toolbar AFTER iframe ---
     if (toolbarWrapper && isMyPictures) {
       container.appendChild(toolbarWrapper);
     }

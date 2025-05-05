@@ -1,35 +1,100 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Me</title>
-    <!-- XP.css: Use CDN link, adjust if using local dependency -->
-    <link rel="stylesheet" href="https://unpkg.com/xp.css">
-    <style>
-      body {
-        background: #ece9d8; /* XP default background */
-        color: #000; /* XP default text color */
-        margin: 0;
-        padding: 0;
-        overflow: auto; /* Allow scrolling within the app frame */
-        font-family: Tahoma, Verdana, sans-serif; /* Default XP font */
-        font-size: 11px; /* Default XP font size */
-      }
-      .app-root {
-        width: 100%;
-        height: 100%; /* Fill the iframe body */
-        box-sizing: border-box;
-        padding: 10px; /* Add some padding */
-      }
-      /* Add any other base styles needed for all apps */
-    </style>
-  </head>
-  <body>
-    <div class="app-root" id="appRoot">
-      <!-- About Me content will go here -->
-      <h2>About Me</h2>
-      <p>This is the placeholder content for the About Me app.</p>
+    <link rel="stylesheet" href="https://unpkg.com/xp.css@0.2.3/dist/XP.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="about.css">
+</head>
+<body>
+    <div class="main-window-content">
+        <aside class="left-panel">
+            <div class="left-panel__card">
+                <div class="left-panel__card__header">
+                    <span class="left-panel__card__header__text">Quick Launch</span>
+                </div>
+                <div class="left-panel__card__content">
+                    <a class="left-panel__card__row" href="#" data-app="about">
+                        <img class="left-panel__card__img" src="../../../assets/gui/desktop/about.webp" alt="About Me" />
+                        <span class="left-panel__card__text link active">About Me</span>
+                    </a>
+                    <a class="left-panel__card__row" href="#" data-app="internet">
+                        <img class="left-panel__card__img" src="../../../assets/gui/desktop/internet.webp" alt="My Projects" />
+                        <span class="left-panel__card__text link">My Projects</span>
+                    </a>
+                    <a class="left-panel__card__row" href="#" data-app="contact">
+                        <img class="left-panel__card__img" src="../../../assets/gui/desktop/contact.webp" alt="Contact Me" />
+                        <span class="left-panel__card__text link">Contact Me</span>
+                    </a>
+                    <a class="left-panel__card__row" href="#" data-app="resume">
+                        <img class="left-panel__card__img" src="../../../assets/gui/desktop/resume.webp" alt="My Resume" />
+                        <span class="left-panel__card__text link">Resume</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="left-panel__card">
+                <div class="left-panel__card__header">
+                    <span class="left-panel__card__header__text">Social Links</span>
+                </div>
+                <div class="left-panel__card__content">
+                    <a href="https://www.instagram.com/mitchivin" target="_blank" rel="noreferrer" class="left-panel__card__row social-link">
+                        <img class="left-panel__card__img" src="../../../assets/gui/start-menu/instagram.webp" alt="Instagram" />
+                        <span class="left-panel__card__text link">Instagram</span>
+                    </a>
+                    <a href="https://www.linkedin.com/in/mitchivin/" target="_blank" rel="noreferrer" class="left-panel__card__row social-link">
+                        <img class="left-panel__card__img" src="../../../assets/gui/start-menu/linkedin.webp" alt="LinkedIn" />
+                        <span class="left-panel__card__text link">LinkedIn</span>
+                    </a>
+                    <a href="https://www.behance.net/mitch_ivin" target="_blank" rel="noreferrer" class="left-panel__card__row social-link">
+                        <img class="left-panel__card__img" src="../../../assets/gui/start-menu/behance.webp" alt="Behance" />
+                        <span class="left-panel__card__text link">Behance</span>
+                    </a>
+                    <a href="https://github.com/mitchivin" target="_blank" rel="noreferrer" class="left-panel__card__row social-link">
+                        <img class="left-panel__card__img" src="../../../assets/gui/start-menu/github.webp" alt="Github" />
+                        <span class="left-panel__card__text link">Github</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="left-panel__card">
+                <div class="left-panel__card__header">
+                    <span class="left-panel__card__header__text">Other Programs</span>
+                </div>
+                <div class="left-panel__card__content">
+                    <a class="left-panel__card__row" href="#" data-app="musicPlayer">
+                        <img class="left-panel__card__img" src="../../../assets/gui/start-menu/musicPlayer.webp" alt="Music Player" />
+                        <span class="left-panel__card__text link">Music Player</span>
+                    </a>
+                    <a class="left-panel__card__row" href="#" data-app="notepad">
+                        <img class="left-panel__card__img" src="../../../assets/gui/start-menu/notepad.webp" alt="Notepad" />
+                        <span class="left-panel__card__text link">Notepad</span>
+                    </a>
+                    <a class="left-panel__card__row" href="#" data-app="cmd">
+                        <img class="left-panel__card__img" src="../../../assets/gui/start-menu/cmd.webp" alt="Command Prompt" />
+                        <span class="left-panel__card__text link">Command Prompt</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <div class="scroll-content">
+            <main class="main">
+                <div class="main-content-wrapper">
+                    <h3 class="welcome_text">About Me</h3>
+                    <div class="section_text about-body">
+                        <div class="about-paragraph-row"><span class="about-paragraph-icon-col"><img src="../../../assets/apps/about/p1.webp" alt="Paragraph icon 1" class="about-paragraph-icon"></span><span class="about-paragraph-text">I'm Mitch, a graphic designer based in Brisbane, Australia, driven by a genuine love for creating. Building ideas from the ground up and bringing them to life through design is what motivates me. Every project is an opportunity to sharpen my skills, solve meaningful problems, and create visuals with impact.</span></div>
+                        <div class="about-paragraph-row"><span class="about-paragraph-icon-col"><img src="../../../assets/apps/about/p2.webp" alt="Paragraph icon 2" class="about-paragraph-icon"></span><span class="about-paragraph-text">Growing up in New Zealand, rugby shaped my confidence, creativity, and early appreciation for the power of design. Seeing how the All Blacks' visual identity inspired pride and unity showed me the lasting influence strong branding can have. This insight continues to guide my approach today.</span></div>
+                        <div class="about-paragraph-row"><span class="about-paragraph-icon-col"><img src="../../../assets/apps/about/p3.webp" alt="Paragraph icon 3" class="about-paragraph-icon"></span><span class="about-paragraph-text">After reconnecting with design in my twenties, I completed a Diploma of Graphic Design at QLD TAFE. This gave me a solid foundation in design principles and proficiency with industry-standard tools like Adobe Creative Suite, enabling me to translate ideas into clear, purposeful visuals.</span></div>
+                        <div class="about-paragraph-row"><span class="about-paragraph-icon-col"><img src="../../../assets/apps/about/p4.webp" alt="Paragraph icon 4" class="about-paragraph-icon"></span><span class="about-paragraph-text">With the design industry rapidly evolving, I am actively embracing AI as a valuable part of my creative workflow. I see it as a way to enhance creativity rather than replace fundamental design thinking, using new technology to push creative boundaries while maintaining quality and purpose.</span></div>
+                        <div class="about-paragraph-row"><span class="about-paragraph-icon-col"><img src="../../../assets/apps/about/p5.webp" alt="Paragraph icon 5" class="about-paragraph-icon"></span><span class="about-paragraph-text">Looking ahead, my goal is to work with a major sports franchise, helping shape brands that resonate deeply and withstand the test of time. This ambition sets the standard for every project I undertake.</span></div>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
-  </body>
+
+    <script src="about.js"></script>
+</body>
 </html> 
