@@ -156,6 +156,9 @@ body {
 .left-panel__card__row:focus-visible {
   outline: 2px dotted #1976d2;
 }
+.left-panel__card__row:hover .left-panel__card__text {
+  text-decoration: underline;
+}
 .left-panel__card__img {
   width: 16px;
   height: 16px;
@@ -163,6 +166,7 @@ body {
   flex-shrink: 0;
   vertical-align: middle;
   display: inline-block;
+  margin-bottom: 1px;
 }
 .left-panel__card__row + .left-panel__card__row {
   margin-top: 1px;
@@ -246,7 +250,7 @@ h3.subtitle_header .heading-icon {
 }
 
 .section_text {
-  font-size: 16px;
+  font-size: 15.5px;
   color: #fff;
   font-weight: normal;
   margin-top: 0;
@@ -547,7 +551,7 @@ h3.subtitle_header + .skills-grid {
 }
 
 .about-paragraph-text {
-  font-size: 16px;
+  font-size: 15.5px;
   padding-left: 0;
   display: block;
   flex: 1;
