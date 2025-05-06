@@ -64,8 +64,21 @@ body {
   color: #333;
   position: relative;
   z-index: 1;
-  border-right: 0.5px solid transparent;
+  border-right: none;
   flex-shrink: 0;
+}
+.left-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(to bottom, #fff 0%, transparent 70%);
+  z-index: 2;
+  transform: scaleX(0.8);
+  transform-origin: right;
 }
 
 .left-panel__card {
@@ -550,7 +563,7 @@ h3.subtitle_header + .skills-grid {
 .about-paragraph-icon {
   width: 36px;
   height: 36px;
-  margin-right: 18px;
+  margin-right: 24px;
   vertical-align: middle;
   display: block;
 }
@@ -571,7 +584,7 @@ h3.subtitle_header + .skills-grid {
 }
 
 .left-panel__card--social .left-panel__card__header {
-  background: linear-gradient(to right, #1856b4 0%, hsl(216, 86%, 58%) 100%);
+  background: linear-gradient(to right, #0853b6 0%, hsl(209, 100%, 59%) 100%);
 }
 
 .left-panel__card--social .left-panel__card__header__text,

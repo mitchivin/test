@@ -768,11 +768,28 @@
     filter: grayscale(1);
   }
 
+  .startmenu {
+    height: 425px;
+  }
+
   .startmenu .menu-item,
   .startmenu .item-right {
     height: calc(35px - 2px);
     min-height: calc(35px - 2px);
     line-height: calc(32px - 2px);
+  }
+
+  .item-title {
+    margin-bottom: 0;
+    line-height: 1;
+  }
+  .item-description {
+    margin-top: 0.35em;
+    line-height: 1;
+  }
+  .item-content {
+    gap: 0;
+    padding: 0;
   }
 }
 

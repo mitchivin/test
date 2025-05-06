@@ -266,12 +266,13 @@ export default class StartMenu {
     if (isMobileDevice()) {
       for (const item of ALL_PROGRAMS_ITEMS) {
         if (
-          ["mediaPlayer", "my-pictures", "notepad", "cmd", "info"].includes(
+          ["mediaPlayer", "my-pictures", "notepad", "cmd"].includes(
             item.programName,
           )
         ) {
           item.disabled = true;
         }
+        // Do not disable 'info' (Disclaimer) on mobile
       }
     } else {
       for (const item of ALL_PROGRAMS_ITEMS) {
@@ -427,7 +428,7 @@ export default class StartMenu {
     }) {
       const shouldDisable =
         isMobile &&
-        ["mediaPlayer", "my-pictures", "notepad", "cmd", "info"].includes(
+        ["mediaPlayer", "my-pictures", "notepad", "cmd"].includes(
           programName,
         );
       const disabledClass = shouldDisable ? " disabled" : "";
@@ -521,23 +522,6 @@ export default class StartMenu {
                 </div>
                 <div class="middle-section middle-right">
                     <ul class="menu-items">
-                        ${
-                          isMobile
-                            ? `
-                        ${renderMenuItem({
-                          id: "github",
-                          icon: "./assets/gui/start-menu/github.webp",
-                          title: "GitHub",
-                          url: "https://github.com/mitchivin",
-                          action: "open-url",
-                        })}
-                        ${renderMenuItem({
-                          id: "instagram",
-                          icon: "./assets/gui/start-menu/instagram.webp",
-                          title: "Instagram",
-                          url: "https://www.instagram.com/mitchivin",
-                          action: "open-url",
-                        })}
                         ${renderMenuItem({
                           id: "behance",
                           icon: "./assets/gui/start-menu/behance.webp",
@@ -552,30 +536,6 @@ export default class StartMenu {
                           url: "https://www.linkedin.com/in/mitchivin",
                           action: "open-url",
                         })}
-                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-                        ${renderMenuItem({
-                          id: "info",
-                          icon: "./assets/gui/start-menu/help.webp",
-                          title: "Disclaimer",
-                          programName: "info",
-                          action: "open-program",
-                        })}
-                        ${renderMenuItem({
-                          id: "cmd",
-                          icon: "./assets/gui/start-menu/cmd.webp",
-                          title: "Command Prompt",
-                          programName: "cmd",
-                          action: "open-program",
-                        })}
-                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-                        <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
-                            <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
-                            <div class="item-content">
-                                <span class="item-title">Recently Used</span>
-                            </div>
-                        </li>
-                        `
-                            : `
                         ${renderMenuItem({
                           id: "github",
                           icon: "./assets/gui/start-menu/github.webp",
@@ -590,27 +550,6 @@ export default class StartMenu {
                           url: "https://www.instagram.com/mitchivin",
                           action: "open-url",
                         })}
-                        ${renderMenuItem({
-                          id: "behance",
-                          icon: "./assets/gui/start-menu/behance.webp",
-                          title: "Behance",
-                          url: "https://www.behance.net/mitch_ivin",
-                          action: "open-url",
-                        })}
-                        ${renderMenuItem({
-                          id: "linkedin",
-                          icon: "./assets/gui/start-menu/linkedin.webp",
-                          title: "LinkedIn",
-                          url: "https://www.linkedin.com/in/mitchivin",
-                          action: "open-url",
-                        })}
-                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-                        <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
-                            <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
-                            <div class="item-content">
-                                <span class="item-title">Recently Used</span>
-                            </div>
-                        </li>
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
                         ${renderMenuItem({
                           id: "cmd",
@@ -619,6 +558,13 @@ export default class StartMenu {
                           programName: "cmd",
                           action: "open-program",
                         })}
+                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+                        <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
+                            <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
+                            <div class="item-content">
+                                <span class="item-title">Recently Used</span>
+                            </div>
+                        </li>
                         ${renderMenuItem({
                           id: "info",
                           icon: "./assets/gui/start-menu/help.webp",
@@ -626,8 +572,6 @@ export default class StartMenu {
                           programName: "info",
                           action: "open-program",
                         })}
-                        `
-                        }
                     </ul>
                 </div>
             </div>

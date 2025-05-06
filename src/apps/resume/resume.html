@@ -19,16 +19,16 @@
         /* margin/padding moved to html, body rule */
         font-family: Tahoma, Verdana, sans-serif; /* Default XP font */
         font-size: 11px; /* Default XP font size */
+        overflow: auto;
       }
       .app-root {
         box-sizing: border-box;
         padding: 16px;
         height: 100%;
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: stretch;
+        overflow: auto;
+        min-width: 100vw;
+        min-height: 100vh;
       }
       .maximized-mode.app-root {
         padding: 16px 0;
@@ -127,7 +127,7 @@
       document.addEventListener('DOMContentLoaded', () => {
         updateMaximizedMode();
         const resumeImage = document.getElementById('resumeImage');
-        const scroller = document.body; // Target body for scrolling
+        const scroller = document.getElementById('appRoot'); // Target .app-root for scrolling
         
         let isDragging = false;
         let startX, startY, startScrollLeft, startScrollTop;
@@ -197,8 +197,6 @@
 
           // --- Panning Logic (remains the same) ---
           resumeImage.addEventListener('mousedown', (e) => {
-            if (!resumeImage.classList.contains('zoomed')) return; 
-            
             isDragging = true;
             didDrag = false;
             resumeImage.classList.add('dragging');

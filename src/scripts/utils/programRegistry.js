@@ -128,8 +128,6 @@ const programData = {
   // System and Utility Programs
   info: createProgram("info", "Disclaimer", "start-menu/help.webp", {
     dimensions: { width: 390, height: 475 },
-    canMinimize: false,
-    canMaximize: false,
   }),
   cmd: createProgram("cmd", "Command Prompt", "start-menu/cmd.webp", {
     dimensions: { width: 500, height: 350 },
