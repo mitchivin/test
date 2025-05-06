@@ -22,7 +22,7 @@ body {
 .feed-container {
     /* Mobile First: Default to 1 column */
     column-count: 1;
-    padding: 20px 2.5vw; /* Adjust L/R padding for ~95vw content */
+    padding: 20px 8vw; /* Increased L/R padding for ~90vw content */
     box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
