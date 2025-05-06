@@ -11,70 +11,83 @@
     <div class="scroll-content">
         <div class="feed-container">
             <!-- Image Post 1 -->
-            <div class="post image-post">
+            <div class="post image-post" data-type="image" data-src="../../../assets/apps/projects/image1.webp" data-caption="A sample image post.">
                 <img src="../../../assets/apps/projects/image1.webp" alt="Project Image 1">
                 <div class="post-caption">A sample image post.</div>
             </div>
 
             <!-- Carousel Post 1 -->
-            <div class="post carousel-post">
-                <div class="placeholder-content carousel-placeholder">
-                    <span>Carousel Post (1080x1350)</span>
-                    <div class="carousel-dots">
-                        <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
-                    </div>
-                </div>
+            <div class="post carousel-post" data-type="carousel" data-images="../../../assets/apps/projects/carousel1.webp,../../../assets/apps/projects/carousel2.webp,../../../assets/apps/projects/carousel3.webp" data-caption="A sample carousel post.">
+                <img src="../../../assets/apps/projects/carousel1.webp" alt="Carousel Post Thumbnail">
                 <div class="post-caption">A sample carousel post.</div>
             </div>
 
             <!-- Video Post 1 -->
-            <div class="post video-post">
-                <video src="../../../assets/apps/projects/video1.mp4" controls autoplay muted loop playsinline alt="Project Video 1"></video>
+            <div class="post video-post" data-type="video" data-src="../../../assets/apps/projects/video1.mp4" data-caption="A sample video post.">
+                <video src="../../../assets/apps/projects/video1.mp4" autoplay muted loop playsinline alt="Project Video 1"></video>
                 <div class="post-caption">A sample video post.</div>
             </div>
 
             <!-- Image Post 2 -->
-            <div class="post image-post">
+            <div class="post image-post" data-type="image" data-src="../../../assets/apps/projects/image2.webp" data-caption="Another beautiful project.">
                 <img src="../../../assets/apps/projects/image2.webp" alt="Project Image 2">
                 <div class="post-caption">Another beautiful project.</div>
             </div>
 
             <!-- Video Post 2 -->
-            <div class="post video-post">
-                <video src="../../../assets/apps/projects/video2.mp4" controls autoplay muted loop playsinline alt="Project Video 2"></video>
+            <div class="post video-post" data-type="video" data-src="../../../assets/apps/projects/video2.mp4" data-caption="Behind the scenes.">
+                <video src="../../../assets/apps/projects/video2.mp4" autoplay muted loop playsinline alt="Project Video 2"></video>
                 <div class="post-caption">Behind the scenes.</div>
             </div>
 
             <!-- Image Post 3 -->
-            <div class="post image-post">
+            <div class="post image-post" data-type="image" data-src="../../../assets/apps/projects/image3.webp" data-caption="Initial design sketch.">
                 <img src="../../../assets/apps/projects/image3.webp" alt="Project Image 3">
                 <div class="post-caption">Initial design sketch.</div>
             </div>
 
             <!-- Video Post 3 -->
-            <div class="post video-post">
-                <video src="../../../assets/apps/projects/video3.mp4" controls autoplay muted loop playsinline alt="Project Video 3"></video>
+            <div class="post video-post" data-type="video" data-src="../../../assets/apps/projects/video3.mp4" data-caption="Project Highlights Reel.">
+                <video src="../../../assets/apps/projects/video3.mp4" autoplay muted loop playsinline alt="Project Video 3"></video>
                 <div class="post-caption">Project Highlights Reel.</div>
             </div>
 
             <!-- Image Post 4 -->
-            <div class="post image-post">
+            <div class="post image-post" data-type="image" data-src="../../../assets/apps/projects/image4.webp" data-caption="The final product shot.">
                 <img src="../../../assets/apps/projects/image4.webp" alt="Project Image 4">
                 <div class="post-caption">The final product shot.</div>
             </div>
 
             <!-- Image Post 5 -->
-            <div class="post image-post">
+            <div class="post image-post" data-type="image" data-src="../../../assets/apps/projects/image5.webp" data-caption="Early concept artwork.">
                 <img src="../../../assets/apps/projects/image5.webp" alt="Project Image 5">
                 <div class="post-caption">Early concept artwork.</div>
             </div>
 
             <!-- Image Post 6 -->
-            <div class="post image-post">
+            <div class="post image-post" data-type="image" data-src="../../../assets/apps/projects/image6.webp" data-caption="UI Mockup details.">
                 <img src="../../../assets/apps/projects/image6.webp" alt="Project Image 6">
                 <div class="post-caption">UI Mockup details.</div>
             </div>
         </div>
     </div>
+
+    <!-- Lightbox Structure -->
+    <div id="project-lightbox">
+        <div id="lightbox-content">
+            <!-- Content (image/video) will be loaded here by JS -->
+        </div>
+        <!-- Carousel Navigation Arrows (remain relative to lightbox-content) -->
+        <span id="lightbox-prev" class="lightbox-nav">&lt;</span>
+        <span id="lightbox-next" class="lightbox-nav">&gt;</span>
+
+        <div id="lightbox-details"> 
+            <!-- Caption will be inserted here by JS -->
+            <span id="lightbox-close">Close</span>
+        </div>
+    </div>
+
+    <script src="projects.js" defer></script>
+
 </body>
 </html>

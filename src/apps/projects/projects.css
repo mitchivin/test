@@ -20,13 +20,13 @@ body {
 }
 
 .feed-container {
-    /* Mobile First: Default to 1 column */
-    column-count: 1;
-    padding: 20px 8vw; /* Increased L/R padding for ~90vw content */
+    /* Mobile First: Default changed to 2 columns */
+    column-count: 2;
+    column-gap: 10px; /* Gap between columns */
+    padding: 10px; /* Padding around the feed */
     box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
-    /* column-gap is not needed for 1 column */
 }
 
 /* Tablet and Small Desktop: 3 columns (Changed from 2) */
@@ -56,11 +56,19 @@ body {
     background-color: #ffffff;
     border: 1px solid #dbdbdb;
     border-radius: 8px; /* Softer radius */
-    margin: 0 auto 24px auto; /* Added for vertical spacing and centering */
+    margin: 0 auto 10px auto; /* top | R/L | bottom | R/L -> Add 10px bottom margin */
     width: 100%;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     overflow: hidden; /* Ensure content within post respects border-radius */
     break-inside: avoid; /* Added to prevent posts splitting across columns */
+    cursor: pointer; /* Indicate posts are clickable */
+}
+
+.post.carousel-post img {
+    display: block;
+    width: 100%;
+    height: 100%; /* Make height 100% of parent */
+    object-fit: cover; /* Cover the area, cropping if necessary */
 }
 
 .post:last-child {
@@ -131,10 +139,155 @@ body {
 }
 
 .post-caption {
-    padding: 12px 16px;
-    font-size: 14px;
+    /* background-color: #fff; */ /* Ensure caption area is white */
+    /* color: #262626; */ /* Standard Instagram text color */
+    /* text-align: left; */ /* Align text to the left by default */
+    display: none; /* Hide captions in the main feed */
+}
+
+/* Lightbox Styles */
+#project-lightbox {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Semi-transparent background */
+    z-index: 100010; /* Ensure it's above other CRT layers */
+    align-items: center; /* Center horizontally */
+    flex-direction: column; /* Stack content and button vertically */
+    padding: 20px; /* Add padding to prevent button touching edge */
+    box-sizing: border-box;
+    overflow-y: auto; /* Allow vertical scrolling if content overflows */
+}
+
+#lightbox-content {
+    position: relative; /* For potential future absolute positioning of children */
+    max-width: 90vw;
+    max-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Ensure it takes up space in column flex */
+    border: 2px solid red; /* --- DEBUG BORDER --- */
+}
+
+#lightbox-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center caption and close button on mobile */
+    width: 100%; /* Take full width on mobile */
+    max-width: 90vw; /* Match content width on mobile */
+    text-align: center; /* Center text for caption on mobile */
+    border: 2px solid limegreen; /* --- DEBUG BORDER --- */
+}
+
+#lightbox-content img,
+#lightbox-content video {
+    max-width: 100%;    /* Fit within #lightbox-content's width (max 90vw) */
+    max-height: 100%;   /* Fit within #lightbox-content's height (max 80vh) */
+    object-fit: contain; /* Ensure entire image/video is visible, letterboxed if necessary */
+    display: block;     /* Remove any potential extra space if inline */
+}
+
+#lightbox-caption {
+    color: #f1f1f1;
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    max-width: 70vw; /* Limit width of caption */
+    margin-top: 10px; /* Space between media and caption */
     line-height: 1.4;
-    border-top: 1px solid #efefef;
-    background-color: #fff; /* Ensure caption area is white */
-    color: #262626; /* Standard Instagram text color */
+}
+
+#lightbox-close {
+    margin-top: 15px; /* Space above the button */
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 0.9rem;
+}
+
+#lightbox-close:hover {
+    background-color: #555;
+}
+
+/* --- Desktop: Two-Column Layout (Applied via JS class) --- */
+
+#project-lightbox.desktop-layout {
+  flex-direction: row; /* Side-by-side layout */
+  align-items: stretch; /* Make columns same height */
+  justify-content: center; /* Center content horizontally */
+  padding: 20px; /* Adjusted padding for desktop */
+}
+
+#project-lightbox.desktop-layout #lightbox-content {
+  flex-basis: 65%; /* Media takes ~2/3 width */
+  max-width: 65%;
+  padding-right: 20px; /* Space between media and details */
+  display: flex; /* Use flex for centering */
+  justify-content: center;
+  align-items: center;
+  height: auto; /* Let height be determined by content ratio */
+  max-height: calc(100% - 40px); /* Adjust based on padding */
+}
+
+#project-lightbox.desktop-layout #lightbox-content img,
+#project-lightbox.desktop-layout #lightbox-content video {
+  max-height: 100%; /* Ensure media respects container height */
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+#project-lightbox.desktop-layout #lightbox-details {
+  flex-basis: 35%; /* Details take ~1/3 width */
+  max-width: 35%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Caption top, Close bottom */
+  padding: 0; /* Reset padding */
+  height: auto; /* Match content height */
+  max-height: calc(100% - 40px); /* Match content max-height */
+  overflow-y: auto; /* Add scroll if caption is very long */
+}
+
+#project-lightbox.desktop-layout #lightbox-caption {
+  text-align: left;
+  margin-bottom: 10px; /* Space below caption */
+  flex-grow: 1; /* Allow caption to take up space */
+  overflow-y: auto; /* Scroll if caption too long */
+}
+
+#project-lightbox.desktop-layout #lightbox-close {
+  align-self: flex-end; /* Align close button to the bottom right */
+  margin-top: auto; /* Push to bottom */
+  position: static; /* Remove absolute positioning */
+  transform: none;
+  padding: 5px 10px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+/* Ensure carousel buttons are positioned correctly in desktop layout */
+#project-lightbox.desktop-layout #lightbox-prev,
+#project-lightbox.desktop-layout #lightbox-next {
+  top: 50%;
+  transform: translateY(-50%);
+  /* Adjust left/right positioning if needed, relative to #lightbox-content */
+}
+
+#project-lightbox.desktop-layout #lightbox-prev {
+  left: 5px; /* Position inside the content area */
+}
+
+#project-lightbox.desktop-layout #lightbox-next {
+  right: calc(35% + 25px); /* Position relative to the start of details column */
 }
