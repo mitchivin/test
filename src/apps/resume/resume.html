@@ -7,11 +7,11 @@
     <!-- XP.css: Use CDN link, adjust if using local dependency -->
     <link rel="stylesheet" href="https://unpkg.com/xp.css">
     <style>
-      html, body {
-        height: 100%; /* Ensure html and body have height */
+      html, body, .app-root {
+        height: 100%;
         margin: 0;
         padding: 0;
-        overflow: auto; /* Allow scrolling in BOTH directions */
+        box-sizing: border-box;
       }
       body {
         background: #97958f; /* Slightly darker than #ece9d8 */
@@ -21,50 +21,53 @@
         font-size: 11px; /* Default XP font size */
       }
       .app-root {
-        width: 100%;
-        height: 100%; /* Fill the iframe body */
         box-sizing: border-box;
-        padding: 10px; /* Keep padding */
+        padding: 16px;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
       }
-      /* Style for the resume image */
-      .resume-image {
-        display: block; /* Treat as block for margin centering */
-        margin-left: auto; /* Center horizontally */
-        margin-right: auto; /* Center horizontally */
-        max-width: 100%; /* Don't exceed container width */
-        max-height: 100%; /* Don't exceed container height */
-        object-fit: contain; /* Scale while preserving aspect ratio */
-        /* Add margin: auto; if needed for centering, though flexbox on parent handles it */
-        /* margin: auto; */ 
+      .maximized-mode.app-root {
+        padding: 16px 0;
       }
-
-      /* Zoom cursor on hover */
       .resume-image {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
         cursor: zoom-in;
+        transition: max-width 0.2s, max-height 0.2s, width 0.2s, height 0.2s;
+        box-sizing: content-box;
       }
-
-      /* Styles for the zoomed state - DEFAULT (smaller window) */
       .resume-image.zoomed {
         max-width: none;
         max-height: none;
-        width: 160%; /* Default zoom relative to container */
+        width: 160%;
         height: auto;
         cursor: zoom-out;
       }
-
-      /* Override zoom style for WIDER viewports (likely maximized) */
-      @media (min-width: 700px) { /* Adjust breakpoint as needed */
+      @media (min-width: 700px) {
         .resume-image.zoomed {
-          width: 850px; /* Fixed width for larger views */
-          max-width: 90vw; /* Capped by viewport */
+          width: 850px;
+          max-width: 90vw;
         }
       }
-
-      /* Style for cursor during drag */
       .resume-image.dragging {
-          cursor: grabbing;
+        cursor: grabbing;
       }
-
+      .maximized-mode .resume-image:not(.zoomed) {
+        width: auto;
+        height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+        margin-bottom: 0;
+        display: block;
+      }
       /* Add any other base styles needed for all apps */
     </style>
   </head>
@@ -80,7 +83,49 @@
     </div>
 
     <script>
+      // Helper: Find parent window with .app-window class
+      function getParentAppWindow() {
+        let win = window.frameElement;
+        while (win && win.parentElement) {
+          if (win.parentElement.classList && win.parentElement.classList.contains('app-window')) {
+            return win.parentElement;
+          }
+          win = win.parentElement;
+        }
+        // Fallback: try top-level
+        if (window.frameElement && window.frameElement.closest) {
+          return window.frameElement.closest('.app-window');
+        }
+        return null;
+      }
+      function updateMaximizedMode() {
+        const appRoot = document.getElementById('appRoot');
+        let maximized = false;
+        try {
+          // Try to detect maximized state from parent window
+          if (window.parent && window.parent !== window) {
+            const frame = window.frameElement;
+            if (frame && frame.parentElement && frame.parentElement.classList.contains('app-window')) {
+              maximized = frame.parentElement.classList.contains('maximized');
+            }
+          }
+        } catch (e) {}
+        if (maximized) {
+          appRoot.classList.add('maximized-mode');
+        } else {
+          appRoot.classList.remove('maximized-mode');
+        }
+      }
+      // Listen for maximized/unmaximized events from parent
+      window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'window:maximized') {
+          document.getElementById('appRoot').classList.add('maximized-mode');
+        } else if (event.data && event.data.type === 'window:unmaximized') {
+          document.getElementById('appRoot').classList.remove('maximized-mode');
+        }
+      });
       document.addEventListener('DOMContentLoaded', () => {
+        updateMaximizedMode();
         const resumeImage = document.getElementById('resumeImage');
         const scroller = document.body; // Target body for scrolling
         
@@ -190,6 +235,8 @@
         } else {
           console.error("Resume image element not found.");
         }
+        // Initial maximized mode check
+        updateMaximizedMode();
       });
     </script>
   </body>

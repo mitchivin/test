@@ -15,11 +15,11 @@ function openExternalLink(url) {
 
 // Setup for social links in the left panel
 function setupSocialLinks() {
-    // Attach click handler to each social link row
-    document.querySelectorAll('a.left-panel__card__row.social-link').forEach(row => {
-        row.addEventListener('click', (e) => {
+    // Attach click handler to each social link anchor
+    document.querySelectorAll('.left-panel__card__row.social-link a').forEach(link => {
+        link.addEventListener('click', (e) => {
             e.preventDefault();
-            openExternalLink(row.href);
+            openExternalLink(link.href);
         });
     });
 }
