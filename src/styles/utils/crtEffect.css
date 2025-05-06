@@ -287,6 +287,7 @@
         transparent calc(var(--crt-scanline-width) + var(--crt-scanline-gap))
     );
     pointer-events: none;
+    opacity: 0.7; /* Decreased from 0.7 */
     z-index: 100000;
     mix-blend-mode: multiply;
     animation: scanline-drift 6s linear infinite;
@@ -445,7 +446,7 @@
     left: 0;
     width: 100%;
     height: 100vh;
-    background: rgb(150 255 150 / 1%);
+    background: rgb(150 255 150 / 1%); /* Increased alpha from 3% */
     pointer-events: none;
     z-index: 100008; /* Increased from 9994 */
     mix-blend-mode: screen;
@@ -453,6 +454,12 @@
 
 /* Remove base styling that might conflict with Windows XP theme */
 /* Body background and flicker are handled elsewhere or not needed */
+
+/* Apply overall brightness */
+body {
+    filter: brightness(1.15);
+}
+
 /*
 body {
     background-color: #000;

@@ -1,0 +1,140 @@
+/* src/apps/projects/projects.css */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #333;
+}
+
+body {
+    background: linear-gradient(135deg, #b7e5ff 0%, #ffffff 100%);
+    background-attachment: fixed; /* Gradient does not move with scroll */
+    /* overflow-y: scroll; */ /* Removed: XP.css will handle scroll on .scroll-content */
+}
+
+.scroll-content {
+    height: 100%; /* Make scroll-content fill the body */
+    overflow-y: auto; /* Enable scrolling and allow XP.css to style the scrollbar */
+    position: relative; /* Optional: for positioning context if needed by xp.css sub-elements */
+}
+
+.feed-container {
+    /* Mobile First: Default to 1 column */
+    column-count: 1;
+    padding: 20px 2.5vw; /* Adjust L/R padding for ~95vw content */
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    /* column-gap is not needed for 1 column */
+}
+
+/* Tablet and Small Desktop: 3 columns (Changed from 2) */
+@media (min-width: 768px) {
+    .feed-container {
+        column-count: 3;
+        column-gap: 24px;
+        padding: 40px; /* Restore user's desired padding */
+        max-width: 1088px; /* Adjusted for 3 smaller posts: (3 * 320px) + (2 * 24px gaps) + (2 * 40px padding) */
+    }
+
+    .post {
+        max-width: 320px; /* Apply max-width only on tablet/desktop */
+    }
+}
+
+/* Large Desktop: 4 columns (Changed from 3) */
+@media (min-width: 1200px) {
+    .feed-container {
+        column-count: 4;
+        /* column-gap and padding are inherited from 768px query */
+        max-width: 1432px; /* Adjusted for 4 smaller posts: (4 * 320px) + (3 * 24px gaps) + (2 * 40px padding) */
+    }
+}
+
+.post {
+    background-color: #ffffff;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px; /* Softer radius */
+    margin: 0 auto 24px auto; /* Added for vertical spacing and centering */
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden; /* Ensure content within post respects border-radius */
+    break-inside: avoid; /* Added to prevent posts splitting across columns */
+}
+
+.post:last-child {
+    margin-bottom: 0;
+}
+
+.post.image-post img {
+    display: block; /* Remove potential bottom space */
+    width: 100%;   /* Fill container width */
+    height: auto;  /* Maintain aspect ratio */
+}
+
+.post.video-post video {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.placeholder-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.image-placeholder {
+    width: 100%;
+    aspect-ratio: 1080 / 1350;
+    background-color: #3498db; /* Blue for images */
+}
+
+.video-placeholder {
+    width: 100%;
+    aspect-ratio: 1080 / 1920;
+    background-color: #2ecc71; /* Green for videos */
+}
+
+.carousel-placeholder {
+    width: 100%;
+    aspect-ratio: 1080 / 1350; /* Same as image for now */
+    background-color: #e74c3c; /* Red for carousels */
+    position: relative; /* For dots */
+}
+
+.carousel-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+}
+
+.carousel-dots .dot {
+    width: 8px;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    margin: 0 4px;
+}
+
+.carousel-dots .dot.active {
+    background-color: white;
+}
+
+.post-caption {
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.4;
+    border-top: 1px solid #efefef;
+    background-color: #fff; /* Ensure caption area is white */
+    color: #262626; /* Standard Instagram text color */
+}

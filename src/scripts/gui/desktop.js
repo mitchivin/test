@@ -52,15 +52,6 @@ export default class Desktop {
       this.desktop.classList.add('wallpaper-default');
     }
 
-    // Set background position class for ultrawide screens
-    this.desktop.classList.remove('bg-pos-ultrawide'); // Clear existing first
-    const aspectRatio = window.innerWidth / window.innerHeight;
-    if (aspectRatio > 2.3) {
-      // 21:9 is ~2.33
-      this.desktop.classList.add('bg-pos-ultrawide');
-    }
-    // No 'else' needed if the default classes handle the non-ultrawide case
-
     this.eventBus.subscribe(EVENTS.WINDOW_CREATED, () => this.clearSelection());
     this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, () => this.clearSelection());
   }
