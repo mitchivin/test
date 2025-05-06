@@ -16,7 +16,7 @@
   bottom: calc(var(--taskbar-height) + 1px);
   left: 0;
   width: 355px;
-  height: 465px;
+  height: 455px;
   display: flex;
   flex-direction: column;
   background-color: var(--xp-bg-accent);
@@ -194,8 +194,11 @@
 
 /* Left side menu items - allow them to grow equally */
 .middle-left .menu-item {
-  /* Inherits general .menu-item styles */
-  flex: 1; /* Allow them to grow and take available space */
+  flex: 1;
+  padding: 4px 8px;
+  margin: 0;
+  box-sizing: border-box;
+  transition: background-color 0.05s ease;
 }
 
 /* Right side menu items */
