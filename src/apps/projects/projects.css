@@ -64,15 +64,9 @@ body {
     cursor: pointer; /* Indicate posts are clickable */
 }
 
-.post.carousel-post img {
-    display: block;
-    width: 100%;
-    height: 100%; /* Make height 100% of parent */
-    object-fit: cover; /* Cover the area, cropping if necessary */
-}
-
 .post:last-child {
     margin-bottom: 0;
+    background-color: #2ecc71; /* Green for videos */
 }
 
 .post.image-post img {
@@ -111,61 +105,46 @@ body {
     background-color: #2ecc71; /* Green for videos */
 }
 
-.carousel-placeholder {
-    width: 100%;
-    aspect-ratio: 1080 / 1350; /* Same as image for now */
-    background-color: #e74c3c; /* Red for carousels */
-    position: relative; /* For dots */
-}
-
-.carousel-dots {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-}
-
-.carousel-dots .dot {
-    width: 8px;
-    height: 8px;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
-    margin: 0 4px;
-}
-
-.carousel-dots .dot.active {
-    background-color: white;
-}
-
 .post-caption {
     /* background-color: #fff; */ /* Ensure caption area is white */
     /* color: #262626; */ /* Standard Instagram text color */
     /* text-align: left; */ /* Align text to the left by default */
     display: none; /* Hide captions in the main feed */
+    cursor: pointer;
 }
 
 /* Lightbox Styles */
 #project-lightbox {
-    display: none; /* Hidden by default */
+    display: none; /* MODIFIED: Should be hidden by default */
+    justify-content: center; 
+    align-items: center; 
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.85); /* Semi-transparent background */
-    z-index: 100010; /* Ensure it's above other CRT layers */
-    align-items: center; /* Center horizontally */
-    flex-direction: column; /* Stack content and button vertically */
-    padding: 20px; /* Add padding to prevent button touching edge */
+    width: 100%; /* Ensure full width for BG */
+    height: 100dvh; 
+    background-color: rgba(0, 0, 0, 0.9); /* MODIFIED: Made slightly darker */
+    z-index: 100010; 
+    padding: 20px; /* Padding for the content area from screen edges */
     box-sizing: border-box;
-    overflow-y: auto; /* Allow vertical scrolling if content overflows */
+    overflow-y: auto; /* If inner-wrapper overflows padded viewport */
+    /* REMOVED: max-width, margin-left, margin-right, right: 0, flex-direction */
+}
+
+#lightbox-inner-wrapper {
+    display: flex;
+    flex-direction: column; /* Mobile: stacks content and details */
+    width: 100%; /* Fills parent's (padded #project-lightbox) content box */
+    max-width: 1440px; /* MODIFIED: Reduced max-width */
+    height: 100%; /* Fills parent's content box height */
+    box-sizing: border-box;
+    /* background-color: rgba(0,100,0,0.1); -- Optional: for debugging inner wrapper */
 }
 
 #lightbox-content {
-    position: relative; /* For potential future absolute positioning of children */
+    position: relative; 
     max-width: 90vw;
-    max-height: 80vh;
+    max-height: 80vh; /* REINSTATED: Max height for media container */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -179,8 +158,10 @@ body {
     align-items: center; /* Center caption and close button on mobile */
     width: 100%; /* Take full width on mobile */
     max-width: 90vw; /* Match content width on mobile */
-    text-align: center; /* Center text for caption on mobile */
+    text-align: center; /* Center text for title on mobile */
     border: 2px solid limegreen; /* --- DEBUG BORDER --- */
+    flex-grow: 1; /* ADDED: Allow details to fill available vertical space */
+    min-height: 0; /* ADDED: Good practice for growing flex items */
 }
 
 #lightbox-content img,
@@ -191,18 +172,38 @@ body {
     display: block;     /* Remove any potential extra space if inline */
 }
 
-#lightbox-caption {
+#lightbox-title {
     color: #f1f1f1;
     text-align: center;
-    padding: 10px 20px;
+    font-size: 1.7rem;
+    font-weight: 700;
+    max-width: 70vw; /* Limit width of title */
+    line-height: 1.3;
+    margin-top: 10px;
+}
+
+#lightbox-subheading {
+    color: #cccccc; /* Lighter than title */
+    font-size: 1.1rem; /* MODIFIED: Between body and title */
+    font-weight: 500; /* MODIFIED: Between body and title */
+    line-height: 1.3;
+    margin-top: 4px; /* Small space below title */
+    /* text-align: center; is inherited from #lightbox-details on mobile */
+    /* max-width will be inherited or can be set if needed */
+}
+
+#lightbox-description {
+    color: #f1f1f1;
     font-size: 0.9rem;
-    max-width: 70vw; /* Limit width of caption */
-    margin-top: 10px; /* Space between media and caption */
-    line-height: 1.4;
+    line-height: 1.5;
+    margin-top: 10px; /* Space below title */
+    margin-bottom: 15px; /* Space above close button */
+    max-width: 70vw; /* Consistent with title's max-width */
+    overflow-y: auto; /* Scroll if title too long */
 }
 
 #lightbox-close {
-    margin-top: 15px; /* Space above the button */
+    margin-top: auto; /* Push to bottom of flex container */
     padding: 10px 20px;
     background-color: #333;
     color: white;
@@ -219,22 +220,21 @@ body {
 
 /* --- Desktop: Two-Column Layout (Applied via JS class) --- */
 
-#project-lightbox.desktop-layout {
+#project-lightbox.desktop-layout #lightbox-inner-wrapper { /* MODIFIED: Target inner-wrapper */
   flex-direction: row; /* Side-by-side layout */
   align-items: stretch; /* Make columns same height */
-  justify-content: center; /* Center content horizontally */
-  padding: 20px; /* Adjusted padding for desktop */
+  /* justify-content: center; -- This was on #project-lightbox, might not be needed here if children use flex-basis */
+  /* padding: 20px; -- Padding is now on #project-lightbox itself */
 }
 
 #project-lightbox.desktop-layout #lightbox-content {
-  flex-basis: 65%; /* Media takes ~2/3 width */
-  max-width: 65%;
-  padding-right: 20px; /* Space between media and details */
+  flex-basis: 60%; 
+  max-width: 60%; /* MODIFIED: Media takes 60% width */
   display: flex; /* Use flex for centering */
   justify-content: center;
   align-items: center;
   height: auto; /* Let height be determined by content ratio */
-  max-height: calc(100% - 40px); /* Adjust based on padding */
+  max-height: 100%; /* Fill available height within padded parent */
 }
 
 #project-lightbox.desktop-layout #lightbox-content img,
@@ -247,47 +247,35 @@ body {
 }
 
 #project-lightbox.desktop-layout #lightbox-details {
-  flex-basis: 35%; /* Details take ~1/3 width */
-  max-width: 35%;
+  flex-basis: 40%; /* MODIFIED: Details take 40% width */
+  max-width: 40%; /* MODIFIED: Details take 40% width */
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Caption top, Close bottom */
-  padding: 0; /* Reset padding */
+  align-items: stretch; /* Allow items to stretch, title will use its own text-align */
+  padding: 0 20px; /* MODIFIED: 0 top/bottom, 20px left/right */
   height: auto; /* Match content height */
-  max-height: calc(100% - 40px); /* Match content max-height */
+  max-height: 100%; /* Fill available height within padded parent */
   overflow-y: auto; /* Add scroll if caption is very long */
 }
 
-#project-lightbox.desktop-layout #lightbox-caption {
+#project-lightbox.desktop-layout #lightbox-title {
   text-align: left;
-  margin-bottom: 10px; /* Space below caption */
-  flex-grow: 1; /* Allow caption to take up space */
-  overflow-y: auto; /* Scroll if caption too long */
+  margin-top: 40px;
+  margin-bottom: 10px;
+  overflow-y: auto;
+}
+
+#project-lightbox.desktop-layout #lightbox-subheading {
+  text-align: left;
+  /* max-width will be effectively determined by parent in desktop if not specified here */
+}
+
+#project-lightbox.desktop-layout #lightbox-description {
+  text-align: left;
+  /* max-width will be effectively determined by parent in desktop if not specified here */
+  /* Other desktop-specific styles for description can be added here if needed */
 }
 
 #project-lightbox.desktop-layout #lightbox-close {
-  align-self: flex-end; /* Align close button to the bottom right */
-  margin-top: auto; /* Push to bottom */
-  position: static; /* Remove absolute positioning */
-  transform: none;
-  padding: 5px 10px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
-
-/* Ensure carousel buttons are positioned correctly in desktop layout */
-#project-lightbox.desktop-layout #lightbox-prev,
-#project-lightbox.desktop-layout #lightbox-next {
-  top: 50%;
-  transform: translateY(-50%);
-  /* Adjust left/right positioning if needed, relative to #lightbox-content */
-}
-
-#project-lightbox.desktop-layout #lightbox-prev {
-  left: 5px; /* Position inside the content area */
-}
-
-#project-lightbox.desktop-layout #lightbox-next {
-  right: calc(35% + 25px); /* Position relative to the start of details column */
+  align-self: center; /* Center the button in the desktop layout, overriding parent's stretch */
 }
