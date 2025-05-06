@@ -8,9 +8,7 @@
 /* =========================
    1. Universal Box Sizing & Font Smoothing
    ========================= */
-*,
-*::before,
-*::after {
+* , *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -81,14 +79,6 @@ a {
   -ms-user-select: none !important;
 }
 
-.desktop-icons-top a {
-  pointer-events: auto !important;
-}
-
-.desktop-icons-top * {
-  pointer-events: auto !important;
-}
-
 /* ==================================================
    END Modern CSS Reset
    ================================================== */
@@ -112,8 +102,4 @@ body {
 #windows-container {
   position: absolute;
   z-index: 100;
-}
-
-.desktop-icons-top {
-  display: none;
 }

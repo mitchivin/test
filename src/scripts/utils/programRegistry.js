@@ -102,30 +102,6 @@ const FILE_DROPDOWN_CONTACT = [
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
 
-// Add menu item arrays for abstraction
-// Placeholders for future tools (intentionally omitted for codebase cleanliness)
-const MOST_USED_TOOLS_ITEMS = [
-  // Example for future expansion:
-  // {
-  //   type: "program",
-  //   programName: "photoshop",
-  //   icon: "./assets/gui/start-menu/vanity-apps/photoshop.webp",
-  //   label: "Adobe Photoshop",
-  //   disabled: true,
-  // },
-];
-
-const AI_TOOLS_ITEMS = [
-  // Example for future expansion:
-  // {
-  //   type: "program",
-  //   programName: "chatgpt",
-  //   icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
-  //   label: "ChatGPT",
-  //   disabled: true,
-  // },
-];
-
 // =========================
 // 2. Program Data Registry
 // =========================
@@ -150,7 +126,7 @@ const programData = {
   ),
 
   // System and Utility Programs
-  info: createProgram("info", "System Information", "start-menu/help.webp", {
+  info: createProgram("info", "Disclaimer", "start-menu/help.webp", {
     dimensions: { width: 390, height: 475 },
     canMinimize: false,
     canMaximize: false,
@@ -256,7 +232,7 @@ const programData = {
     },
   }),
   resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
-    dimensions: { width: 536, height: 750 },
+    dimensions: { width: 600, height: 725 },
     statusBarText: "Reviewing professional background",
     appPath: "src/apps/resume/resume.html",
     menuBarConfig: {

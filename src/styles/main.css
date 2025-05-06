@@ -8,15 +8,14 @@
 /* =========================
    1. Imports
    ========================= */
-@import url("reset.css"); /* Moved from utils */
-/* @import url("utils/fonts.css"); */ /* Removed - File missing */
+@import url("reset.css");
 @import url("gui/desktop.css");
 @import url("gui/taskbar.css");
 @import url("gui/startMenu.css");
 @import url("gui/window.css");
 @import url("gui/windowBars.css");
 @import url("gui/boot.css");
-@import url("utils/crtEffect.css"); /* Import CRT effect styles */
+@import url("utils/crtEffect.css");
 
 /* =========================
    2. Z-Index Hierarchy
@@ -158,7 +157,7 @@ iframe a {
    XP.css-Inspired Custom Scrollbar Styles (Global)
    ==================================================
    - Ensures all scrollable areas (windows, menus, lists) use a consistent Windows XP look.
-   - Applies to .window-body, .all-programs-items, .most-used-tools-items, .ai-tools-items, .menu-items, and any scrollable container.
+   - Applies to .window-body, .all-programs-items, .recently-used-items, .ai-tools-items, .menu-items, and any scrollable container.
    - Uses both ::-webkit-scrollbar (WebKit) and scrollbar-color/width (Firefox) for cross-browser support.
    - Colors and sizing match XP.css and Windows XP visual style.
    ================================================== */
@@ -168,7 +167,7 @@ iframe a {
 /* WebKit browsers (Chrome, Edge, Safari) */
 .window-body,
 .all-programs-items,
-.most-used-tools-items,
+.recently-used-items,
 .ai-tools-items,
 .menu-items,
 .desktop-icons {
@@ -178,7 +177,7 @@ iframe a {
 
 .window-body::-webkit-scrollbar,
 .all-programs-items::-webkit-scrollbar,
-.most-used-tools-items::-webkit-scrollbar,
+.recently-used-items::-webkit-scrollbar,
 .ai-tools-items::-webkit-scrollbar,
 .menu-items::-webkit-scrollbar,
 .desktop-icons::-webkit-scrollbar {
@@ -188,7 +187,7 @@ iframe a {
 
 .window-body::-webkit-scrollbar-thumb,
 .all-programs-items::-webkit-scrollbar-thumb,
-.most-used-tools-items::-webkit-scrollbar-thumb,
+.recently-used-items::-webkit-scrollbar-thumb,
 .ai-tools-items::-webkit-scrollbar-thumb,
 .menu-items::-webkit-scrollbar-thumb,
 .desktop-icons::-webkit-scrollbar-thumb {
@@ -201,7 +200,7 @@ iframe a {
 
 .window-body::-webkit-scrollbar-thumb:hover,
 .all-programs-items::-webkit-scrollbar-thumb:hover,
-.most-used-tools-items::-webkit-scrollbar-thumb:hover,
+.recently-used-items::-webkit-scrollbar-thumb:hover,
 .ai-tools-items::-webkit-scrollbar-thumb:hover,
 .menu-items::-webkit-scrollbar-thumb:hover,
 .desktop-icons::-webkit-scrollbar-thumb:hover {
@@ -210,7 +209,7 @@ iframe a {
 
 .window-body::-webkit-scrollbar-track,
 .all-programs-items::-webkit-scrollbar-track,
-.most-used-tools-items::-webkit-scrollbar-track,
+.recently-used-items::-webkit-scrollbar-track,
 .ai-tools-items::-webkit-scrollbar-track,
 .menu-items::-webkit-scrollbar-track,
 .desktop-icons::-webkit-scrollbar-track {
@@ -221,7 +220,7 @@ iframe a {
 /* Hide scrollbar corner (where vertical and horizontal meet) */
 .window-body::-webkit-scrollbar-corner,
 .all-programs-items::-webkit-scrollbar-corner,
-.most-used-tools-items::-webkit-scrollbar-corner,
+.recently-used-items::-webkit-scrollbar-corner,
 .ai-tools-items::-webkit-scrollbar-corner,
 .menu-items::-webkit-scrollbar-corner,
 .desktop-icons::-webkit-scrollbar-corner {
@@ -232,7 +231,7 @@ iframe a {
 @media (forced-colors: active) {
   .window-body,
   .all-programs-items,
-  .most-used-tools-items,
+  .recently-used-items,
   .ai-tools-items,
   .menu-items,
   .desktop-icons {

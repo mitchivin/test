@@ -80,7 +80,6 @@ export default class Taskbar {
     this.programsContainer = document.querySelector(".taskbar-programs");
     this.systemTray = document.querySelector(".system-tray");
     this.taskbar = document.querySelector(".taskbar"); // Cache taskbar
-    this.quickLaunch = document.querySelector(".quick-launch"); // Cache quick-launch
 
     // Always use the desktop start button asset
     this._setStartButtonImage();
@@ -183,9 +182,8 @@ export default class Taskbar {
   _calculateAvailableWidth() {
     const taskbarWidth = this.taskbar.offsetWidth;
     const startButtonWidth = this.startButton.offsetWidth;
-    const quickLaunchWidth = this.quickLaunch?.offsetWidth || 0;
     const systemTrayWidth = this.systemTray.offsetWidth;
-    return taskbarWidth - startButtonWidth - quickLaunchWidth - systemTrayWidth;
+    return taskbarWidth - startButtonWidth - systemTrayWidth;
   }
 
   _determineLayoutMode(itemCount, availableWidth) {

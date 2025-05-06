@@ -91,7 +91,7 @@ const ALL_PROGRAMS_ITEMS = [
 ];
 
 // Add menu item arrays for abstraction
-const MOST_USED_TOOLS_ITEMS = [
+const RECENTLY_USED_ITEMS = [
   {
     type: "program",
     programName: "program1",
@@ -155,9 +155,7 @@ const MOST_USED_TOOLS_ITEMS = [
     label: "Figma",
     disabled: true,
   },
-];
-
-const AI_TOOLS_ITEMS = [
+  { type: "separator" },
   {
     type: "program",
     programName: "chatgpt",
@@ -261,8 +259,7 @@ export default class StartMenu {
     this.startButton = document.getElementById("start-button");
     this.startMenu = null;
     this.allProgramsMenu = null;
-    this.mostUsedToolsMenu = null;
-    this.aiToolsMenu = null;
+    this.recentlyUsedMenu = null;
     this.activeWindowOverlay = null; // Keep track of which overlay is active
 
     // Only disable certain programs on mobile at runtime
@@ -327,8 +324,7 @@ export default class StartMenu {
     this.startMenu = startMenu;
 
     this.createAllProgramsMenu();
-    this.createMostUsedToolsMenu();
-    this.createAiToolsMenu();
+    this.createRecentlyUsedMenu();
     this.setupMenuItems();
     this._setupDelegatedEventHandlers();
   }
@@ -398,33 +394,17 @@ export default class StartMenu {
   }
 
   /**
-   * Create the Most Used Tools submenu and attach to DOM.
+   * Create the Recently Used submenu and attach to DOM.
    * @returns {void}
    */
-  createMostUsedToolsMenu() {
+  createRecentlyUsedMenu() {
     this._createMenuWithEffects({
-      items: MOST_USED_TOOLS_ITEMS,
-      itemClass: "most-used-tools",
-      ulClass: "most-used-tools-items",
-      menuClass: "most-used-tools-menu",
-      propertyName: "mostUsedToolsMenu",
-      itemSelector: ".most-used-tools-item",
-      attachClickHandler: true,
-    });
-  }
-
-  /**
-   * Create the AI Tools submenu and attach to DOM.
-   * @returns {void}
-   */
-  createAiToolsMenu() {
-    this._createMenuWithEffects({
-      items: AI_TOOLS_ITEMS,
-      itemClass: "ai-tools",
-      ulClass: "ai-tools-items",
-      menuClass: "ai-tools-menu",
-      propertyName: "aiToolsMenu",
-      itemSelector: ".ai-tools-item",
+      items: RECENTLY_USED_ITEMS,
+      itemClass: "recently-used",
+      ulClass: "recently-used-items",
+      menuClass: "recently-used-menu",
+      propertyName: "recentlyUsedMenu",
+      itemSelector: ".recently-used-item",
       attachClickHandler: true,
     });
   }
@@ -576,7 +556,7 @@ export default class StartMenu {
                         ${renderMenuItem({
                           id: "info",
                           icon: "./assets/gui/start-menu/help.webp",
-                          title: "System Information",
+                          title: "Disclaimer",
                           programName: "info",
                           action: "open-program",
                         })}
@@ -588,16 +568,10 @@ export default class StartMenu {
                           action: "open-program",
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-                        <li class="menu-item" id="menu-program4" data-action="toggle-most-used-tools">
-                            <img src="./assets/gui/start-menu/most-used.webp" alt="Most Used Tools">
+                        <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
+                            <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
                             <div class="item-content">
-                                <span class="item-title">Most Used Tools</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-ai-tools" data-action="toggle-ai-tools">
-                            <img src="./assets/gui/start-menu/ai-utilities.webp" alt="A.I. Utilities">
-                            <div class="item-content">
-                                <span class="item-title">A.I. Utilities</span>
+                                <span class="item-title">Recently Used</span>
                             </div>
                         </li>
                         `
@@ -631,16 +605,10 @@ export default class StartMenu {
                           action: "open-url",
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-                        <li class="menu-item" id="menu-program4" data-action="toggle-most-used-tools">
-                            <img src="./assets/gui/start-menu/most-used.webp" alt="Most Used Tools">
+                        <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
+                            <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
                             <div class="item-content">
-                                <span class="item-title">Most Used Tools</span>
-                            </div>
-                        </li>
-                        <li class="menu-item" id="menu-ai-tools" data-action="toggle-ai-tools">
-                            <img src="./assets/gui/start-menu/ai-utilities.webp" alt="A.I. Utilities">
-                            <div class="item-content">
-                                <span class="item-title">A.I. Utilities</span>
+                                <span class="item-title">Recently Used</span>
                             </div>
                         </li>
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
@@ -654,7 +622,7 @@ export default class StartMenu {
                         ${renderMenuItem({
                           id: "info",
                           icon: "./assets/gui/start-menu/help.webp",
-                          title: "System Information",
+                          title: "Disclaimer",
                           programName: "info",
                           action: "open-program",
                         })}
@@ -707,17 +675,15 @@ export default class StartMenu {
         const clickedOnButton = this.startButton.contains(target);
         const clickedOnAllPrograms = this.allProgramsMenu?.contains(target);
 
-        // NEW: Check if click was in the Most Used Tools or AI Tools menus
-        const clickedOnMostUsedTools = this.mostUsedToolsMenu?.contains(target);
-        const clickedOnAiTools = this.aiToolsMenu?.contains(target);
+        // NEW: Check if click was in the Recently Used Tools or AI Tools menus
+        const clickedOnRecentlyUsed = this.recentlyUsedMenu?.contains(target);
 
         // If the click was NOT on menu/button/submenu AND not the overlay/iframe, close.
         if (
           !clickedOnMenu &&
           !clickedOnButton &&
           !clickedOnAllPrograms &&
-          !clickedOnMostUsedTools &&
-          !clickedOnAiTools
+          !clickedOnRecentlyUsed
         ) {
           e.stopPropagation();
           e.preventDefault();
@@ -760,10 +726,9 @@ export default class StartMenu {
       return;
     }
 
-    // Prevent closing the menu if a disabled item in Most Used Tools or AI Tools is clicked
+    // Prevent closing the menu if a disabled item in Recently Used Tools is clicked
     if (
-      (target.classList.contains("most-used-tools-item") ||
-        target.classList.contains("ai-tools-item")) &&
+      target.classList.contains("recently-used-item") &&
       target.classList.contains("disabled")
     ) {
       event.stopPropagation();
@@ -775,29 +740,11 @@ export default class StartMenu {
     const programName = target.dataset.programName;
     const url = target.dataset.url;
 
-    // Handle Most Used Tools and AI Tools popouts on both desktop and mobile
-    if (action === "toggle-most-used-tools") {
-      this.showMostUsedToolsMenu();
+    // Handle Recently Used Tools popout on both desktop and mobile
+    if (action === "toggle-recently-used") {
+      this.showRecentlyUsedMenu();
       return;
     }
-    if (action === "toggle-ai-tools") {
-      this.showAiToolsMenu();
-      return;
-    }
-
-    // Check if the click is on an item in the Most Used Tools submenu
-    const isInMostUsedToolsMenu = target.classList.contains(
-      "most-used-tools-item",
-    );
-    // Check if the click is on an item in the AI Tools submenu
-    const isInAiToolsMenu = target.classList.contains("ai-tools-item");
-
-    // --- Custom popup for Most Used Tools and AI Tools ---
-    if (isInMostUsedToolsMenu || isInAiToolsMenu) {
-      this.closeStartMenu();
-      return;
-    }
-    // --- End custom popup ---
 
     if (action === "open-program" && programName) {
       this.openProgram(programName);
@@ -840,8 +787,7 @@ export default class StartMenu {
     [
       this.startMenu,
       this.allProgramsMenu,
-      this.mostUsedToolsMenu,
-      this.aiToolsMenu,
+      this.recentlyUsedMenu,
     ].forEach((menu) => {
       if (menu) {
         menu.addEventListener("click", this._handleMenuClick.bind(this));
@@ -855,12 +801,12 @@ export default class StartMenu {
   setupMenuItems() {
     this.setupAllProgramsMenu(); // Setup submenu immediately
 
-    // Setup Most Used Tools submenu (previously Creative Suite)
-    const mostUsedToolsButton = this.startMenu.querySelector("#menu-program4"); // Keep ID for now
-    if (mostUsedToolsButton) {
-      mostUsedToolsButton.setAttribute("data-action", "toggle-most-used-tools"); // Ensure action is set
-      mostUsedToolsButton.style.position = "relative";
-      mostUsedToolsButton.style.width = "100%";
+    // Setup Recently Used Tools submenu (previously Creative Suite)
+    const recentlyUsedButton = this.startMenu.querySelector("#menu-program4"); // Keep ID for now
+    if (recentlyUsedButton) {
+      recentlyUsedButton.setAttribute("data-action", "toggle-recently-used"); // Ensure action is set
+      recentlyUsedButton.style.position = "relative";
+      recentlyUsedButton.style.width = "100%";
       const mutArrowSpan = document.createElement("span"); // Renamed variable
       mutArrowSpan.className = "mut-menu-arrow"; // Renamed class
       mutArrowSpan.innerHTML = "►";
@@ -869,47 +815,18 @@ export default class StartMenu {
       mutArrowSpan.style.top = "50%";
       mutArrowSpan.style.transform = "translateY(-50%) scaleX(0.5)";
       mutArrowSpan.style.fontSize = "10px";
-      mostUsedToolsButton.appendChild(mutArrowSpan);
-      mostUsedToolsButton.addEventListener("mouseenter", () =>
-        this.showMostUsedToolsMenu(),
+      recentlyUsedButton.appendChild(mutArrowSpan);
+      recentlyUsedButton.addEventListener("mouseenter", () =>
+        this.showRecentlyUsedMenu(),
       );
-      mostUsedToolsButton.addEventListener("mouseleave", (e) => {
+      recentlyUsedButton.addEventListener("mouseleave", (e) => {
         if (
           e.relatedTarget &&
-          (e.relatedTarget.closest(".most-used-tools-menu") ||
-            e.relatedTarget === this.mostUsedToolsMenu)
+          (e.relatedTarget.closest(".recently-used-menu") ||
+            e.relatedTarget === this.recentlyUsedMenu)
         )
           return;
-        this.hideMostUsedToolsMenu();
-      });
-    }
-
-    // Setup A.I. Tools submenu
-    const aiToolsButton = this.startMenu.querySelector("#menu-ai-tools");
-    if (aiToolsButton) {
-      aiToolsButton.setAttribute("data-action", "toggle-ai-tools"); // Ensure action is set
-      aiToolsButton.style.position = "relative";
-      aiToolsButton.style.width = "100%";
-      const aiArrowSpan = document.createElement("span");
-      aiArrowSpan.className = "ai-tools-arrow"; // New class
-      aiArrowSpan.innerHTML = "►";
-      aiArrowSpan.style.position = "absolute";
-      aiArrowSpan.style.right = "8px";
-      aiArrowSpan.style.top = "50%";
-      aiArrowSpan.style.transform = "translateY(-50%) scaleX(0.5)";
-      aiArrowSpan.style.fontSize = "10px";
-      aiToolsButton.appendChild(aiArrowSpan);
-      aiToolsButton.addEventListener("mouseenter", () =>
-        this.showAiToolsMenu(),
-      );
-      aiToolsButton.addEventListener("mouseleave", (e) => {
-        if (
-          e.relatedTarget &&
-          (e.relatedTarget.closest(".ai-tools-menu") ||
-            e.relatedTarget === this.aiToolsMenu)
-        )
-          return;
-        this.hideAiToolsMenu();
+        this.hideRecentlyUsedMenu();
       });
     }
   }
@@ -1039,8 +956,7 @@ export default class StartMenu {
     this.eventBus.publish(EVENTS.STARTMENU_CLOSED);
 
     // Also hide submenus
-    this.hideMostUsedToolsMenu();
-    this.hideAiToolsMenu();
+    this.hideRecentlyUsedMenu();
   }
 
   // New helper method to manage overlay activation
@@ -1075,10 +991,10 @@ export default class StartMenu {
   }
 
   /**
-   * Show the Most Used Tools menu
+   * Show the Recently Used Tools menu
    */
-  showMostUsedToolsMenu() {
-    if (!this.mostUsedToolsMenu || !this.startMenu) {
+  showRecentlyUsedMenu() {
+    if (!this.recentlyUsedMenu || !this.startMenu) {
       return;
     }
 
@@ -1088,11 +1004,11 @@ export default class StartMenu {
     }
 
     // Ensure menu is visible to get dimensions, but positioned off-screen initially
-    this.mostUsedToolsMenu.style.visibility = "hidden";
-    this.mostUsedToolsMenu.style.display = "block";
+    this.recentlyUsedMenu.style.visibility = "hidden";
+    this.recentlyUsedMenu.style.display = "block";
 
     const buttonRect = button.getBoundingClientRect();
-    const menuRect = this.mostUsedToolsMenu.getBoundingClientRect();
+    const menuRect = this.recentlyUsedMenu.getBoundingClientRect();
 
     // Try positioning to the right first
     let left = buttonRect.right;
@@ -1114,7 +1030,7 @@ export default class StartMenu {
       top = window.innerHeight - 30 - menuRect.height;
     }
 
-    Object.assign(this.mostUsedToolsMenu.style, {
+    Object.assign(this.recentlyUsedMenu.style, {
       left: `${left}px`,
       top: `${top}px`,
       display: "block", // Keep display block
@@ -1122,95 +1038,30 @@ export default class StartMenu {
     });
 
     // Add mouseleave event to the menu itself
-    this.mostUsedToolsMenu.addEventListener("mouseleave", (e) => {
+    this.recentlyUsedMenu.addEventListener("mouseleave", (e) => {
       if (
         e.relatedTarget &&
         (e.relatedTarget === button ||
           e.relatedTarget.closest("#menu-program4"))
       )
         return;
-      this.hideMostUsedToolsMenu();
+      this.hideRecentlyUsedMenu();
     });
 
-    this.mostUsedToolsMenu.classList.add("mut-menu-active");
+    this.recentlyUsedMenu.classList.add("mut-menu-active");
     button.classList.add("active-submenu-trigger");
   }
 
   /**
-   * Hide the Most Used Tools menu
+   * Hide the Recently Used Tools menu
    */
-  hideMostUsedToolsMenu() {
-    if (this.mostUsedToolsMenu) {
-      this.mostUsedToolsMenu.classList.remove("mut-menu-active");
-      this.mostUsedToolsMenu.style.display = "none";
+  hideRecentlyUsedMenu() {
+    if (this.recentlyUsedMenu) {
+      this.recentlyUsedMenu.classList.remove("mut-menu-active");
+      this.recentlyUsedMenu.style.display = "none";
     }
     const button = this.startMenu?.querySelector("#menu-program4");
     button?.classList.remove("active-submenu-trigger");
-  }
-
-  /**
-   * Show the AI Tools submenu
-   */
-  showAiToolsMenu() {
-    if (!this.aiToolsMenu || !this.startMenu) return;
-    const aiToolsButton = this.startMenu.querySelector("#menu-ai-tools");
-    if (aiToolsButton) {
-      // First display the menu so we can get its height and width
-      this.aiToolsMenu.style.display = "block";
-      this.aiToolsMenu.style.visibility = "hidden";
-
-      const buttonRect = aiToolsButton.getBoundingClientRect();
-      const menuRect = this.aiToolsMenu.getBoundingClientRect();
-
-      // Try positioning to the right first
-      let left = buttonRect.right;
-      // If it goes off-screen to the right, position to the left
-      if (left + menuRect.width > window.innerWidth) {
-        left = buttonRect.left - menuRect.width;
-      }
-
-      // Calculate top position to align bottom of menu with bottom of button
-      let top = buttonRect.bottom - menuRect.height;
-      if (top < 0) {
-        top = 0;
-      }
-      if (top + menuRect.height > window.innerHeight - 30) {
-        top = window.innerHeight - 30 - menuRect.height;
-      }
-
-      Object.assign(this.aiToolsMenu.style, {
-        left: `${left}px`,
-        top: `${top}px`,
-        display: "block",
-        visibility: "visible",
-      });
-
-      this.aiToolsMenu.addEventListener("mouseleave", (e) => {
-        if (
-          e.relatedTarget &&
-          (e.relatedTarget === aiToolsButton ||
-            e.relatedTarget.closest("#menu-ai-tools"))
-        )
-          return;
-        this.hideAiToolsMenu();
-      });
-      this.aiToolsMenu.classList.add("active");
-      aiToolsButton.classList.add("active-submenu-trigger");
-    }
-  }
-
-  /**
-   * Hide the AI Tools submenu
-   */
-  hideAiToolsMenu() {
-    if (this.aiToolsMenu) {
-      this.aiToolsMenu.style.display = "none";
-      this.aiToolsMenu.classList.remove("active");
-      const aiToolsButton = this.startMenu.querySelector("#menu-ai-tools");
-      if (aiToolsButton) {
-        aiToolsButton.classList.remove("active-submenu-trigger"); // Use the same class as Most Used Tools
-      }
-    }
   }
 }
 

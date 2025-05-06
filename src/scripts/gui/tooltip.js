@@ -14,41 +14,38 @@
 import { isMobileDevice } from "../utils/device.js";
 
 /**
- * Set up tooltips for all elements matching the selector. Tooltips are shown on hover and hidden on mouse leave or click.
+ * Set up tooltips for all elements matching the selector using event delegation. Tooltips are shown on hover and hidden on mouse leave or click.
  *
- * @param {string} selector - CSS selector for elements that should have tooltips.
+ * @param {string} selector - CSS selector for elements that should have tooltips. Defaults to '[data-tooltip]'.
  * @param {HTMLElement} [tooltipContainer=document.body] - The container where the tooltip will be appended.
  * @param {number} [delay=100] - Delay in milliseconds before hiding the tooltip after mouseleave.
  * @returns {void}
- * @example
- * // Attach tooltips to all elements with the class 'has-tooltip'
- * setupTooltips('.has-tooltip');
  */
 export function setupTooltips(
-  selector,
+  selector = '[data-tooltip]',
   tooltipContainer = document.body,
   delay = 100,
 ) {
   let activeTooltip = null;
   let tooltipTimeout = null;
   const tooltipElement =
-    tooltipContainer.querySelector(".dynamic-tooltip") ||
+    tooltipContainer.querySelector('.dynamic-tooltip') ||
     (() => {
-      const el = document.createElement("div");
-      el.className = "dynamic-tooltip";
+      const el = document.createElement('div');
+      el.className = 'dynamic-tooltip';
       Object.assign(el.style, {
-        position: "absolute",
-        display: "none",
-        zIndex: "10000",
-        backgroundColor: "#FFFFE1",
-        border: "1px solid #000000",
-        padding: "2px 5px",
-        fontSize: "8pt",
-        whiteSpace: "nowrap",
-        fontFamily: "Tahoma, sans-serif",
-        pointerEvents: "none",
-        boxShadow: "1px 1px 3px rgba(0,0,0,0.2)",
-        borderRadius: "3px",
+        position: 'absolute',
+        display: 'none',
+        zIndex: '10000',
+        backgroundColor: '#FFFFE1',
+        border: '1px solid #000000',
+        padding: '2px 5px',
+        fontSize: '8pt',
+        whiteSpace: 'nowrap',
+        fontFamily: 'Tahoma, sans-serif',
+        pointerEvents: 'none',
+        boxShadow: '1px 1px 3px rgba(0,0,0,0.2)',
+        borderRadius: '3px',
       });
       tooltipContainer.appendChild(el);
       return el;
@@ -56,7 +53,7 @@ export function setupTooltips(
   const hideImmediately = () => {
     clearTimeout(tooltipTimeout);
     if (activeTooltip) {
-      activeTooltip.style.display = "none";
+      activeTooltip.style.display = 'none';
     }
     activeTooltip = null;
   };
@@ -67,16 +64,16 @@ export function setupTooltips(
   const showTooltip = (element) => {
     // Prevent tooltip if balloon is active and this is the tray network icon
     if (
-      element.classList.contains("tray-network-icon") &&
-      document.getElementById("balloon-root")
+      element.classList.contains('tray-network-icon') &&
+      document.getElementById('balloon-root')
     )
       return;
     clearTimeout(tooltipTimeout);
     const tooltipText =
-      element.getAttribute("data-tooltip") || element.getAttribute("title");
+      element.getAttribute('data-tooltip') || element.getAttribute('title');
     if (!tooltipText) return;
     tooltipElement.textContent = tooltipText;
-    tooltipElement.style.display = "block";
+    tooltipElement.style.display = 'block';
     activeTooltip = tooltipElement;
     const containerRect =
       tooltipContainer === document.body
@@ -96,10 +93,20 @@ export function setupTooltips(
   // Only attach hover/click tooltip listeners on non-mobile devices
   // Balloon tooltips triggered separately by click handlers are unaffected
   if (!isMobileDevice()) {
-    document.querySelectorAll(selector).forEach((element) => {
-      element.addEventListener("mouseenter", () => showTooltip(element));
-      element.addEventListener("mouseleave", hideTooltip);
-      element.addEventListener("click", hideImmediately);
+    // Remove any previous listeners if re-initializing
+    // Attach delegated listeners
+    document.body.addEventListener('mouseover', function(event) {
+      const target = event.target.closest(selector);
+      if (target) showTooltip(target);
+    });
+    document.body.addEventListener('mouseout', function(event) {
+      const target = event.target.closest(selector);
+      // Only hide if the mouse actually left the element (not just moved within it)
+      if (target && !target.contains(event.relatedTarget)) hideTooltip();
+    });
+    document.body.addEventListener('click', function(event) {
+      const target = event.target.closest(selector);
+      if (target) hideImmediately();
     });
   }
 }

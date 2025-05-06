@@ -200,9 +200,9 @@
 
 /* Right side menu items */
 .middle-right .menu-item {
-  height: 36px;
-  min-height: 36px;
-  max-height: 36px;
+  height: 35px;
+  min-height: 35px;
+  max-height: 35px;
   padding: 8px 7.5px 8px 9px;
 }
 
@@ -451,7 +451,7 @@
 
 /* Base styles for submenu containers */
 .all-programs-menu,
-.most-used-tools-menu,
+.recently-used-menu,
 .ai-tools-menu {
   position: absolute;
   background-color: var(--xp-bg-main);
@@ -467,7 +467,7 @@
 
 /* Specific style for the blue gradient strip on left */
 .all-programs-menu::before,
-.most-used-tools-menu::before,
+.recently-used-menu::before,
 .ai-tools-menu::before {
   content: "";
   position: absolute;
@@ -481,7 +481,7 @@
 
 /* Container for submenu items */
 .all-programs-items,
-.most-used-tools-items,
+.recently-used-items,
 .ai-tools-items {
   list-style: none;
   margin: 0;
@@ -493,7 +493,7 @@
 
 /* Individual submenu items */
 .all-programs-item,
-.most-used-tools-item,
+.recently-used-item,
 .ai-tools-item {
   position: relative;
   display: flex;
@@ -512,7 +512,7 @@
 
 /* Hover effect for submenu items */
 .all-programs-item:hover,
-.most-used-tools-item:hover,
+.recently-used-item:hover,
 .ai-tools-item:hover {
   background-color: #2f71cd;
   color: white;
@@ -521,7 +521,7 @@
 
 /* Create a background overlay that can transition smoothly */
 .all-programs-item::after,
-.most-used-tools-item::after,
+.recently-used-item::after,
 .ai-tools-item::after {
   content: "";
   position: absolute;
@@ -533,14 +533,14 @@
 }
 
 .all-programs-item:hover::after,
-.most-used-tools-item:hover::after,
+.recently-used-item:hover::after,
 .ai-tools-item:hover::after {
   background-color: #2f71cd;
 }
 
 /* Highlight extension for hover */
 .all-programs-item:hover::before,
-.most-used-tools-item:hover::before,
+.recently-used-item:hover::before,
 .ai-tools-item:hover::before {
   content: "";
   position: absolute;
@@ -555,7 +555,7 @@
 
 /* Make text and icon in submenu items transition together */
 .all-programs-item *,
-.most-used-tools-item *,
+.recently-used-item *,
 .ai-tools-item * {
   transition: color 0.05s ease; /* Standardize to ease */
   z-index: 2; /* Keep content above the overlay */
@@ -563,7 +563,7 @@
 
 /* Apply color changes to both icon and text simultaneously */
 .all-programs-item:hover *,
-.most-used-tools-item:hover *,
+.recently-used-item:hover *,
 .ai-tools-item:hover * {
   color: white;
   filter: brightness(1.1);
@@ -571,7 +571,7 @@
 
 /* Icons within submenu items */
 .all-programs-item img,
-.most-used-tools-item img,
+.recently-used-item img,
 .ai-tools-item img {
   width: 16px;
   height: 16px;
@@ -620,16 +620,16 @@
 .middle-right .menu-item#menu-program4,
 .middle-right .menu-item#menu-program5 {
   padding: 8px 7.5px 8px 9px;
-  height: 36px;
-  flex: 0 0 36px;
+  height: 35px;
+  flex: 0 0 35px;
   box-sizing: border-box;
 }
 
 /* Make program 6 the same height as others */
 .middle-right .menu-item#menu-program6 {
   padding: 8px 7.5px 8px 9px;
-  height: 36px;
-  flex: 0 0 36px;
+  height: 35px;
+  flex: 0 0 35px;
   box-sizing: border-box;
 }
 
@@ -651,8 +651,8 @@
 /* Ensure portfolio items have the same height as program items */
 .middle-right .menu-item#menu-internet {
   padding: 8px 7.5px 8px 9px;
-  height: 36px;
-  flex: 0 0 36px;
+  height: 35px;
+  flex: 0 0 35px;
   box-sizing: border-box;
 }
 
@@ -687,7 +687,7 @@
 }
 
 /* Consolidated Disabled Menu Item Styles */
-.most-used-tools-item.disabled,
+.recently-used-item.disabled,
 .ai-tools-item.disabled,
 .all-programs-item.disabled {
   color: #999 !important;
@@ -699,10 +699,10 @@
   position: relative;
 }
 
-.most-used-tools-item.disabled:hover,
+.recently-used-item.disabled:hover,
 .ai-tools-item.disabled:hover,
 .all-programs-item.disabled:hover,
-.most-used-tools-item.disabled:focus,
+.recently-used-item.disabled:focus,
 .ai-tools-item.disabled:focus,
 .all-programs-item.disabled:focus {
   background: none !important;
@@ -711,16 +711,16 @@
   box-shadow: none !important;
 }
 
-.most-used-tools-item.disabled::before,
+.recently-used-item.disabled::before,
 .ai-tools-item.disabled::before,
 .all-programs-item.disabled::before,
-.most-used-tools-item.disabled::after,
+.recently-used-item.disabled::after,
 .ai-tools-item.disabled::after,
 .all-programs-item.disabled::after,
-.most-used-tools-item.disabled:hover::before,
+.recently-used-item.disabled:hover::before,
 .ai-tools-item.disabled:hover::before,
 .all-programs-item.disabled:hover::before,
-.most-used-tools-item.disabled:hover::after,
+.recently-used-item.disabled:hover::after,
 .ai-tools-item.disabled:hover::after,
 .all-programs-item.disabled:hover::after {
   background: none !important;
@@ -728,14 +728,14 @@
   box-shadow: none !important;
 }
 
-.most-used-tools-item.disabled img,
+.recently-used-item.disabled img,
 .ai-tools-item.disabled img,
 .all-programs-item.disabled img {
   filter: grayscale(0.25) !important;
   opacity: 0.6 !important;
 }
 
-.most-used-tools-item.disabled:hover img,
+.recently-used-item.disabled:hover img,
 .ai-tools-item.disabled:hover img,
 .all-programs-item.disabled:hover img {
   filter: grayscale(1);
@@ -767,8 +767,8 @@
 
   .startmenu .menu-item,
   .startmenu .item-right {
-    height: calc(36px - 2px);
-    min-height: calc(36px - 2px);
+    height: calc(35px - 2px);
+    min-height: calc(35px - 2px);
     line-height: calc(32px - 2px);
   }
 }

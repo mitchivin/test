@@ -8,67 +8,41 @@ import Desktop from "./gui/desktop.js";
 import Taskbar from "./gui/taskbar.js";
 import WindowManager from "./gui/window.js";
 import { eventBus, EVENTS } from "./utils/eventBus.js";
-import { initBootSequence } from "./gui/boot.js"; // Import the boot sequence initializer
-import { setupTooltips } from "./gui/tooltip.js"; // Ensure path is correct
+import { initBootSequence } from "./gui/boot.js";
+import { setupTooltips } from "./gui/tooltip.js";
 import { initRandomScanline } from "./utils/crtEffect.js";
 
-// Variable to track the time of the last touchstart event
 let lastTouchStartTime = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Initialize core UI components with shared event bus for communication
   new Taskbar(eventBus);
   new Desktop(eventBus);
   new WindowManager(eventBus);
-
-  // Initialize boot/login sequence after component initialization
-  // IMPORTANT: Must be called after eventBus initialization
   initBootSequence(eventBus, EVENTS);
-
-  // Handle system shutdown requests
-  // Confirmation dialog intentionally omitted for streamlined UX
   eventBus.subscribe(EVENTS.SHUTDOWN_REQUESTED, () => {
     sessionStorage.removeItem("logged_in");
-    // Navigate with a parameter to force boot sequence on reload
     const currentPath = window.location.pathname;
     window.location.assign(currentPath + "?forceBoot=true");
   });
-
-  // Initialize CRT visual effects
   initRandomScanline();
-
-  // Enable XP-style tooltips globally for all elements with data-tooltip
   setupTooltips("[data-tooltip]");
-
-  // Landscape block overlay for mobile
   ensureLandscapeBlock();
   handleOrientationBlock();
   window.addEventListener("orientationchange", handleOrientationBlock);
   window.addEventListener("resize", handleOrientationBlock);
-
-  // Set --real-vh CSS variable for true viewport height on mobile
   setRealVh();
-
-  // Dynamically scale desktop icons to fit the row on mobile with gap
   scaleDesktopIconsToFitMobile();
-
-  // Prevent double-tap zoom on mobile via JavaScript
   document.addEventListener('touchstart', (event) => {
     const now = Date.now();
     const timeSinceLastTouch = now - lastTouchStartTime;
-    const doubleTapThreshold = 300; // Milliseconds
-
+    const doubleTapThreshold = 300;
     if (timeSinceLastTouch < doubleTapThreshold && event.touches.length === 1) {
-      // Prevent the default zoom behavior on double tap
       event.preventDefault();
     }
-
     lastTouchStartTime = now;
-  }, { passive: false }); // Required to allow preventDefault on touch events
-
+  }, { passive: false });
 });
 
-// Landscape block overlay for mobile
 function ensureLandscapeBlock() {
   if (!document.getElementById("landscape-block")) {
     const block = document.createElement("div");
@@ -93,7 +67,6 @@ function handleOrientationBlock() {
   }
 }
 
-// Set --real-vh CSS variable for true viewport height on mobile
 function setRealVh() {
   const vh =
     (window.visualViewport
@@ -102,9 +75,7 @@ function setRealVh() {
   document.documentElement.style.setProperty("--real-vh", `${vh}px`);
 }
 
-// Dynamically scale desktop icons to fit the row on mobile with gap
 function scaleDesktopIconsToFitMobile() {
-  // Scale both .desktop-icons and .desktop-icons-top
   const containers = [
     document.querySelector(".desktop-icons"),
     document.querySelector(".desktop-icons-top"),
@@ -115,12 +86,10 @@ function scaleDesktopIconsToFitMobile() {
       child.classList.contains("desktop-icon"),
     );
     if (icons.length === 0) return;
-
-    const gap = 8; // px, must match your CSS
-    const iconWidth = 90; // px, must match your CSS
+    const gap = 8;
+    const iconWidth = 90;
     const availableWidth = container.offsetWidth;
     const totalIconWidth = icons.length * iconWidth + (icons.length - 1) * gap;
-    // Calculate scale factor (never above 1)
     const scale = Math.min(1, availableWidth / totalIconWidth);
     container.style.setProperty("--icon-scale", scale);
   });
