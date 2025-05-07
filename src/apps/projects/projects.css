@@ -197,6 +197,34 @@ body {
     min-height: 0;
 }
 
+/* General Lightbox Text Styles (primarily for Desktop) */
+#lightbox-title {
+    color: #f1f1f1;
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+    /* max-width: 70vw; */ /* Max-width is handled by desktop-specific rules or inherited */
+    margin-top: 10px; /* Base margin, can be overridden by desktop */
+}
+
+#lightbox-subheading {
+    color: #cccccc; 
+    font-size: 1.2rem; 
+    font-weight: 600; 
+    line-height: 1.4;
+    margin-top: 4px; /* Base margin */
+}
+
+#lightbox-description {
+    color: #f1f1f1;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-top: 10px; 
+    margin-bottom: 15px; 
+    /* max-width: 50vw; */ /* Max-width is handled by desktop-specific rules or inherited */
+    /* overflow-y: auto; is in desktop specific */
+}
+
 #lightbox-close {
     margin-top: auto;
     padding: 10px 20px;
@@ -276,7 +304,10 @@ body {
 
 /* Mobile Layout */
 #project-lightbox:not(.desktop-layout) #lightbox-inner-wrapper {
-    gap: 12px;
+    gap: 32px; /* Adjusted set distance between media and close button */
+    justify-content: center; /* Vertically center the media + close button group */
+    align-items: center; /* Horizontally center the media + close button group */
+    /* Inherits display: flex, flex-direction: column, height: 100% */
 }
 
 #project-lightbox:not(.desktop-layout) #lightbox-title,
@@ -289,6 +320,7 @@ body {
     justify-content: center;
     background-color: transparent;
     padding: 0;
+    flex-grow: 0; /* Prevent details from expanding and ruining vertical centering */
 }
 
 #project-lightbox:not(.desktop-layout) #lightbox-close {

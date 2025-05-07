@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const posts = document.querySelectorAll('.post');
     const feedContainer = document.querySelector('.feed-container');
 
-    if (!lightbox || !lightboxContent || !lightboxDetails || !lightboxClose || posts.length === 0) {
-        console.error('Lightbox or critical elements not found, or no posts available.');
+    if (!lightbox || !lightboxContent || !lightboxDetails || !lightboxClose || !feedContainer) {
+        console.error('Lightbox, feedContainer, or critical elements not found, or no posts available.');
         return;
     }
 
@@ -23,19 +23,19 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} mobileDescriptionText - The description text for mobile.
      */
     function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText) {
-        const feedStyle = window.getComputedStyle(feedContainer);
-        const columnCount = parseInt(feedStyle.getPropertyValue('column-count'), 10);
-        
-        console.log(`Feed column count detected: ${columnCount}`);
+        // Determine if desktop layout should be used based on feedContainer width
+        const isDesktopView = feedContainer.offsetWidth >= 768; 
 
-        if (columnCount >= 3) {
+        // console.log(`feedContainer.offsetWidth: ${feedContainer.offsetWidth}, isDesktopView for lightbox: ${isDesktopView}`);
+
+        if (isDesktopView) {
             if (!lightbox.classList.contains('desktop-layout')) {
-                console.log('Applying desktop-layout class based on feed columns.');
+                // console.log('Applying desktop-layout class to lightbox.');
                 lightbox.classList.add('desktop-layout');
             }
         } else {
             if (lightbox.classList.contains('desktop-layout')) {
-                console.log('Removing desktop-layout class based on feed columns.');
+                // console.log('Removing desktop-layout class from lightbox.');
                 lightbox.classList.remove('desktop-layout');
             }
         }
@@ -97,21 +97,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleEl = lightboxDetails.querySelector('#lightbox-title');
             if (titleEl && titleEl.nextSibling) {
                 lightboxDetails.insertBefore(subheadingElement, titleEl.nextSibling);
-            } else {
+            } else if (lightboxDetails) {
                 lightboxDetails.insertBefore(subheadingElement, lightboxClose);
             }
         }
 
-        let descriptionText;
-        if (lightbox.classList.contains('desktop-layout')) {
-            descriptionText = desktopDescriptionText;
-        }
-
-        if (descriptionText) {
+        // Only add description if in desktop layout and desktopDescriptionText is provided
+        if (lightbox.classList.contains('desktop-layout') && desktopDescriptionText) {
             const descriptionElement = document.createElement('div');
             descriptionElement.id = 'lightbox-description';
-            descriptionElement.textContent = descriptionText;
-            lightboxDetails.insertBefore(descriptionElement, lightboxClose);
+            descriptionElement.textContent = desktopDescriptionText;
+            // Try to insert it after subheading, or after title, or before close button
+            const subheadingEl = lightboxDetails.querySelector('#lightbox-subheading');
+            const titleEl = lightboxDetails.querySelector('#lightbox-title');
+            if (subheadingEl && subheadingEl.nextSibling) {
+                lightboxDetails.insertBefore(descriptionElement, subheadingEl.nextSibling);
+            } else if (titleEl && titleEl.nextSibling) {
+                 lightboxDetails.insertBefore(descriptionElement, titleEl.nextSibling);
+            } else if (lightboxDetails) {
+                lightboxDetails.insertBefore(descriptionElement, lightboxClose);
+            }
         }
 
         lightbox.style.display = 'flex';
