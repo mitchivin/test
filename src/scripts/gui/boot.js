@@ -130,12 +130,20 @@ export function initBootSequence(eventBus, EVENTS) {
       return new Promise((resolve) => {
         const video = document.createElement("video");
         video.preload = "metadata";
-        video.onloadedmetadata = () => { cleanup(); resolve(); };
+        video.onloadedmetadata = () => {
+          // Store metadata globally for use in lightbox
+          window.preloadedVideoMeta = window.preloadedVideoMeta || {};
+          window.preloadedVideoMeta[url] = {
+            width: video.videoWidth,
+            height: video.videoHeight
+          };
+          cleanup();
+          resolve();
+        };
         video.onerror = () => { cleanup(); resolve(); };
         video.src = url;
         video.style.display = "none";
         document.body.appendChild(video);
-        // Clean up after metadata is loaded or error
         function cleanup() {
           if (video.parentNode) video.parentNode.removeChild(video);
         }

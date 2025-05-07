@@ -26,6 +26,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Pause all grid videos
         document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
 
+        // Set aspect ratio for lightbox-content if video and metadata available
+        if (type === 'video' && window.preloadedVideoMeta && window.preloadedVideoMeta[src]) {
+            const meta = window.preloadedVideoMeta[src];
+            if (meta.width && meta.height) {
+                lightboxContent.style.aspectRatio = `${meta.width} / ${meta.height}`;
+                lightboxContent.style.minHeight = '200px'; // fallback for old browsers
+            }
+        } else {
+            lightboxContent.style.aspectRatio = '';
+            lightboxContent.style.minHeight = '';
+        }
+
         // Determine if desktop layout should be used based on feedContainer width
         const isDesktopView = feedContainer.offsetWidth >= 768; 
 
@@ -134,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaElement.load();
         }
         lightboxContent.innerHTML = '';
+        lightboxContent.style.aspectRatio = '';
+        lightboxContent.style.minHeight = '';
         const titleElement = document.getElementById('lightbox-title');
         if (titleElement) {
             titleElement.remove();
