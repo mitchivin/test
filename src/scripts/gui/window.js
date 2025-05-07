@@ -186,17 +186,13 @@ export default class WindowManager {
         )
           return;
 
-        let windowElement = this._getWindowFromIframeSource(event.source);
-        // PATCH: Fallback if not found (e.g., iframe moved or not in DOM)
-        if (!windowElement) {
-          // Try to find any .app-window containing an iframe with this contentWindow
-          windowElement = Array.from(
-            document.querySelectorAll(".app-window"),
-          ).find((win) => {
-            const iframe = win.querySelector("iframe");
-            return iframe && iframe.contentWindow === event.source;
-          });
-        }
+        // Find the .app-window containing the iframe with this contentWindow
+        let windowElement = Array.from(
+          document.querySelectorAll(".app-window"),
+        ).find((win) => {
+          const iframe = win.querySelector("iframe");
+          return iframe && iframe.contentWindow === event.source;
+        });
         if (!windowElement) return;
 
         if (event.data?.type === "minimize-window") {
@@ -269,56 +265,6 @@ export default class WindowManager {
 
     const windowElement = this._createWindowElement(program);
     if (!windowElement) return;
-
-    // --- Special handling for Projects (internet) app ---
-    if (programName === "internet") {
-      // Hide content and show overlay until ready
-      const iframe = windowElement.querySelector("iframe");
-      const iframeContainer = iframe.parentElement;
-      iframeContainer.style.position = "relative";
-      const overlay = document.createElement("div");
-      overlay.className = "projects-loading-overlay";
-      overlay.style.position = "absolute";
-      overlay.style.top = iframe.offsetTop + "px";
-      overlay.style.left = iframe.offsetLeft + "px";
-      overlay.style.width = iframe.offsetWidth ? iframe.offsetWidth + "px" : "100%";
-      overlay.style.height = iframe.offsetHeight ? iframe.offsetHeight + "px" : "100%";
-      overlay.style.background = "rgba(0,0,0,0.72)";
-      overlay.style.opacity = 1;
-      overlay.style.zIndex = 10;
-      overlay.style.display = "flex";
-      overlay.style.justifyContent = "center";
-      overlay.style.alignItems = "center";
-      overlay.innerHTML = '<div class="projects-spinner"></div>';
-      // Insert overlay after iframe so it only covers the iframe
-      iframe.after(overlay);
-      iframe.style.visibility = "hidden";
-      // Listen for ready message
-      window.addEventListener("message", function projectsReadyListener(event) {
-        if (
-          event.data?.type === "projects-ready" &&
-          iframe.contentWindow === event.source
-        ) {
-          setTimeout(() => {
-            // Fade out overlay, fade in iframe
-            overlay.style.transition = "opacity 0.35s";
-            iframe.style.transition = "opacity 0.35s";
-            iframe.style.opacity = 0;
-            iframe.style.visibility = "visible";
-            setTimeout(() => {
-              iframe.style.opacity = 1;
-              overlay.style.opacity = 0;
-              setTimeout(() => {
-                overlay.remove();
-                iframe.style.transition = "";
-              }, 350);
-            }, 10); // allow style to apply
-          }, 1000); // minimum 1s spinner
-          window.removeEventListener("message", projectsReadyListener);
-        }
-      });
-      iframe.style.opacity = 0;
-    }
 
     // --- Force cascade for internet app ---
     if (programName === "internet") {

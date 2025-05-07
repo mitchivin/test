@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fade out the lightbox background before hiding
         lightbox.classList.add('fade-out');
         setTimeout(() => {
-            lightbox.style.display = 'none';
+        lightbox.style.display = 'none';
             lightbox.classList.remove('fade-out');
         }, 250); // Match the CSS transition duration
         const mediaElement = lightboxContent.querySelector('video, img');
@@ -258,6 +258,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Smooth Drag/Swipe Logic ---
+    // Only attach touch listeners for swipe on mobile
+    function isMobileLightbox() {
+        return !lightbox.classList.contains('desktop-layout');
+    }
+
+    function setSwipeContentTransform(dx, dy, scale = 1) {
+        if (lightboxContent) {
+            lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
+        }
+    }
+
+    function setLightboxBgOpacity(opacity) {
+        if (lightbox) {
+            lightbox.style.backgroundColor = `rgba(0, 0, 0, ${opacity})`;
+        }
+    }
+
     let dragStartX = 0;
     let dragCurrentX = 0;
     let dragStartY = 0;
@@ -271,13 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragRAF = null;
     let dragIsVertical = false;
 
-    function setSwipeContentTransform(dx, dy, scale = 1) {
-        if (lightboxContent) {
-            lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
-        }
-    }
-
     function handleTouchStart(e) {
+        if (!isMobileLightbox()) return;
         if (e.touches.length === 1) {
             dragStartX = e.touches[0].clientX;
             dragCurrentX = dragStartX;
@@ -296,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleTouchMove(e) {
+        if (!isMobileLightbox()) return;
         if (!dragging || e.touches.length !== 1) return;
         dragCurrentX = e.touches[0].clientX;
         dragCurrentY = e.touches[0].clientY;
@@ -310,8 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (lightboxContent && !dragIsVertical) {
             setSwipeContentTransform(dx, 0, 1);
         }
-        const isMobile = !lightbox.classList.contains('desktop-layout');
-        if (lightboxContent && dragIsVertical && isMobile) {
+        if (lightboxContent && dragIsVertical) {
             const limitedDy = Math.min(0, dy);
             const minScale = 0.85;
             const scale = 1 + (minScale - 1) * Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
@@ -320,48 +332,122 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dragRAF) cancelAnimationFrame(dragRAF);
             dragRAF = requestAnimationFrame(() => {
                 setSwipeContentTransform(0, limitedDy, scale);
+                // Lower lightbox bg opacity as you drag up
+                const baseOpacity = 0.87;
+                const minOpacity = 0.2;
+                const dragRatio = Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
+                setLightboxBgOpacity(baseOpacity - (baseOpacity - minOpacity) * dragRatio);
             });
         }
     }
 
+    function fadeInNewPost() {
+        if (!isMobileLightbox() || !lightboxContent) return;
+        const media = lightboxContent.querySelector('img, video');
+        if (media) {
+            media.style.opacity = '0';
+            media.style.transition = 'opacity 220ms cubic-bezier(0.4,0,0.2,1)';
+            setTimeout(() => {
+                media.style.opacity = '1';
+            }, 80);
+        }
+    }
+
+    // Patch openLightboxByIndex to fade in new post on mobile
+    const originalOpenLightboxByIndex = openLightboxByIndex;
+    openLightboxByIndex = function(index, direction = 0, animate = true) {
+        originalOpenLightboxByIndex(index, direction, animate);
+        if (isMobileLightbox()) fadeInNewPost();
+    };
+
     function handleTouchEnd() {
+        if (!isMobileLightbox()) return;
         if (!dragging) return;
         dragging = false;
         if (dragRAF) cancelAnimationFrame(dragRAF);
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
-        const isMobile = !lightbox.classList.contains('desktop-layout');
-        if (dragIsVertical && isMobile && dy < -verticalDragThreshold && Math.abs(dy) > Math.abs(dx)) {
+        // --- Swipe Up to Close: Physics-based ---
+        if (dragIsVertical && dy < -verticalDragThreshold && Math.abs(dy) > Math.abs(dx)) {
             if (lightboxContent) {
                 lightboxContent.classList.remove('swiping');
                 lightboxContent.classList.add('animate');
-                lightboxContent.style.transform = 'translateY(-100%) scale(0.85)';
-            }
-            setTimeout(() => {
-                if (lightboxContent) {
+                const currentY = dy;
+                const targetY = -window.innerHeight;
+                const remaining = Math.abs(targetY - currentY);
+                const total = Math.abs(targetY);
+                const baseDuration = 200; // ms for full swipe
+                const duration = Math.max(80, baseDuration * (remaining / total));
+                lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
+                lightboxContent.style.transform = `translateY(${targetY}px) scale(0.85)`;
+                setLightboxBgOpacity(0.2);
+                const onTransitionEnd = () => {
+                    lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
+                    lightboxContent.style.transition = '';
                     lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
-                }
-                closeLightbox();
-            }, 200);
+                    setLightboxBgOpacity(0.87);
+                    closeLightbox();
+                };
+                lightboxContent.addEventListener('transitionend', onTransitionEnd);
+            }
             return;
         }
+        // --- Side Swipe: Animate Offscreen (physics-based) ---
         if (lightboxContent) {
             lightboxContent.classList.remove('swiping');
         }
+        const vw = window.innerWidth;
         if (!dragIsVertical && dx < -dragThreshold && Math.abs(dx) > Math.abs(dy)) {
+            // Swipe left: next
             if (currentLightboxIndex !== null) {
-                openLightboxByIndex(currentLightboxIndex + 1, 1, true);
+                const currentX = dx;
+                const targetX = -vw;
+                const remaining = Math.abs(targetX - currentX);
+                const total = Math.abs(targetX);
+                const baseDuration = 250; // ms for full swipe
+                const duration = Math.max(80, baseDuration * (remaining / total));
+                lightboxContent.classList.add('animate');
+                lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
+                lightboxContent.style.transform = `translateX(${targetX}px)`;
+                const onTransitionEnd = () => {
+                    lightboxContent.removeEventListener('transitionend', onTransitionEnd);
+                    lightboxContent.classList.remove('animate');
+                    lightboxContent.style.transition = '';
+                    lightboxContent.style.transform = 'translateX(0)';
+                    openLightboxByIndex(currentLightboxIndex + 1, 1, false);
+                };
+                lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
         } else if (!dragIsVertical && dx > dragThreshold && Math.abs(dx) > Math.abs(dy)) {
+            // Swipe right: previous
             if (currentLightboxIndex !== null) {
-                openLightboxByIndex(currentLightboxIndex - 1, -1, true);
+                const currentX = dx;
+                const targetX = vw;
+                const remaining = Math.abs(targetX - currentX);
+                const total = Math.abs(targetX);
+                const baseDuration = 250; // ms for full swipe
+                const duration = Math.max(80, baseDuration * (remaining / total));
+                lightboxContent.classList.add('animate');
+                lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
+                lightboxContent.style.transform = `translateX(${targetX}px)`;
+                const onTransitionEnd = () => {
+                    lightboxContent.removeEventListener('transitionend', onTransitionEnd);
+                    lightboxContent.classList.remove('animate');
+                    lightboxContent.style.transition = '';
+                    lightboxContent.style.transform = 'translateX(0)';
+                    openLightboxByIndex(currentLightboxIndex - 1, -1, false);
+                };
+                lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
         } else {
+            // Snap back
             if (lightboxContent) {
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
+                lightboxContent.style.transition = '';
             }
+            setLightboxBgOpacity(0.87);
         }
     }
 
@@ -375,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Optional: Keyboard navigation (left/right arrows)
     document.addEventListener('keydown', (event) => {
         if (lightbox.style.display === 'flex' && currentLightboxIndex !== null) {
+            if (!isMobileLightbox()) return; // Disable on desktop
             if (event.key === 'ArrowLeft') {
                 openLightboxByIndex(currentLightboxIndex - 1, -1, true);
             } else if (event.key === 'ArrowRight') {
