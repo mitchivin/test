@@ -134,7 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // --- Fade-in logic ---
         lightbox.style.display = 'flex';
+        lightbox.classList.remove('fade-out');
+        // Force reflow to ensure transition
+        void lightbox.offsetWidth;
+        requestAnimationFrame(() => {
+            lightbox.classList.add('fade-in');
+        });
         document.body.style.overflow = 'hidden';
 
         // --- Mobile close button logic ---
@@ -151,11 +158,26 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function closeLightbox() {
         // Fade out the lightbox background before hiding
+        lightbox.classList.remove('fade-in');
         lightbox.classList.add('fade-out');
+        let transitionEnded = false;
+        const onTransitionEnd = (e) => {
+            if (e.target === lightbox && e.propertyName === 'opacity') {
+                transitionEnded = true;
+                lightbox.style.display = 'none';
+                lightbox.classList.remove('fade-out');
+                lightbox.removeEventListener('transitionend', onTransitionEnd);
+            }
+        };
+        lightbox.addEventListener('transitionend', onTransitionEnd);
+        // Fallback: If transitionend doesn't fire (e.g. swipe close on mobile), hide after 300ms
         setTimeout(() => {
-        lightbox.style.display = 'none';
-            lightbox.classList.remove('fade-out');
-        }, 250); // Match the CSS transition duration
+            if (!transitionEnded && lightbox.classList.contains('fade-out')) {
+                lightbox.style.display = 'none';
+                lightbox.classList.remove('fade-out');
+                lightbox.removeEventListener('transitionend', onTransitionEnd);
+            }
+        }, 300);
         const mediaElement = lightboxContent.querySelector('video, img');
         if (mediaElement && mediaElement.tagName === 'VIDEO') {
             mediaElement.pause();
@@ -266,6 +288,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function setSwipeContentTransform(dx, dy, scale = 1) {
         if (lightboxContent) {
             lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
+            // Fade out media and lightbox together as you swipe up
+            const media = lightboxContent.querySelector('img, video');
+            if (media && dragIsVertical) {
+                // Calculate fade based on vertical drag
+                const fadeEnd = 0.95;
+                const dragRatio = Math.min(1, Math.abs(dy) / (window.innerHeight * fadeEnd));
+                const fade = 1 - Math.pow(dragRatio, 2);
+                media.style.opacity = fade;
+                lightbox.style.opacity = fade;
+            } else if (media) {
+                media.style.opacity = '';
+                lightbox.style.opacity = '';
+            }
         }
     }
 
@@ -377,16 +412,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const remaining = Math.abs(targetY - currentY);
                 const total = Math.abs(targetY);
                 const baseDuration = 200; // ms for full swipe
-                const duration = Math.max(80, baseDuration * (remaining / total));
+                const duration = Math.min(Math.max(280, baseDuration * (remaining / total)), 400);
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateY(${targetY}px) scale(0.85)`;
                 setLightboxBgOpacity(0.2);
+                // Fade out media and lightbox
+                const media = lightboxContent.querySelector('img, video');
+                if (media) media.style.opacity = 0;
+                lightbox.style.opacity = 0.2;
                 const onTransitionEnd = () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
                     lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
                     setLightboxBgOpacity(0.87);
+                    // Reset media and lightbox opacity
+                    if (media) media.style.opacity = '';
+                    lightbox.style.opacity = '';
                     closeLightbox();
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
@@ -406,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const remaining = Math.abs(targetX - currentX);
                 const total = Math.abs(targetX);
                 const baseDuration = 250; // ms for full swipe
-                const duration = Math.max(80, baseDuration * (remaining / total));
+                const duration = Math.min(Math.max(180, baseDuration * (remaining / total)), 350);
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateX(${targetX}px)`;
@@ -414,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
-                    lightboxContent.style.transform = 'translateX(0)';
+                    lightboxContent.style.transform = `translateX(0)`;
                     openLightboxByIndex(currentLightboxIndex + 1, 1, false);
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
@@ -427,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const remaining = Math.abs(targetX - currentX);
                 const total = Math.abs(targetX);
                 const baseDuration = 250; // ms for full swipe
-                const duration = Math.max(80, baseDuration * (remaining / total));
+                const duration = Math.min(Math.max(180, baseDuration * (remaining / total)), 350);
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateX(${targetX}px)`;
@@ -435,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
-                    lightboxContent.style.transform = 'translateX(0)';
+                    lightboxContent.style.transform = `translateX(0)`;
                     openLightboxByIndex(currentLightboxIndex - 1, -1, false);
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
@@ -446,6 +488,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
                 lightboxContent.style.transition = '';
+                // Reset media and lightbox opacity
+                const media = lightboxContent.querySelector('img, video');
+                if (media) media.style.opacity = '';
+                lightbox.style.opacity = '';
             }
             setLightboxBgOpacity(0.87);
         }
@@ -457,32 +503,6 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxContent.addEventListener('touchmove', handleTouchMove, { passive: true });
         lightboxContent.addEventListener('touchend', handleTouchEnd, { passive: true });
     }
-
-    // Optional: Keyboard navigation (left/right arrows)
-    document.addEventListener('keydown', (event) => {
-        if (lightbox.style.display === 'flex' && currentLightboxIndex !== null) {
-            if (!isMobileLightbox()) return; // Disable on desktop
-            if (event.key === 'ArrowLeft') {
-                openLightboxByIndex(currentLightboxIndex - 1, -1, true);
-            } else if (event.key === 'ArrowRight') {
-                openLightboxByIndex(currentLightboxIndex + 1, 1, true);
-            } else if (event.key === 'ArrowUp') {
-                // Animate up and close
-                if (lightboxContent) {
-                    lightboxContent.classList.remove('swiping');
-                    lightboxContent.classList.add('animate');
-                    lightboxContent.style.transform = 'translateY(-100%)';
-                }
-                setTimeout(() => {
-                    if (lightboxContent) {
-                        lightboxContent.classList.remove('animate');
-                        lightboxContent.style.transform = 'translateX(0) translateY(0)';
-                    }
-                    closeLightbox();
-                }, 200);
-            }
-        }
-    });
 
     // --- Mobile tap-to-show-close-button logic ---
     function handleMobileShowCloseBtn(event) {

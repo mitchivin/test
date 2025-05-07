@@ -139,7 +139,10 @@ body {
 
 /* Lightbox Styles */
 #project-lightbox {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1);
+    display: none; /* display is toggled by JS */
     justify-content: center; 
     align-items: center; 
     position: fixed;
@@ -147,13 +150,16 @@ body {
     left: 0;
     width: 100%;
     height: 100dvh; 
-    background-color: rgba(0, 0, 0, 0.87);
+    background-color: rgba(27, 27, 27, 0.55);
     z-index: 100010; 
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
-    transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+#project-lightbox.fade-in {
     opacity: 1;
+    pointer-events: auto;
 }
 
 #project-lightbox.fade-out {
@@ -179,6 +185,22 @@ body {
     justify-content: center;
     align-items: center;
     width: 100%;
+}
+
+#lightbox-content img,
+#lightbox-content video {
+    opacity: 0;
+    transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+#project-lightbox.fade-in #lightbox-content img,
+#project-lightbox.fade-in #lightbox-content video {
+    opacity: 1;
+}
+
+#project-lightbox.fade-out #lightbox-content img,
+#project-lightbox.fade-out #lightbox-content video {
+    opacity: 0;
 }
 
 #lightbox-content img,
@@ -320,6 +342,8 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0;
+  margin: 0;
+  /* background-color is inherited from #project-lightbox */
 }
 #project-lightbox:not(.desktop-layout) #lightbox-inner-wrapper {
   height: 100vh;
@@ -364,13 +388,15 @@ body {
 /* Mobile: Make lightbox media fill more of the viewport */
 #project-lightbox:not(.desktop-layout) #lightbox-content img,
 #project-lightbox:not(.desktop-layout) #lightbox-content video {
-  max-width: 100vw;
-  max-height: 95vh;
+  max-width: calc(100vw - 24px);
   width: auto;
   height: auto;
   object-fit: contain;
-  border-radius: 0;
-  margin: 0;
+  border-radius: 20px;
+  margin: 0 12px;
+  display: block;
+  padding: 0;
+  border: none;
 }
 
 .wave {
