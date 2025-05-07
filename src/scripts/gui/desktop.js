@@ -181,16 +181,23 @@ export default class Desktop {
       if (e.target !== this.overlay && e.target !== this.desktop) return;
 
       if (isMobileDevice()) {
-        if (this.isDragging && e.pointerId !== this.activeDragPointerId) {
-          // A drag is already in progress by another pointer, ignore this new one
-          return;
+        // If an activeDragPointerId exists and it's different from the current event's pointer,
+        // it implies a multi-touch scenario (e.g., pinch) or a stuck state from a previous drag.
+        // Reset any existing drag state aggressively.
+        if (this.activeDragPointerId !== null && this.activeDragPointerId !== e.pointerId) {
+          this.resetDragSelectionState(); 
+          // After resetting, this new pointer (e.pointerId) can now attempt to start a fresh drag.
+        } else if (this.isDragging && this.activeDragPointerId === e.pointerId) {
+          // Unlikely scenario: pointerdown for the same pointer that's already dragging.
+          // Reset to be safe and ensure a clean state before potentially restarting.
+          this.resetDragSelectionState();
         }
-        // If it's a new primary touch or no drag is active, allow it to start
-        if (this.activeDragPointerId !== null && e.pointerId !== this.activeDragPointerId) {
-          // Potentially a new gesture starting before the old one fully cleared, let's be cautious
-          // and effectively only allow one drag pointer at a time on mobile.
-          return;
-        }
+      }
+
+      // If, after the above checks, a drag is STILL considered in progress, bail out.
+      // This typically shouldn't happen if resetDragSelectionState() was called correctly.
+      if (this.isDragging) {
+        return;
       }
 
       if (!e.ctrlKey) {
@@ -210,7 +217,7 @@ export default class Desktop {
       });
       this.desktop.appendChild(this.selectionBox);
       this.isDragging = true;
-      this.hasDragged = false;
+      this.hasDragged = false; // Ensure hasDragged is reset here too
       this.activeDragPointerId = e.pointerId; // Store the ID of the pointer starting the drag
     });
     window.addEventListener("pointermove", (e) => {
