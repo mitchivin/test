@@ -6,7 +6,14 @@
    ================================================== */
 
 /* --- Menu Bar Styles (Previously Injected) --- */
-.window-body.iframe-container .menu-bar {
+.menu-bar-container {
+  width: 100%;
+  background: #ece9d8;
+  box-sizing: border-box;
+  z-index: 30;
+}
+
+.menu-bar {
   display: flex;
   align-items: center;
   background: #ece9d8;
@@ -26,7 +33,7 @@
   border-bottom: 2px solid #d7d4ca;
   cursor: default;
 }
-.window-body.iframe-container .menu-bar .menu-item {
+.menu-bar .menu-item {
   flex: 1 1 0;
   text-align: center;
   max-width: fit-content;
@@ -36,23 +43,23 @@
   align-items: center;
   justify-content: center;
 }
-.window-body.iframe-container .menu-item:not(.disabled):hover,
-.window-body.iframe-container .menu-item.active {
+.menu-bar .menu-item:not(.disabled):hover,
+.menu-bar .menu-item.active {
   background: #0a6fc2;
   color: #fff;
 }
-.window-body.iframe-container .menu-item.disabled {
+.menu-bar .menu-item.disabled {
   color: #bcbcbc;
   cursor: default;
 }
-.window-body.iframe-container .menu-item.disabled:hover {
+.menu-bar .menu-item.disabled:hover {
     background: none;
     color: #bcbcbc;
     border: none;
     outline: none;
     box-shadow: none;
 }
-.window-body.iframe-container .dropdown-menu {
+.menu-bar-container .dropdown-menu {
   display: none;
   position: absolute;
   left: 0;
@@ -69,10 +76,10 @@
   padding: 0;
   box-sizing: border-box;
 }
-.window-body.iframe-container .dropdown-menu.show {
+.menu-bar-container .dropdown-menu.show {
   display: block;
 }
-.window-body.iframe-container .menu-option {
+.menu-bar-container .menu-option {
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -86,15 +93,15 @@
   text-align: left;
   transition: background 0.13s;
 }
-.window-body.iframe-container .menu-option:hover:not(.disabled) {
+.menu-bar-container .menu-option:hover:not(.disabled) {
   background: #0a6fc2;
   color: #fff;
 }
-.window-body.iframe-container .menu-option.disabled {
+.menu-bar-container .menu-option.disabled {
   color: #bcbcbc;
   cursor: default;
 }
-.window-body.iframe-container .menu-separator {
+.menu-bar-container .menu-separator {
   border-top: 1px solid #d7d4ca;
   margin: 2px 0;
   height: 0;

@@ -56,44 +56,40 @@ class WindowTemplates {
 
   static createIframeContainer(appPath, windowId, programConfig) {
     const container = document.createElement("div");
-    container.className = "window-body iframe-container";
-    const isMyPictures =
-      programConfig && programConfig.id === "my-pictures-window";
+    container.className = "window-body";
 
     // --- Dynamically Generate MenuBar based on programConfig ---
     let menuBarContainer = null;
-    if (
-      programConfig?.menuBarConfig?.items
-    ) {
+    if (programConfig?.menuBarConfig?.items) {
       let parentWindowElement = container.closest(".window, .app-window");
       menuBarContainer = createMenuBar(
         programConfig.menuBarConfig,
         windowId,
         parentWindowElement,
       );
-      // Append Menu Bar FIRST if it exists
       if (menuBarContainer) container.appendChild(menuBarContainer);
     }
 
     // --- Generate Toolbar (if config exists) ---
     let toolbarWrapper = null;
-    if (
-      programConfig?.toolbarConfig?.buttons
-    ) {
+    if (programConfig?.toolbarConfig?.buttons) {
       toolbarWrapper = createToolbar(
         programConfig.toolbarConfig,
         windowId,
-        isMyPictures, // Pass flag for My Pictures specific layout
+        programConfig && programConfig.id === "my-pictures-window"
       );
     }
 
     // --- Create Address Bar (if config exists) ---
     let addressBar = null;
-    if (programConfig?.addressBarConfig?.enabled) { // Check the new config
+    if (programConfig?.addressBarConfig?.enabled) {
       addressBar = createAddressBar(programConfig.addressBarConfig);
     }
 
-    // --- Create and Prepare iframe ---
+    // --- Create iframe container and iframe ---
+    const iframeContainer = document.createElement("div");
+    iframeContainer.className = "iframe-container";
+    iframeContainer.style.position = "relative";
     const iframe = document.createElement("iframe");
     Object.assign(iframe, { src: appPath, title: `${windowId}-content` });
     const attrs = {
@@ -105,21 +101,12 @@ class WindowTemplates {
     };
     for (const [attr, value] of Object.entries(attrs))
       iframe.setAttribute(attr, value);
+    iframeContainer.appendChild(iframe);
 
-    // --- Append Toolbar, Address Bar, and iframe in correct order ---
-    // Exception: My Pictures toolbar goes below iframe
-    if (toolbarWrapper && !isMyPictures) {
-      container.appendChild(toolbarWrapper);
-    }
-    if (addressBar) { // Append Address Bar AFTER Toolbar (if toolbar exists)
-      container.appendChild(addressBar);
-    }
-    container.appendChild(iframe); // Append iframe AFTER Address Bar (if it exists)
-
-    // --- Append My Pictures Toolbar AFTER iframe ---
-    if (toolbarWrapper && isMyPictures) {
-      container.appendChild(toolbarWrapper);
-    }
+    // --- Append in correct order: MenuBar, Toolbar, AddressBar, IframeContainer ---
+    if (toolbarWrapper) container.appendChild(toolbarWrapper);
+    if (addressBar) container.appendChild(addressBar);
+    container.appendChild(iframeContainer);
 
     return container;
   }
@@ -282,6 +269,56 @@ export default class WindowManager {
 
     const windowElement = this._createWindowElement(program);
     if (!windowElement) return;
+
+    // --- Special handling for Projects (internet) app ---
+    if (programName === "internet") {
+      // Hide content and show overlay until ready
+      const iframe = windowElement.querySelector("iframe");
+      const iframeContainer = iframe.parentElement;
+      iframeContainer.style.position = "relative";
+      const overlay = document.createElement("div");
+      overlay.className = "projects-loading-overlay";
+      overlay.style.position = "absolute";
+      overlay.style.top = iframe.offsetTop + "px";
+      overlay.style.left = iframe.offsetLeft + "px";
+      overlay.style.width = iframe.offsetWidth ? iframe.offsetWidth + "px" : "100%";
+      overlay.style.height = iframe.offsetHeight ? iframe.offsetHeight + "px" : "100%";
+      overlay.style.background = "rgba(0,0,0,0.72)";
+      overlay.style.opacity = 1;
+      overlay.style.zIndex = 10;
+      overlay.style.display = "flex";
+      overlay.style.justifyContent = "center";
+      overlay.style.alignItems = "center";
+      overlay.innerHTML = '<div class="projects-spinner"></div>';
+      // Insert overlay after iframe so it only covers the iframe
+      iframe.after(overlay);
+      iframe.style.visibility = "hidden";
+      // Listen for ready message
+      window.addEventListener("message", function projectsReadyListener(event) {
+        if (
+          event.data?.type === "projects-ready" &&
+          iframe.contentWindow === event.source
+        ) {
+          setTimeout(() => {
+            // Fade out overlay, fade in iframe
+            overlay.style.transition = "opacity 0.35s";
+            iframe.style.transition = "opacity 0.35s";
+            iframe.style.opacity = 0;
+            iframe.style.visibility = "visible";
+            setTimeout(() => {
+              iframe.style.opacity = 1;
+              overlay.style.opacity = 0;
+              setTimeout(() => {
+                overlay.remove();
+                iframe.style.transition = "";
+              }, 350);
+            }, 10); // allow style to apply
+          }, 1000); // minimum 1s spinner
+          window.removeEventListener("message", projectsReadyListener);
+        }
+      });
+      iframe.style.opacity = 0;
+    }
 
     // --- Force cascade for internet app ---
     if (programName === "internet") {

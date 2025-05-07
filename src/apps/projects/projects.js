@@ -302,6 +302,40 @@ document.addEventListener('DOMContentLoaded', () => {
             // On resize, assume media dimensions are stable if they were loaded.
             resizeTimeout = setTimeout(applyMasonryLayout, 150); 
         });
+        // Notify parent when ready (first load only)
+        // Wait for all images and videos to be loaded, then send message
+        const posts = Array.from(feedContainer.querySelectorAll('.post'));
+        const mediaElements = posts.map(post => post.querySelector('img, video')).filter(Boolean);
+        let loadedCount = 0;
+        function checkAllLoaded() {
+            loadedCount++;
+            if (loadedCount === mediaElements.length) {
+                // Layout is ready, notify parent
+                setTimeout(() => {
+                  if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'projects-ready' }, '*');
+                  }
+                }, 0);
+            }
+        }
+        if (mediaElements.length === 0) {
+            // No media, notify immediately
+            setTimeout(() => {
+              if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'projects-ready' }, '*');
+              }
+            }, 0);
+        } else {
+            mediaElements.forEach(el => {
+                if ((el.tagName === 'IMG' && el.complete) || (el.tagName === 'VIDEO' && el.readyState >= 2)) {
+                    checkAllLoaded();
+                } else {
+                    el.addEventListener('load', checkAllLoaded);
+                    el.addEventListener('loadeddata', checkAllLoaded);
+                    el.addEventListener('error', checkAllLoaded);
+                }
+            });
+        }
     } else {
         console.error("Masonry: .feed-container not found. Masonry layout not initialized.");
     }
