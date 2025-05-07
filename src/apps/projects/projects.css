@@ -8,8 +8,12 @@ html, body {
     width: 100%;
 }
 
+html {
+    background: url('../../../assets/apps/projects/projectsbg.webp') center center / cover no-repeat fixed;
+}
+
 body {
-    background: linear-gradient(45deg, #aaaaaa 0%, #636363 100%);
+    background: none !important;
     background-size: 200% 200%;  
     height: 100%;
     width: 100%;
