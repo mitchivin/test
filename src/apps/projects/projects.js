@@ -79,6 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaElement = document.createElement('img');
             mediaElement.src = src;
             mediaElement.alt = 'Project Lightbox Image';
+            // Hide image until loaded
+            mediaElement.style.opacity = '0';
+            const showImage = () => {
+                mediaElement.style.opacity = '';
+            };
+            mediaElement.addEventListener('load', showImage, { once: true });
+            // Fallback: show after 500ms if load is slow
+            setTimeout(() => {
+                mediaElement.style.opacity = '';
+            }, 500);
         } else if (type === 'video') {
             mediaElement = document.createElement('video');
             mediaElement.src = src;
@@ -90,6 +100,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (poster) {
                 mediaElement.poster = poster;
             }
+            // Hide video until ready
+            mediaElement.style.opacity = '0';
+            // Fade in video when ready
+            const showVideo = () => {
+                mediaElement.style.opacity = '';
+            };
+            mediaElement.addEventListener('loadeddata', showVideo, { once: true });
+            // Fallback: show after 700ms if loadeddata is slow
+            setTimeout(() => {
+                mediaElement.style.opacity = '';
+            }, 700);
         }
 
         if (mediaElement) {
@@ -151,6 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearTimeout(window._lightboxCloseBtnTimer);
             }
         }
+
+        // When opening, always reset visibility
+        lightbox.style.visibility = '';
     }
 
     /**
@@ -167,6 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 lightbox.style.display = 'none';
                 lightbox.classList.remove('fade-out');
                 lightbox.removeEventListener('transitionend', onTransitionEnd);
+                // Extra: Hide and reset to prevent post-close flashes
+                lightbox.style.visibility = 'hidden';
+                lightbox.style.opacity = '';
+                if (lightboxContent) lightboxContent.style.opacity = '';
             }
         };
         lightbox.addEventListener('transitionend', onTransitionEnd);
@@ -176,6 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 lightbox.style.display = 'none';
                 lightbox.classList.remove('fade-out');
                 lightbox.removeEventListener('transitionend', onTransitionEnd);
+                // Extra: Hide and reset to prevent post-close flashes
+                lightbox.style.visibility = 'hidden';
+                lightbox.style.opacity = '';
+                if (lightboxContent) lightboxContent.style.opacity = '';
             }
         }, 300);
         const mediaElement = lightboxContent.querySelector('video, img');
@@ -306,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setLightboxBgOpacity(opacity) {
         if (lightbox) {
-            lightbox.style.backgroundColor = `rgba(0, 0, 0, ${opacity})`;
+            lightbox.style.backgroundColor = `rgba(59, 59, 59, ${opacity})`;
         }
     }
 
