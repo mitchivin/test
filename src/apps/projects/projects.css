@@ -393,7 +393,7 @@ body {
   height: auto;
   object-fit: contain;
   border-radius: 20px;
-  margin: 0 12px;
+  margin: 12px 12px;
   display: block;
   padding: 0;
   border: none;

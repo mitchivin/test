@@ -323,15 +323,20 @@ document.addEventListener('DOMContentLoaded', () => {
             // Fade out media and lightbox together as you swipe up
             const media = lightboxContent.querySelector('img, video');
             if (media && dragIsVertical) {
-                // Calculate fade based on vertical drag
+                // Calculate fade and scale based on vertical drag
                 const fadeEnd = 0.95;
                 const dragRatio = Math.min(1, Math.abs(dy) / (window.innerHeight * fadeEnd));
                 const fade = 1 - Math.pow(dragRatio, 2);
                 media.style.opacity = fade;
                 lightbox.style.opacity = fade;
+                // Scale from 1 to 0.25 as drag progresses
+                const minScale = 0.25;
+                const scale = 1 - (1 - minScale) * dragRatio;
+                lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
             } else if (media) {
                 media.style.opacity = '';
                 lightbox.style.opacity = '';
+                lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(1)`;
             }
         }
     }
@@ -434,8 +439,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dragRAF) cancelAnimationFrame(dragRAF);
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
-        // --- Swipe Up to Close: Physics-based ---
-        if (dragIsVertical && dy < -verticalDragThreshold && Math.abs(dy) > Math.abs(dx)) {
+        const media = lightboxContent.querySelector('img, video');
+        let triggerSwipeUp = false;
+        let triggerSwipeLeft = false;
+        let triggerSwipeRight = false;
+        if (media) {
+            const rect = media.getBoundingClientRect();
+            // Calculate where the media would be after the drag
+            const draggedTop = rect.top + dy;
+            const draggedBottom = rect.bottom + dy;
+            const draggedLeft = rect.left + dx;
+            const draggedRight = rect.right + dx;
+            const draggedCenter = (rect.left + rect.right) / 2 + dx;
+            // Swipe up: if bottom is above vertical center
+            if (dragIsVertical && draggedBottom < window.innerHeight / 2 && Math.abs(dy) > Math.abs(dx)) {
+                triggerSwipeUp = true;
+            }
+            // Swipe left: if right edge is left of horizontal center
+            if (!dragIsVertical && draggedRight < window.innerWidth / 2 && dx < 0 && Math.abs(dx) > Math.abs(dy)) {
+                triggerSwipeLeft = true;
+            }
+            // Swipe right: if left edge is right of horizontal center
+            if (!dragIsVertical && draggedLeft > window.innerWidth / 2 && dx > 0 && Math.abs(dx) > Math.abs(dy)) {
+                triggerSwipeRight = true;
+            }
+        }
+        // --- Swipe Up to Close: Content-relative threshold ---
+        if (triggerSwipeUp) {
             if (lightboxContent) {
                 lightboxContent.classList.remove('swiping');
                 lightboxContent.classList.add('animate');
@@ -445,11 +475,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const total = Math.abs(targetY);
                 const baseDuration = 200; // ms for full swipe
                 const duration = Math.min(Math.max(280, baseDuration * (remaining / total)), 400);
+                // Calculate current scale based on drag position
+                const fadeEnd = 0.95;
+                const dragRatio = Math.min(1, Math.abs(currentY) / (window.innerHeight * fadeEnd));
+                const minScale = 0.25;
+                const startScale = 1 - (1 - minScale) * dragRatio;
+                // Animate to scale 0.25 as it slides up
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
-                lightboxContent.style.transform = `translateY(${targetY}px) scale(0.85)`;
+                lightboxContent.style.transform = `translateY(${targetY}px) scale(${minScale})`;
                 setLightboxBgOpacity(0.2);
                 // Fade out media and lightbox
-                const media = lightboxContent.querySelector('img, video');
                 if (media) media.style.opacity = 0;
                 lightbox.style.opacity = 0.2;
                 const onTransitionEnd = () => {
@@ -461,22 +496,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Reset media and lightbox opacity
                     if (media) media.style.opacity = '';
                     lightbox.style.opacity = '';
+                    // Ensure consistent background color after snap-back
+                    lightbox.style.backgroundColor = 'rgba(59, 59, 59, 0.55)';
                     closeLightbox();
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
             return;
         }
-        // --- Side Swipe: Animate Offscreen (physics-based) ---
-        if (lightboxContent) {
-            lightboxContent.classList.remove('swiping');
-        }
-        const vw = window.innerWidth;
-        if (!dragIsVertical && dx < -dragThreshold && Math.abs(dx) > Math.abs(dy)) {
-            // Swipe left: next
+        // --- Side Swipe: Content-relative threshold ---
+        if (triggerSwipeLeft) {
             if (currentLightboxIndex !== null) {
                 const currentX = dx;
-                const targetX = -vw;
+                const targetX = -window.innerWidth;
                 const remaining = Math.abs(targetX - currentX);
                 const total = Math.abs(targetX);
                 const baseDuration = 250; // ms for full swipe
@@ -493,11 +525,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
-        } else if (!dragIsVertical && dx > dragThreshold && Math.abs(dx) > Math.abs(dy)) {
-            // Swipe right: previous
+            return;
+        }
+        if (triggerSwipeRight) {
             if (currentLightboxIndex !== null) {
                 const currentX = dx;
-                const targetX = vw;
+                const targetX = window.innerWidth;
                 const remaining = Math.abs(targetX - currentX);
                 const total = Math.abs(targetX);
                 const baseDuration = 250; // ms for full swipe
@@ -514,19 +547,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
-        } else {
-            // Snap back
-            if (lightboxContent) {
-                lightboxContent.classList.add('animate');
-                lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
-                lightboxContent.style.transition = '';
-                // Reset media and lightbox opacity
-                const media = lightboxContent.querySelector('img, video');
-                if (media) media.style.opacity = '';
-                lightbox.style.opacity = '';
-            }
-            setLightboxBgOpacity(0.87);
+            return;
         }
+        // --- Snap back if no threshold met ---
+        if (lightboxContent) {
+            lightboxContent.classList.add('animate');
+            lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
+            lightboxContent.style.transition = '';
+            // Reset media and lightbox opacity
+            if (media) media.style.opacity = '';
+            lightbox.style.opacity = '';
+            // Ensure consistent background color after snap-back
+            lightbox.style.backgroundColor = 'rgba(59, 59, 59, 0.55)';
+        }
+        // setLightboxBgOpacity(0.87); // Do not call this after snap-back
     }
 
     // Attach touch listeners to the lightboxContent for mobile only
