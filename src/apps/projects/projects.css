@@ -45,7 +45,7 @@ body {
     box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
-    column-fill: balance;
+    column-fill: auto;
 }
 
 /* Tablet and Small Desktop: 3 columns (Changed from 2) */
@@ -81,6 +81,8 @@ body {
     -webkit-transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    display: inline-block;
+    width: 100%;
 }
 
 .post:last-child {
