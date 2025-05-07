@@ -265,6 +265,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragThreshold = 60; // px
     let dragHasMoved = false;
     let verticalDragThreshold = 60; // px for swipe up to close
+    let lastDragDx = 0;
+    let lastDragDy = 0;
+    let dragRAF = null;
+    let dragIsVertical = false;
+
+    function setSwipeWrapperTransform(dx, dy, scale = 1) {
+        if (swipeWrapper) {
+            swipeWrapper.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
+        }
+    }
 
     function handleTouchStart(e) {
         if (e.touches.length === 1) {
@@ -274,6 +284,9 @@ document.addEventListener('DOMContentLoaded', () => {
             dragCurrentY = dragStartY;
             dragging = true;
             dragHasMoved = false;
+            dragIsVertical = false;
+            lastDragDx = 0;
+            lastDragDy = 0;
             if (swipeWrapper) {
                 swipeWrapper.classList.add('swiping');
                 swipeWrapper.classList.remove('animate');
@@ -288,44 +301,66 @@ document.addEventListener('DOMContentLoaded', () => {
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
         if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragHasMoved = true;
-        // Only translate horizontally for left/right swipe
-        if (swipeWrapper && Math.abs(dx) > Math.abs(dy)) {
-            swipeWrapper.style.transform = `translateX(${dx}px)`;
+        // Determine if this is a vertical or horizontal drag (lock after initial movement)
+        if (!dragIsVertical && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
+            dragIsVertical = true;
+        } else if (!dragIsVertical && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
+            dragIsVertical = false;
         }
-        // Optionally, you could add a vertical translate for swipe up, but not needed for close gesture
+        // Only translate horizontally for left/right swipe
+        if (swipeWrapper && !dragIsVertical) {
+            setSwipeWrapperTransform(dx, 0, 1);
+        }
+        // For vertical swipe up to close (mobile only)
+        const isMobile = !lightbox.classList.contains('desktop-layout');
+        if (swipeWrapper && dragIsVertical && isMobile) {
+            // Only allow upward drag (dy negative)
+            const limitedDy = Math.min(0, dy); // Only upwards
+            // Scale from 1 to 0.85 as dy goes from 0 to -window.innerHeight/2
+            const minScale = 0.85;
+            const scale = 1 + (minScale - 1) * Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
+            lastDragDx = 0;
+            lastDragDy = limitedDy;
+            if (dragRAF) cancelAnimationFrame(dragRAF);
+            dragRAF = requestAnimationFrame(() => {
+                setSwipeWrapperTransform(0, limitedDy, scale);
+            });
+        }
     }
 
     function handleTouchEnd() {
         if (!dragging) return;
         dragging = false;
+        if (dragRAF) cancelAnimationFrame(dragRAF);
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
         const isMobile = !lightbox.classList.contains('desktop-layout');
-        if (isMobile && dy < -verticalDragThreshold && Math.abs(dy) > Math.abs(dx)) {
-            // Swipe up to close
+        if (dragIsVertical && isMobile && dy < -verticalDragThreshold && Math.abs(dy) > Math.abs(dx)) {
+            // Animate up and scale out, then close
             if (swipeWrapper) {
                 swipeWrapper.classList.remove('swiping');
                 swipeWrapper.classList.add('animate');
-                swipeWrapper.style.transform = 'translateY(-100%)';
+                swipeWrapper.style.transform = 'translateY(-100%) scale(0.85)';
             }
             setTimeout(() => {
                 if (swipeWrapper) {
                     swipeWrapper.classList.remove('animate');
-                    swipeWrapper.style.transform = 'translateX(0) translateY(0)';
+                    swipeWrapper.style.transform = 'translateX(0) translateY(0) scale(1)';
                 }
                 closeLightbox();
             }, 200);
             return;
         }
+        // Horizontal swipe logic
         if (swipeWrapper) {
             swipeWrapper.classList.remove('swiping');
         }
-        if (dx < -dragThreshold && Math.abs(dx) > Math.abs(dy)) {
+        if (!dragIsVertical && dx < -dragThreshold && Math.abs(dx) > Math.abs(dy)) {
             // Swipe left: next
             if (currentLightboxIndex !== null) {
                 openLightboxByIndex(currentLightboxIndex + 1, 1, true);
             }
-        } else if (dx > dragThreshold && Math.abs(dx) > Math.abs(dy)) {
+        } else if (!dragIsVertical && dx > dragThreshold && Math.abs(dx) > Math.abs(dy)) {
             // Swipe right: previous
             if (currentLightboxIndex !== null) {
                 openLightboxByIndex(currentLightboxIndex - 1, -1, true);
@@ -334,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Snap back
             if (swipeWrapper) {
                 swipeWrapper.classList.add('animate');
-                swipeWrapper.style.transform = 'translateX(0)';
+                swipeWrapper.style.transform = 'translateX(0) translateY(0) scale(1)';
             }
         }
     }
