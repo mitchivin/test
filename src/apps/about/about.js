@@ -1,34 +1,9 @@
 // Function to handle opening external links safely
-function openExternalLink(url) {
-    if (window.parent && window.parent !== window) {
-        try {
-            // Ask the parent window shell to open the link
-            window.parent.postMessage({ type: 'openExternal', url: url }, '*');
-        } catch (error) {
-            console.error("Could not postMessage to parent: ", error);
-            window.open(url, '_blank', 'noopener,noreferrer'); // Fallback
-        }
-    } else {
-        window.open(url, '_blank', 'noopener,noreferrer'); // Fallback if no parent
-    }
-}
-
-// Setup for social links in the left panel
-function setupSocialLinks() {
-    // Attach click handler to each social link anchor
-    document.querySelectorAll('.left-panel__card__row.social-link a').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            openExternalLink(link.href);
-        });
-    });
-}
+// (No longer needed for social links)
 
 // Initialize listeners when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    setupSocialLinks();
-
-    // Add functionality to toggle card visibility
+    // Only keep the card collapse/expand logic
     document.querySelectorAll('.left-panel__card__header__img').forEach(icon => {
         icon.addEventListener('click', function (e) {
             e.stopPropagation(); // Prevent bubbling if needed

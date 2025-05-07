@@ -74,21 +74,78 @@ export function initBootSequence(eventBus, EVENTS) {
     bootScreen.style.display = "flex";
     bootScreen.style.opacity = "1";
     bootScreen.style.pointerEvents = "auto";
-    setTimeout(() => {
-      bootScreen.style.display = "none";
-      if (isMobileDevice()) {
-        handleLoginSuccess();
-      } else {
-        loginScreen.style.display = "flex";
-        loginScreen.style.opacity = "1";
-        loginScreen.style.pointerEvents = "auto";
-        const loginContent = loginScreen.querySelector(".login-screen");
-        if (loginContent) {
-          loginContent.style.opacity = "1";
+
+    const minBootTime = 3000; // 3 seconds minimum
+    const bootStart = Date.now();
+
+    preloadAssets().then(() => {
+      const elapsed = Date.now() - bootStart;
+      const remaining = Math.max(0, minBootTime - elapsed);
+      setTimeout(() => {
+        bootScreen.style.display = "none";
+        if (isMobileDevice()) {
+          handleLoginSuccess();
+        } else {
+          loginScreen.style.display = "flex";
+          loginScreen.style.opacity = "1";
+          loginScreen.style.pointerEvents = "auto";
+          const loginContent = loginScreen.querySelector(".login-screen");
+          if (loginContent) {
+            loginContent.style.opacity = "1";
+          }
+          attachLoginScreenHandlers();
         }
-        attachLoginScreenHandlers();
-      }
-    }, 5000);
+      }, remaining);
+    });
+  }
+
+  // Preload all critical assets for Projects app
+  function preloadAssets() {
+    // List of images and videos from projects.html
+    const imageUrls = [
+      "../../../assets/apps/projects/image1.webp",
+      "../../../assets/apps/projects/carousel1.webp",
+      "../../../assets/apps/projects/image2.webp",
+      "../../../assets/apps/projects/image3.webp",
+      "../../../assets/apps/projects/image4.webp",
+      "../../../assets/apps/projects/image5.webp",
+      "../../../assets/apps/projects/image6.webp",
+    ];
+    const videoUrls = [
+      "../../../assets/apps/projects/video1.mp4",
+      "../../../assets/apps/projects/video2.mp4",
+      "../../../assets/apps/projects/video3.mp4",
+    ];
+    // Helper to preload an image
+    function preloadImage(url) {
+      return new Promise((resolve) => {
+        const img = new window.Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = url;
+      });
+    }
+    // Helper to preload a video (metadata only)
+    function preloadVideo(url) {
+      return new Promise((resolve) => {
+        const video = document.createElement("video");
+        video.preload = "auto";
+        video.onloadeddata = () => { cleanup(); resolve(); };
+        video.onerror = () => { cleanup(); resolve(); };
+        video.src = url;
+        // For Safari, need to append to DOM to trigger load
+        video.style.display = "none";
+        document.body.appendChild(video);
+        // Clean up after load/error
+        function cleanup() {
+          if (video.parentNode) video.parentNode.removeChild(video);
+        }
+      });
+    }
+    // Preload all assets
+    const imagePromises = imageUrls.map(preloadImage);
+    const videoPromises = videoUrls.map(preloadVideo);
+    return Promise.all([...imagePromises, ...videoPromises]);
   }
 
   /**

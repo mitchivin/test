@@ -26,16 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Determine if desktop layout should be used based on feedContainer width
         const isDesktopView = feedContainer.offsetWidth >= 768; 
 
-        // console.log(`feedContainer.offsetWidth: ${feedContainer.offsetWidth}, isDesktopView for lightbox: ${isDesktopView}`);
-
         if (isDesktopView) {
             if (!lightbox.classList.contains('desktop-layout')) {
-                // console.log('Applying desktop-layout class to lightbox.');
                 lightbox.classList.add('desktop-layout');
             }
         } else {
             if (lightbox.classList.contains('desktop-layout')) {
-                // console.log('Removing desktop-layout class from lightbox.');
                 lightbox.classList.remove('desktop-layout');
             }
         }
@@ -183,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyMasonryLayout() {
         if (!feedContainer || feedContainerPosts.length === 0) {
-            // console.log("Masonry: No container or posts found.");
             return;
         }
 
@@ -226,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
         feedContainerPosts.forEach(post => {
             const postHeight = post.offsetHeight;
             if (postHeight === 0 && post.querySelector('img, video')) {
-                // console.warn("Masonry: Post has zero offsetHeight despite media. Layout may be incorrect.", post);
             }
             
             let shortestColumnIndex = 0;
@@ -312,6 +306,5 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Masonry: .feed-container not found. Masonry layout not initialized.");
     }
 
-    // Remove or comment out the old applyMasonryLayout call and resize listener if they are separate
-    // The new initMasonryWithVideoCheck and its resize listener replace them.
+    // The new initMasonryWithVideoCheck and its resize listener replace the old approach.
 });
