@@ -5,12 +5,31 @@ html, body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: #333;
+    width: 100%;
 }
 
 body {
-    background: linear-gradient(135deg, #b7e5ff 0%, #ffffff 100%);
-    background-attachment: fixed; /* Gradient does not move with scroll */
-    /* overflow-y: scroll; */ /* Removed: XP.css will handle scroll on .scroll-content */
+    background: linear-gradient(45deg, #a1a1a1 0%, #242424 100%);
+    background-size: 200% 200%;  
+    height: 100%;
+    width: 100%;
+    animation: background 6s ease infinite;
+    min-height: 100vh;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background-attachment: fixed;
+}
+
+@keyframes background { 
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .scroll-content {
@@ -20,10 +39,9 @@ body {
 }
 
 .feed-container {
-    /* Mobile First: Default changed to 2 columns */
     column-count: 2;
-    column-gap: 10px; /* Gap between columns */
-    padding: 10px; /* Padding around the feed */
+    column-gap: 12px;
+    padding: 10px;
     box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
@@ -33,13 +51,12 @@ body {
 @media (min-width: 768px) {
     .feed-container {
         column-count: 3;
-        column-gap: 24px;
-        padding: 40px; /* Restore user's desired padding */
-        max-width: 1088px; /* Adjusted for 3 smaller posts: (3 * 320px) + (2 * 24px gaps) + (2 * 40px padding) */
+        padding: 40px;
+        max-width: 1072px;
     }
 
     .post {
-        max-width: 320px; /* Apply max-width only on tablet/desktop */
+        max-width: 320px;
     }
 }
 
@@ -47,21 +64,18 @@ body {
 @media (min-width: 1200px) {
     .feed-container {
         column-count: 4;
-        /* column-gap and padding are inherited from 768px query */
-        max-width: 1432px; /* Adjusted for 4 smaller posts: (4 * 320px) + (3 * 24px gaps) + (2 * 40px padding) */
+        max-width: 1408px;
     }
 }
 
 .post {
-    background-color: #ffffff;
-    border: 1px solid #dbdbdb;
-    border-radius: 8px; /* Softer radius */
-    margin: 0 auto 10px auto; /* top | R/L | bottom | R/L -> Add 10px bottom margin */
+    border-radius: 8px;
+    margin: 0 0 12px 0;
     width: 100%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden; /* Ensure content within post respects border-radius */
-    break-inside: avoid; /* Added to prevent posts splitting across columns */
-    cursor: pointer; /* Indicate posts are clickable */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.692); /* Simple drop shadow */
+    overflow: hidden;
+    break-inside: avoid;
+    cursor: pointer;
 }
 
 .post:last-child {
@@ -78,7 +92,17 @@ body {
 .post.video-post video {
     display: block;
     width: 100%;
+    height: unset;
+    min-height: 100%;
+    object-fit: fill;
+    box-sizing: border-box;
+}
+
+.post video {
+    display: block;
+    width: 100.1%;
     height: auto;
+    box-sizing: border-box;
 }
 
 .placeholder-content {
@@ -123,7 +147,7 @@ body {
     left: 0;
     width: 100%; /* Ensure full width for BG */
     height: 100dvh; 
-    background-color: rgba(0, 0, 0, 0.9); /* MODIFIED: Made slightly darker */
+    background-color: rgba(0, 0, 0, 0.87); /* Lighter and more transparent */
     z-index: 100010; 
     padding: 20px; /* Padding for the content area from screen edges */
     box-sizing: border-box;
@@ -149,7 +173,6 @@ body {
     justify-content: center;
     align-items: center;
     width: 100%; /* Ensure it takes up space in column flex */
-    border: 2px solid red; /* --- DEBUG BORDER --- */
 }
 
 #lightbox-details {
@@ -159,7 +182,8 @@ body {
     width: 100%; /* Take full width on mobile */
     max-width: 90vw; /* Match content width on mobile */
     text-align: center; /* Center text for title on mobile */
-    border: 2px solid limegreen; /* --- DEBUG BORDER --- */
+    background-color: #2b2b2b;
+    border-radius: 20px;
     flex-grow: 1; /* ADDED: Allow details to fill available vertical space */
     min-height: 0; /* ADDED: Good practice for growing flex items */
 }
@@ -170,23 +194,24 @@ body {
     max-height: 100%;   /* Fit within #lightbox-content's height (max 80vh) */
     object-fit: contain; /* Ensure entire image/video is visible, letterboxed if necessary */
     display: block;     /* Remove any potential extra space if inline */
+    border-radius: 20px; /* Add border radius to both images and videos */
 }
 
 #lightbox-title {
     color: #f1f1f1;
     text-align: center;
-    font-size: 1.7rem;
+    font-size: 1.9rem;
     font-weight: 700;
     max-width: 70vw; /* Limit width of title */
-    line-height: 1.3;
+    line-height: 1.2;
     margin-top: 10px;
 }
 
 #lightbox-subheading {
     color: #cccccc; /* Lighter than title */
-    font-size: 1.1rem; /* MODIFIED: Between body and title */
-    font-weight: 500; /* MODIFIED: Between body and title */
-    line-height: 1.3;
+    font-size: 1.2rem; /* Increased size */
+    font-weight: 600; /* MODIFIED: Between body and title */
+    line-height: 1.4;
     margin-top: 4px; /* Small space below title */
     /* text-align: center; is inherited from #lightbox-details on mobile */
     /* max-width will be inherited or can be set if needed */
@@ -198,43 +223,44 @@ body {
     line-height: 1.5;
     margin-top: 10px; /* Space below title */
     margin-bottom: 15px; /* Space above close button */
-    max-width: 70vw; /* Consistent with title's max-width */
+    max-width: 50vw; /* Consistent with title's max-width */
     overflow-y: auto; /* Scroll if title too long */
 }
 
 #lightbox-close {
     margin-top: auto; /* Push to bottom of flex container */
     padding: 10px 20px;
-    background-color: #333;
+    background-color: #2b2b2b; /* Match desc container bg */
     color: white;
-    border: none;
+    border: 0.5px solid #fff;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s ease;
     font-size: 0.9rem;
+    margin-bottom: 32px;
 }
 
 #lightbox-close:hover {
-    background-color: #555;
+    background-color: #333; /* Darker, similar to previous base color */
 }
 
 /* --- Desktop: Two-Column Layout (Applied via JS class) --- */
 
-#project-lightbox.desktop-layout #lightbox-inner-wrapper { /* MODIFIED: Target inner-wrapper */
-  flex-direction: row; /* Side-by-side layout */
-  align-items: stretch; /* Make columns same height */
-  /* justify-content: center; -- This was on #project-lightbox, might not be needed here if children use flex-basis */
-  /* padding: 20px; -- Padding is now on #project-lightbox itself */
+#project-lightbox.desktop-layout #lightbox-inner-wrapper {
+  flex-direction: row;
+  align-items: stretch;
+  padding: 0 24px;
 }
 
 #project-lightbox.desktop-layout #lightbox-content {
-  flex-basis: 60%; 
-  max-width: 60%; /* MODIFIED: Media takes 60% width */
-  display: flex; /* Use flex for centering */
+  flex-basis: 50%;
+  max-width: 50%;
+  display: flex;
   justify-content: center;
   align-items: center;
-  height: auto; /* Let height be determined by content ratio */
-  max-height: 100%; /* Fill available height within padded parent */
+  height: auto;
+  max-height: 100%;
+  margin-left: 0;
 }
 
 #project-lightbox.desktop-layout #lightbox-content img,
@@ -247,20 +273,22 @@ body {
 }
 
 #project-lightbox.desktop-layout #lightbox-details {
-  flex-basis: 40%; /* MODIFIED: Details take 40% width */
-  max-width: 40%; /* MODIFIED: Details take 40% width */
+  flex-basis: 50%;
+  max-width: 50%;
   display: flex;
   flex-direction: column;
-  align-items: stretch; /* Allow items to stretch, title will use its own text-align */
-  padding: 0 20px; /* MODIFIED: 0 top/bottom, 20px left/right */
-  height: auto; /* Match content height */
-  max-height: 100%; /* Fill available height within padded parent */
-  overflow-y: auto; /* Add scroll if caption is very long */
+  align-items: stretch;
+  padding: 0 32px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 #project-lightbox.desktop-layout #lightbox-title {
   text-align: left;
-  margin-top: 40px;
+  margin-top: 32px;
   margin-bottom: 10px;
   overflow-y: auto;
 }
@@ -278,4 +306,101 @@ body {
 
 #project-lightbox.desktop-layout #lightbox-close {
   align-self: center; /* Center the button in the desktop layout, overriding parent's stretch */
+}
+
+#project-lightbox #lightbox-content img {
+  /* border-radius: 20px; */
+}
+
+#project-lightbox #lightbox-content video {
+  /* border-radius: 20px; */
+}
+
+#project-lightbox.desktop-layout.image-lightbox #lightbox-inner-wrapper {
+  gap: 32px;
+}
+
+#project-lightbox:not(.desktop-layout) #lightbox-inner-wrapper {
+  gap: 24px;
+}
+
+#project-lightbox:not(.desktop-layout) #lightbox-title,
+#project-lightbox:not(.desktop-layout) #lightbox-subheading {
+  display: none;
+}
+
+#project-lightbox:not(.desktop-layout) #lightbox-details {
+  justify-content: center;
+}
+
+#project-lightbox:not(.desktop-layout) #lightbox-close {
+  align-self: center;
+}
+
+.wave {
+    background: rgb(255 255 255 / 25%);
+    border-radius: 1000% 1000% 0 0;
+    position: fixed;
+    width: 200%;
+    height: 12em;
+    animation: wave 10s -3s linear infinite;
+    transform: translate3d(0, 0, 0);
+    opacity: 0.8;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.wave:nth-of-type(2) {
+    bottom: -1.25em;
+    animation: wave 18s linear reverse infinite;
+    opacity: 0.8;
+}
+
+.wave:nth-of-type(3) {
+    bottom: -2.5em;
+    animation: wave 20s -1s reverse infinite;
+    opacity: 0.9;
+}
+
+@keyframes wave {
+    2% {
+        transform: translateX(1);
+    }
+    25% {
+        transform: translateX(-25%);
+    }
+    50% {
+        transform: translateX(-50%);
+    }
+    75% {
+        transform: translateX(-25%);
+    }
+    100% {
+        transform: translateX(1);
+    }
+}
+
+.panel {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 300vw;
+  height: 40vh;
+  background: rgba(255,255,255,0.15);
+  box-shadow: 0 4px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(8px);
+  z-index: 0;
+  pointer-events: none;
+}
+.panel:nth-child(1) {
+  transform: rotate(-6deg) translateX(-50vw);
+}
+.panel:nth-child(2) {
+  transform: rotate(3deg) translateY(2vh) translateX(-50vw);
+  opacity: 0.7;
+}
+.panel:nth-child(3) {
+  transform: rotate(-2deg) translateY(4vh) translateX(-50vw);
+  opacity: 0.5;
 }

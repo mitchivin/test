@@ -40,6 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Add or remove image-lightbox class based on type
+        if (type === 'image') {
+            lightbox.classList.add('image-lightbox');
+        } else {
+            lightbox.classList.remove('image-lightbox');
+        }
+
         lightboxContent.innerHTML = '';
         const existingTitle = lightboxDetails.querySelector('#lightbox-title');
         if (existingTitle) {
