@@ -21,8 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} subheadingText - The subheading text to display.
      * @param {string} desktopDescriptionText - The description text for desktop.
      * @param {string} mobileDescriptionText - The description text for mobile.
+     * @param {string} poster - The poster URL for the video.
      */
-    function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText) {
+    function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, poster) {
         // Pause all grid videos
         document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
 
@@ -86,6 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaElement.loop = true;
             mediaElement.alt = 'Project Lightbox Video';
             mediaElement.setAttribute('playsinline', '');
+            if (poster) {
+                mediaElement.poster = poster;
+            }
         }
 
         if (mediaElement) {
@@ -179,9 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const desktopDescription = post.dataset.description;
             const mobileDescription = post.dataset.mobileDescription;
             const sourceData = post.dataset.src;
+            const poster = post.dataset.poster;
 
             if (type && sourceData) {
-                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription);
+                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
             }
         });
     });
