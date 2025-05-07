@@ -136,6 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         lightbox.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
+        // --- Mobile close button logic ---
+        if (!lightbox.classList.contains('desktop-layout')) {
+            lightbox.classList.remove('show-close-btn');
+            if (window._lightboxCloseBtnTimer) {
+                clearTimeout(window._lightboxCloseBtnTimer);
+            }
+        }
     }
 
     /**
@@ -191,12 +199,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    lightboxClose.addEventListener('click', closeLightbox);
+    // --- Mobile tap-to-show-close-button logic ---
+    function handleMobileShowCloseBtn(event) {
+        if (lightbox.classList.contains('desktop-layout')) return;
+        // Always show the close button on any tap
+        lightbox.classList.add('show-close-btn');
+        if (window._lightboxCloseBtnTimer) {
+            clearTimeout(window._lightboxCloseBtnTimer);
+        }
+        window._lightboxCloseBtnTimer = setTimeout(() => {
+            lightbox.classList.remove('show-close-btn');
+        }, 3000);
+    }
+
+    // Listen for taps/clicks on the lightbox and its content (image/video)
     lightbox.addEventListener('click', (event) => {
+        // If tap is on the close button, let its handler run
+        if (event.target === lightboxClose) return;
+        // Only for mobile
+        if (!lightbox.classList.contains('desktop-layout')) {
+            handleMobileShowCloseBtn();
+        }
+        // If tap is on the background, close the lightbox
         if (event.target === lightbox) {
             closeLightbox();
         }
     });
+    // Also listen for taps on the media itself
+    lightboxContent.addEventListener('click', (event) => {
+        if (!lightbox.classList.contains('desktop-layout')) {
+            handleMobileShowCloseBtn();
+        }
+    });
+    // When close button is clicked, close immediately and clear timer
+    lightboxClose.addEventListener('click', () => {
+        if (window._lightboxCloseBtnTimer) {
+            clearTimeout(window._lightboxCloseBtnTimer);
+        }
+        lightbox.classList.remove('show-close-btn');
+        closeLightbox();
+    });
+
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && lightbox.style.display === 'flex') {
             closeLightbox();

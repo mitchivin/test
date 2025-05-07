@@ -9,7 +9,7 @@ html, body {
 }
 
 body {
-    background: linear-gradient(45deg, #8a8a8a 0%, #242424 100%);
+    background: linear-gradient(45deg, #aaaaaa 0%, #636363 100%);
     background-size: 200% 200%;  
     height: 100%;
     width: 100%;
@@ -297,11 +297,35 @@ body {
 }
 
 /* Mobile Layout */
+#project-lightbox:not(.desktop-layout) {
+  height: 100vh;
+  min-height: 100vh;
+  /* display: flex; */
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
 #project-lightbox:not(.desktop-layout) #lightbox-inner-wrapper {
-    gap: 24px; /* Adjusted set distance between media and close button */
-    justify-content: center; /* Vertically center the media + close button group */
-    align-items: center; /* Horizontally center the media + close button group */
-    /* Inherits display: flex, flex-direction: column, height: 100% */
+  height: 100vh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+#project-lightbox:not(.desktop-layout) #lightbox-content {
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
 }
 
 #project-lightbox:not(.desktop-layout) #lightbox-title,
@@ -318,9 +342,31 @@ body {
 }
 
 #project-lightbox:not(.desktop-layout) #lightbox-close {
-    align-self: center;
-    margin-top: 0;
-    margin-bottom: 0;
+    position: fixed;
+    left: 50%;
+    bottom: 60px;
+    transform: translate(-50%, 100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+    z-index: 100011;
+}
+#project-lightbox:not(.desktop-layout).show-close-btn #lightbox-close {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Mobile: Make lightbox media fill more of the viewport */
+#project-lightbox:not(.desktop-layout) #lightbox-content img,
+#project-lightbox:not(.desktop-layout) #lightbox-content video {
+  max-width: 100vw;
+  max-height: 95vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0;
+  margin: 0;
 }
 
 .wave {
