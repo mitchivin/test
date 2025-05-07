@@ -124,6 +124,32 @@ const programData = {
       dimensions: { width: 750, height: 500 },
     },
   ),
+  musicPlayer: createProgram(
+    "musicPlayer",
+    "Music Player",
+    "start-menu/music.webp",
+    {
+      dimensions: { width: 400, height: 450 }, // Typical music player size
+      // Basic menubar similar to other simple apps
+      menuBarConfig: {
+        items: [
+          {
+            key: "file",
+            text: "File",
+            enabled: true,
+            dropdown: FILE_DROPDOWN_EXIT_ONLY, // File > Exit
+          },
+          {
+            key: "view",
+            text: "View",
+            enabled: true,
+            dropdown: VIEW_DROPDOWN, // View > Minimize/Maximize
+          },
+          { key: "help", text: "Help", enabled: false },
+        ],
+      },
+    }
+  ),
 
   // System and Utility Programs
   cmd: createProgram("cmd", "Command Prompt", "start-menu/cmd.webp", {
@@ -391,7 +417,7 @@ const programData = {
           key: "send",
           enabled: true,
           icon: "./assets/gui/toolbar/send.webp",
-          text: "Send",
+          text: "Send Message",
           action: "sendMessage",
         },
         { type: "separator" },

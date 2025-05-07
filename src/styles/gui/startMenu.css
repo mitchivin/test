@@ -15,7 +15,7 @@
   position: absolute;
   bottom: calc(var(--taskbar-height) + 1px);
   left: 0;
-  width: 355px;
+  width: 335px;
   height: 455px;
   display: flex;
   flex-direction: column;
@@ -597,6 +597,18 @@
   margin-left: 1px; /* Align with padding */
 }
 
+/* Separator for Recently Used items (similar to All Programs) */
+.recently-used-separator {
+  height: 1px;
+  background-color: #d1d1d1; /* Same color as all-programs-separator */
+  margin: 3px 0; /* Same margin */
+  padding: 0;
+  border: none;
+  flex-shrink: 0;
+  width: calc(100% - 2px); /* Account for container padding */
+  margin-left: 1px; /* Align with padding */
+}
+
 /* Arrow indicator styling */
 .mut-menu-arrow,
 .ai-tools-arrow {
@@ -811,4 +823,30 @@
     #a1c4fc 50%,
     /* dark blue */ transparent 100%
   );
+}
+
+/* Style for main menu items that are disabled */
+.startmenu .menu-item.disabled {
+  opacity: 0.6 !important; /* Make it visually more distinct */
+  pointer-events: none !important;
+  cursor: default !important;
+  filter: grayscale(0.8) !important; /* Apply grayscale */
+  background-color: transparent !important; /* Ensure no hover/active background */
+  box-shadow: none !important;
+}
+
+.startmenu .menu-item.disabled:hover,
+.startmenu .menu-item.disabled:active {
+  background-color: transparent !important; /* Consistent no background */
+  box-shadow: none !important;
+}
+
+.startmenu .menu-item.disabled .item-title,
+.startmenu .menu-item.disabled .item-description {
+  color: #888 !important; /* Lighter text color for disabled items */
+  text-shadow: none !important;
+}
+
+.startmenu .menu-item.disabled img {
+  filter: grayscale(0.8) opacity(0.6) !important; /* Grayscale and fade icon */
 }

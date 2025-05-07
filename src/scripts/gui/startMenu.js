@@ -15,6 +15,33 @@ import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
 
 const ALL_PROGRAMS_ITEMS = [
+  // Socials first
+  {
+    type: "url",
+    url: "https://www.instagram.com/mitchivin",
+    icon: "./assets/gui/start-menu/instagram.webp",
+    label: "Instagram",
+  },
+  {
+    type: "url",
+    url: "https://github.com/mitchivin",
+    icon: "./assets/gui/start-menu/github.webp",
+    label: "GitHub",
+  },
+  {
+    type: "url",
+    url: "https://www.linkedin.com/in/mitchivin",
+    icon: "./assets/gui/start-menu/linkedin.webp",
+    label: "LinkedIn",
+  },
+  {
+    type: "url",
+    url: "https://www.behance.net/mitch_ivin",
+    icon: "./assets/gui/start-menu/behance.webp",
+    label: "Behance",
+  },
+  { type: "separator" }, // Separator after socials
+  // Then the rest of the programs
   {
     type: "program",
     programName: "about",
@@ -44,50 +71,37 @@ const ALL_PROGRAMS_ITEMS = [
     programName: "my-pictures",
     icon: "./assets/gui/start-menu/photos.webp",
     label: "My Photos",
+    disabled: true, // Always disabled
   },
   {
     type: "program",
     programName: "mediaPlayer",
     icon: "./assets/gui/start-menu/mediaPlayer.webp",
     label: "Media Player",
+    disabled: true, // Always disabled
+  },
+  {
+    type: "program",
+    programName: "musicPlayer",
+    icon: "./assets/gui/start-menu/music.webp",
+    label: "Music Player",
+    disabled: true, // Always disabled
   },
   {
     type: "program",
     programName: "notepad",
     icon: "./assets/gui/start-menu/notepad.webp",
     label: "Notepad",
+    disabled: true, // Always disabled
   },
   {
     type: "program",
     programName: "cmd",
     icon: "./assets/gui/start-menu/cmd.webp",
     label: "Command Prompt",
-  },
-  { type: "separator" },
-  {
-    type: "url",
-    url: "https://www.instagram.com/mitchivin",
-    icon: "./assets/gui/start-menu/instagram.webp",
-    label: "Instagram",
-  },
-  {
-    type: "url",
-    url: "https://github.com/mitchivin",
-    icon: "./assets/gui/start-menu/github.webp",
-    label: "GitHub",
-  },
-  {
-    type: "url",
-    url: "https://www.linkedin.com/in/mitchivin",
-    icon: "./assets/gui/start-menu/linkedin.webp",
-    label: "LinkedIn",
-  },
-  {
-    type: "url",
-    url: "https://www.behance.net/mitch_ivin",
-    icon: "./assets/gui/start-menu/behance.webp",
-    label: "Behance",
-  },
+    disabled: true, // Always disabled
+  }
+  // The original separator and social links are removed from here as they are moved to the top.
 ];
 
 // Add menu item arrays for abstraction
@@ -262,30 +276,6 @@ export default class StartMenu {
     this.recentlyUsedMenu = null;
     this.activeWindowOverlay = null; // Keep track of which overlay is active
 
-    // Only disable certain programs on mobile at runtime
-    if (isMobileDevice()) {
-      for (const item of ALL_PROGRAMS_ITEMS) {
-        if (
-          ["mediaPlayer", "my-pictures", "notepad", "cmd"].includes(
-            item.programName,
-          )
-        ) {
-          item.disabled = true;
-        }
-        // Do not disable 'info' (Disclaimer) on mobile
-      }
-    } else {
-      for (const item of ALL_PROGRAMS_ITEMS) {
-        if (
-          ["mediaPlayer", "my-pictures", "notepad", "cmd"].includes(
-            item.programName,
-          )
-        ) {
-          item.disabled = false;
-        }
-      }
-    }
-
     this.createStartMenuElement();
     this.setupEventListeners();
 
@@ -426,11 +416,9 @@ export default class StartMenu {
       action,
       url,
     }) {
-      const shouldDisable =
-        isMobile &&
-        ["mediaPlayer", "my-pictures", "notepad", "cmd"].includes(
-          programName,
-        );
+      const programsToDisable = ["mediaPlayer", "my-pictures", "notepad", "cmd", "musicPlayer"];
+      const shouldDisable = programsToDisable.includes(programName);
+
       const disabledClass = shouldDisable ? " disabled" : "";
       const dataAction = shouldDisable
         ? ""
@@ -505,10 +493,10 @@ export default class StartMenu {
                           action: "open-program",
                         })}
                         ${renderMenuItem({
-                          id: "notepad",
-                          icon: "./assets/gui/start-menu/notepad.webp",
-                          title: "Notepad",
-                          programName: "notepad",
+                          id: "musicPlayer",
+                          icon: "./assets/gui/start-menu/music.webp",
+                          title: "Music Player",
+                          programName: "musicPlayer",
                           action: "open-program",
                         })}
                         <li class="menu-divider"><hr class="divider"></li>
@@ -551,6 +539,13 @@ export default class StartMenu {
                           action: "open-url",
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+                        ${renderMenuItem({
+                          id: "notepad",
+                          icon: "./assets/gui/start-menu/notepad.webp",
+                          title: "Notepad",
+                          programName: "notepad",
+                          action: "open-program",
+                        })}
                         ${renderMenuItem({
                           id: "cmd",
                           icon: "./assets/gui/start-menu/cmd.webp",
@@ -781,9 +776,28 @@ export default class StartMenu {
     allProgramsButton.addEventListener("mouseenter", () =>
       this.showAllProgramsMenu(),
     );
-    this.allProgramsMenu.addEventListener("mouseleave", () =>
-      this.hideAllProgramsMenu(),
-    );
+
+    allProgramsButton.addEventListener("mouseleave", (e) => {
+      if (
+        e.relatedTarget &&
+        (e.relatedTarget.closest(".all-programs-menu") ||
+          e.relatedTarget === this.allProgramsMenu)
+      ) {
+        return; // Don't hide if moving into the submenu itself
+      }
+      this.hideAllProgramsMenu();
+    });
+
+    this.allProgramsMenu.addEventListener("mouseleave", (e) => {
+      if (
+        e.relatedTarget &&
+        (e.relatedTarget === allProgramsButton ||
+          e.relatedTarget.closest("#menu-all-programs"))
+      ) {
+        return; // Don't hide if moving back to the trigger button
+      }
+      this.hideAllProgramsMenu();
+    });
 
     const otherElements = this.startMenu.querySelectorAll(
       ".menu-item:not(#menu-all-programs), .menutopbar, .start-menu-footer, .middle-right",

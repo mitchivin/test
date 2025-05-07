@@ -40,6 +40,21 @@
           if (fromField) fromField.value = '';
           if (subjectField) subjectField.value = '';
           if (messageField) messageField.value = '';
+        } else if (event.data && event.data.type === 'getContactFormData') {
+          const from = document.getElementById('contact-from').value;
+          const subject = document.getElementById('contact-subject').value;
+          const message = document.getElementById('contact-message').value;
+          const to = document.getElementById('contact-to').value; // Although fixed, send it for completeness
+
+          event.source.postMessage({
+            type: 'contactFormDataResponse',
+            data: {
+              to: to,
+              from: from,
+              subject: subject,
+              message: message
+            }
+          }, event.origin); // Respond to the specific origin that sent the request
         }
       });
     </script>

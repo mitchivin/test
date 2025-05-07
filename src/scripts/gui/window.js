@@ -632,14 +632,43 @@ export default class WindowManager {
         case 'navigateBack':
         case 'navigateForward':
         case 'navigateHome':
-        case 'sendMessage':
+        // case 'sendMessage': // Will be handled differently now
         case 'newMessage':
         case 'previousImage':
         case 'toggleSlideshow':
         case 'nextImage':
-            const iframe = windowElement.querySelector('iframe');
-            if (iframe && iframe.contentWindow) {
-                iframe.contentWindow.postMessage({ type: 'toolbar-action', action: action }, '*');
+            const iframeForGenericAction = windowElement.querySelector('iframe');
+            if (iframeForGenericAction && iframeForGenericAction.contentWindow) {
+                iframeForGenericAction.contentWindow.postMessage({ type: 'toolbar-action', action: action }, '*');
+            }
+            break;
+        case 'sendMessage':
+            const contactIframe = windowElement.querySelector('iframe');
+            if (contactIframe && contactIframe.contentWindow) {
+                // 1. Post message to get form data
+                contactIframe.contentWindow.postMessage({ type: 'getContactFormData' }, '*');
+
+                // 2. Listen for the response
+                const mailtoListener = (event) => {
+                    // Ensure the message is from the contact app's iframe and is the correct type
+                    if (event.source === contactIframe.contentWindow && event.data && event.data.type === 'contactFormDataResponse') {
+                        const formData = event.data.data;
+                        const to = formData.to; // This is mitchellivin@gmail.com
+                        const subject = encodeURIComponent(formData.subject);
+                        const body = encodeURIComponent(formData.message);
+
+                        let mailtoLink = `mailto:${to}`;
+                        mailtoLink += `?subject=${subject}`;
+                        mailtoLink += `&body=${body}`;
+
+                        // 3. Open mailto link
+                        window.open(mailtoLink, '_blank');
+
+                        // 4. Clean up listener
+                        window.removeEventListener('message', mailtoListener);
+                    }
+                };
+                window.addEventListener('message', mailtoListener);
             }
             break;
         default:

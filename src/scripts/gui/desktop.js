@@ -37,6 +37,7 @@ export default class Desktop {
     this.startY = 0;
     this.lastClickTimes = {};
     this.selectedIcons = new Set();
+    this.activeDragPointerId = null;
 
     this.cleanupArtifacts();
     this.createSelectionOverlay();
@@ -172,6 +173,20 @@ export default class Desktop {
   setupPointerSelectionEvents() {
     window.addEventListener("pointerdown", (e) => {
       if (e.target !== this.overlay && e.target !== this.desktop) return;
+
+      if (isMobileDevice()) {
+        if (this.isDragging && e.pointerId !== this.activeDragPointerId) {
+          // A drag is already in progress by another pointer, ignore this new one
+          return;
+        }
+        // If it's a new primary touch or no drag is active, allow it to start
+        if (this.activeDragPointerId !== null && e.pointerId !== this.activeDragPointerId) {
+          // Potentially a new gesture starting before the old one fully cleared, let's be cautious
+          // and effectively only allow one drag pointer at a time on mobile.
+          return;
+        }
+      }
+
       if (!e.ctrlKey) {
         this.clearSelection();
       }
@@ -190,9 +205,13 @@ export default class Desktop {
       this.desktop.appendChild(this.selectionBox);
       this.isDragging = true;
       this.hasDragged = false;
+      this.activeDragPointerId = e.pointerId; // Store the ID of the pointer starting the drag
     });
     window.addEventListener("pointermove", (e) => {
       if (!this.isDragging || !this.selectionBox) return;
+      // On mobile, only respond to the active drag pointer
+      if (isMobileDevice() && e.pointerId !== this.activeDragPointerId) return;
+
       this.hasDragged = true;
       const rect = this.desktop.getBoundingClientRect();
       const currentX = e.clientX - rect.left;
@@ -209,8 +228,14 @@ export default class Desktop {
       });
       this.highlightIconsIntersecting(x, y, w, h);
     });
-    window.addEventListener("pointerup", () => {
+    window.addEventListener("pointerup", (e) => { // Modified 'e' for event object
       if (!this.isDragging || !this.selectionBox) return;
+
+      // On mobile, only the original pointer can finalize the drag
+      if (isMobileDevice() && e.pointerId !== this.activeDragPointerId) {
+        return; 
+      }
+
       this.isDragging = false;
       this.getIcons().forEach((icon) => {
         if (icon.classList.contains("hover-by-selection")) {
@@ -223,6 +248,7 @@ export default class Desktop {
         this.selectionBox.parentNode.removeChild(this.selectionBox);
         this.selectionBox = null;
       }
+      this.activeDragPointerId = null; // Clear the active pointer ID
     });
   }
 
