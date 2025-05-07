@@ -55,6 +55,12 @@ export default class Desktop {
 
     this.eventBus.subscribe(EVENTS.WINDOW_CREATED, () => this.clearSelection());
     this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, () => this.clearSelection());
+
+    // New subscriptions to reset drag selection state
+    this.eventBus.subscribe(EVENTS.PROGRAM_OPEN, () => this.resetDragSelectionState());
+    this.eventBus.subscribe(EVENTS.STARTMENU_OPENED, () => this.resetDragSelectionState());
+    // Also reset on window focus, as clearSelection() might not be enough for a stuck drag box
+    this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, () => this.resetDragSelectionState());
   }
 
   /**
@@ -324,5 +330,21 @@ export default class Desktop {
     this.getIcons().forEach((icon) =>
       icon.classList.remove("hover-by-selection"),
     );
+  }
+
+  /**
+   * Forcefully resets the state of any ongoing drag selection.
+   * This is useful to clean up if an interaction is interrupted.
+   */
+  resetDragSelectionState() {
+    this.isDragging = false;
+    this.hasDragged = false;
+    this.activeDragPointerId = null;
+
+    if (this.selectionBox && this.selectionBox.parentNode) {
+      this.selectionBox.parentNode.removeChild(this.selectionBox);
+      this.selectionBox = null;
+    }
+    this.clearTemporaryHighlights(); // Ensure any visual highlights on icons are cleared
   }
 }
