@@ -185,31 +185,54 @@ document.addEventListener('DOMContentLoaded', () => {
     let allPosts = Array.from(document.querySelectorAll('.post'));
     const swipeWrapper = document.getElementById('lightbox-swipe-wrapper');
 
-    function openLightboxByIndex(index, direction = 0) {
+    function openLightboxByIndex(index, direction = 0, animate = true) {
         if (index < 0) index = allPosts.length - 1;
         if (index >= allPosts.length) index = 0;
         const post = allPosts[index];
         if (!post) return;
-        currentLightboxIndex = index;
-        // Animate swipeWrapper for direction
-        if (swipeWrapper && direction !== 0) {
-            swipeWrapper.classList.add('animate');
-            swipeWrapper.style.transform = `translateX(${direction * 100}%)`;
-            setTimeout(() => {
-                swipeWrapper.classList.remove('animate');
+        // If direction is 0 or animate is false, just swap content
+        if (!direction || !animate || !swipeWrapper) {
+            currentLightboxIndex = index;
+            const type = post.dataset.type;
+            const title = post.dataset.title;
+            const subheading = post.dataset.subheading;
+            const desktopDescription = post.dataset.description;
+            const mobileDescription = post.dataset.mobileDescription;
+            const sourceData = post.dataset.src;
+            const poster = post.dataset.poster;
+            if (type && sourceData) {
+                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
+            }
+            if (swipeWrapper) {
                 swipeWrapper.style.transform = 'translateX(0)';
-            }, 350);
+            }
+            return;
         }
-        const type = post.dataset.type;
-        const title = post.dataset.title;
-        const subheading = post.dataset.subheading;
-        const desktopDescription = post.dataset.description;
-        const mobileDescription = post.dataset.mobileDescription;
-        const sourceData = post.dataset.src;
-        const poster = post.dataset.poster;
-        if (type && sourceData) {
-            openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
-        }
+        // Two-step animation for swipe
+        swipeWrapper.classList.add('animate');
+        swipeWrapper.style.transform = `translateX(${direction * -100}%)`;
+        setTimeout(() => {
+            // Instantly jump to opposite side with new content
+            swipeWrapper.classList.remove('animate');
+            swipeWrapper.style.transform = `translateX(${direction * 100}%)`;
+            // Swap content
+            currentLightboxIndex = index;
+            const type = post.dataset.type;
+            const title = post.dataset.title;
+            const subheading = post.dataset.subheading;
+            const desktopDescription = post.dataset.description;
+            const mobileDescription = post.dataset.mobileDescription;
+            const sourceData = post.dataset.src;
+            const poster = post.dataset.poster;
+            if (type && sourceData) {
+                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
+            }
+            // Animate in to center
+            setTimeout(() => {
+                swipeWrapper.classList.add('animate');
+                swipeWrapper.style.transform = 'translateX(0)';
+            }, 20);
+        }, 350);
     }
 
     // Modify the post click handler to set currentLightboxIndex
@@ -277,7 +300,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dragging = false;
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
-        // Only allow swipe up to close on mobile (not desktop layout)
         const isMobile = !lightbox.classList.contains('desktop-layout');
         if (isMobile && dy < -verticalDragThreshold && Math.abs(dy) > Math.abs(dx)) {
             // Swipe up to close
@@ -295,38 +317,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 200);
             return;
         }
-        // Horizontal swipe logic
         if (swipeWrapper) {
             swipeWrapper.classList.remove('swiping');
-            swipeWrapper.classList.add('animate');
         }
         if (dx < -dragThreshold && Math.abs(dx) > Math.abs(dy)) {
             // Swipe left: next
             if (currentLightboxIndex !== null) {
-                if (swipeWrapper) swipeWrapper.style.transform = 'translateX(-100%)';
-                setTimeout(() => {
-                    if (swipeWrapper) {
-                        swipeWrapper.classList.remove('animate');
-                        swipeWrapper.style.transform = 'translateX(0)';
-                    }
-                    openLightboxByIndex(currentLightboxIndex + 1, 1);
-                }, 200);
+                openLightboxByIndex(currentLightboxIndex + 1, 1, true);
             }
         } else if (dx > dragThreshold && Math.abs(dx) > Math.abs(dy)) {
             // Swipe right: previous
             if (currentLightboxIndex !== null) {
-                if (swipeWrapper) swipeWrapper.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    if (swipeWrapper) {
-                        swipeWrapper.classList.remove('animate');
-                        swipeWrapper.style.transform = 'translateX(0)';
-                    }
-                    openLightboxByIndex(currentLightboxIndex - 1, -1);
-                }, 200);
+                openLightboxByIndex(currentLightboxIndex - 1, -1, true);
             }
         } else {
             // Snap back
             if (swipeWrapper) {
+                swipeWrapper.classList.add('animate');
                 swipeWrapper.style.transform = 'translateX(0)';
             }
         }
@@ -343,9 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (event) => {
         if (lightbox.style.display === 'flex' && currentLightboxIndex !== null) {
             if (event.key === 'ArrowLeft') {
-                openLightboxByIndex(currentLightboxIndex - 1, -1);
+                openLightboxByIndex(currentLightboxIndex - 1, -1, true);
             } else if (event.key === 'ArrowRight') {
-                openLightboxByIndex(currentLightboxIndex + 1, 1);
+                openLightboxByIndex(currentLightboxIndex + 1, 1, true);
             } else if (event.key === 'ArrowUp') {
                 // Animate up and close
                 if (swipeWrapper) {
