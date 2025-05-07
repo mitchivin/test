@@ -339,6 +339,12 @@ const programData = {
     dimensions: { width: 900, height: 650 },
     statusBarText: "Exploring the portfolio",
     appPath: "src/apps/projects/projects.html",
+    addressBarConfig: {
+      enabled: true,
+      icon: "./assets/gui/desktop/internet.webp",
+      title: "https://www.myprojects.com",
+      canNavigate: false
+    },
     menuBarConfig: {
       items: [
         {
