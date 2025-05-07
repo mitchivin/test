@@ -304,7 +304,7 @@ body {
 
 /* Mobile Layout */
 #project-lightbox:not(.desktop-layout) #lightbox-inner-wrapper {
-    gap: 32px; /* Adjusted set distance between media and close button */
+    gap: 24px; /* Adjusted set distance between media and close button */
     justify-content: center; /* Vertically center the media + close button group */
     align-items: center; /* Horizontally center the media + close button group */
     /* Inherits display: flex, flex-direction: column, height: 100% */
