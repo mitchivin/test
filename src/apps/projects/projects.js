@@ -180,11 +180,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    posts.forEach(post => {
+    // --- Swipe Navigation for Lightbox ---
+    let currentLightboxIndex = null;
+    let allPosts = Array.from(document.querySelectorAll('.post'));
+    const swipeWrapper = document.getElementById('lightbox-swipe-wrapper');
+
+    function openLightboxByIndex(index, direction = 0) {
+        if (index < 0) index = allPosts.length - 1;
+        if (index >= allPosts.length) index = 0;
+        const post = allPosts[index];
+        if (!post) return;
+        currentLightboxIndex = index;
+        // Animate swipeWrapper for direction
+        if (swipeWrapper && direction !== 0) {
+            swipeWrapper.classList.add('animate');
+            swipeWrapper.style.transform = `translateX(${direction * 100}%)`;
+            setTimeout(() => {
+                swipeWrapper.classList.remove('animate');
+                swipeWrapper.style.transform = 'translateX(0)';
+            }, 350);
+        }
+        const type = post.dataset.type;
+        const title = post.dataset.title;
+        const subheading = post.dataset.subheading;
+        const desktopDescription = post.dataset.description;
+        const mobileDescription = post.dataset.mobileDescription;
+        const sourceData = post.dataset.src;
+        const poster = post.dataset.poster;
+        if (type && sourceData) {
+            openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
+        }
+    }
+
+    // Modify the post click handler to set currentLightboxIndex
+    posts.forEach((post, idx) => {
         post.addEventListener('click', (event) => {
             if (event.target.tagName === 'A') {
                 return;
             }
+            currentLightboxIndex = idx;
             const type = post.dataset.type;
             const title = post.dataset.title;
             const subheading = post.dataset.subheading;
@@ -197,6 +231,137 @@ document.addEventListener('DOMContentLoaded', () => {
                 openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
             }
         });
+    });
+
+    // --- Smooth Drag/Swipe Logic ---
+    let dragStartX = 0;
+    let dragCurrentX = 0;
+    let dragStartY = 0;
+    let dragCurrentY = 0;
+    let dragging = false;
+    let dragThreshold = 60; // px
+    let dragHasMoved = false;
+    let verticalDragThreshold = 60; // px for swipe up to close
+
+    function handleTouchStart(e) {
+        if (e.touches.length === 1) {
+            dragStartX = e.touches[0].clientX;
+            dragCurrentX = dragStartX;
+            dragStartY = e.touches[0].clientY;
+            dragCurrentY = dragStartY;
+            dragging = true;
+            dragHasMoved = false;
+            if (swipeWrapper) {
+                swipeWrapper.classList.add('swiping');
+                swipeWrapper.classList.remove('animate');
+            }
+        }
+    }
+
+    function handleTouchMove(e) {
+        if (!dragging || e.touches.length !== 1) return;
+        dragCurrentX = e.touches[0].clientX;
+        dragCurrentY = e.touches[0].clientY;
+        const dx = dragCurrentX - dragStartX;
+        const dy = dragCurrentY - dragStartY;
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragHasMoved = true;
+        // Only translate horizontally for left/right swipe
+        if (swipeWrapper && Math.abs(dx) > Math.abs(dy)) {
+            swipeWrapper.style.transform = `translateX(${dx}px)`;
+        }
+        // Optionally, you could add a vertical translate for swipe up, but not needed for close gesture
+    }
+
+    function handleTouchEnd() {
+        if (!dragging) return;
+        dragging = false;
+        const dx = dragCurrentX - dragStartX;
+        const dy = dragCurrentY - dragStartY;
+        // Only allow swipe up to close on mobile (not desktop layout)
+        const isMobile = !lightbox.classList.contains('desktop-layout');
+        if (isMobile && dy < -verticalDragThreshold && Math.abs(dy) > Math.abs(dx)) {
+            // Swipe up to close
+            if (swipeWrapper) {
+                swipeWrapper.classList.remove('swiping');
+                swipeWrapper.classList.add('animate');
+                swipeWrapper.style.transform = 'translateY(-100%)';
+            }
+            setTimeout(() => {
+                if (swipeWrapper) {
+                    swipeWrapper.classList.remove('animate');
+                    swipeWrapper.style.transform = 'translateX(0) translateY(0)';
+                }
+                closeLightbox();
+            }, 200);
+            return;
+        }
+        // Horizontal swipe logic
+        if (swipeWrapper) {
+            swipeWrapper.classList.remove('swiping');
+            swipeWrapper.classList.add('animate');
+        }
+        if (dx < -dragThreshold && Math.abs(dx) > Math.abs(dy)) {
+            // Swipe left: next
+            if (currentLightboxIndex !== null) {
+                if (swipeWrapper) swipeWrapper.style.transform = 'translateX(-100%)';
+                setTimeout(() => {
+                    if (swipeWrapper) {
+                        swipeWrapper.classList.remove('animate');
+                        swipeWrapper.style.transform = 'translateX(0)';
+                    }
+                    openLightboxByIndex(currentLightboxIndex + 1, 1);
+                }, 200);
+            }
+        } else if (dx > dragThreshold && Math.abs(dx) > Math.abs(dy)) {
+            // Swipe right: previous
+            if (currentLightboxIndex !== null) {
+                if (swipeWrapper) swipeWrapper.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (swipeWrapper) {
+                        swipeWrapper.classList.remove('animate');
+                        swipeWrapper.style.transform = 'translateX(0)';
+                    }
+                    openLightboxByIndex(currentLightboxIndex - 1, -1);
+                }, 200);
+            }
+        } else {
+            // Snap back
+            if (swipeWrapper) {
+                swipeWrapper.style.transform = 'translateX(0)';
+            }
+        }
+    }
+
+    // Attach touch listeners to the swipe wrapper
+    if (swipeWrapper) {
+        swipeWrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
+        swipeWrapper.addEventListener('touchmove', handleTouchMove, { passive: true });
+        swipeWrapper.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
+
+    // Optional: Keyboard navigation (left/right arrows)
+    document.addEventListener('keydown', (event) => {
+        if (lightbox.style.display === 'flex' && currentLightboxIndex !== null) {
+            if (event.key === 'ArrowLeft') {
+                openLightboxByIndex(currentLightboxIndex - 1, -1);
+            } else if (event.key === 'ArrowRight') {
+                openLightboxByIndex(currentLightboxIndex + 1, 1);
+            } else if (event.key === 'ArrowUp') {
+                // Animate up and close
+                if (swipeWrapper) {
+                    swipeWrapper.classList.remove('swiping');
+                    swipeWrapper.classList.add('animate');
+                    swipeWrapper.style.transform = 'translateY(-100%)';
+                }
+                setTimeout(() => {
+                    if (swipeWrapper) {
+                        swipeWrapper.classList.remove('animate');
+                        swipeWrapper.style.transform = 'translateX(0) translateY(0)';
+                    }
+                    closeLightbox();
+                }, 200);
+            }
+        }
     });
 
     // --- Mobile tap-to-show-close-button logic ---
