@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} mobileDescriptionText - The description text for mobile.
      */
     function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText) {
+        // Pause all grid videos
+        document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
+
         // Determine if desktop layout should be used based on feedContainer width
         const isDesktopView = feedContainer.offsetWidth >= 768; 
 
@@ -142,6 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const descriptionElement = document.getElementById('lightbox-description');
         if (descriptionElement) {
             descriptionElement.remove();
+        }
+        // Resume correct grid video state after closing lightbox
+        if (typeof isMaximized !== 'undefined' && isMaximized) {
+            gridVideos.forEach(v => v.pause());
+        } else if (typeof playVisibleVideos === 'function' && intersectionObserver) {
+            playVisibleVideos();
         }
     }
 
@@ -341,4 +350,138 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // The new initMasonryWithVideoCheck and its resize listener replace the old approach.
+
+    // Fallback: If image/video fails to load, use low-res, then swap back to high-res when available
+    posts.forEach(post => {
+        const type = post.dataset.type;
+        const lowres = post.dataset.lowres;
+        const src = post.dataset.src;
+        if (!lowres) return;
+        let mediaEl = post.querySelector(type === 'image' ? 'img' : 'video');
+        if (!mediaEl) return;
+        // Only attach fallback if not already loaded
+        if (type === 'image') {
+            mediaEl.addEventListener('error', function onImgError() {
+                if (mediaEl.src !== lowres) {
+                    mediaEl.src = lowres;
+                }
+            });
+            // Try to swap back to high-res when it loads
+            const tryHighRes = new Image();
+            tryHighRes.src = src;
+            tryHighRes.onload = function() {
+                if (mediaEl.src !== src) {
+                    mediaEl.src = src;
+                }
+            };
+        } else if (type === 'video') {
+            mediaEl.addEventListener('error', function onVidError() {
+                if (mediaEl.src !== lowres) {
+                    mediaEl.src = lowres;
+                }
+            });
+            // Try to swap back to high-res when it loads
+            const tryHighResVid = document.createElement('video');
+            tryHighResVid.src = src;
+            tryHighResVid.muted = true;
+            tryHighResVid.playsInline = true;
+            tryHighResVid.autoplay = false;
+            tryHighResVid.addEventListener('loadeddata', function() {
+                if (mediaEl.src !== src) {
+                    mediaEl.src = src;
+                }
+            });
+        }
+    });
+
+    // --- Video Grid Play/Pause Logic for Maximized/Unmaximized States ---
+    const gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
+    let isMaximized = false;
+    let intersectionObserver = null;
+    let hoverListeners = [];
+
+    function playVisibleVideos() {
+        if (!intersectionObserver) return;
+        // Find all visible videos
+        const visibleVideos = gridVideos.filter(video => video.__isIntersecting);
+        // Only play the first 2 visible, pause the rest
+        visibleVideos.slice(0, 2).forEach(video => video.play());
+        visibleVideos.slice(2).forEach(video => video.pause());
+        // Pause all non-visible
+        gridVideos.filter(video => !video.__isIntersecting).forEach(video => video.pause());
+    }
+
+    function setupIntersectionObserver() {
+        if (intersectionObserver) intersectionObserver.disconnect();
+        intersectionObserver = new window.IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                entry.target.__isIntersecting = entry.isIntersecting;
+            });
+            playVisibleVideos();
+        }, { root: document.querySelector('.scroll-content'), threshold: 0.1 });
+        gridVideos.forEach(video => {
+            intersectionObserver.observe(video);
+        });
+        playVisibleVideos();
+    }
+
+    function cleanupIntersectionObserver() {
+        if (intersectionObserver) {
+            intersectionObserver.disconnect();
+            intersectionObserver = null;
+        }
+        gridVideos.forEach(video => { delete video.__isIntersecting; });
+    }
+
+    function setupHoverListeners() {
+        cleanupHoverListeners();
+        hoverListeners = gridVideos.map(video => {
+            const onEnter = () => video.play();
+            const onLeave = () => video.pause();
+            video.addEventListener('mouseenter', onEnter);
+            video.addEventListener('mouseleave', onLeave);
+            return { video, onEnter, onLeave };
+        });
+    }
+
+    function cleanupHoverListeners() {
+        hoverListeners.forEach(({ video, onEnter, onLeave }) => {
+            video.removeEventListener('mouseenter', onEnter);
+            video.removeEventListener('mouseleave', onLeave);
+        });
+        hoverListeners = [];
+    }
+
+    function setMaximizedState(maximized) {
+        isMaximized = maximized;
+        // Toggle .maximized class on all .video-posts for overlay
+        document.querySelectorAll('.video-post').forEach(post => {
+            if (isMaximized) {
+                post.classList.add('maximized');
+            } else {
+                post.classList.remove('maximized');
+            }
+        });
+        if (isMaximized) {
+            cleanupIntersectionObserver();
+            gridVideos.forEach(video => video.pause());
+            setupHoverListeners();
+        } else {
+            cleanupHoverListeners();
+            setupIntersectionObserver();
+        }
+    }
+
+    // Listen for maximize/unmaximize messages from parent
+    window.addEventListener('message', (event) => {
+        if (!event.data || typeof event.data.type !== 'string') return;
+        if (event.data.type === 'window:maximized') {
+            setMaximizedState(true);
+        } else if (event.data.type === 'window:unmaximized') {
+            setMaximizedState(false);
+        }
+    });
+
+    // Initialize for default (unmaximized) state
+    setupIntersectionObserver();
 });

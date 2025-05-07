@@ -81,20 +81,20 @@ export function initBootSequence(eventBus, EVENTS) {
     preloadAssets().then(() => {
       const elapsed = Date.now() - bootStart;
       const remaining = Math.max(0, minBootTime - elapsed);
-      setTimeout(() => {
-        bootScreen.style.display = "none";
-        if (isMobileDevice()) {
-          handleLoginSuccess();
-        } else {
-          loginScreen.style.display = "flex";
-          loginScreen.style.opacity = "1";
-          loginScreen.style.pointerEvents = "auto";
-          const loginContent = loginScreen.querySelector(".login-screen");
-          if (loginContent) {
-            loginContent.style.opacity = "1";
-          }
-          attachLoginScreenHandlers();
+    setTimeout(() => {
+      bootScreen.style.display = "none";
+      if (isMobileDevice()) {
+        handleLoginSuccess();
+      } else {
+        loginScreen.style.display = "flex";
+        loginScreen.style.opacity = "1";
+        loginScreen.style.pointerEvents = "auto";
+        const loginContent = loginScreen.querySelector(".login-screen");
+        if (loginContent) {
+          loginContent.style.opacity = "1";
         }
+        attachLoginScreenHandlers();
+      }
       }, remaining);
     });
   }

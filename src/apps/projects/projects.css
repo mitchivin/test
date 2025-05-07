@@ -388,3 +388,36 @@ body {
   transform: rotate(-2deg) translateY(4vh) translateX(-50vw);
   opacity: 0.5;
 }
+
+/* Overlay for video thumbs when maximized */
+.video-post .video-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.video-post .video-overlay .play-icon {
+  width: 64px;
+  height: 64px;
+  display: block;
+}
+
+.video-post.maximized .video-overlay {
+  opacity: 1;
+}
+
+.video-post.maximized:hover .video-overlay {
+  opacity: 0;
+}
+
+/* Ensure .video-post is positioned for overlay */
+.video-post {
+  position: relative;
+}
