@@ -90,7 +90,9 @@ body {
     display: block;
     width: 100%;
     height: unset;
-    min-height: 100%;
+    min-height: 180px;
+    aspect-ratio: 9/16;
+    min-width: 100%;
     object-fit: fill;
     box-sizing: border-box;
 }

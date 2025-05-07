@@ -330,6 +330,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // On resize, assume media dimensions are stable if they were loaded.
             resizeTimeout = setTimeout(applyMasonryLayout, 150); 
         });
+
+        // Safety re-layout after 1.2s to catch late-loading videos (especially on mobile)
+        setTimeout(applyMasonryLayout, 1200);
+
+        // Re-apply layout on scroll and touchend (mobile interaction)
+        window.addEventListener('scroll', () => {
+            setTimeout(applyMasonryLayout, 100);
+        });
+        window.addEventListener('touchend', () => {
+            setTimeout(applyMasonryLayout, 100);
+        });
+
         // Notify parent when ready (first load only)
         // Wait for all images and videos to be loaded, then send message
         const posts = Array.from(feedContainer.querySelectorAll('.post'));
