@@ -150,7 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
      * Closes the lightbox.
      */
     function closeLightbox() {
-        lightbox.style.display = 'none';
+        // Fade out the lightbox background before hiding
+        lightbox.classList.add('fade-out');
+        setTimeout(() => {
+            lightbox.style.display = 'none';
+            lightbox.classList.remove('fade-out');
+        }, 250); // Match the CSS transition duration
         const mediaElement = lightboxContent.querySelector('video, img');
         if (mediaElement && mediaElement.tagName === 'VIDEO') {
             mediaElement.pause();
@@ -178,20 +183,19 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (typeof playVisibleVideos === 'function' && intersectionObserver) {
             playVisibleVideos();
         }
+        document.body.style.overflow = '';
     }
 
     // --- Swipe Navigation for Lightbox ---
     let currentLightboxIndex = null;
     let allPosts = Array.from(document.querySelectorAll('.post'));
-    const swipeWrapper = document.getElementById('lightbox-swipe-wrapper');
 
     function openLightboxByIndex(index, direction = 0, animate = true) {
         if (index < 0) index = allPosts.length - 1;
         if (index >= allPosts.length) index = 0;
         const post = allPosts[index];
         if (!post) return;
-        // If direction is 0 or animate is false, just swap content
-        if (!direction || !animate || !swipeWrapper) {
+        if (!direction || !animate || !lightboxContent) {
             currentLightboxIndex = index;
             const type = post.dataset.type;
             const title = post.dataset.title;
@@ -203,19 +207,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (type && sourceData) {
                 openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
             }
-            if (swipeWrapper) {
-                swipeWrapper.style.transform = 'translateX(0)';
+            if (lightboxContent) {
+                lightboxContent.style.transform = 'translateX(0)';
             }
             return;
         }
         // Two-step animation for swipe
-        swipeWrapper.classList.add('animate');
-        swipeWrapper.style.transform = `translateX(${direction * -100}%)`;
+        lightboxContent.classList.add('animate');
+        lightboxContent.style.transform = `translateX(${direction * -100}%)`;
         setTimeout(() => {
-            // Instantly jump to opposite side with new content
-            swipeWrapper.classList.remove('animate');
-            swipeWrapper.style.transform = `translateX(${direction * 100}%)`;
-            // Swap content
+            lightboxContent.classList.remove('animate');
+            lightboxContent.style.transform = `translateX(${direction * 100}%)`;
             currentLightboxIndex = index;
             const type = post.dataset.type;
             const title = post.dataset.title;
@@ -227,10 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (type && sourceData) {
                 openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
             }
-            // Animate in to center
             setTimeout(() => {
-                swipeWrapper.classList.add('animate');
-                swipeWrapper.style.transform = 'translateX(0)';
+                lightboxContent.classList.add('animate');
+                lightboxContent.style.transform = 'translateX(0)';
             }, 20);
         }, 350);
     }
@@ -270,9 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragRAF = null;
     let dragIsVertical = false;
 
-    function setSwipeWrapperTransform(dx, dy, scale = 1) {
-        if (swipeWrapper) {
-            swipeWrapper.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
+    function setSwipeContentTransform(dx, dy, scale = 1) {
+        if (lightboxContent) {
+            lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
         }
     }
 
@@ -287,9 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
             dragIsVertical = false;
             lastDragDx = 0;
             lastDragDy = 0;
-            if (swipeWrapper) {
-                swipeWrapper.classList.add('swiping');
-                swipeWrapper.classList.remove('animate');
+            if (lightboxContent) {
+                lightboxContent.classList.add('swiping');
+                lightboxContent.classList.remove('animate');
             }
         }
     }
@@ -301,29 +302,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
         if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragHasMoved = true;
-        // Determine if this is a vertical or horizontal drag (lock after initial movement)
         if (!dragIsVertical && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
             dragIsVertical = true;
         } else if (!dragIsVertical && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
             dragIsVertical = false;
         }
-        // Only translate horizontally for left/right swipe
-        if (swipeWrapper && !dragIsVertical) {
-            setSwipeWrapperTransform(dx, 0, 1);
+        if (lightboxContent && !dragIsVertical) {
+            setSwipeContentTransform(dx, 0, 1);
         }
-        // For vertical swipe up to close (mobile only)
         const isMobile = !lightbox.classList.contains('desktop-layout');
-        if (swipeWrapper && dragIsVertical && isMobile) {
-            // Only allow upward drag (dy negative)
-            const limitedDy = Math.min(0, dy); // Only upwards
-            // Scale from 1 to 0.85 as dy goes from 0 to -window.innerHeight/2
+        if (lightboxContent && dragIsVertical && isMobile) {
+            const limitedDy = Math.min(0, dy);
             const minScale = 0.85;
             const scale = 1 + (minScale - 1) * Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
             lastDragDx = 0;
             lastDragDy = limitedDy;
             if (dragRAF) cancelAnimationFrame(dragRAF);
             dragRAF = requestAnimationFrame(() => {
-                setSwipeWrapperTransform(0, limitedDy, scale);
+                setSwipeContentTransform(0, limitedDy, scale);
             });
         }
     }
@@ -336,49 +332,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const dy = dragCurrentY - dragStartY;
         const isMobile = !lightbox.classList.contains('desktop-layout');
         if (dragIsVertical && isMobile && dy < -verticalDragThreshold && Math.abs(dy) > Math.abs(dx)) {
-            // Animate up and scale out, then close
-            if (swipeWrapper) {
-                swipeWrapper.classList.remove('swiping');
-                swipeWrapper.classList.add('animate');
-                swipeWrapper.style.transform = 'translateY(-100%) scale(0.85)';
+            if (lightboxContent) {
+                lightboxContent.classList.remove('swiping');
+                lightboxContent.classList.add('animate');
+                lightboxContent.style.transform = 'translateY(-100%) scale(0.85)';
             }
             setTimeout(() => {
-                if (swipeWrapper) {
-                    swipeWrapper.classList.remove('animate');
-                    swipeWrapper.style.transform = 'translateX(0) translateY(0) scale(1)';
+                if (lightboxContent) {
+                    lightboxContent.classList.remove('animate');
+                    lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
                 }
                 closeLightbox();
             }, 200);
             return;
         }
-        // Horizontal swipe logic
-        if (swipeWrapper) {
-            swipeWrapper.classList.remove('swiping');
+        if (lightboxContent) {
+            lightboxContent.classList.remove('swiping');
         }
         if (!dragIsVertical && dx < -dragThreshold && Math.abs(dx) > Math.abs(dy)) {
-            // Swipe left: next
             if (currentLightboxIndex !== null) {
                 openLightboxByIndex(currentLightboxIndex + 1, 1, true);
             }
         } else if (!dragIsVertical && dx > dragThreshold && Math.abs(dx) > Math.abs(dy)) {
-            // Swipe right: previous
             if (currentLightboxIndex !== null) {
                 openLightboxByIndex(currentLightboxIndex - 1, -1, true);
             }
         } else {
-            // Snap back
-            if (swipeWrapper) {
-                swipeWrapper.classList.add('animate');
-                swipeWrapper.style.transform = 'translateX(0) translateY(0) scale(1)';
+            if (lightboxContent) {
+                lightboxContent.classList.add('animate');
+                lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
             }
         }
     }
 
-    // Attach touch listeners to the swipe wrapper
-    if (swipeWrapper) {
-        swipeWrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
-        swipeWrapper.addEventListener('touchmove', handleTouchMove, { passive: true });
-        swipeWrapper.addEventListener('touchend', handleTouchEnd, { passive: true });
+    // Attach touch listeners to the lightboxContent for mobile only
+    if (lightboxContent) {
+        lightboxContent.addEventListener('touchstart', handleTouchStart, { passive: true });
+        lightboxContent.addEventListener('touchmove', handleTouchMove, { passive: true });
+        lightboxContent.addEventListener('touchend', handleTouchEnd, { passive: true });
     }
 
     // Optional: Keyboard navigation (left/right arrows)
@@ -390,15 +381,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 openLightboxByIndex(currentLightboxIndex + 1, 1, true);
             } else if (event.key === 'ArrowUp') {
                 // Animate up and close
-                if (swipeWrapper) {
-                    swipeWrapper.classList.remove('swiping');
-                    swipeWrapper.classList.add('animate');
-                    swipeWrapper.style.transform = 'translateY(-100%)';
+                if (lightboxContent) {
+                    lightboxContent.classList.remove('swiping');
+                    lightboxContent.classList.add('animate');
+                    lightboxContent.style.transform = 'translateY(-100%)';
                 }
                 setTimeout(() => {
-                    if (swipeWrapper) {
-                        swipeWrapper.classList.remove('animate');
-                        swipeWrapper.style.transform = 'translateX(0) translateY(0)';
+                    if (lightboxContent) {
+                        lightboxContent.classList.remove('animate');
+                        lightboxContent.style.transform = 'translateX(0) translateY(0)';
                     }
                     closeLightbox();
                 }, 200);

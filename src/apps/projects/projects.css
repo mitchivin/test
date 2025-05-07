@@ -148,6 +148,13 @@ body {
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
+    transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1);
+    opacity: 1;
+}
+
+#project-lightbox.fade-out {
+    opacity: 0;
+    pointer-events: none;
 }
 
 #lightbox-inner-wrapper {
@@ -239,8 +246,10 @@ body {
 
 /* Desktop Layout */
 #project-lightbox.desktop-layout #lightbox-inner-wrapper {
+    display: flex;
     flex-direction: row;
     align-items: stretch;
+    height: 100%;
     padding: 0 24px;
 }
 
@@ -249,19 +258,21 @@ body {
     max-width: 50%;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: auto;
+    align-items: stretch;
+    height: 100%;
+    box-sizing: border-box;
     max-height: 100%;
-    margin-left: 0;
+    max-width: 100%;
 }
 
 #project-lightbox.desktop-layout #lightbox-content img,
 #project-lightbox.desktop-layout #lightbox-content video {
-    max-height: 100%;
     max-width: 100%;
+    max-height: 100%;
     width: auto;
-    height: auto;
+    height: 100%;
     object-fit: contain;
+    border-radius: 20px;
 }
 
 #project-lightbox.desktop-layout #lightbox-details {
@@ -457,19 +468,4 @@ body {
 /* Ensure .video-post is positioned for overlay */
 .video-post {
   position: relative;
-}
-
-#lightbox-swipe-wrapper {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  position: relative;
-  touch-action: pan-y;
-  will-change: transform;
-}
-#lightbox-swipe-wrapper.swiping {
-  transition: none;
-}
-#lightbox-swipe-wrapper.animate {
-  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
 }
