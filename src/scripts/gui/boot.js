@@ -129,14 +129,13 @@ export function initBootSequence(eventBus, EVENTS) {
     function preloadVideo(url) {
       return new Promise((resolve) => {
         const video = document.createElement("video");
-        video.preload = "auto";
-        video.onloadeddata = () => { cleanup(); resolve(); };
+        video.preload = "metadata";
+        video.onloadedmetadata = () => { cleanup(); resolve(); };
         video.onerror = () => { cleanup(); resolve(); };
         video.src = url;
-        // For Safari, need to append to DOM to trigger load
         video.style.display = "none";
         document.body.appendChild(video);
-        // Clean up after load/error
+        // Clean up after metadata is loaded or error
         function cleanup() {
           if (video.parentNode) video.parentNode.removeChild(video);
         }
