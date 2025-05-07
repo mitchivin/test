@@ -173,4 +173,140 @@ document.addEventListener('DOMContentLoaded', () => {
             closeLightbox();
         }
     });
+
+    const feedContainerPosts = Array.from(feedContainer.querySelectorAll('.post'));
+
+    function applyMasonryLayout() {
+        if (!feedContainer || feedContainerPosts.length === 0) {
+            // console.log("Masonry: No container or posts found.");
+            return;
+        }
+
+        const containerStyle = getComputedStyle(feedContainer);
+        const containerPaddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+        const containerPaddingTop = parseFloat(containerStyle.paddingTop) || 0;
+        const containerPaddingRight = parseFloat(containerStyle.paddingRight) || 0;
+        const containerPaddingBottom = parseFloat(containerStyle.paddingBottom) || 0;
+
+        const availableWidth = feedContainer.offsetWidth - containerPaddingLeft - containerPaddingRight;
+        
+        let numColumns = 2; // Default for mobile
+        const gap = 12; // Gap between posts, both horizontally and vertically
+
+        if (feedContainer.offsetWidth >= 1200) {
+            numColumns = 4;
+        } else if (feedContainer.offsetWidth >= 768) {
+            numColumns = 3;
+        }
+
+        const columnWidth = (availableWidth - (numColumns - 1) * gap) / numColumns;
+
+        if (columnWidth <= 0) {
+            console.error("Masonry: Calculated column width is zero or negative.", { availableWidth, numColumns, gap });
+            feedContainerPosts.forEach(post => {
+                post.style.position = 'static'; // Revert to static flow
+                post.style.width = ''; 
+            });
+            feedContainer.style.height = 'auto';
+            return; 
+        }
+
+        feedContainerPosts.forEach(post => {
+            post.style.position = 'absolute'; 
+            post.style.width = `${columnWidth}px`;
+        });
+
+        const columnHeights = Array(numColumns).fill(0);
+
+        feedContainerPosts.forEach(post => {
+            const postHeight = post.offsetHeight;
+            if (postHeight === 0 && post.querySelector('img, video')) {
+                // console.warn("Masonry: Post has zero offsetHeight despite media. Layout may be incorrect.", post);
+            }
+            
+            let shortestColumnIndex = 0;
+            for (let i = 1; i < numColumns; i++) {
+                if (columnHeights[i] < columnHeights[shortestColumnIndex]) {
+                    shortestColumnIndex = i;
+                }
+            }
+
+            post.style.left = `${containerPaddingLeft + shortestColumnIndex * (columnWidth + gap)}px`;
+            post.style.top = `${containerPaddingTop + columnHeights[shortestColumnIndex]}px`;
+
+            columnHeights[shortestColumnIndex] += postHeight + gap;
+        });
+
+        const effectiveColumnHeights = columnHeights.map(h => h > 0 ? h - gap : 0);
+        const tallestColumnContentHeight = Math.max(0, ...effectiveColumnHeights);
+        
+        feedContainer.style.height = `${containerPaddingTop + tallestColumnContentHeight + containerPaddingBottom}px`;
+    }
+
+    function initMasonryWithVideoCheck() {
+        if (!feedContainer) return;
+
+        // Ensure feedContainerPosts is up-to-date if posts can be added dynamically later.
+        // For this initial load, it's fine as defined earlier in DOMContentLoaded.
+        // If posts are added, this Array needs to be updated before calling this function.
+        
+        const videos = feedContainerPosts.filter(post => post.querySelector('video')).map(post => post.querySelector('video'));
+
+        if (videos.length === 0) {
+            applyMasonryLayout();
+            return;
+        }
+
+        let videosToMonitor = videos.length;
+        let videosReported = 0;
+
+        const onMediaReady = (mediaElement, eventType) => {
+            mediaElement.removeEventListener('loadedmetadata', onMediaReadyHandler);
+            mediaElement.removeEventListener('loadeddata', onMediaReadyHandler);
+            mediaElement.removeEventListener('error', onErrorHandler);
+            
+            videosReported++;
+            if (videosReported === videosToMonitor) {
+                applyMasonryLayout();
+            }
+        };
+        
+        const onMediaReadyHandler = function(event) { onMediaReady(this, event.type); };
+        const onErrorHandler = function(event) { 
+            console.warn('Masonry: Video failed to load or had an error:', this.src || this.currentSrc);
+            onMediaReady(this, event.type); // Count it as "done" to not block layout
+        };
+
+        videos.forEach(video => {
+            if (video.readyState >= 2) { // HAVE_CURRENT_DATA (should mean dimensions are available)
+                videosReported++;
+            } else {
+                video.addEventListener('loadedmetadata', onMediaReadyHandler);
+                video.addEventListener('loadeddata', onMediaReadyHandler); // For some browsers/cases
+                video.addEventListener('error', onErrorHandler);
+            }
+        });
+
+        if (videosReported === videosToMonitor && videosToMonitor > 0) { // Ensure it only applies if there were videos
+            applyMasonryLayout();
+        } else if (videosToMonitor === 0) { // Should have been caught earlier, but defensive
+             applyMasonryLayout();
+        }
+    }
+
+    if (feedContainer) {
+        initMasonryWithVideoCheck(); // Initial layout calculation
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            // On resize, assume media dimensions are stable if they were loaded.
+            resizeTimeout = setTimeout(applyMasonryLayout, 150); 
+        });
+    } else {
+        console.error("Masonry: .feed-container not found. Masonry layout not initialized.");
+    }
+
+    // Remove or comment out the old applyMasonryLayout call and resize listener if they are separate
+    // The new initMasonryWithVideoCheck and its resize listener replace them.
 });

@@ -39,19 +39,19 @@ body {
 }
 
 .feed-container {
-    column-count: 2;
-    column-gap: 24px;
+    /* column-count: 2; */
+    /* column-gap: 12px; */
+    position: relative; /* Added for absolute positioning of posts */
     padding: 10px;
     box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
-    column-fill: auto;
 }
 
 /* Tablet and Small Desktop: 3 columns (Changed from 2) */
 @media (min-width: 768px) {
     .feed-container {
-        column-count: 3;
+        /* column-count: 3; */
         padding: 40px;
         max-width: 1072px;
     }
@@ -64,24 +64,20 @@ body {
 /* Large Desktop: 4 columns (Changed from 3) */
 @media (min-width: 1200px) {
     .feed-container {
-        column-count: 4;
+        /* column-count: 4; */
         max-width: 1408px;
     }
 }
 
 .post {
     border-radius: 8px;
-    margin: 0 0 24px 0;
-    width: 100%;
+    margin: 0 0 12px 0; /* Keep bottom margin for spacing */
+    width: 100%; /* JS will set specific width for items in columns */
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.692);
     overflow: hidden;
-    break-inside: avoid;
+    /* break-inside: avoid; */ /* No longer strictly needed for CSS columns, but harmless */
     cursor: pointer;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    display: block;
+    position: absolute; /* Will be positioned by JavaScript */
 }
 
 .post:last-child {
