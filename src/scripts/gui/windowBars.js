@@ -244,7 +244,10 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
     if (
       isMobile &&
       !buttonConfig.enabled &&
-      !(windowId === "internet-window" && buttonConfig.key === "back")
+      !(
+        (windowId === "internet-window" && buttonConfig.key === "back") ||
+        (windowId === "internet-window" && buttonConfig.key === "home")
+      )
     )
       return;
     // On mobile, skip forward button in internet window
@@ -264,7 +267,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
         !buttonConfig.enabled &&
         !(
           windowId === "internet-window" &&
-          (buttonConfig.key === "back" || buttonConfig.key === "forward")
+          (buttonConfig.key === "back" || buttonConfig.key === "forward" || buttonConfig.key === "home")
         )
       )
         return;
@@ -318,6 +321,27 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   });
   // --- Add divider and close button on mobile only ---
   if (isMobile) {
+    // Close button (match other toolbar buttons)
+    const closeBtn = document.createElement("div");
+    closeBtn.className = "toolbar-button toolbar-close-button";
+    closeBtn.setAttribute("aria-label", "Close");
+    closeBtn.innerHTML = `<img alt=\"close\" width=\"25\" height=\"25\" src=\"assets/gui/toolbar/delete.webp\" /><span>Close</span>`;
+    closeBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      // Find the parent window element and dispatch the close event
+      let parent = toolbarWrapper.parentElement;
+      while (parent && !parent.classList.contains("app-window")) {
+        parent = parent.parentElement;
+      }
+      if (parent) {
+        parent.dispatchEvent(
+          new CustomEvent("request-close-window", { bubbles: false }),
+        );
+      }
+    });
+    // Add the close button as the first item on the left for mobile
+    toolbarRow.insertBefore(closeBtn, toolbarRow.firstChild);
+
     // Insert divider after the first group of buttons (left group)
     const firstDivider = document.createElement("div");
     firstDivider.className = "vertical_line";
@@ -334,33 +358,6 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
         toolbarButtons[1] || toolbarRow.children[0].nextSibling,
       );
     }
-    // Spacer to push close button to the right
-    const spacer = document.createElement("div");
-    spacer.style.flex = "1";
-    toolbarRow.appendChild(spacer);
-    // Divider before the close button
-    const closeDivider = document.createElement("div");
-    closeDivider.className = "vertical_line";
-    toolbarRow.appendChild(closeDivider);
-    // Close button (match other toolbar buttons)
-    const closeBtn = document.createElement("div");
-    closeBtn.className = "toolbar-button toolbar-close-button";
-    closeBtn.setAttribute("aria-label", "Close");
-    closeBtn.innerHTML = `<img alt="close" width="25" height="25" src="assets/gui/toolbar/delete.webp" /><span>Close</span>`;
-    closeBtn.addEventListener("click", function (e) {
-      e.stopPropagation();
-      // Find the parent window element and dispatch the close event
-      let parent = toolbarWrapper.parentElement;
-      while (parent && !parent.classList.contains("app-window")) {
-        parent = parent.parentElement;
-      }
-      if (parent) {
-        parent.dispatchEvent(
-          new CustomEvent("request-close-window", { bubbles: false }),
-        );
-      }
-    });
-    toolbarRow.appendChild(closeBtn);
   }
   if (isMobile && windowId === "internet-window") {
     // Find the forward button

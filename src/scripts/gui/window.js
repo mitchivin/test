@@ -441,7 +441,7 @@ export default class WindowManager {
                 <div class="title-bar-controls">
                     ${program.canMinimize !== false ? '<button class="xp-button" aria-label="Minimize" data-action="minimize"></button>' : ""}
                     ${!isMobile && program.canMaximize !== false ? '<button class="xp-button" aria-label="Maximize" data-action="maximize"></button>' : ""}
-                    ${!isMobile ? '<button class="xp-button" aria-label="Close" data-action="close"></button>' : ""}
+                    <button class="xp-button" aria-label="Close" data-action="close"></button>
                 </div>
             </div>
         `;
@@ -587,6 +587,70 @@ export default class WindowManager {
     }
 
     this._setupIframeActivationOverlay(windowElement);
+
+    // Add listeners for toolbar actions within this window
+    const toolbarButtons = windowElement.querySelectorAll('.toolbar-button[data-action]');
+    toolbarButtons.forEach(button => {
+        this._bindControl(button, 'click', () => {
+            if (button.classList.contains('disabled')) return; // Do nothing if button is disabled
+            const action = button.getAttribute('data-action');
+            this._handleToolbarAction(action, windowElement);
+        });
+    });
+  }
+
+  /**
+   * Handle actions from toolbar buttons.
+   * @private
+   * @param {string} action - The action to perform.
+   * @param {HTMLElement} windowElement - The window element a Mcting as context.
+   * @returns {void}
+   */
+  _handleToolbarAction(action, windowElement) {
+    // const programName = windowElement.getAttribute("data-program"); // Context if needed
+
+    switch (action) {
+        case 'openInternet': // For "My Projects" on "About Me" toolbar (desktop)
+        case 'openProjects': // For "My Projects" on "About Me" toolbar (mobile)
+            this.openProgram('internet');
+            break;
+        case 'openResume':   // For "My Resume" on "About Me" toolbar (desktop & mobile)
+            this.openProgram('resume');
+            break;
+        case 'openContact': // For "Contact Me" on "My Resume" toolbar
+            this.openProgram('contact');
+            break;
+        // For actions that need to be handled by the specific app's iframe:
+        case 'saveResume':
+            const link = document.createElement('a');
+            link.href = './assets/apps/resume/resumeMitchIvin.pdf';
+            link.download = 'resumeMitchIvin.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            break;
+        case 'navigateBack':
+        case 'navigateForward':
+        case 'navigateHome':
+        case 'sendMessage':
+        case 'newMessage':
+        case 'previousImage':
+        case 'toggleSlideshow':
+        case 'nextImage':
+            const iframe = windowElement.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'toolbar-action', action: action }, '*');
+            }
+            break;
+        default:
+            // Optionally log unhandled actions or send a generic message
+            // console.warn(`Unhandled toolbar action: ${action} for window: ${windowElement.id}`);
+            const genericIframe = windowElement.querySelector('iframe');
+            if (genericIframe && genericIframe.contentWindow) {
+                genericIframe.contentWindow.postMessage({ type: 'toolbar-action', action: action }, '*');
+            }
+            break;
+    }
   }
 
   /**

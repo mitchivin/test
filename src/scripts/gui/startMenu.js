@@ -277,7 +277,7 @@ export default class StartMenu {
     } else {
       for (const item of ALL_PROGRAMS_ITEMS) {
         if (
-          ["mediaPlayer", "my-pictures", "notepad", "cmd", "info"].includes(
+          ["mediaPlayer", "my-pictures", "notepad", "cmd"].includes(
             item.programName,
           )
         ) {
@@ -565,13 +565,6 @@ export default class StartMenu {
                                 <span class="item-title">Recently Used</span>
                             </div>
                         </li>
-                        ${renderMenuItem({
-                          id: "info",
-                          icon: "./assets/gui/start-menu/help.webp",
-                          title: "Disclaimer",
-                          programName: "info",
-                          action: "open-program",
-                        })}
                     </ul>
                 </div>
             </div>

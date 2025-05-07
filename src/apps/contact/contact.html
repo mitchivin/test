@@ -25,5 +25,23 @@
         </div>
         <textarea id="contact-message" class="textarea" placeholder="Write your message here"></textarea>
     </div>
+    <script>
+      window.addEventListener('message', function(event) {
+        // It's a good practice to check the origin of the message for security
+        // For local development or same-origin iframes, this might not be strictly necessary,
+        // but in a broader context, you'd want to verify event.origin.
+        // Example: if (event.origin !== 'expected_origin') return;
+
+        if (event.data && event.data.type === 'toolbar-action' && event.data.action === 'newMessage') {
+          const fromField = document.getElementById('contact-from');
+          const subjectField = document.getElementById('contact-subject');
+          const messageField = document.getElementById('contact-message');
+
+          if (fromField) fromField.value = '';
+          if (subjectField) subjectField.value = '';
+          if (messageField) messageField.value = '';
+        }
+      });
+    </script>
   </body>
 </html> 
