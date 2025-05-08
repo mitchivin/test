@@ -179,6 +179,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 10);
             }
         }
+
+        // Remove any existing wrapper/overlay
+        const oldWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
+        if (oldWrapper) oldWrapper.remove();
+        lightboxOverlayVisible = false;
+        // Find the media element
+        const media = lightboxContent.querySelector('img, video');
+        if (media) {
+            // Create wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'lightbox-media-wrapper';
+            wrapper.style.display = 'inline-block';
+            wrapper.style.position = 'relative';
+            // Insert wrapper and move media inside
+            lightboxContent.appendChild(wrapper);
+            wrapper.appendChild(media);
+            media.style.cursor = '';
+        }
+
+        // Notify parent that lightbox is open
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'lightbox-state', open: true }, '*');
+        }
     }
 
     /**
@@ -241,6 +264,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         document.body.style.overflow = '';
         setHomeButtonEnabledInParent(false);
+
+        // Notify parent that lightbox is closed
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'lightbox-state', open: false }, '*');
+        }
     }
 
     // --- Swipe Navigation for Lightbox ---
@@ -297,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 350);
     }
 
-    // Modify the post click handler to set currentLightboxIndex
+    // Modify the post click handler to only open the lightbox
     posts.forEach((post, idx) => {
         post.addEventListener('click', (event) => {
             if (event.target.tagName === 'A') {
@@ -311,11 +339,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const mobileDescription = post.dataset.mobileDescription;
             const sourceData = post.dataset.src;
             const poster = post.dataset.poster;
-
             if (type && sourceData) {
                 openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
             }
         });
+    });
+
+    // Hide overlays when clicking outside any post
+    window.addEventListener('click', (event) => {
+        if (!event.target.closest('.post')) {
+            posts.forEach(p => p.classList.remove('show-caption'));
+        }
     });
 
     // --- Smooth Drag/Swipe Logic ---
@@ -979,6 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         currentLightboxIndex = newIndex;
+        setupLightboxMediaOverlay(desktopDescription);
     }
 
     if (arrowLeft) {
@@ -1037,19 +1072,79 @@ document.addEventListener('DOMContentLoaded', () => {
             showDesktopHint();
         }
     };
-});
 
-// Move this outside DOMContentLoaded so it is always registered
-window.addEventListener('message', function(event) {
-    if (event.data && event.data.type === 'close-lightbox') {
-        if (typeof closeLightbox === 'function') {
-            closeLightbox();
+    // --- Lightbox Description Overlay ---
+    function createLightboxOverlay(description) {
+        const overlay = document.createElement('div');
+        overlay.className = 'lightbox-caption-overlay';
+        overlay.textContent = description || '';
+        overlay.style.pointerEvents = 'none'; // Always non-blocking by default
+        return overlay;
+    }
+
+    let lightboxOverlayVisible = false;
+
+    function toggleLightboxOverlay(description, wrapper) {
+        if (!wrapper) return;
+        let overlay = wrapper.querySelector('.lightbox-caption-overlay');
+        if (!overlay) {
+            overlay = createLightboxOverlay(description);
+            wrapper.appendChild(overlay);
+            // Force reflow for animation
+            void overlay.offsetWidth;
+            overlay.classList.add('show');
+            overlay.style.pointerEvents = 'auto'; // Only block when shown
+            lightboxOverlayVisible = true;
+        } else {
+            if (overlay.classList.contains('show')) {
+                overlay.classList.remove('show');
+                overlay.style.pointerEvents = 'none';
+                lightboxOverlayVisible = false;
+            } else {
+                overlay.classList.add('show');
+                overlay.style.pointerEvents = 'auto';
+                lightboxOverlayVisible = true;
+            }
         }
     }
-    // Handle toolbar-action for Home button
-    if (event.data && event.data.type === 'toolbar-action' && event.data.action === 'navigateHome') {
-        if (typeof closeLightbox === 'function') {
-            closeLightbox();
+
+    // Helper to wrap media and attach overlay toggle
+    function setupLightboxMediaOverlay(description) {
+        // Remove any existing wrapper/overlay
+        const oldWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
+        if (oldWrapper) oldWrapper.remove();
+        lightboxOverlayVisible = false;
+        // Find the media element
+        const media = lightboxContent.querySelector('img, video');
+        if (media) {
+            // Create wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'lightbox-media-wrapper';
+            wrapper.style.display = 'inline-block';
+            wrapper.style.position = 'relative';
+            // Insert wrapper and move media inside
+            lightboxContent.appendChild(wrapper);
+            wrapper.appendChild(media);
+            media.style.cursor = '';
         }
     }
+
+    // Place this at the end of DOMContentLoaded, after all variables and functions are defined
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'toolbar-action') {
+            if (event.data.action === 'viewDescription') {
+                const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
+                let description = '';
+                if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
+                    description = allPosts[currentLightboxIndex].dataset.description;
+                }
+                toggleLightboxOverlay(description, wrapper);
+            } else if (event.data.action === 'navigateHome') {
+                // Only close if lightbox is open
+                if (lightbox && lightbox.style.display === 'flex') {
+                    closeLightbox();
+                }
+            }
+        }
+    });
 });

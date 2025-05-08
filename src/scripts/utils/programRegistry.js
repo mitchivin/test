@@ -404,6 +404,14 @@ const programData = {
           text: "Home",
           action: "navigateHome",
         },
+        { type: "separator" },
+        {
+          key: "view-description",
+          enabled: true,
+          icon: "./assets/gui/toolbar/desc.webp",
+          text: "View Description",
+          action: "viewDescription"
+        },
       ],
     },
   }),

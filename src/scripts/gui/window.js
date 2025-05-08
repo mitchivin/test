@@ -78,6 +78,11 @@ class WindowTemplates {
         windowId,
         programConfig && programConfig.id === "my-pictures-window"
       );
+      // If this is the My Projects (internet) window, disable the view-description button by default
+      if (windowId === "internet-window" && toolbarWrapper) {
+        const viewDescBtn = toolbarWrapper.querySelector('.toolbar-button.view-description');
+        if (viewDescBtn) viewDescBtn.classList.add('disabled');
+      }
     }
 
     // --- Create Address Bar (if config exists) ---
@@ -166,6 +171,17 @@ export default class WindowManager {
                     homeButton.classList.remove('disabled');
                 } else {
                     homeButton.classList.add('disabled');
+                }
+            }
+        }
+        // Handle lightbox open/close for enabling/disabling view-description
+        if (event.data && event.data.type === 'lightbox-state') {
+            const viewDescBtn = document.querySelector('.toolbar-button.view-description');
+            if (viewDescBtn) {
+                if (event.data.open) {
+                    viewDescBtn.classList.remove('disabled');
+                } else {
+                    viewDescBtn.classList.add('disabled');
                 }
             }
         }
