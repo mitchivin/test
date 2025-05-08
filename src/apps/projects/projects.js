@@ -347,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function setSwipeContentTransform(dx, dy, scale = 1) {
         if (lightboxContent) {
             lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
-            // Fade out media and lightbox together as you swipe up
             const media = lightboxContent.querySelector('img, video');
             if (media && dragIsVertical) {
                 // Calculate fade and scale based on vertical drag
@@ -355,6 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dragRatio = Math.min(1, Math.abs(dy) / (window.innerHeight * fadeEnd));
                 const fade = 1 - Math.pow(dragRatio, 2);
                 media.style.opacity = fade;
+                // Fade out the lightbox background (not background-color, but opacity)
                 lightbox.style.opacity = fade;
                 // Scale from 1 to 0.25 as drag progresses
                 const minScale = 0.25;
@@ -362,15 +362,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
             } else if (media) {
                 media.style.opacity = '';
-                lightbox.style.opacity = '';
                 lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(1)`;
+                // Reset lightbox opacity if not swiping up
+                lightbox.style.opacity = '';
             }
-        }
-    }
-
-    function setLightboxBgOpacity(opacity) {
-        if (lightbox) {
-            lightbox.style.backgroundColor = `rgba(59, 59, 59, ${opacity})`;
         }
     }
 
@@ -431,11 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dragRAF) cancelAnimationFrame(dragRAF);
             dragRAF = requestAnimationFrame(() => {
                 setSwipeContentTransform(0, limitedDy, scale);
-                // Lower lightbox bg opacity as you drag up
-                const baseOpacity = 0.87;
-                const minOpacity = 0.2;
-                const dragRatio = Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
-                setLightboxBgOpacity(baseOpacity - (baseOpacity - minOpacity) * dragRatio);
+                // Do NOT change lightbox bg opacity here
             });
         }
     }
@@ -510,21 +501,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Animate to scale 0.25 as it slides up
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateY(${targetY}px) scale(${minScale})`;
-                setLightboxBgOpacity(0.2);
-                // Fade out media and lightbox
+                // Animate lightbox opacity to 0 as it slides up
+                lightbox.style.transition = `opacity ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
+                lightbox.style.opacity = 0;
                 if (media) media.style.opacity = 0;
-                lightbox.style.opacity = 0.2;
                 const onTransitionEnd = () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
                     lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
-                    setLightboxBgOpacity(0.87);
-                    // Reset media and lightbox opacity
-                    if (media) media.style.opacity = '';
+                    // Reset lightbox opacity after close
+                    lightbox.style.transition = '';
                     lightbox.style.opacity = '';
-                    // Ensure consistent background color after snap-back
-                    lightbox.style.backgroundColor = 'rgba(59, 59, 59, 0.55)';
+                    if (media) media.style.opacity = '';
                     closeLightbox();
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
@@ -543,6 +532,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateX(${targetX}px)`;
+                // Reset lightbox opacity for side swipes
+                lightbox.style.transition = '';
+                lightbox.style.opacity = '';
                 const onTransitionEnd = () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
@@ -565,6 +557,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateX(${targetX}px)`;
+                // Reset lightbox opacity for side swipes
+                lightbox.style.transition = '';
+                lightbox.style.opacity = '';
                 const onTransitionEnd = () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
@@ -581,13 +576,12 @@ document.addEventListener('DOMContentLoaded', () => {
             lightboxContent.classList.add('animate');
             lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
             lightboxContent.style.transition = '';
-            // Reset media and lightbox opacity
+            // Reset media opacity only
             if (media) media.style.opacity = '';
+            // Reset lightbox opacity
+            lightbox.style.transition = '';
             lightbox.style.opacity = '';
-            // Ensure consistent background color after snap-back
-            lightbox.style.backgroundColor = 'rgba(59, 59, 59, 0.55)';
         }
-        // setLightboxBgOpacity(0.87); // Do not call this after snap-back
     }
 
     // Attach touch listeners to the lightboxContent for mobile only
