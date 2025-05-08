@@ -389,6 +389,7 @@ body {
 #project-lightbox:not(.desktop-layout) #lightbox-content img,
 #project-lightbox:not(.desktop-layout) #lightbox-content video {
   max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
   width: auto;
   height: auto;
   object-fit: contain;
