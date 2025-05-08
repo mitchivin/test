@@ -664,16 +664,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const columnWidth = (availableWidth - (numColumns - 1) * gap) / numColumns;
 
-        if (columnWidth <= 0) {
-            console.error("Masonry: Calculated column width is zero or negative.", { availableWidth, numColumns, gap });
-            feedContainerPosts.forEach(post => {
-                post.style.position = 'static'; // Revert to static flow
-                post.style.width = ''; 
-            });
-            feedContainer.style.height = 'auto';
-            return; 
-        }
-
         feedContainerPosts.forEach(post => {
             post.style.position = 'absolute'; 
             post.style.width = `${columnWidth}px`;
@@ -683,8 +673,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         feedContainerPosts.forEach(post => {
             const postHeight = post.offsetHeight;
-            if (postHeight === 0 && post.querySelector('img, video')) {
-            }
             
             let shortestColumnIndex = 0;
             for (let i = 1; i < numColumns; i++) {
@@ -708,10 +696,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function initMasonryWithVideoCheck() {
         if (!feedContainer) return;
 
-        // Ensure feedContainerPosts is up-to-date if posts can be added dynamically later.
-        // For this initial load, it's fine as defined earlier in DOMContentLoaded.
-        // If posts are added, this Array needs to be updated before calling this function.
-        
         const videos = feedContainerPosts.filter(post => post.querySelector('video')).map(post => post.querySelector('video'));
 
         if (videos.length === 0) {
@@ -749,10 +733,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        if (videosReported === videosToMonitor && videosToMonitor > 0) { // Ensure it only applies if there were videos
+        if (videosReported === videosToMonitor && videosToMonitor > 0) {
             applyMasonryLayout();
-        } else if (videosToMonitor === 0) { // Should have been caught earlier, but defensive
-             applyMasonryLayout();
         }
     }
 
@@ -793,14 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 0);
             }
         }
-        if (mediaElements.length === 0) {
-            // No media, notify immediately
-            setTimeout(() => {
-              if (window.parent && window.parent !== window) {
-                window.parent.postMessage({ type: 'projects-ready' }, '*');
-              }
-            }, 0);
-        } else {
+        if (mediaElements.length > 0) {
             mediaElements.forEach(el => {
                 if ((el.tagName === 'IMG' && el.complete) || (el.tagName === 'VIDEO' && el.readyState >= 2)) {
                     checkAllLoaded();
@@ -814,8 +789,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error("Masonry: .feed-container not found. Masonry layout not initialized.");
     }
-
-    // The new initMasonryWithVideoCheck and its resize listener replace the old approach.
 
     // Fallback: If image/video fails to load, use low-res, then swap back to high-res when available
     posts.forEach(post => {
@@ -864,7 +837,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
     let isMaximized = false;
     let intersectionObserver = null;
-    let hoverListeners = [];
 
     function playVisibleVideos() {
         if (!intersectionObserver) return;
@@ -899,25 +871,6 @@ document.addEventListener('DOMContentLoaded', () => {
         gridVideos.forEach(video => { delete video.__isIntersecting; });
     }
 
-    function setupHoverListeners() {
-        cleanupHoverListeners();
-        hoverListeners = gridVideos.map(video => {
-            const onEnter = () => video.play();
-            const onLeave = () => video.pause();
-            video.addEventListener('mouseenter', onEnter);
-            video.addEventListener('mouseleave', onLeave);
-            return { video, onEnter, onLeave };
-        });
-    }
-
-    function cleanupHoverListeners() {
-        hoverListeners.forEach(({ video, onEnter, onLeave }) => {
-            video.removeEventListener('mouseenter', onEnter);
-            video.removeEventListener('mouseleave', onLeave);
-        });
-        hoverListeners = [];
-    }
-
     function setMaximizedState(maximized) {
         isMaximized = maximized;
         // Toggle .maximized class on all .video-posts for overlay
@@ -930,10 +883,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (isMaximized) {
             cleanupIntersectionObserver();
-            gridVideos.forEach(video => video.pause());
-            setupHoverListeners();
+            gridVideos.forEach(video => {
+                video.play();
+            });
         } else {
-            cleanupHoverListeners();
+            gridVideos.forEach(video => {
+                video.pause();
+            });
             setupIntersectionObserver();
         }
     }
