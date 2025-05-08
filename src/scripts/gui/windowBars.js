@@ -306,8 +306,12 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
       const buttonDiv = document.createElement("div");
       buttonDiv.className = `toolbar-button ${buttonConfig.key}`;
       if (!buttonConfig.enabled) buttonDiv.classList.add("disabled");
-      if (buttonConfig.action)
+      // Always set data-action for home button in internet-window
+      if (buttonConfig.key === "home" && windowId === "internet-window") {
+        buttonDiv.setAttribute("data-action", "navigateHome");
+      } else if (buttonConfig.action) {
         buttonDiv.setAttribute("data-action", buttonConfig.action);
+      }
       let buttonContent = "";
       if (buttonConfig.icon) {
         buttonContent += `<img alt="${buttonConfig.key}" width="25" height="25" src="${buttonConfig.icon}" />`;

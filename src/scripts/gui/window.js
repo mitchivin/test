@@ -156,6 +156,35 @@ export default class WindowManager {
       if (taskbar.parentElement === windowsContainer) {
       }
     }
+
+    // Listen for messages from iframes to enable/disable the Home button
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'set-home-enabled') {
+            const homeButton = document.querySelector('.toolbar-button.home');
+            if (homeButton) {
+                if (event.data.enabled) {
+                    homeButton.classList.remove('disabled');
+                } else {
+                    homeButton.classList.add('disabled');
+                }
+            }
+        }
+    });
+
+    // Add click handler to Home button to send close-lightbox message to Projects app iframe only
+    const homeButton = document.querySelector('.toolbar-button.home');
+    if (homeButton) {
+        homeButton.addEventListener('click', function() {
+            if (!homeButton.classList.contains('disabled')) {
+                // Find the Projects app window and its iframe
+                const projectsWindow = document.getElementById('internet-window');
+                const iframe = projectsWindow ? projectsWindow.querySelector('iframe') : null;
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ type: 'close-lightbox' }, '*');
+                }
+            }
+        });
+    }
   }
 
   _setupGlobalHandlers() {

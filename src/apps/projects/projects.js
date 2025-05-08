@@ -13,6 +13,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Utility to get the Home button in the current window's toolbar
+    function getHomeButton() {
+        return document.querySelector('.toolbar-button.home');
+    }
+
+    function setHomeButtonEnabled(enabled) {
+        const homeButton = getHomeButton();
+        if (homeButton) {
+            if (enabled) {
+                homeButton.classList.remove('disabled');
+            } else {
+                homeButton.classList.add('disabled');
+            }
+        }
+    }
+
+    function setHomeButtonEnabledInParent(enabled) {
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage(
+                { type: 'set-home-enabled', enabled },
+                '*'
+            );
+        }
+    }
+
     /**
      * Opens the lightbox with the specified media type and source.
      * @param {string} type - The type of media to display (image, video).
@@ -175,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // When opening, always reset visibility
         lightbox.style.visibility = '';
+        setHomeButtonEnabledInParent(true);
     }
 
     /**
@@ -238,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playVisibleVideos();
         }
         document.body.style.overflow = '';
+        setHomeButtonEnabledInParent(false);
     }
 
     // --- Swipe Navigation for Lightbox ---
@@ -929,4 +956,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize for default (unmaximized) state
     setupIntersectionObserver();
+
+    // Expose closeLightbox globally for message handler
+    window.closeLightbox = closeLightbox;
+});
+
+// Move this outside DOMContentLoaded so it is always registered
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'close-lightbox') {
+        if (typeof closeLightbox === 'function') {
+            closeLightbox();
+        }
+    }
+    // Handle toolbar-action for Home button
+    if (event.data && event.data.type === 'toolbar-action' && event.data.action === 'navigateHome') {
+        if (typeof closeLightbox === 'function') {
+            closeLightbox();
+        }
+    }
 });
