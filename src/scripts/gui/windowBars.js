@@ -111,6 +111,12 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
       menuBarContainer.appendChild(dropdownMenu);
     }
   });
+  // Add logo placeholder (now an image)
+  const logoPlaceholder = document.createElement("img");
+  logoPlaceholder.className = "menu-bar-logo-placeholder";
+  logoPlaceholder.src = "./assets/gui/toolbar/barlogo.webp";
+  logoPlaceholder.alt = "Logo";
+  menuBar.appendChild(logoPlaceholder);
   menuBarContainer.insertBefore(menuBar, menuBarContainer.firstChild);
 
   // --- MenuBar JS Logic ---

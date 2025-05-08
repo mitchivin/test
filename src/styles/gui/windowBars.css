@@ -296,4 +296,18 @@
 /* Ensure consistent cursor */
 .toolbar-button, .addressbar-row span, .go-button-container span {
   cursor: default;
+}
+
+.menu-bar-logo-placeholder {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 40px;
+  object-fit: contain;
+  display: block;
+  margin-left: 0;
+  z-index: 2;
+  background: none;
+  border-radius: 0;
 } 
