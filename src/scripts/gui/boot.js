@@ -129,9 +129,7 @@ export function initBootSequence(eventBus, EVENTS) {
 
   // Event listener for communication with login iframe
   window.addEventListener("message", (event) => {
-    if (event.data?.type === "loginSuccess") {
-      handleLoginSuccess();
-    } else if (event.data?.type === "shutdownRequest") {
+    if (event.data?.type === "shutdownRequest") {
       if (eventBus && EVENTS) {
         eventBus.publish(EVENTS.SHUTDOWN_REQUESTED);
       }

@@ -454,8 +454,7 @@
 
 /* Base styles for submenu containers */
 .all-programs-menu,
-.recently-used-menu,
-.ai-tools-menu {
+.recently-used-menu {
   position: absolute;
   background-color: var(--xp-bg-main);
   border: 1px solid var(--xp-border-main);
@@ -470,8 +469,7 @@
 
 /* Specific style for the blue gradient strip on left */
 .all-programs-menu::before,
-.recently-used-menu::before,
-.ai-tools-menu::before {
+.recently-used-menu::before {
   content: "";
   position: absolute;
   left: 0;
@@ -484,8 +482,7 @@
 
 /* Container for submenu items */
 .all-programs-items,
-.recently-used-items,
-.ai-tools-items {
+.recently-used-items {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -496,8 +493,7 @@
 
 /* Individual submenu items */
 .all-programs-item,
-.recently-used-item,
-.ai-tools-item {
+.recently-used-item {
   position: relative;
   display: flex;
   align-items: center;
@@ -515,8 +511,7 @@
 
 /* Hover effect for submenu items */
 .all-programs-item:hover,
-.recently-used-item:hover,
-.ai-tools-item:hover {
+.recently-used-item:hover {
   background-color: #2f71cd;
   color: white;
   padding-left: 30px; /* Ensure consistent padding */
@@ -524,8 +519,7 @@
 
 /* Create a background overlay that can transition smoothly */
 .all-programs-item::after,
-.recently-used-item::after,
-.ai-tools-item::after {
+.recently-used-item::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -536,15 +530,13 @@
 }
 
 .all-programs-item:hover::after,
-.recently-used-item:hover::after,
-.ai-tools-item:hover::after {
+.recently-used-item:hover::after {
   background-color: #2f71cd;
 }
 
 /* Highlight extension for hover */
 .all-programs-item:hover::before,
-.recently-used-item:hover::before,
-.ai-tools-item:hover::before {
+.recently-used-item:hover::before {
   content: "";
   position: absolute;
   left: 0;
@@ -558,24 +550,21 @@
 
 /* Make text and icon in submenu items transition together */
 .all-programs-item *,
-.recently-used-item *,
-.ai-tools-item * {
+.recently-used-item * {
   transition: color 0.05s ease; /* Standardize to ease */
   z-index: 2; /* Keep content above the overlay */
 }
 
 /* Apply color changes to both icon and text simultaneously */
 .all-programs-item:hover *,
-.recently-used-item:hover *,
-.ai-tools-item:hover * {
+.recently-used-item:hover * {
   color: white;
   filter: brightness(1.1);
 }
 
 /* Icons within submenu items */
 .all-programs-item img,
-.recently-used-item img,
-.ai-tools-item img {
+.recently-used-item img {
   width: 16px;
   height: 16px;
   position: absolute;
@@ -610,8 +599,7 @@
 }
 
 /* Arrow indicator styling */
-.mut-menu-arrow,
-.ai-tools-arrow {
+.mut-menu-arrow {
   position: absolute;
   right: 8px;
   top: 50%;
@@ -703,7 +691,6 @@
 
 /* Consolidated Disabled Menu Item Styles */
 .recently-used-item.disabled,
-.ai-tools-item.disabled,
 .all-programs-item.disabled {
   color: #999 !important;
   opacity: 0.93 !important;
@@ -715,10 +702,8 @@
 }
 
 .recently-used-item.disabled:hover,
-.ai-tools-item.disabled:hover,
 .all-programs-item.disabled:hover,
 .recently-used-item.disabled:focus,
-.ai-tools-item.disabled:focus,
 .all-programs-item.disabled:focus {
   background: none !important;
   color: #999 !important;
@@ -727,16 +712,12 @@
 }
 
 .recently-used-item.disabled::before,
-.ai-tools-item.disabled::before,
 .all-programs-item.disabled::before,
 .recently-used-item.disabled::after,
-.ai-tools-item.disabled::after,
 .all-programs-item.disabled::after,
 .recently-used-item.disabled:hover::before,
-.ai-tools-item.disabled:hover::before,
 .all-programs-item.disabled:hover::before,
 .recently-used-item.disabled:hover::after,
-.ai-tools-item.disabled:hover::after,
 .all-programs-item.disabled:hover::after {
   background: none !important;
   content: none !important;
@@ -744,14 +725,12 @@
 }
 
 .recently-used-item.disabled img,
-.ai-tools-item.disabled img,
 .all-programs-item.disabled img {
   filter: grayscale(0.25) !important;
   opacity: 0.6 !important;
 }
 
 .recently-used-item.disabled:hover img,
-.ai-tools-item.disabled:hover img,
 .all-programs-item.disabled:hover img {
   filter: grayscale(1);
 }
@@ -849,4 +828,11 @@
 
 .startmenu .menu-item.disabled img {
   filter: grayscale(0.8) opacity(0.6) !important; /* Grayscale and fade icon */
+}
+
+/* Added style for menu-item-clicked */
+.menu-item.menu-item-clicked {
+  background-color: #1e5fa9; /* Darker blue for clicked state */
+  color: white;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.3);
 }

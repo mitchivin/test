@@ -78,7 +78,6 @@ function setRealVh() {
 function scaleDesktopIconsToFitMobile() {
   const containers = [
     document.querySelector(".desktop-icons"),
-    document.querySelector(".desktop-icons-top"),
   ];
   containers.forEach((container) => {
     if (!container) return;

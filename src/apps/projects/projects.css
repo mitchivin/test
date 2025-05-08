@@ -181,10 +181,9 @@ body {
     position: relative; 
     max-width: 90vw;
     max-height: 80vh;
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
 }
 
 #lightbox-content img,
@@ -219,7 +218,7 @@ body {
     width: 100%;
     max-width: 90vw;
     text-align: center;
-    background-color: #181818e8;
+    background-color: #333;
     border-radius: 20px;
     flex-grow: 1;
     min-height: 0;
@@ -231,7 +230,6 @@ body {
     font-size: 1.9rem;
     font-weight: 700;
     line-height: 1.2;
-    /* max-width: 70vw; */ /* Max-width is handled by desktop-specific rules or inherited */
     margin-top: 10px; /* Base margin, can be overridden by desktop */
 }
 
@@ -249,101 +247,17 @@ body {
     line-height: 1.5;
     margin-top: 10px; 
     margin-bottom: 15px; 
-    /* max-width: 50vw; */ /* Max-width is handled by desktop-specific rules or inherited */
-    /* overflow-y: auto; is in desktop specific */
-}
-
-#lightbox-close {
-    margin-top: auto;
-    padding: 10px 20px;
-    background-color: #2b2b2b;
-    color: white;
-    border: 0.5px solid #fff;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    font-size: 0.9rem;
-    margin-bottom: 32px;
-}
-
-#lightbox-close:hover {
-    background-color: #333;
-}
-
-/* Desktop Layout */
-#project-lightbox.desktop-layout #lightbox-inner-wrapper {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    height: 100%;
-    padding: 0 24px;
-}
-
-#project-lightbox.desktop-layout #lightbox-content {
-    flex-basis: 50%;
-    max-width: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    height: 100%;
-    box-sizing: border-box;
-    max-height: 100%;
-    max-width: 100%;
-}
-
-#project-lightbox.desktop-layout #lightbox-content img,
-#project-lightbox.desktop-layout #lightbox-content video {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 20px;
-}
-
-#project-lightbox.desktop-layout #lightbox-details {
-    flex-basis: 50%;
-    max-width: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0 32px;
-    height: 100%;
-    box-sizing: border-box;
-    overflow-y: auto;
-    margin-left: 0;
-    margin-right: 0;
-}
-
-#project-lightbox.desktop-layout #lightbox-title {
-    text-align: left;
-    margin-top: 32px;
-    margin-bottom: 10px;
-    overflow-y: auto;
-}
-
-#project-lightbox.desktop-layout #lightbox-subheading {
-    text-align: left;
-}
-
-#project-lightbox.desktop-layout #lightbox-description {
-    text-align: left;
-}
-
-#project-lightbox.desktop-layout #lightbox-close {
-    align-self: center;
 }
 
 /* Mobile Layout */
 #project-lightbox:not(.desktop-layout) {
-  height: 100vh;
+  height: 100vh; 
   min-height: 100vh;
-  /* display: flex; */
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 0; 
   margin: 0;
-  /* background-color is inherited from #project-lightbox */
+  overflow: hidden; /* Added to prevent scrollbars on mobile lightbox */
 }
 #project-lightbox:not(.desktop-layout) #lightbox-inner-wrapper {
   height: 100vh;
@@ -381,10 +295,6 @@ body {
     flex-grow: 0; /* Prevent details from expanding and ruining vertical centering */
 }
 
-#project-lightbox:not(.desktop-layout) #lightbox-close {
-    display: none !important;
-}
-
 /* Mobile: Make lightbox media fill more of the viewport */
 #project-lightbox:not(.desktop-layout) #lightbox-content img,
 #project-lightbox:not(.desktop-layout) #lightbox-content video {
@@ -394,7 +304,6 @@ body {
   height: auto;
   object-fit: contain;
   border-radius: 20px;
-  margin: 12px 12px;
   display: block;
   padding: 0;
   border: none;
@@ -476,4 +385,59 @@ body {
 /* Ensure .video-post is positioned for overlay */
 .video-post {
   position: relative;
+}
+
+/* --- Desktop Lightbox Navigation Buttons & Hint --- */
+@media (min-width: 768px) {
+  #lightbox-arrow-left, #lightbox-arrow-right, #lightbox-close-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    z-index: 100020;
+    cursor: pointer;
+  }
+  #lightbox-arrow-left { left: 48px; top: 50%; transform: translateY(-50%); }
+  #lightbox-arrow-right { right: 68px; top: 50%; transform: translateY(-50%); }
+  #lightbox-close-btn { right: 68px; top: 48px; z-index: 100021; }
+  #lightbox-arrow-left img,
+  #lightbox-arrow-right img,
+  #lightbox-close-btn img {
+    display: block;
+    pointer-events: none;
+    max-width: 64px;
+    max-height: 64px;
+    margin: auto;
+  }
+  #lightbox-desktop-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(40,40,40,0.92);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 24px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    z-index: 100030;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    opacity: 0.97;
+    pointer-events: none;
+    animation: hint-fadein 0.5s;
+  }
+  @keyframes hint-fadein {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 0.97; transform: translateX(-50%) translateY(0); }
+  }
+}
+
+/* Hide navigation buttons and hint on mobile */
+@media (max-width: 767px) {
+  #lightbox-arrow-left, #lightbox-arrow-right, #lightbox-close-btn, #lightbox-desktop-hint {
+    display: none !important;
+  }
 }

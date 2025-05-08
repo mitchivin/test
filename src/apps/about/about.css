@@ -164,23 +164,12 @@ body {
   transition: transform 0.05s ease;
 }
 
-.left-panel__card__header__img.disabled {
-  filter: grayscale(100%) opacity(0.6);
-  pointer-events: none;
-}
 .left-panel__card__text {
   font-size: 10px;
   line-height: 14px;
   color: #0c327d;
   text-decoration: none;
   pointer-events: auto;
-}
-.left-panel__card__text.active {
-   font-weight: bold;
-}
-.left-panel__card__text.link,
-.left-panel__card__row a .left-panel__card__text {
-  cursor: pointer;
 }
 .left-panel__card__row {
   cursor: default;
@@ -191,22 +180,11 @@ body {
 .left-panel__card__row:focus-visible {
   outline: 2px dotted #1976d2;
 }
-.left-panel__card__row:hover .left-panel__card__text {
-  text-decoration: underline;
-}
 .left-panel__card__img {
   cursor: default;
 }
 .left-panel__card__text:not(.link) {
   cursor: default;
-}
-
-.heading-icon {
-  width: 34px;
-  height: 34px;
-  vertical-align: middle;
-  margin-right: 4px;
-  flex: 1;
 }
 
 .welcome_text {
@@ -223,36 +201,6 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-h3.subtitle_header {
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 0;
-  margin-bottom: 12px;
-  font-family: Tahoma, Segoe UI, Verdana, Arial, sans-serif;
-  padding-bottom: 2px;
-  text-shadow: 1px 1px 0 #000, 0 0px 1px #000;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: none;
-}
-h3.subtitle_header .heading-icon {
-  width: 25px;
-  height: 25px;
-  margin-right: 4px;
-}
-
-.subtitle {
-  font-size: 15px;
-  color: #fff;
-  font-weight: normal;
-  margin: 0 0 10px 0;
-  padding: 0;
-  line-height: 1.6;
-  text-shadow: 0 1px 4px #000;
 }
 
 .section_text {
@@ -299,14 +247,6 @@ h3.subtitle_header .heading-icon {
     width: 100%;
     box-sizing: border-box;
   }
-}
-
-
-
-
-@keyframes fadeInCard {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: none; }
 }
 
 .about-paragraph-row {
@@ -358,10 +298,6 @@ h3.subtitle_header .heading-icon {
   color: #fff !important;
 }
 
-.left-panel__card__text:hover {
-  text-decoration: underline;
-}
-
 .left-panel__card__text.link {
   display: inline;
   width: auto;
@@ -369,10 +305,6 @@ h3.subtitle_header .heading-icon {
   margin: 0;
   pointer-events: auto;
   cursor: pointer;
-}
-
-.left-panel__card__text.link:hover {
-  text-decoration: underline;
 }
 
 .left-panel__card__text.link:focus {
@@ -389,4 +321,18 @@ h3.subtitle_header .heading-icon {
   display: inline-block;
   margin-bottom: 1px;
   pointer-events: none;
+}
+
+/* Added back cursor and hover underline rules */
+.left-panel__card__row:focus-visible {
+  outline: 2px dotted #1976d2;
+}
+
+.left-panel__card__text.link,
+.left-panel__card__row a .left-panel__card__text {
+  cursor: pointer;
+}
+
+.left-panel__card__row:hover .left-panel__card__text {
+  text-decoration: underline;
 }

@@ -167,24 +167,21 @@ iframe a {
 /* WebKit browsers (Chrome, Edge, Safari) */
 .window-body,
 .recently-used-items,
-.menu-items,
-.desktop-icons {
+.menu-items {
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: #316ac5 #ece9d8; /* thumb, track */
 }
 
 .window-body::-webkit-scrollbar,
 .recently-used-items::-webkit-scrollbar,
-.menu-items::-webkit-scrollbar,
-.desktop-icons::-webkit-scrollbar {
+.menu-items::-webkit-scrollbar {
   width: 13px;
   background: #ece9d8;
 }
 
 .window-body::-webkit-scrollbar-thumb,
 .recently-used-items::-webkit-scrollbar-thumb,
-.menu-items::-webkit-scrollbar-thumb,
-.desktop-icons::-webkit-scrollbar-thumb {
+.menu-items::-webkit-scrollbar-thumb {
   background: linear-gradient(to bottom, #eaf1fb 0%, #316ac5 100%);
   border-radius: 7px;
   border: 2px solid #ece9d8;
@@ -194,15 +191,13 @@ iframe a {
 
 .window-body::-webkit-scrollbar-thumb:hover,
 .recently-used-items::-webkit-scrollbar-thumb:hover,
-.menu-items::-webkit-scrollbar-thumb:hover,
-.desktop-icons::-webkit-scrollbar-thumb:hover {
+.menu-items::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #dbe8fa 0%, #184f8b 100%);
 }
 
 .window-body::-webkit-scrollbar-track,
 .recently-used-items::-webkit-scrollbar-track,
-.menu-items::-webkit-scrollbar-track,
-.desktop-icons::-webkit-scrollbar-track {
+.menu-items::-webkit-scrollbar-track {
   background: #ece9d8;
   border-radius: 7px;
 }
@@ -210,8 +205,7 @@ iframe a {
 /* Hide scrollbar corner (where vertical and horizontal meet) */
 .window-body::-webkit-scrollbar-corner,
 .recently-used-items::-webkit-scrollbar-corner,
-.menu-items::-webkit-scrollbar-corner,
-.desktop-icons::-webkit-scrollbar-corner {
+.menu-items::-webkit-scrollbar-corner {
   background: #ece9d8;
 }
 
@@ -219,8 +213,7 @@ iframe a {
 @media (forced-colors: active) {
   .window-body,
   .recently-used-items,
-  .menu-items,
-  .desktop-icons {
+  .menu-items {
     scrollbar-color: ButtonText ButtonFace;
   }
 }

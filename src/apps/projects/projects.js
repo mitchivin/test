@@ -4,11 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
-    const lightboxClose = document.getElementById('lightbox-close');
     const posts = document.querySelectorAll('.post');
     const feedContainer = document.querySelector('.feed-container');
 
-    if (!lightbox || !lightboxContent || !lightboxDetails || !lightboxClose || !feedContainer) {
+    if (!lightbox || !lightboxContent || !lightboxDetails || !feedContainer) {
         console.error('Lightbox, feedContainer, or critical elements not found, or no posts available.');
         return;
     }
@@ -48,34 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} mobileDescriptionText - The description text for mobile.
      * @param {string} poster - The poster URL for the video.
      */
-    function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, poster) {
+    function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, poster, fadeInFast) {
         // Pause all grid videos
         document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
-
-        // Set aspect ratio for lightbox-content if video and metadata available
-        if (type === 'video' && window.preloadedVideoMeta && window.preloadedVideoMeta[src]) {
-            const meta = window.preloadedVideoMeta[src];
-            if (meta.width && meta.height) {
-                lightboxContent.style.aspectRatio = `${meta.width} / ${meta.height}`;
-                lightboxContent.style.minHeight = '200px'; // fallback for old browsers
-            }
-        } else {
-            lightboxContent.style.aspectRatio = '';
-            lightboxContent.style.minHeight = '';
-        }
-
-        // Determine if desktop layout should be used based on feedContainer width
-        const isDesktopView = feedContainer.offsetWidth >= 768; 
-
-        if (isDesktopView) {
-            if (!lightbox.classList.contains('desktop-layout')) {
-                lightbox.classList.add('desktop-layout');
-            }
-        } else {
-            if (lightbox.classList.contains('desktop-layout')) {
-                lightbox.classList.remove('desktop-layout');
-            }
-        }
 
         // Add or remove image-lightbox class based on type
         if (type === 'image') {
@@ -147,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             titleElement.id = 'lightbox-title';
             titleElement.textContent = titleText;
             if (lightboxDetails) {
-                lightboxDetails.insertBefore(titleElement, lightboxClose);
+                lightboxDetails.appendChild(titleElement);
             }
         }
 
@@ -159,24 +133,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (titleEl && titleEl.nextSibling) {
                 lightboxDetails.insertBefore(subheadingElement, titleEl.nextSibling);
             } else if (lightboxDetails) {
-                lightboxDetails.insertBefore(subheadingElement, lightboxClose);
+                lightboxDetails.appendChild(subheadingElement);
             }
         }
 
-        // Only add description if in desktop layout and desktopDescriptionText is provided
-        if (lightbox.classList.contains('desktop-layout') && desktopDescriptionText) {
+        // Only add description if desktopDescriptionText is provided (CSS handles mobile visibility)
+        if (desktopDescriptionText) {
             const descriptionElement = document.createElement('div');
             descriptionElement.id = 'lightbox-description';
             descriptionElement.textContent = desktopDescriptionText;
-            // Try to insert it after subheading, or after title, or before close button
+            // Try to insert it after subheading, or after title, or append directly
             const subheadingEl = lightboxDetails.querySelector('#lightbox-subheading');
             const titleEl = lightboxDetails.querySelector('#lightbox-title');
             if (subheadingEl && subheadingEl.nextSibling) {
-                lightboxDetails.insertBefore(descriptionElement, subheadingEl.nextSibling);
+                 lightboxDetails.insertBefore(descriptionElement, subheadingEl.nextSibling);
             } else if (titleEl && titleEl.nextSibling) {
                  lightboxDetails.insertBefore(descriptionElement, titleEl.nextSibling);
             } else if (lightboxDetails) {
-                lightboxDetails.insertBefore(descriptionElement, lightboxClose);
+                lightboxDetails.appendChild(descriptionElement);
             }
         }
 
@@ -190,17 +164,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.body.style.overflow = 'hidden';
 
-        // --- Mobile close button logic ---
-        if (!lightbox.classList.contains('desktop-layout')) {
-            lightbox.classList.remove('show-close-btn');
-            if (window._lightboxCloseBtnTimer) {
-                clearTimeout(window._lightboxCloseBtnTimer);
-            }
-        }
-
         // When opening, always reset visibility
         lightbox.style.visibility = '';
         setHomeButtonEnabledInParent(true);
+
+        // If fadeInFast is true (desktop button nav), use a fast fade-in
+        if (fadeInFast && isDesktop() && lightboxContent) {
+            const media = lightboxContent.querySelector('img, video');
+            if (media) {
+                media.style.transition = 'opacity 120ms cubic-bezier(0.4,0,0.2,1)';
+                media.style.opacity = '0';
+                setTimeout(() => {
+                    media.style.opacity = '1';
+                }, 10);
+            }
+        }
     }
 
     /**
@@ -243,8 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaElement.load();
         }
         lightboxContent.innerHTML = '';
-        lightboxContent.style.aspectRatio = '';
-        lightboxContent.style.minHeight = '';
         const titleElement = document.getElementById('lightbox-title');
         if (titleElement) {
             titleElement.remove();
@@ -271,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentLightboxIndex = null;
     let allPosts = Array.from(document.querySelectorAll('.post'));
 
-    function openLightboxByIndex(index, direction = 0, animate = true) {
+    function openLightboxByIndex(index, direction = 0, animate = true, fadeInFast = false) {
         if (index < 0) index = allPosts.length - 1;
         if (index >= allPosts.length) index = 0;
         const post = allPosts[index];
@@ -286,11 +262,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const sourceData = post.dataset.src;
             const poster = post.dataset.poster;
             if (type && sourceData) {
-                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
+                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster, fadeInFast);
             }
             if (lightboxContent) {
                 lightboxContent.style.transform = 'translateX(0)';
             }
+            // Fade in new post (always apply now)
+            fadeInNewPost(); 
             return;
         }
         // Two-step animation for swipe
@@ -308,11 +286,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const sourceData = post.dataset.src;
             const poster = post.dataset.poster;
             if (type && sourceData) {
-                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
+                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster, fadeInFast);
             }
             setTimeout(() => {
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transform = 'translateX(0)';
+                // Fade in new post (always apply now)
+                fadeInNewPost();
             }, 20);
         }, 350);
     }
@@ -339,11 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Smooth Drag/Swipe Logic ---
-    // Only attach touch listeners for swipe on mobile
-    function isMobileLightbox() {
-        return !lightbox.classList.contains('desktop-layout');
-    }
-
     function setSwipeContentTransform(dx, dy, scale = 1) {
         if (lightboxContent) {
             lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
@@ -358,8 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 lightbox.style.opacity = fade;
                 // Scale from 1 to 0.25 as drag progresses
                 const minScale = 0.25;
-                const scale = 1 - (1 - minScale) * dragRatio;
-                lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
+                const scaleVal = 1 - (1 - minScale) * dragRatio;
+                lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scaleVal})`;
             } else if (media) {
                 media.style.opacity = '';
                 lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(1)`;
@@ -383,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragIsVertical = false;
 
     function handleTouchStart(e) {
-        if (!isMobileLightbox()) return;
         if (e.touches.length === 1) {
             dragStartX = e.touches[0].clientX;
             dragCurrentX = dragStartX;
@@ -402,7 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleTouchMove(e) {
-        if (!isMobileLightbox()) return;
         if (!dragging || e.touches.length !== 1) return;
         dragCurrentX = e.touches[0].clientX;
         dragCurrentY = e.touches[0].clientY;
@@ -420,19 +393,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (lightboxContent && dragIsVertical) {
             const limitedDy = Math.min(0, dy);
             const minScale = 0.85;
-            const scale = 1 + (minScale - 1) * Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
+            const scaleVal = 1 + (minScale - 1) * Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
             lastDragDx = 0;
             lastDragDy = limitedDy;
             if (dragRAF) cancelAnimationFrame(dragRAF);
             dragRAF = requestAnimationFrame(() => {
-                setSwipeContentTransform(0, limitedDy, scale);
+                setSwipeContentTransform(0, limitedDy, scaleVal);
                 // Do NOT change lightbox bg opacity here
             });
         }
     }
 
     function fadeInNewPost() {
-        if (!isMobileLightbox() || !lightboxContent) return;
+        if (!lightboxContent) return;
         const media = lightboxContent.querySelector('img, video');
         if (media) {
             media.style.opacity = '0';
@@ -443,15 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Patch openLightboxByIndex to fade in new post on mobile
-    const originalOpenLightboxByIndex = openLightboxByIndex;
-    openLightboxByIndex = function(index, direction = 0, animate = true) {
-        originalOpenLightboxByIndex(index, direction, animate);
-        if (isMobileLightbox()) fadeInNewPost();
-    };
-
     function handleTouchEnd() {
-        if (!isMobileLightbox()) return;
         if (!dragging) return;
         dragging = false;
         if (dragRAF) cancelAnimationFrame(dragRAF);
@@ -584,52 +549,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Attach touch listeners to the lightboxContent for mobile only
+    // Attach touch listeners to the lightboxContent
     if (lightboxContent) {
         lightboxContent.addEventListener('touchstart', handleTouchStart, { passive: true });
         lightboxContent.addEventListener('touchmove', handleTouchMove, { passive: true });
         lightboxContent.addEventListener('touchend', handleTouchEnd, { passive: true });
     }
 
-    // --- Mobile tap-to-show-close-button logic ---
-    function handleMobileShowCloseBtn(event) {
-        if (lightbox.classList.contains('desktop-layout')) return;
-        // Always show the close button on any tap
-        lightbox.classList.add('show-close-btn');
-        if (window._lightboxCloseBtnTimer) {
-            clearTimeout(window._lightboxCloseBtnTimer);
-        }
-        window._lightboxCloseBtnTimer = setTimeout(() => {
-            lightbox.classList.remove('show-close-btn');
-        }, 3000);
-    }
-
-    // Listen for taps/clicks on the lightbox and its content (image/video)
+    // Listen for taps/clicks on the lightbox background to close
     lightbox.addEventListener('click', (event) => {
-        // If tap is on the close button, let its handler run
-        if (event.target === lightboxClose) return;
-        // Only for mobile
-        if (!lightbox.classList.contains('desktop-layout')) {
-            handleMobileShowCloseBtn();
-        }
-        // If tap is on the background, close the lightbox
         if (event.target === lightbox) {
             closeLightbox();
         }
-    });
-    // Also listen for taps on the media itself
-    lightboxContent.addEventListener('click', (event) => {
-        if (!lightbox.classList.contains('desktop-layout')) {
-            handleMobileShowCloseBtn();
-        }
-    });
-    // When close button is clicked, close immediately and clear timer
-    lightboxClose.addEventListener('click', () => {
-        if (window._lightboxCloseBtnTimer) {
-            clearTimeout(window._lightboxCloseBtnTimer);
-        }
-        lightbox.classList.remove('show-close-btn');
-        closeLightbox();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -909,6 +840,203 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Expose closeLightbox globally for message handler
     window.closeLightbox = closeLightbox;
+
+    // --- Desktop Lightbox Navigation Buttons & Hint ---
+    const arrowLeft = document.getElementById('lightbox-arrow-left');
+    const arrowRight = document.getElementById('lightbox-arrow-right');
+    const closeBtn = document.getElementById('lightbox-close-btn');
+    const desktopHint = document.getElementById('lightbox-desktop-hint');
+    let desktopHintShown = false;
+
+    function isDesktop() {
+        return window.matchMedia('(min-width: 768px)').matches;
+    }
+
+    function showDesktopHint() {
+        if (!isDesktop() || !desktopHint || desktopHintShown) return;
+        desktopHint.style.display = 'block';
+        setTimeout(() => {
+            desktopHint.style.opacity = '0';
+            setTimeout(() => {
+                desktopHint.style.display = 'none';
+                desktopHint.style.opacity = '';
+            }, 600);
+        }, 3200);
+        desktopHintShown = true;
+    }
+
+    function handleNavKey(e, action) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            action();
+        }
+    }
+
+    function fadeOutCurrentMedia(callback) {
+        if (!isDesktop() || !lightboxContent) {
+            callback();
+            return;
+        }
+        const media = lightboxContent.querySelector('img, video');
+        if (!media) {
+            callback();
+            return;
+        }
+        media.style.transition = 'opacity 180ms cubic-bezier(0.4,0,0.2,1)';
+        // Force reflow
+        void media.offsetWidth;
+        media.style.opacity = '0';
+        function onTransitionEnd(e) {
+            if (e.target === media && e.propertyName === 'opacity') {
+                media.removeEventListener('transitionend', onTransitionEnd);
+                if (media.parentNode) media.parentNode.removeChild(media);
+                callback();
+            }
+        }
+        media.addEventListener('transitionend', onTransitionEnd);
+    }
+
+    // Crossfade for desktop button navigation (no fade out, just fade in new media)
+    function crossfadeToNewMedia(newIndex) {
+        if (!isDesktop() || !lightboxContent) {
+            openLightboxByIndex(newIndex, 0, true);
+            return;
+        }
+        const oldMedia = lightboxContent.querySelector('img, video');
+        const post = allPosts[newIndex];
+        if (!post) return;
+        // Prepare new media element
+        const type = post.dataset.type;
+        const src = post.dataset.src;
+        const poster = post.dataset.poster;
+        let newMedia;
+        if (type === 'image') {
+            newMedia = document.createElement('img');
+            newMedia.src = src;
+            newMedia.alt = 'Project Lightbox Image';
+        } else if (type === 'video') {
+            newMedia = document.createElement('video');
+            newMedia.src = src;
+            newMedia.controls = true;
+            newMedia.autoplay = true;
+            newMedia.loop = true;
+            newMedia.alt = 'Project Lightbox Video';
+            newMedia.setAttribute('playsinline', '');
+            if (poster) newMedia.poster = poster;
+        }
+        if (!newMedia) return;
+        newMedia.style.opacity = '0';
+        newMedia.style.transition = 'opacity 120ms cubic-bezier(0.4,0,0.2,1)';
+        // Remove old media immediately
+        if (oldMedia && oldMedia.parentNode) oldMedia.parentNode.removeChild(oldMedia);
+        lightboxContent.appendChild(newMedia);
+        // Fade in new media
+        setTimeout(() => {
+            newMedia.style.opacity = '1';
+        }, 10);
+        // Update details (title, subheading, description)
+        const title = post.dataset.title;
+        const subheading = post.dataset.subheading;
+        const desktopDescription = post.dataset.description;
+        const mobileDescription = post.dataset.mobileDescription;
+        // Remove old details
+        const existingTitle = lightboxDetails.querySelector('#lightbox-title');
+        if (existingTitle) lightboxDetails.removeChild(existingTitle);
+        const existingSubheading = lightboxDetails.querySelector('#lightbox-subheading');
+        if (existingSubheading) lightboxDetails.removeChild(existingSubheading);
+        const existingDescription = lightboxDetails.querySelector('#lightbox-description');
+        if (existingDescription) lightboxDetails.removeChild(existingDescription);
+        // Add new details
+        if (title) {
+            const titleElement = document.createElement('div');
+            titleElement.id = 'lightbox-title';
+            titleElement.textContent = title;
+            lightboxDetails.appendChild(titleElement);
+        }
+        if (subheading) {
+            const subheadingElement = document.createElement('div');
+            subheadingElement.id = 'lightbox-subheading';
+            subheadingElement.textContent = subheading;
+            const titleEl = lightboxDetails.querySelector('#lightbox-title');
+            if (titleEl && titleEl.nextSibling) {
+                lightboxDetails.insertBefore(subheadingElement, titleEl.nextSibling);
+            } else {
+                lightboxDetails.appendChild(subheadingElement);
+            }
+        }
+        if (desktopDescription) {
+            const descriptionElement = document.createElement('div');
+            descriptionElement.id = 'lightbox-description';
+            descriptionElement.textContent = desktopDescription;
+            const subheadingEl = lightboxDetails.querySelector('#lightbox-subheading');
+            const titleEl = lightboxDetails.querySelector('#lightbox-title');
+            if (subheadingEl && subheadingEl.nextSibling) {
+                lightboxDetails.insertBefore(descriptionElement, subheadingEl.nextSibling);
+            } else if (titleEl && titleEl.nextSibling) {
+                lightboxDetails.insertBefore(descriptionElement, titleEl.nextSibling);
+            } else {
+                lightboxDetails.appendChild(descriptionElement);
+            }
+        }
+        currentLightboxIndex = newIndex;
+    }
+
+    if (arrowLeft) {
+        arrowLeft.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentLightboxIndex !== null) {
+                crossfadeToNewMedia((currentLightboxIndex - 1 + allPosts.length) % allPosts.length);
+            }
+        });
+        arrowLeft.addEventListener('keydown', (e) => handleNavKey(e, () => {
+            if (currentLightboxIndex !== null) {
+                openLightboxByIndex(currentLightboxIndex - 1, -1, true);
+            }
+        }));
+    }
+    if (arrowRight) {
+        arrowRight.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentLightboxIndex !== null) {
+                crossfadeToNewMedia((currentLightboxIndex + 1) % allPosts.length);
+            }
+        });
+        arrowRight.addEventListener('keydown', (e) => handleNavKey(e, () => {
+            if (currentLightboxIndex !== null) {
+                openLightboxByIndex(currentLightboxIndex + 1, 1, true);
+            }
+        }));
+    }
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeLightbox();
+        });
+        closeBtn.addEventListener('keydown', (e) => handleNavKey(e, closeLightbox));
+    }
+
+    // Keyboard navigation (already present, but ensure hint is shown)
+    document.addEventListener('keydown', (event) => {
+        if (!isDesktop() || lightbox.style.display !== 'flex') return;
+        if (event.key === 'ArrowLeft') {
+            if (currentLightboxIndex !== null) {
+                openLightboxByIndex(currentLightboxIndex - 1, -1, true);
+            }
+        } else if (event.key === 'ArrowRight') {
+            if (currentLightboxIndex !== null) {
+                openLightboxByIndex(currentLightboxIndex + 1, 1, true);
+            }
+        }
+    });
+
+    // Show hint when lightbox opens (desktop only)
+    const origOpenLightbox = openLightbox;
+    openLightbox = function(...args) {
+        origOpenLightbox.apply(this, args);
+        if (isDesktop()) {
+            showDesktopHint();
+        }
+    };
 });
 
 // Move this outside DOMContentLoaded so it is always registered
