@@ -17,10 +17,25 @@ function sendMessageToParent(payload) {
     }
 }
 
-function createDesktopDescriptionCard(descriptionText) {
+function createDesktopDescriptionCard(titleText, subheadingText, descriptionText) {
     const animWrapper = createEl('div', 'desc-card-anim-wrapper');
     const descCard = createEl('div', 'lightbox-desc-card');
-    descCard.textContent = descriptionText || '';
+    
+    // Clear any existing content (though typically it's new)
+    clearChildren(descCard);
+
+    if (titleText) {
+        const titleEl = createEl('div', 'card-title', titleText);
+        descCard.appendChild(titleEl);
+    }
+    if (subheadingText) {
+        const subheadingEl = createEl('div', 'card-subheading', subheadingText);
+        descCard.appendChild(subheadingEl);
+    }
+    if (descriptionText) {
+        const bodyEl = createEl('div', 'card-body', descriptionText);
+        descCard.appendChild(bodyEl);
+    }
     
     animWrapper.appendChild(descCard);
     return animWrapper;
@@ -174,24 +189,30 @@ document.addEventListener('DOMContentLoaded', () => {
             } else { // SHOWING LOGIC
                 let animWrapper = wrapper.querySelector('.desc-card-anim-wrapper');
                 let card = animWrapper ? animWrapper.querySelector('.lightbox-desc-card') : null;
-                // let contentElement = card ? card.querySelector('.desc-card-content') : null; // No longer needed
 
                 if (!animWrapper) {
-                    animWrapper = createDesktopDescriptionCard(description); // This now sets text on card
+                    // Fetch current post data if we need to create everything new
+                    const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
+                    animWrapper = createDesktopDescriptionCard(currentPostData.title, currentPostData.subheading, currentPostData.description);
                     wrapper.appendChild(animWrapper);
-                    card = animWrapper.querySelector('.lightbox-desc-card'); // Re-acquire card
+                    card = animWrapper.querySelector('.lightbox-desc-card'); 
                 } else if (!card && animWrapper) { 
-                    // This case implies animWrapper is empty or malformed, recreate card within it
                     while (animWrapper.firstChild) animWrapper.removeChild(animWrapper.firstChild);
-                    const newCardElement = createDesktopDescriptionCard(description).querySelector('.lightbox-desc-card');
+                    const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
+                    const newCardElement = createDesktopDescriptionCard(currentPostData.title, currentPostData.subheading, currentPostData.description).querySelector('.lightbox-desc-card');
                     animWrapper.appendChild(newCardElement);
                     card = newCardElement;
                 } 
-                // No specific need to check for contentElement missing from card, as card itself holds text
-
-                // Ensure text content is set on the card itself
+                
+                // Ensure text content is set on the card (now handled by creation, but good for updates if we add that)
                 if (card) {
-                    card.textContent = description || '';
+                    // If card exists, but children are missing, or text needs update (e.g. if desc could change dynamically)
+                    // This part might need enhancement if card content can change without full recreation
+                    const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
+                    clearChildren(card); // Clear old single text node if any
+                    if (currentPostData.title) card.appendChild(createEl('div', 'card-title', currentPostData.title));
+                    if (currentPostData.subheading) card.appendChild(createEl('div', 'card-subheading', currentPostData.subheading));
+                    if (currentPostData.description) card.appendChild(createEl('div', 'card-body', currentPostData.description));
                 }
                 
                 if (animWrapper) {
@@ -288,6 +309,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mediaFaded && descCardFadedOut) { // Only proceed if both exit animations are complete
                 while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild); // Clear previous content
 
+                // Remove old media type classes and add new one before appending media
+                wrapper.classList.remove('image-media-active', 'video-media-active');
+                if (type === 'video') {
+                    wrapper.classList.add('video-media-active');
+                } else if (type === 'image') {
+                    wrapper.classList.add('image-media-active');
+                }
+
                 // --- Insert new media (image or video) ---
                 let newMedia = createLightboxMediaElement(type, src);
 
@@ -318,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         void wrapper.offsetHeight; // Force reflow
                     }
 
-                    const newAnimWrapper = createDesktopDescriptionCard(desktopDescription);
+                    const newAnimWrapper = createDesktopDescriptionCard(title, subheading, desktopDescription);
                     wrapper.appendChild(newAnimWrapper);
                     
                     void newAnimWrapper.offsetHeight; // Ensure this line is present

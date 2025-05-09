@@ -353,6 +353,40 @@ body {
     body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-desc-card {
       /* width: 600px; */ /* No longer fixed, relies on 95% of its parent */
     }
+
+    /* Styling for title, subheading, body within the description card */
+    .lightbox-media-wrapper .lightbox-desc-card .card-title {
+        font-size: 1.6rem; /* Larger for title */
+        font-weight: 700;
+        color: inherit; /* Inherit from .lightbox-desc-card which is #222 !important */
+        margin-bottom: 8px;
+        line-height: 1.2;
+    }
+
+    .lightbox-media-wrapper .lightbox-desc-card .card-subheading {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: inherit; 
+        margin-bottom: 12px;
+        line-height: 1.3;
+        opacity: 0.85; /* Slightly less prominent */
+    }
+
+    .lightbox-media-wrapper .lightbox-desc-card .card-body {
+        font-size: 0.95rem;
+        font-weight: 400;
+        color: inherit;
+        line-height: 1.6;
+        /* width: 90%; */ /* REMOVED */
+        /* margin-left: 0; */ /* REMOVED */
+        /* margin-right: auto; */ /* REMOVED */
+        /* white-space: pre-wrap; */ /* If you want to preserve whitespace/newlines from data-description */
+    }
+
+    /* Specific padding for desc card when media is a video */
+    .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
+        padding-right: 64px;
+    }
 }
 
 /* Hide navigation buttons and hint on mobile */
@@ -424,7 +458,7 @@ body {
   max-height: 100%; /* Max height of its allocated space in the flex container */
   min-width: 0; /* Necessary for flex items */
   min-height: 0; /* Necessary for flex items */
-  flex: 0 1 auto; /* MODIFIED: No grow, can shrink, basis is auto */
+  flex: 0 0 auto; /* CHANGED: No grow, NO SHRINK, basis is auto */
   /* border-radius: 20px; */ /* Ensured by #lightbox-content img/video rule */
   box-shadow: 0 2px 16px rgba(0,0,0,0.18);
   margin-right: 0; /* Was already 0, ensure it stays for spacing if desc card is next */
@@ -456,7 +490,7 @@ body {
   transform: translateX(-40px); 
   transition: opacity 0.3s, transform 0.3s; /* Keep existing animation for appearing */
   overflow: auto; /* For scrolling text content */
-  padding: 15px; /* Add some padding for the text */
+  padding: 24px; /* CHANGED from 15px - more padding for the text */
   text-align: left; /* Ensure text is left-aligned */
   white-space: normal; /* Ensure text wraps */
   word-break: break-word; /* Ensure long words break */
