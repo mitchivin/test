@@ -375,16 +375,16 @@ body {
     /* No strict height, let it fit content */
   }
   #lightbox-content {
-    border: 4px solid #2ecc71 !important; /* GREEN: content */
+    /* border: 4px solid #2ecc71 !important;  GREEN: content */
   }
   .lightbox-media-wrapper {
-    border: 4px solid #3498db !important; /* BLUE: media wrapper */
+    /* border: 4px solid #3498db !important;  BLUE: media wrapper */
   }
   .desc-card-anim-wrapper {
-    border: 4px solid #9b59b6 !important; /* PURPLE: desc card anim wrapper */
+    /* border: 4px solid #9b59b6 !important;  PURPLE: desc card anim wrapper */
   }
   .lightbox-desc-card {
-    border: 4px solid #e67e22 !important; /* ORANGE: desc card */
+    /* border: 4px solid #e67e22 !important;  ORANGE: desc card */
     background: #ecececb6 !important; /* Much lighter grey fill */
     color: #222;
     width: 90% !important; /* Only fill 90% of purple wrapper */
@@ -392,10 +392,27 @@ body {
     margin-right: auto;
   }
   .desc-card-inner-border-container {
-    border: 4px dashed #1abc9c !important; /* TEAL: inner border container */
+    border: 4px dashed #1abc9c !important; /* TEAL/GREEN: inner border container */
+    box-sizing: border-box;
+    display: flex; /* To manage padding or alignment of .desc-card-content if needed */
+    flex-direction: column;
+    justify-content: center; /* Example: center content vertically */
+    align-items: center; /* Example: center content horizontally */
+    padding: 15px; /* Add padding inside the border, adjust as needed */
+    overflow: hidden; /* Prevent content from spilling out */ 
+    border-radius: 12px; /* Optional: slightly round the corners of the inner border */
   }
   .desc-card-content {
-    border: 4px dotted #34495e !important; /* NAVY: desc card content */
+    /* border: 4px dotted #34495e !important;  NAVY: desc card content */
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden; /* Should be scrollable if content exceeds space */
+    white-space: normal;
+    word-break: break-word;
+    width: 100%; /* Fill the inner-border-container */
+    height: 100%; /* Fill the inner-border-container */
+    text-align: left; /* Or center, depending on design */
+    /* Remove direct padding if it's now on desc-card-inner-border-container */
   }
   .lightbox-media-wrapper.desc-visible .desc-card-anim-wrapper {
     width: 350px;
@@ -518,20 +535,6 @@ body {
   flex-shrink: 1;
 }
 
-.desc-card-inner-border-container {
-  width: 95%;
-  height: 95%;
-  border: 1px solid white; /* White border, no fill (background transparent by default) */
-  box-sizing: border-box;
-  display: flex; /* To manage padding or alignment of .desc-card-content if needed */
-  flex-direction: column;
-  justify-content: center; /* Example: center content vertically */
-  align-items: center; /* Example: center content horizontally */
-  padding: 15px; /* Add padding inside the white border, adjust as needed */
-  overflow: hidden; /* Prevent content from spilling out */ 
-  border-radius: 12px; /* Optional: slightly round the corners of the inner border */
-}
-
 .lightbox-media-wrapper.desc-visible .lightbox-desc-card > * {
   /* This rule might need adjustment if it targets the new inner container directly 
      or if content opacity is handled differently. For now, let's assume it's okay. */
@@ -608,7 +611,7 @@ body.projects-window-maximized .desc-card-anim-wrapper {
 }
 
 .lightbox-desc-card {
-  border: 4px solid #e67e22 !important; /* ORANGE: desc card */
+  /* border: 4px solid #e67e22 !important;  ORANGE: desc card */
   background: #ecececb6 !important; /* Much lighter grey fill */
   color: #222;
   width: 90% !important; /* Only fill 90% of purple wrapper */

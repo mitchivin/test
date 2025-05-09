@@ -126,15 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const descCard = document.createElement('div');
                 descCard.className = 'lightbox-desc-card';
 
-                const innerBorderContainer = document.createElement('div');
-                innerBorderContainer.className = 'desc-card-inner-border-container';
-
                 const descContent = document.createElement('div');
                 descContent.className = 'desc-card-content desc-content-visible'; // Assuming content is visible if card is
                 descContent.textContent = desktopDescriptionText || ''; 
 
-                innerBorderContainer.appendChild(descContent);
-                descCard.appendChild(innerBorderContainer);
+                descCard.appendChild(descContent);
                 animWrapper.appendChild(descCard);
                 wrapper.appendChild(animWrapper); // Append the whole description structure next to the media
 
@@ -371,8 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('[Toggle Desktop] Showing: .desc-visible is NOT on wrapper. Adding it.');
                 const animWrapper = wrapper.querySelector('.desc-card-anim-wrapper');
                 let card = animWrapper ? animWrapper.querySelector('.lightbox-desc-card') : null;
-                let innerBorderContainer = card ? card.querySelector('.desc-card-inner-border-container') : null;
-                let contentElement = innerBorderContainer ? innerBorderContainer.querySelector('.desc-card-content') : null;
+                let contentElement = card ? card.querySelector('.desc-card-content') : null;
 
                 // Ensure the full structure exists if it was not there or got cleared
                 if (!animWrapper) {
@@ -382,13 +377,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     newAnimWrapper.className = 'desc-card-anim-wrapper';
                     card = document.createElement('div');
                     card.className = 'lightbox-desc-card';
-                    innerBorderContainer = document.createElement('div');
-                    innerBorderContainer.className = 'desc-card-inner-border-container';
                     contentElement = document.createElement('div');
                     contentElement.className = 'desc-card-content desc-content-visible';
                     
-                    innerBorderContainer.appendChild(contentElement);
-                    card.appendChild(innerBorderContainer);
+                    card.appendChild(contentElement);
                     newAnimWrapper.appendChild(card);
                     wrapper.appendChild(newAnimWrapper); // Append to the main media wrapper
                 }
@@ -397,16 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.className = 'lightbox-desc-card';
                     animWrapper.appendChild(card);
                 }
-                if (!innerBorderContainer && card) {
-                    innerBorderContainer = document.createElement('div');
-                    innerBorderContainer.className = 'desc-card-inner-border-container';
-                    card.innerHTML = ''; // Clear card before adding new structure
-                    card.appendChild(innerBorderContainer);
-                }
-                if (!contentElement && innerBorderContainer) {
+                if (!contentElement && card) {
                     contentElement = document.createElement('div');
                     contentElement.className = 'desc-card-content desc-content-visible';
-                    innerBorderContainer.appendChild(contentElement);
+                    card.appendChild(contentElement);
                 }
 
                 if (contentElement && description) {
@@ -556,19 +542,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     newDescCard.className = 'lightbox-desc-card';
                     
                     // Create the new inner border container
-                    const newInnerBorderContainer = document.createElement('div');
-                    newInnerBorderContainer.className = 'desc-card-inner-border-container';
-
                     const newDescContent = document.createElement('div');
                     newDescContent.className = 'desc-card-content desc-content-visible';
                     newDescContent.textContent = desktopDescription || ''; 
                     
-                    // Nest content -> innerBorderContainer -> newDescCard -> newAnimWrapper
-                    newInnerBorderContainer.appendChild(newDescContent);
-                    newDescCard.appendChild(newInnerBorderContainer);
+                    // Nest content -> newDescCard -> newAnimWrapper
+                    newDescCard.appendChild(newDescContent);
                     newAnimWrapper.appendChild(newDescCard);
                     wrapper.appendChild(newAnimWrapper);
-                    console.log('[Nav In] New anim wrapper, card, inner border, and content added to DOM. Wrapper element:', wrapper);
+                    console.log('[Nav In] New anim wrapper, card, and content added to DOM. Wrapper element:', wrapper);
 
                     void newAnimWrapper.offsetHeight;
                     console.log('[Nav In] Reflow forced for newAnimWrapper.');
