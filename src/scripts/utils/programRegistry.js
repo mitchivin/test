@@ -185,18 +185,18 @@ const programData = {
     toolbarConfig: {
       buttons: [
         {
-          key: "back",
+          key: "previous",
           enabled: false,
           icon: "./assets/gui/toolbar/back.webp",
-          text: "Back",
-          action: "navigateBack",
+          text: "Previous",
+          action: "navigatePrevious",
         },
         {
-          key: "forward",
+          key: "next",
           enabled: false,
           icon: "./assets/gui/toolbar/forward.webp",
-          text: "Forward",
-          action: "navigateForward",
+          text: "Next",
+          action: "navigateNext",
         },
         {
           key: "up",
@@ -384,25 +384,25 @@ const programData = {
     toolbarConfig: {
       buttons: [
         {
-          key: "back",
-          enabled: false,
-          icon: "./assets/gui/toolbar/back.webp",
-          text: "Back",
-          action: "navigateBack",
-        },
-        {
-          key: "forward",
-          enabled: false,
-          icon: "./assets/gui/toolbar/forward.webp",
-          text: "Forward",
-          action: "navigateForward",
-        },
-        {
           key: "home",
           enabled: false,
           icon: "./assets/gui/toolbar/home.webp",
           text: "Home",
           action: "navigateHome",
+        },
+        {
+          key: "previous",
+          enabled: true,
+          icon: "./assets/gui/toolbar/back.webp",
+          text: "Previous",
+          action: "navigatePrevious",
+        },
+        {
+          key: "next",
+          enabled: true,
+          icon: "./assets/gui/toolbar/forward.webp",
+          text: "Next",
+          action: "navigateNext",
         },
         { type: "separator" },
         {

@@ -233,110 +233,15 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   if (isBottom) toolbarRow.classList.add("toolbar-bottom");
   const isMobile = isMobileDevice && isMobileDevice();
   let buttons = toolbarConfig.buttons;
-  if (isMobile && windowId === "resume-window") {
-    buttons = buttons.filter(
-      (btn) => !["actual-size", "zoom-in", "zoom-out"].includes(btn.key),
-    );
-  }
-  buttons.forEach((buttonConfig) => {
-    // On mobile, skip dividers except for internet window (My Projects)
-    if (
-      isMobile &&
-      buttonConfig.type === "separator" &&
-      windowId !== "internet-window"
-    )
-      return; // Skip dividers on mobile except My Projects
-    // On mobile, skip disabled buttons except for back in internet window
-    if (
-      isMobile &&
-      !buttonConfig.enabled &&
-      !(
-        (windowId === "internet-window" && buttonConfig.key === "back") ||
-        (windowId === "internet-window" && buttonConfig.key === "home")
-      )
-    )
-      return;
-    // On mobile, skip forward button in internet window
-    if (
-      isMobile &&
-      windowId === "internet-window" &&
-      buttonConfig.key === "forward"
-    )
-      return;
-    if (buttonConfig.type === "separator") {
-      const separator = document.createElement("div");
-      separator.className = "vertical_line";
-      toolbarRow.appendChild(separator);
-    } else if (buttonConfig.key) {
-      if (
-        isMobile &&
-        !buttonConfig.enabled &&
-        !(
-          windowId === "internet-window" &&
-          (buttonConfig.key === "back" || buttonConfig.key === "forward" || buttonConfig.key === "home")
-        )
-      )
-        return;
-      // Add 'Home' text to home button on mobile
-      if (isMobile && buttonConfig.key === "home") {
-        buttonConfig.text = "Home";
-      }
-      // In About Me window on mobile, replace 'photos' and 'videos' buttons with new ones using correct icons and actions
-      if (isMobile && windowId === "about-window") {
-        if (buttonConfig.key === "photos") {
-          buttonConfig = {
-            key: "projects",
-            enabled: true,
-            icon: "./assets/gui/desktop/internet.webp", // My Projects icon
-            text: "My Projects",
-            action: "openProjects",
-          };
-        } else if (buttonConfig.key === "videos") {
-          buttonConfig = {
-            key: "resume",
-            enabled: true,
-            icon: "./assets/gui/desktop/resume.webp", // My Resume icon
-            text: "My Resume",
-            action: "openResume",
-          };
-        }
-      }
-      // Rename save button to Download everywhere
-      if (buttonConfig.key === "save") {
-        buttonConfig.text = "Download";
-      }
-      // Use Contact Me program icon for the contact button
-      if (buttonConfig.key === "email") {
-        buttonConfig.icon = "./assets/gui/desktop/contact.webp";
-      }
-      const buttonDiv = document.createElement("div");
-      buttonDiv.className = `toolbar-button ${buttonConfig.key}`;
-      if (!buttonConfig.enabled) buttonDiv.classList.add("disabled");
-      // Always set data-action for home button in internet-window
-      if (buttonConfig.key === "home" && windowId === "internet-window") {
-        buttonDiv.setAttribute("data-action", "navigateHome");
-      } else if (buttonConfig.action) {
-        buttonDiv.setAttribute("data-action", buttonConfig.action);
-      }
-      let buttonContent = "";
-      if (buttonConfig.icon) {
-        buttonContent += `<img alt="${buttonConfig.key}" width="25" height="25" src="${buttonConfig.icon}" />`;
-      }
-      if (buttonConfig.text) {
-        buttonContent += `<span>${buttonConfig.text}</span>`;
-      }
-      buttonDiv.innerHTML = buttonContent;
-      toolbarRow.appendChild(buttonDiv);
-    }
-  });
-  // --- Add divider and close button on mobile only ---
+
+  // --- Add close button as first item on mobile only ---
+  let mobileCloseBtn = null;
   if (isMobile) {
-    // Close button (match other toolbar buttons)
-    const closeBtn = document.createElement("div");
-    closeBtn.className = "toolbar-button toolbar-close-button";
-    closeBtn.setAttribute("aria-label", "Close");
-    closeBtn.innerHTML = `<img alt=\"close\" width=\"25\" height=\"25\" src=\"assets/gui/toolbar/delete.webp\" /><span>Close</span>`;
-    closeBtn.addEventListener("click", function (e) {
+    mobileCloseBtn = document.createElement("div");
+    mobileCloseBtn.className = "toolbar-button toolbar-close-button";
+    mobileCloseBtn.setAttribute("aria-label", "Close");
+    mobileCloseBtn.innerHTML = `<img alt=\"close\" width=\"25\" height=\"25\" src=\"assets/gui/toolbar/delete.webp\" /><span>Close</span>`;
+    mobileCloseBtn.addEventListener("click", function (e) {
       e.stopPropagation();
       // Find the parent window element and dispatch the close event
       let parent = toolbarWrapper.parentElement;
@@ -349,36 +254,101 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
         );
       }
     });
-    // Add the close button as the first item on the left for mobile
-    toolbarRow.insertBefore(closeBtn, toolbarRow.firstChild);
-
-    // Insert divider after the first group of buttons (left group)
+    toolbarRow.appendChild(mobileCloseBtn);
+    // Add divider after close button
     const firstDivider = document.createElement("div");
     firstDivider.className = "vertical_line";
-    // Find the first non-disabled, non-separator button after the left group
-    // For simplicity, insert after the first group (before the first separator or after the last left button)
-    // We'll insert after the first group of buttons (before the first separator or at index 2)
-    const toolbarButtons = Array.from(toolbarRow.children).filter((el) =>
-      el.classList.contains("toolbar-button"),
-    );
-    if (toolbarButtons.length > 0) {
-      // Insert after the first group (after the first button)
-      toolbarRow.insertBefore(
-        firstDivider,
-        toolbarButtons[1] || toolbarRow.children[0].nextSibling,
-      );
-    }
+    toolbarRow.appendChild(firstDivider);
   }
-  if (isMobile && windowId === "internet-window") {
-    // Find the forward button
-    const forwardBtn = toolbarRow.querySelector(".toolbar-button.forward");
-    const homeBtn = toolbarRow.querySelector(".toolbar-button.home");
-    if (forwardBtn && homeBtn) {
-      const divider = document.createElement("div");
-      divider.className = "vertical_line";
-      toolbarRow.insertBefore(divider, homeBtn);
+
+  // Render all toolbar buttons and dividers in order
+  buttons.forEach((buttonConfig) => {
+    // On mobile, skip the Home button in the My Projects window
+    if (isMobile && windowId === "internet-window" && buttonConfig.key === "home") return;
+    if (buttonConfig.type === "separator") {
+      const separator = document.createElement("div");
+      separator.className = "vertical_line";
+      toolbarRow.appendChild(separator);
+    } else if (buttonConfig.key) {
+      const buttonDiv = document.createElement("div");
+      buttonDiv.className = `toolbar-button ${buttonConfig.key}`;
+      if (!buttonConfig.enabled) buttonDiv.classList.add("disabled");
+      if (buttonConfig.key === "home" && windowId === "internet-window") {
+        buttonDiv.setAttribute("data-action", "navigateHome");
+      } else if (buttonConfig.action) {
+        buttonDiv.setAttribute("data-action", buttonConfig.action);
+      }
+      let buttonContent = "";
+      if (buttonConfig.icon) {
+        buttonContent += `<img alt=\"${buttonConfig.key}\" width=\"25\" height=\"25\" src=\"${buttonConfig.icon}\" />`;
+      }
+      if (buttonConfig.text) {
+        buttonContent += `<span>${buttonConfig.text}</span>`;
+      }
+      buttonDiv.innerHTML = buttonContent;
+      toolbarRow.appendChild(buttonDiv);
     }
-  }
+  });
+
   toolbarWrapper.appendChild(toolbarRow);
+
+  // --- Mobile: Listen for lightbox-state messages to toggle close/home button ---
+  if (isMobile && windowId === "internet-window" && mobileCloseBtn) {
+    let isHomeMode = false;
+    function setToHomeMode() {
+      isHomeMode = true;
+      mobileCloseBtn.innerHTML = `<img alt=\"home\" width=\"25\" height=\"25\" src=\"assets/gui/toolbar/home.webp\" /><span>Home</span>`;
+      mobileCloseBtn.setAttribute('aria-label', 'Home');
+    }
+    function setToCloseMode() {
+      isHomeMode = false;
+      mobileCloseBtn.innerHTML = `<img alt=\"close\" width=\"25\" height=\"25\" src=\"assets/gui/toolbar/delete.webp\" /><span>Close</span>`;
+      mobileCloseBtn.setAttribute('aria-label', 'Close');
+    }
+    // Initial mode is close
+    setToCloseMode();
+    // Remove all previous click listeners
+    mobileCloseBtn.replaceWith(mobileCloseBtn.cloneNode(true));
+    // Re-attach reference
+    mobileCloseBtn = toolbarRow.querySelector('.toolbar-close-button');
+    // Attach a single click handler that checks mode
+    mobileCloseBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (isHomeMode) {
+        // Only close the lightbox (send navigateHome to iframe)
+        let parent = toolbarWrapper.parentElement;
+        while (parent && !parent.classList.contains("app-window")) {
+          parent = parent.parentElement;
+        }
+        if (parent) {
+          const iframe = parent.querySelector('iframe');
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: 'toolbar-action', action: 'navigateHome' }, '*');
+          }
+        }
+      } else {
+        // Close the window
+        let parent = toolbarWrapper.parentElement;
+        while (parent && !parent.classList.contains("app-window")) {
+          parent = parent.parentElement;
+        }
+        if (parent) {
+          parent.dispatchEvent(
+            new CustomEvent("request-close-window", { bubbles: false }),
+          );
+        }
+      }
+    });
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'lightbox-state') {
+        if (event.data.open) {
+          setToHomeMode();
+        } else {
+          setToCloseMode();
+        }
+      }
+    });
+  }
+
   return toolbarWrapper;
 }

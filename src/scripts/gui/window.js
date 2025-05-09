@@ -78,10 +78,14 @@ class WindowTemplates {
         windowId,
         programConfig && programConfig.id === "my-pictures-window"
       );
-      // If this is the My Projects (internet) window, disable the view-description button by default
+      // If this is the My Projects (internet) window, disable the view-description, back, and forward buttons by default
       if (windowId === "internet-window" && toolbarWrapper) {
         const viewDescBtn = toolbarWrapper.querySelector('.toolbar-button.view-description');
         if (viewDescBtn) viewDescBtn.classList.add('disabled');
+        const backBtn = toolbarWrapper.querySelector('.toolbar-button.previous');
+        if (backBtn) backBtn.classList.add('disabled');
+        const forwardBtn = toolbarWrapper.querySelector('.toolbar-button.next');
+        if (forwardBtn) forwardBtn.classList.add('disabled');
       }
     }
 
@@ -151,6 +155,8 @@ export default class WindowManager {
     this.cascadeColumn = 0;
     this.cascadeRow = 0;
 
+    this.lastInteractionTimes = {}; // To store timestamps for throttling
+
     this._setupGlobalHandlers();
     this._subscribeToEvents();
 
@@ -162,8 +168,8 @@ export default class WindowManager {
       }
     }
 
-    // Listen for messages from iframes to enable/disable the Home button
-    window.addEventListener('message', function(event) {
+    // Listen for messages from iframes
+    window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'set-home-enabled') {
             const homeButton = document.querySelector('.toolbar-button.home');
             if (homeButton) {
@@ -174,14 +180,54 @@ export default class WindowManager {
                 }
             }
         }
-        // Handle lightbox open/close for enabling/disabling view-description
+        
         if (event.data && event.data.type === 'lightbox-state') {
-            const viewDescBtn = document.querySelector('.toolbar-button.view-description');
+            const projectsWindow = this.windows['internet-window'];
+            let viewDescBtn, backBtn, forwardBtn;
+
+            if (projectsWindow) {
+                 viewDescBtn = projectsWindow.querySelector('.toolbar-button.view-description');
+                 backBtn = projectsWindow.querySelector('.toolbar-button.previous');
+                 forwardBtn = projectsWindow.querySelector('.toolbar-button.next');
+            } else {
+                viewDescBtn = document.querySelector('.toolbar-button.view-description');
+                backBtn = document.querySelector('.toolbar-button.previous');
+                forwardBtn = document.querySelector('.toolbar-button.next');
+            }
+
             if (viewDescBtn) {
-                if (event.data.open) {
-                    viewDescBtn.classList.remove('disabled');
-                } else {
-                    viewDescBtn.classList.add('disabled');
+                viewDescBtn.classList.toggle('disabled', !event.data.open);
+            }
+            if (backBtn) {
+                backBtn.classList.toggle('disabled', !event.data.open);
+            }
+            if (forwardBtn) {
+                forwardBtn.classList.toggle('disabled', !event.data.open);
+            }
+        }
+
+        if (event.data && event.data.type === 'description-state') {
+            let sourceWindowElement = null;
+            for (const windowId in this.windows) {
+                const winElement = this.windows[windowId];
+                const iframe = winElement.querySelector('iframe');
+                if (iframe && iframe.contentWindow === event.source) {
+                    sourceWindowElement = winElement;
+                    break;
+                }
+            }
+
+            if (sourceWindowElement && sourceWindowElement.id === 'internet-window') {
+                const viewDescButton = sourceWindowElement.querySelector('.toolbar-button.view-description');
+                if (viewDescButton) {
+                    const textSpan = viewDescButton.querySelector('span');
+                    if (event.data.open) {
+                        if (textSpan) textSpan.textContent = 'Hide Description';
+                        viewDescButton.setAttribute('aria-label', 'Hide Description');
+                    } else {
+                        if (textSpan) textSpan.textContent = 'View Description';
+                        viewDescButton.setAttribute('aria-label', 'View Description');
+                    }
                 }
             }
         }
@@ -635,6 +681,52 @@ export default class WindowManager {
    * @returns {void}
    */
   _handleToolbarAction(action, windowElement) {
+    const windowId = windowElement.id; // Get the window ID for specific throttling
+
+    // Throttle 'viewDescription' action for 'internet-window' (My Projects)
+    if (action === 'viewDescription' && windowId === 'internet-window') {
+      const now = Date.now();
+      const buttonKey = `${windowId}-${action}`;
+      const viewDescButton = windowElement.querySelector('.toolbar-button.view-description'); // Get the button element
+
+      if (!this.lastInteractionTimes[buttonKey]) {
+        this.lastInteractionTimes[buttonKey] = 0;
+      }
+
+      const timeSinceLastClick = now - this.lastInteractionTimes[buttonKey];
+      const throttleDuration = 500; // Changed from 1000ms to 500ms (0.5 seconds)
+
+      if (timeSinceLastClick < throttleDuration) {
+        if (viewDescButton) {
+          viewDescButton.classList.add('disabled');
+          // Re-enable after the throttle period for this specific click has passed
+          setTimeout(() => {
+            // Only re-enable if another click hasn't re-disabled it in the meantime
+            const currentTime = Date.now();
+            if (currentTime - this.lastInteractionTimes[buttonKey] >= throttleDuration) {
+                 if (viewDescButton) viewDescButton.classList.remove('disabled');
+            }
+          }, throttleDuration - timeSinceLastClick);
+        }
+        // console.log(`Action "${action}" on window "${windowId}" throttled.`);
+        return; // Ignore the click if it's too soon
+      }
+      
+      // Not throttled, proceed with action but disable button for the throttle duration
+      this.lastInteractionTimes[buttonKey] = now; // Update the timestamp
+      if (viewDescButton) {
+        viewDescButton.classList.add('disabled');
+        setTimeout(() => {
+            // Only re-enable if another click hasn't re-disabled it in the meantime
+            // This check is important if the user clicks again right before this timeout fires.
+            const currentTime = Date.now();
+            if (currentTime - this.lastInteractionTimes[buttonKey] >= throttleDuration) {
+                 if (viewDescButton) viewDescButton.classList.remove('disabled');
+            }
+        }, throttleDuration);
+      }
+    }
+
     // const programName = windowElement.getAttribute("data-program"); // Context if needed
 
     switch (action) {
@@ -657,14 +749,8 @@ export default class WindowManager {
             link.click();
             document.body.removeChild(link);
             break;
-        case 'navigateBack':
-        case 'navigateForward':
-        case 'navigateHome':
-        // case 'sendMessage': // Will be handled differently now
-        case 'newMessage':
-        case 'previousImage':
-        case 'toggleSlideshow':
-        case 'nextImage':
+        case 'navigatePrevious':
+        case 'navigateNext':
             const iframeForGenericAction = windowElement.querySelector('iframe');
             if (iframeForGenericAction && iframeForGenericAction.contentWindow) {
                 iframeForGenericAction.contentWindow.postMessage({ type: 'toolbar-action', action: action }, '*');

@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} poster - The poster URL for the video.
      */
     function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, poster, fadeInFast) {
+        console.log('OPENLIGHTBOX CALLED', {type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, poster, fadeInFast});
         // Pause all grid videos
         document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
 
@@ -196,9 +197,28 @@ document.addEventListener('DOMContentLoaded', () => {
             lightboxContent.appendChild(wrapper);
             wrapper.appendChild(media);
             media.style.cursor = '';
+            // Desktop: add .lightbox-desc-card as sibling if description is present
+            console.log('isDesktop()', isDesktop());
+            if (isDesktop()) {
+                const descCard = document.createElement('div');
+                descCard.className = 'lightbox-desc-card';
+                const descContent = document.createElement('div');
+                descContent.className = 'desc-card-content';
+                descContent.textContent = desktopDescriptionText || '';
+                descCard.appendChild(descContent);
+                wrapper.appendChild(descCard);
+                console.log('DESC CARD ADDED', {wrapper, descCard, descContent, lightboxContent: lightboxContent.innerHTML});
+                wrapper.classList.add('desc-visible');
+                descCard.classList.add('show');
+                descContent.classList.add('desc-content-visible');
+                setDescCardHeight(wrapper);
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                }
+            }
         }
 
-        // Notify parent that lightbox is open
+        // Notify parent that lightbox is open (enable back/forward/desc)
         if (window.parent && window.parent !== window) {
             window.parent.postMessage({ type: 'lightbox-state', open: true }, '*');
         }
@@ -265,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
         setHomeButtonEnabledInParent(false);
 
-        // Notify parent that lightbox is closed
+        // Notify parent that lightbox is closed (disable back/forward/desc)
         if (window.parent && window.parent !== window) {
             window.parent.postMessage({ type: 'lightbox-state', open: false }, '*');
         }
@@ -280,6 +300,152 @@ document.addEventListener('DOMContentLoaded', () => {
         if (index >= allPosts.length) index = 0;
         const post = allPosts[index];
         if (!post) return;
+        // If direction is nonzero (toolbar/cycle), do a robust crossfade
+        if (direction && lightboxContent) {
+            const oldMedia = lightboxContent.querySelector('img, video');
+            const oldOverlay = lightboxContent.querySelector('.lightbox-caption-overlay');
+            let mediaFaded = false;
+            let overlayFaded = false;
+            function tryReplace() {
+                if ((mediaFaded || !oldMedia) && (overlayFaded || !oldOverlay)) {
+                    // Remove old media
+                    if (oldMedia && oldMedia.parentNode) oldMedia.parentNode.removeChild(oldMedia);
+                    // Remove old overlay
+                    if (oldOverlay && oldOverlay.parentNode) oldOverlay.parentNode.removeChild(oldOverlay);
+                    // Insert new media (opacity 0)
+                    const type = post.dataset.type;
+                    const src = post.dataset.src;
+                    const poster = post.dataset.poster;
+                    let newMedia;
+                    if (type === 'image') {
+                        newMedia = document.createElement('img');
+                        newMedia.src = src;
+                        newMedia.alt = 'Project Lightbox Image';
+                    } else if (type === 'video') {
+                        newMedia = document.createElement('video');
+                        newMedia.src = src;
+                        newMedia.controls = true;
+                        newMedia.autoplay = true;
+                        newMedia.loop = true;
+                        newMedia.alt = 'Project Lightbox Video';
+                        newMedia.setAttribute('playsinline', '');
+                        if (poster) newMedia.poster = poster;
+                    }
+                    if (!newMedia) return;
+                    newMedia.style.opacity = '0';
+                    newMedia.style.transition = 'opacity 220ms cubic-bezier(0.4,0,0.2,1)';
+                    lightboxContent.appendChild(newMedia);
+                    setTimeout(() => {
+                        newMedia.style.opacity = '1';
+                    }, 10);
+                    // Update details (title, subheading, description)
+                    const title = post.dataset.title;
+                    const subheading = post.dataset.subheading;
+                    const desktopDescription = post.dataset.description;
+                    // Remove old details
+                    const existingTitle = lightboxDetails.querySelector('#lightbox-title');
+                    if (existingTitle) lightboxDetails.removeChild(existingTitle);
+                    const existingSubheading = lightboxDetails.querySelector('#lightbox-subheading');
+                    if (existingSubheading) lightboxDetails.removeChild(existingSubheading);
+                    const existingDescription = lightboxDetails.querySelector('#lightbox-description');
+                    if (existingDescription) lightboxDetails.removeChild(existingDescription);
+                    // Add new details
+                    if (title) {
+                        const titleElement = document.createElement('div');
+                        titleElement.id = 'lightbox-title';
+                        titleElement.textContent = title;
+                        lightboxDetails.appendChild(titleElement);
+                    }
+                    if (subheading) {
+                        const subheadingElement = document.createElement('div');
+                        subheadingElement.id = 'lightbox-subheading';
+                        subheadingElement.textContent = subheading;
+                        const titleEl = lightboxDetails.querySelector('#lightbox-title');
+                        if (titleEl && titleEl.nextSibling) {
+                            lightboxDetails.insertBefore(subheadingElement, titleEl.nextSibling);
+                        } else {
+                            lightboxDetails.appendChild(subheadingElement);
+                        }
+                    }
+                    if (desktopDescription) {
+                        const descriptionElement = document.createElement('div');
+                        descriptionElement.id = 'lightbox-description';
+                        descriptionElement.textContent = desktopDescription;
+                        const subheadingEl = lightboxDetails.querySelector('#lightbox-subheading');
+                        const titleEl = lightboxDetails.querySelector('#lightbox-title');
+                        if (subheadingEl && subheadingEl.nextSibling) {
+                            lightboxDetails.insertBefore(descriptionElement, subheadingEl.nextSibling);
+                        } else if (titleEl && titleEl.nextSibling) {
+                            lightboxDetails.insertBefore(descriptionElement, titleEl.nextSibling);
+                        } else {
+                            lightboxDetails.appendChild(descriptionElement);
+                        }
+                    }
+
+                    // --- START MODIFIED LOGIC FOR WRAPPER AND DESC CARD ---
+                    // 1. Remove any old wrapper from the previous item
+                    const existingOldWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
+                    if (existingOldWrapper) {
+                        existingOldWrapper.remove();
+                    }
+
+                    // 2. The newMedia is already in lightboxContent. Now create its wrapper.
+                    if (newMedia) { // Ensure newMedia exists
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'lightbox-media-wrapper';
+                        wrapper.style.display = 'inline-block'; // from openLightbox
+                        wrapper.style.position = 'relative';    // from openLightbox
+
+                        // Append new wrapper to lightboxContent, then move newMedia into the new wrapper
+                        lightboxContent.appendChild(wrapper);
+                        wrapper.appendChild(newMedia);
+
+                        // 3. If isDesktop() and the new item has a desktopDescription, create and append the 'lightbox-desc-card'
+                        if (isDesktop() && desktopDescription) { // desktopDescription is for the current item
+                            const descCard = document.createElement('div');
+                            descCard.className = 'lightbox-desc-card';
+                            const descContent = document.createElement('div');
+                            descContent.className = 'desc-card-content';
+                            descContent.textContent = desktopDescription; // Use the new item's description
+                            descCard.appendChild(descContent);
+                            wrapper.appendChild(descCard);
+                        }
+                    }
+                    // --- END MODIFIED LOGIC ---
+
+                    currentLightboxIndex = index;
+                    // Explicitly notify parent that the new item's description is initially closed
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: false }, '*');
+                    }
+                }
+            }
+            if (oldMedia) {
+                oldMedia.style.transition = 'opacity 180ms cubic-bezier(0.4,0,0.2,1)';
+                oldMedia.style.opacity = '0';
+                oldMedia.addEventListener('transitionend', function onFadeOut(e) {
+                    if (e.target !== oldMedia) return;
+                    oldMedia.removeEventListener('transitionend', onFadeOut);
+                    mediaFaded = true;
+                    tryReplace();
+                });
+            } else {
+                mediaFaded = true;
+            }
+            if (oldOverlay && oldOverlay.classList.contains('show')) {
+                oldOverlay.classList.remove('show');
+                oldOverlay.addEventListener('transitionend', function onOverlayFade(e) {
+                    if (e.target !== oldOverlay) return;
+                    oldOverlay.removeEventListener('transitionend', onOverlayFade);
+                    overlayFaded = true;
+                    tryReplace();
+                });
+            } else {
+                overlayFaded = true;
+            }
+            return;
+        }
+        // Default: no direction or no media, use old logic
         if (!direction || !animate || !lightboxContent) {
             currentLightboxIndex = index;
             const type = post.dataset.type;
@@ -295,8 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (lightboxContent) {
                 lightboxContent.style.transform = 'translateX(0)';
             }
-            // Fade in new post (always apply now)
-            fadeInNewPost(); 
+            fadeInNewPost();
             return;
         }
         // Two-step animation for swipe
@@ -319,7 +484,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transform = 'translateX(0)';
-                // Fade in new post (always apply now)
                 fadeInNewPost();
             }, 20);
         }, 350);
@@ -846,6 +1010,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 post.classList.remove('maximized');
             }
         });
+
+        // Add/remove class on body for general maximized styling
+        if (maximized) {
+            document.body.classList.add('projects-window-maximized');
+        } else {
+            document.body.classList.remove('projects-window-maximized');
+        }
+
         if (isMaximized) {
             cleanupIntersectionObserver();
             gridVideos.forEach(video => {
@@ -876,9 +1048,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeLightbox = closeLightbox;
 
     // --- Desktop Lightbox Navigation Buttons & Hint ---
-    const arrowLeft = document.getElementById('lightbox-arrow-left');
-    const arrowRight = document.getElementById('lightbox-arrow-right');
-    const closeBtn = document.getElementById('lightbox-close-btn');
     const desktopHint = document.getElementById('lightbox-desktop-hint');
     let desktopHintShown = false;
 
@@ -898,171 +1067,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3200);
         desktopHintShown = true;
     }
-
-    function handleNavKey(e, action) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            action();
-        }
-    }
-
-    function fadeOutCurrentMedia(callback) {
-        if (!isDesktop() || !lightboxContent) {
-            callback();
-            return;
-        }
-        const media = lightboxContent.querySelector('img, video');
-        if (!media) {
-            callback();
-            return;
-        }
-        media.style.transition = 'opacity 180ms cubic-bezier(0.4,0,0.2,1)';
-        // Force reflow
-        void media.offsetWidth;
-        media.style.opacity = '0';
-        function onTransitionEnd(e) {
-            if (e.target === media && e.propertyName === 'opacity') {
-                media.removeEventListener('transitionend', onTransitionEnd);
-                if (media.parentNode) media.parentNode.removeChild(media);
-                callback();
-            }
-        }
-        media.addEventListener('transitionend', onTransitionEnd);
-    }
-
-    // Crossfade for desktop button navigation (no fade out, just fade in new media)
-    function crossfadeToNewMedia(newIndex) {
-        if (!isDesktop() || !lightboxContent) {
-            openLightboxByIndex(newIndex, 0, true);
-            return;
-        }
-        const oldMedia = lightboxContent.querySelector('img, video');
-        const post = allPosts[newIndex];
-        if (!post) return;
-        // Prepare new media element
-        const type = post.dataset.type;
-        const src = post.dataset.src;
-        const poster = post.dataset.poster;
-        let newMedia;
-        if (type === 'image') {
-            newMedia = document.createElement('img');
-            newMedia.src = src;
-            newMedia.alt = 'Project Lightbox Image';
-        } else if (type === 'video') {
-            newMedia = document.createElement('video');
-            newMedia.src = src;
-            newMedia.controls = true;
-            newMedia.autoplay = true;
-            newMedia.loop = true;
-            newMedia.alt = 'Project Lightbox Video';
-            newMedia.setAttribute('playsinline', '');
-            if (poster) newMedia.poster = poster;
-        }
-        if (!newMedia) return;
-        newMedia.style.opacity = '0';
-        newMedia.style.transition = 'opacity 120ms cubic-bezier(0.4,0,0.2,1)';
-        // Remove old media immediately
-        if (oldMedia && oldMedia.parentNode) oldMedia.parentNode.removeChild(oldMedia);
-        lightboxContent.appendChild(newMedia);
-        // Fade in new media
-        setTimeout(() => {
-            newMedia.style.opacity = '1';
-        }, 10);
-        // Update details (title, subheading, description)
-        const title = post.dataset.title;
-        const subheading = post.dataset.subheading;
-        const desktopDescription = post.dataset.description;
-        const mobileDescription = post.dataset.mobileDescription;
-        // Remove old details
-        const existingTitle = lightboxDetails.querySelector('#lightbox-title');
-        if (existingTitle) lightboxDetails.removeChild(existingTitle);
-        const existingSubheading = lightboxDetails.querySelector('#lightbox-subheading');
-        if (existingSubheading) lightboxDetails.removeChild(existingSubheading);
-        const existingDescription = lightboxDetails.querySelector('#lightbox-description');
-        if (existingDescription) lightboxDetails.removeChild(existingDescription);
-        // Add new details
-        if (title) {
-            const titleElement = document.createElement('div');
-            titleElement.id = 'lightbox-title';
-            titleElement.textContent = title;
-            lightboxDetails.appendChild(titleElement);
-        }
-        if (subheading) {
-            const subheadingElement = document.createElement('div');
-            subheadingElement.id = 'lightbox-subheading';
-            subheadingElement.textContent = subheading;
-            const titleEl = lightboxDetails.querySelector('#lightbox-title');
-            if (titleEl && titleEl.nextSibling) {
-                lightboxDetails.insertBefore(subheadingElement, titleEl.nextSibling);
-            } else {
-                lightboxDetails.appendChild(subheadingElement);
-            }
-        }
-        if (desktopDescription) {
-            const descriptionElement = document.createElement('div');
-            descriptionElement.id = 'lightbox-description';
-            descriptionElement.textContent = desktopDescription;
-            const subheadingEl = lightboxDetails.querySelector('#lightbox-subheading');
-            const titleEl = lightboxDetails.querySelector('#lightbox-title');
-            if (subheadingEl && subheadingEl.nextSibling) {
-                lightboxDetails.insertBefore(descriptionElement, subheadingEl.nextSibling);
-            } else if (titleEl && titleEl.nextSibling) {
-                lightboxDetails.insertBefore(descriptionElement, titleEl.nextSibling);
-            } else {
-                lightboxDetails.appendChild(descriptionElement);
-            }
-        }
-        currentLightboxIndex = newIndex;
-        setupLightboxMediaOverlay(desktopDescription);
-    }
-
-    if (arrowLeft) {
-        arrowLeft.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (currentLightboxIndex !== null) {
-                crossfadeToNewMedia((currentLightboxIndex - 1 + allPosts.length) % allPosts.length);
-            }
-        });
-        arrowLeft.addEventListener('keydown', (e) => handleNavKey(e, () => {
-            if (currentLightboxIndex !== null) {
-                openLightboxByIndex(currentLightboxIndex - 1, -1, true);
-            }
-        }));
-    }
-    if (arrowRight) {
-        arrowRight.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (currentLightboxIndex !== null) {
-                crossfadeToNewMedia((currentLightboxIndex + 1) % allPosts.length);
-            }
-        });
-        arrowRight.addEventListener('keydown', (e) => handleNavKey(e, () => {
-            if (currentLightboxIndex !== null) {
-                openLightboxByIndex(currentLightboxIndex + 1, 1, true);
-            }
-        }));
-    }
-    if (closeBtn) {
-        closeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeLightbox();
-        });
-        closeBtn.addEventListener('keydown', (e) => handleNavKey(e, closeLightbox));
-    }
-
-    // Keyboard navigation (already present, but ensure hint is shown)
-    document.addEventListener('keydown', (event) => {
-        if (!isDesktop() || lightbox.style.display !== 'flex') return;
-        if (event.key === 'ArrowLeft') {
-            if (currentLightboxIndex !== null) {
-                openLightboxByIndex(currentLightboxIndex - 1, -1, true);
-            }
-        } else if (event.key === 'ArrowRight') {
-            if (currentLightboxIndex !== null) {
-                openLightboxByIndex(currentLightboxIndex + 1, 1, true);
-            }
-        }
-    });
 
     // Show hint when lightbox opens (desktop only)
     const origOpenLightbox = openLightbox;
@@ -1084,48 +1088,128 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let lightboxOverlayVisible = false;
 
-    function toggleLightboxOverlay(description, wrapper) {
+    function setDescCardHeight(wrapper) {
         if (!wrapper) return;
-        let overlay = wrapper.querySelector('.lightbox-caption-overlay');
-        if (!overlay) {
-            overlay = createLightboxOverlay(description);
-            wrapper.appendChild(overlay);
-            // Force reflow for animation
-            void overlay.offsetWidth;
-            overlay.classList.add('show');
-            overlay.style.pointerEvents = 'auto'; // Only block when shown
-            lightboxOverlayVisible = true;
-        } else {
-            if (overlay.classList.contains('show')) {
-                overlay.classList.remove('show');
-                overlay.style.pointerEvents = 'none';
-                lightboxOverlayVisible = false;
-            } else {
-                overlay.classList.add('show');
-                overlay.style.pointerEvents = 'auto';
-                lightboxOverlayVisible = true;
-            }
+        const card = wrapper.querySelector('.lightbox-desc-card');
+        const media = wrapper.querySelector('img, video');
+        if (card && media) {
+            card.style.height = media.offsetHeight + 'px';
         }
     }
 
-    // Helper to wrap media and attach overlay toggle
-    function setupLightboxMediaOverlay(description) {
-        // Remove any existing wrapper/overlay
-        const oldWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
-        if (oldWrapper) oldWrapper.remove();
-        lightboxOverlayVisible = false;
-        // Find the media element
-        const media = lightboxContent.querySelector('img, video');
-        if (media) {
-            // Create wrapper
-            const wrapper = document.createElement('div');
-            wrapper.className = 'lightbox-media-wrapper';
-            wrapper.style.display = 'inline-block';
-            wrapper.style.position = 'relative';
-            // Insert wrapper and move media inside
-            lightboxContent.appendChild(wrapper);
-            wrapper.appendChild(media);
-            media.style.cursor = '';
+    function clearDescCardHeight(wrapper) {
+        if (!wrapper) return;
+        const card = wrapper.querySelector('.lightbox-desc-card');
+        if (card) card.style.height = '';
+    }
+
+    function toggleLightboxOverlay(description, wrapper) {
+        if (!wrapper) return;
+        if (isDesktop()) {
+            let card = wrapper.querySelector('.lightbox-desc-card');
+            let content = card ? card.querySelector('.desc-card-content') : null;
+            if (!card) {
+                card = document.createElement('div');
+                card.className = 'lightbox-desc-card';
+                content = document.createElement('div');
+                content.className = 'desc-card-content';
+                content.textContent = description || '';
+                card.appendChild(content);
+                wrapper.appendChild(card);
+            }
+
+            if (wrapper.classList.contains('desc-visible')) {
+                if (content) {
+                    content.classList.remove('desc-content-visible');
+                }
+
+                wrapper.classList.remove('desc-visible');
+                if (card) card.classList.remove('show');
+
+                const onCardCollapseEnd = (eCard) => {
+                    if (eCard.target === card && eCard.propertyName === 'width') {
+                        if (card) card.removeEventListener('transitionend', onCardCollapseEnd);
+                        
+                        if (!wrapper.classList.contains('desc-visible')) {
+                            clearDescCardHeight(wrapper);
+                        }
+                        
+                        if (window.parent && window.parent !== window) {
+                            window.parent.postMessage({ type: 'description-state', open: wrapper.classList.contains('desc-visible') }, '*');
+                        }
+                    }
+                };
+                
+                if (card) {
+                    card.addEventListener('transitionend', onCardCollapseEnd);
+                } else {
+                    if (!wrapper.classList.contains('desc-visible')) {
+                       clearDescCardHeight(wrapper);
+                    }
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: wrapper.classList.contains('desc-visible') }, '*');
+                    }
+                }
+            } else {
+                if (content) content.classList.remove('desc-content-visible');
+                wrapper.classList.remove('desc-visible');
+                if (card) card.classList.remove('show');
+                
+                content.textContent = description || '';
+
+                void card.offsetWidth;
+
+                requestAnimationFrame(() => {
+                    wrapper.classList.add('desc-visible');
+                    if (card) card.classList.add('show');
+                    setDescCardHeight(wrapper);
+
+                    const onWidthTransition = (e) => {
+                        if (e.target === card && e.propertyName === 'width') {
+                            if (content) content.classList.add('desc-content-visible');
+                            if (card) card.removeEventListener('transitionend', onWidthTransition);
+                            if (window.parent && window.parent !== window) {
+                                window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                            }
+                        }
+                    };
+                    if (card) card.addEventListener('transitionend', onWidthTransition);
+                });
+            }
+        } else {
+            // Mobile: use the old overlay logic
+            let overlay = wrapper.querySelector('.lightbox-caption-overlay');
+            if (!overlay) {
+                overlay = createLightboxOverlay(description);
+                wrapper.appendChild(overlay);
+                // Force reflow for animation
+                void overlay.offsetWidth;
+                overlay.classList.add('show');
+                overlay.style.pointerEvents = 'auto'; // Only block when shown
+                lightboxOverlayVisible = true;
+                // Mobile overlay is now visible
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                }
+            } else {
+                if (overlay.classList.contains('show')) {
+                    overlay.classList.remove('show');
+                    overlay.style.pointerEvents = 'none';
+                    lightboxOverlayVisible = false;
+                    // Mobile overlay is now hidden
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: false }, '*');
+                    }
+                } else {
+                    overlay.classList.add('show');
+                    overlay.style.pointerEvents = 'auto';
+                    lightboxOverlayVisible = true;
+                    // Mobile overlay is now visible
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                    }
+                }
+            }
         }
     }
 
@@ -1140,11 +1224,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 toggleLightboxOverlay(description, wrapper);
             } else if (event.data.action === 'navigateHome') {
-                // Only close if lightbox is open
                 if (lightbox && lightbox.style.display === 'flex') {
                     closeLightbox();
                 }
+            } else if (event.data.action === 'navigatePrevious') {
+                if (lightbox && lightbox.style.display === 'flex' && allPosts.length > 0) {
+                    let newIndex = (currentLightboxIndex - 1 + allPosts.length) % allPosts.length;
+                    openLightboxByIndex(newIndex, -1, true);
+                }
+            } else if (event.data.action === 'navigateNext') {
+                if (lightbox && lightbox.style.display === 'flex' && allPosts.length > 0) {
+                    let newIndex = (currentLightboxIndex + 1) % allPosts.length;
+                    openLightboxByIndex(newIndex, 1, true);
+                }
             }
+        }
+    });
+
+    // Update desc card height on window resize if open
+    window.addEventListener('resize', () => {
+        const wrapper = document.querySelector('.lightbox-media-wrapper');
+        if (wrapper && wrapper.classList.contains('desc-visible')) {
+            setDescCardHeight(wrapper);
         }
     });
 });
