@@ -45,10 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} subheadingText - The subheading text to display.
      * @param {string} desktopDescriptionText - The description text for desktop.
      * @param {string} mobileDescriptionText - The description text for mobile.
-     * @param {string} poster - The poster URL for the video.
      */
-    function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, poster, fadeInFast) {
-        console.log('OPENLIGHTBOX CALLED', {type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, poster, fadeInFast});
+    function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, fadeInFast) {
+        console.log('OPENLIGHTBOX CALLED', {type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, fadeInFast});
         // Pause all grid videos
         document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
 
@@ -97,9 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaElement.loop = true;
             mediaElement.alt = 'Project Lightbox Video';
             mediaElement.setAttribute('playsinline', '');
-            if (poster) {
-                mediaElement.poster = poster;
-            }
             // Hide video until ready
             mediaElement.style.opacity = '0';
             // Fade in video when ready
@@ -291,31 +287,212 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Swipe Navigation for Lightbox ---
+    // --- Desktop Lightbox Navigation Buttons & Hint ---
+    const desktopHint = document.getElementById('lightbox-desktop-hint');
+    let desktopHintShown = false;
+
+    function isDesktop() {
+        return window.matchMedia('(min-width: 768px)').matches;
+    }
+
+    function showDesktopHint() {
+        if (!isDesktop() || !desktopHint || desktopHintShown) return;
+        desktopHint.style.display = 'block';
+        setTimeout(() => {
+            desktopHint.style.opacity = '0';
+            setTimeout(() => {
+                desktopHint.style.display = 'none';
+                desktopHint.style.opacity = '';
+            }, 600);
+        }, 3200);
+        desktopHintShown = true;
+    }
+
+    // Show hint when lightbox opens (desktop only)
+    const origOpenLightbox = openLightbox;
+    openLightbox = function(...args) {
+        origOpenLightbox.apply(this, args);
+        if (isDesktop()) {
+            showDesktopHint();
+        }
+    };
+
+    // --- Lightbox Description Overlay ---
+    function createLightboxOverlay(description) {
+        const overlay = document.createElement('div');
+        overlay.className = 'lightbox-caption-overlay';
+        overlay.textContent = description || '';
+        overlay.style.pointerEvents = 'none'; // Always non-blocking by default
+        return overlay;
+    }
+
+    let lightboxOverlayVisible = false;
+
+    function setDescCardHeight(wrapper) {
+        if (!wrapper) return;
+        const card = wrapper.querySelector('.lightbox-desc-card');
+        if (card) {
+            // Rely on CSS (height: 100% on card and align-items: stretch on wrapper)
+            // No explicit height setting here.
+        }
+    }
+
+    function clearDescCardHeight(wrapper) {
+        if (!wrapper) return;
+        const card = wrapper.querySelector('.lightbox-desc-card');
+        if (card) {
+            // No explicit height to clear if we are relying on CSS height: 100%
+            // card.style.height = ''; 
+        }
+    }
+
+    function toggleLightboxOverlay(description, wrapper) {
+        if (!wrapper) return;
+        if (isDesktop()) {
+            let card = wrapper.querySelector('.lightbox-desc-card');
+            let content = card ? card.querySelector('.desc-card-content') : null;
+            
+            if (!card) { // Should ideally not happen if always prepared, but as a fallback
+                card = document.createElement('div');
+                card.className = 'lightbox-desc-card';
+                content = document.createElement('div');
+                content.className = 'desc-card-content';
+                card.appendChild(content);
+                wrapper.appendChild(card);
+            }
+
+            const isCurrentlyVisible = wrapper.classList.contains('desc-visible') && card.classList.contains('show');
+
+            // Clear any existing toggle animations to prevent conflicts
+            card.classList.remove('desc-card-toggle-slide-in-active', 'desc-card-toggle-slide-out-active');
+            // Force reflow if needed before adding new animation class
+            void card.offsetWidth;
+
+            if (isCurrentlyVisible) { // HIDING LOGIC (Slide Out)
+                if (content) content.classList.remove('desc-content-visible'); // Content can hide faster
+                
+                card.classList.add('desc-card-toggle-slide-out-active');
+                card.addEventListener('animationend', function onSlideOutEnd() {
+                    card.removeEventListener('animationend', onSlideOutEnd);
+                    card.classList.remove('desc-card-toggle-slide-out-active');
+                    wrapper.classList.remove('desc-visible'); // Layout class
+                    card.classList.remove('show'); // Static visibility class
+                    // Base style (opacity:0, transform:translateX(-40px)) should take over
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: false }, '*');
+                    }
+                }, { once: true });
+            } else { // SHOWING LOGIC (Slide In)
+                if (content) content.textContent = description || '';
+
+                wrapper.classList.add('desc-visible'); // Prepare layout for visible state
+                card.classList.add('show'); // Target static state class (will be overridden by anim)
+                card.classList.add('desc-card-toggle-slide-in-active');
+
+                card.addEventListener('animationend', function onSlideInEnd() {
+                    card.removeEventListener('animationend', onSlideInEnd);
+                    card.classList.remove('desc-card-toggle-slide-in-active');
+                    // .show and .desc-visible should remain to keep it statically visible
+                    if (content) content.classList.add('desc-content-visible'); // Make content visible after slide
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                    }
+                }, { once: true });
+            }
+        } else {
+            // Mobile: use the old overlay logic
+            let overlay = wrapper.querySelector('.lightbox-caption-overlay');
+            if (!overlay) {
+                overlay = createLightboxOverlay(description);
+                wrapper.appendChild(overlay);
+                // Force reflow for animation
+                void overlay.offsetWidth;
+                overlay.classList.remove('hide-anim');
+                overlay.classList.add('show');
+                overlay.style.pointerEvents = 'auto'; // Only block when shown
+                lightboxOverlayVisible = true;
+                // Mobile overlay is now visible
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                }
+            } else {
+                if (overlay.classList.contains('show')) {
+                    overlay.classList.remove('show');
+                    overlay.classList.add('hide-anim');
+                    overlay.style.pointerEvents = 'none';
+                    lightboxOverlayVisible = false;
+                    // Remove overlay after animation
+                    overlay.addEventListener('animationend', function onHideAnim() {
+                        overlay.removeEventListener('animationend', onHideAnim);
+                        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                    });
+                    // Mobile overlay is now hidden
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: false }, '*');
+                    }
+                } else {
+                    overlay.classList.remove('hide-anim');
+                    overlay.classList.add('show');
+                    overlay.style.pointerEvents = 'auto';
+                    lightboxOverlayVisible = true;
+                    // Mobile overlay is now visible
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                    }
+                }
+            }
+        }
+    }
+
+    // --- CLEANED UP NAVIGATION LOGIC ---
     let currentLightboxIndex = null;
     let allPosts = Array.from(document.querySelectorAll('.post'));
 
-    function openLightboxByIndex(index, direction = 0, animate = true, fadeInFast = false) {
+    // Ensure a persistent wrapper exists
+    function getOrCreateWrapper() {
+        let wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
+        if (!wrapper) {
+            wrapper = document.createElement('div');
+            wrapper.className = 'lightbox-media-wrapper';
+            wrapper.style.maxWidth = '90vw';
+            wrapper.style.width = '100%';
+            wrapper.style.minWidth = '0';
+            wrapper.style.overflow = 'hidden';
+            wrapper.style.display = 'flex';
+            wrapper.style.alignItems = 'stretch';
+            wrapper.style.justifyContent = 'center';
+            lightboxContent.appendChild(wrapper);
+        }
+        return wrapper;
+    }
+
+    function openLightboxByIndex(index, direction = 0, animate = true, fadeInFast = false, skipFadeIn = false) {
         if (index < 0) index = allPosts.length - 1;
         if (index >= allPosts.length) index = 0;
         const post = allPosts[index];
         if (!post) return;
-        // If direction is nonzero (toolbar/cycle), do a robust crossfade
-        if (direction && lightboxContent) {
-            const oldMedia = lightboxContent.querySelector('img, video');
-            const oldOverlay = lightboxContent.querySelector('.lightbox-caption-overlay');
-            let mediaFaded = false;
-            let overlayFaded = false;
-            function tryReplace() {
-                if ((mediaFaded || !oldMedia) && (overlayFaded || !oldOverlay)) {
-                    // Remove old media
-                    if (oldMedia && oldMedia.parentNode) oldMedia.parentNode.removeChild(oldMedia);
-                    // Remove old overlay
-                    if (oldOverlay && oldOverlay.parentNode) oldOverlay.parentNode.removeChild(oldOverlay);
-                    // Insert new media (opacity 0)
+        currentLightboxIndex = index;
                     const type = post.dataset.type;
                     const src = post.dataset.src;
-                    const poster = post.dataset.poster;
+        const title = post.dataset.title;
+        const subheading = post.dataset.subheading;
+        const desktopDescription = post.dataset.description;
+        const mobileDescription = post.dataset.mobileDescription;
+
+        // Always use a persistent wrapper
+        const wrapper = getOrCreateWrapper();
+
+        // Animate out old children (media, desc card)
+        const oldMedia = wrapper.querySelector('img, video');
+        const oldDescCard = wrapper.querySelector('.lightbox-desc-card');
+        let mediaFaded = !oldMedia;
+        let descCardFadedOut = !oldDescCard;
+
+        function trySwapInNewContent() {
+            if (mediaFaded && descCardFadedOut) {
+                // Remove old children
+                while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild);
+                // --- Insert new media ---
                     let newMedia;
                     if (type === 'image') {
                         newMedia = document.createElement('img');
@@ -329,27 +506,59 @@ document.addEventListener('DOMContentLoaded', () => {
                         newMedia.loop = true;
                         newMedia.alt = 'Project Lightbox Video';
                         newMedia.setAttribute('playsinline', '');
-                        if (poster) newMedia.poster = poster;
                     }
-                    if (!newMedia) return;
+                if (newMedia) {
+                    if (!(skipFadeIn && !isDesktop())) {
                     newMedia.style.opacity = '0';
                     newMedia.style.transition = 'opacity 220ms cubic-bezier(0.4,0,0.2,1)';
-                    lightboxContent.appendChild(newMedia);
+                        wrapper.appendChild(newMedia);
                     setTimeout(() => {
                         newMedia.style.opacity = '1';
                     }, 10);
-                    // Update details (title, subheading, description)
-                    const title = post.dataset.title;
-                    const subheading = post.dataset.subheading;
-                    const desktopDescription = post.dataset.description;
-                    // Remove old details
-                    const existingTitle = lightboxDetails.querySelector('#lightbox-title');
-                    if (existingTitle) lightboxDetails.removeChild(existingTitle);
-                    const existingSubheading = lightboxDetails.querySelector('#lightbox-subheading');
-                    if (existingSubheading) lightboxDetails.removeChild(existingSubheading);
-                    const existingDescription = lightboxDetails.querySelector('#lightbox-description');
-                    if (existingDescription) lightboxDetails.removeChild(existingDescription);
-                    // Add new details
+                    } else {
+                        // On mobile swipe, slide in from the side
+                        // direction: 1 (left swipe, show from right), -1 (right swipe, show from left)
+                        const slideFrom = direction === 1 ? '100vw' : direction === -1 ? '-100vw' : '100vw';
+                        newMedia.style.transform = `translateX(${slideFrom})`;
+                        newMedia.style.transition = 'transform 400ms cubic-bezier(0.4,0,0.2,1)';
+                        wrapper.appendChild(newMedia);
+                        // Force reflow
+                        void newMedia.offsetWidth;
+                        setTimeout(() => {
+                            newMedia.style.transform = 'translateX(0)';
+                        }, 10);
+                    }
+                }
+                // --- Insert new desc card (always open on navigation) ---
+                if (isDesktop()) {
+                    const descCard = document.createElement('div');
+                    descCard.className = 'lightbox-desc-card desc-card-slide-in-active';
+                    descCard.style.transition = 'none';
+                    descCard.style.width = '';
+                    descCard.style.opacity = '1';
+                    const descContent = document.createElement('div');
+                    descContent.className = 'desc-card-content desc-content-visible';
+                    descContent.textContent = desktopDescription || '';
+                    descCard.appendChild(descContent);
+                    wrapper.appendChild(descCard);
+                    wrapper.classList.add('desc-visible');
+                    // After animation, clean up classes
+                    descCard.addEventListener('animationend', function onSlideIn() {
+                        descCard.removeEventListener('animationend', onSlideIn);
+                        descCard.classList.remove('desc-card-slide-in-active');
+                        descCard.classList.add('show');
+                    });
+                } else {
+                    wrapper.classList.remove('desc-visible');
+                }
+                // --- Update details (title, subheading, description) ---
+                const removeIfExists = id => {
+                    const el = lightboxDetails.querySelector(id);
+                    if (el) el.remove();
+                };
+                removeIfExists('#lightbox-title');
+                removeIfExists('#lightbox-subheading');
+                removeIfExists('#lightbox-description');
                     if (title) {
                         const titleElement = document.createElement('div');
                         titleElement.id = 'lightbox-title';
@@ -381,112 +590,65 @@ document.addEventListener('DOMContentLoaded', () => {
                             lightboxDetails.appendChild(descriptionElement);
                         }
                     }
-
-                    // --- START MODIFIED LOGIC FOR WRAPPER AND DESC CARD ---
-                    // 1. Remove any old wrapper from the previous item
-                    const existingOldWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
-                    if (existingOldWrapper) {
-                        existingOldWrapper.remove();
-                    }
-
-                    // 2. The newMedia is already in lightboxContent. Now create its wrapper.
-                    if (newMedia) { // Ensure newMedia exists
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'lightbox-media-wrapper';
-                        wrapper.style.display = 'inline-block'; // from openLightbox
-                        wrapper.style.position = 'relative';    // from openLightbox
-
-                        // Append new wrapper to lightboxContent, then move newMedia into the new wrapper
-                        lightboxContent.appendChild(wrapper);
-                        wrapper.appendChild(newMedia);
-
-                        // 3. If isDesktop() and the new item has a desktopDescription, create and append the 'lightbox-desc-card'
-                        if (isDesktop() && desktopDescription) { // desktopDescription is for the current item
-                            const descCard = document.createElement('div');
-                            descCard.className = 'lightbox-desc-card';
-                            const descContent = document.createElement('div');
-                            descContent.className = 'desc-card-content';
-                            descContent.textContent = desktopDescription; // Use the new item's description
-                            descCard.appendChild(descContent);
-                            wrapper.appendChild(descCard);
-                        }
-                    }
-                    // --- END MODIFIED LOGIC ---
-
-                    currentLightboxIndex = index;
-                    // Explicitly notify parent that the new item's description is initially closed
+                // Notify parent about description state
                     if (window.parent && window.parent !== window) {
-                        window.parent.postMessage({ type: 'description-state', open: false }, '*');
+                    window.parent.postMessage({ type: 'description-state', open: isDesktop() }, '*');
                     }
                 }
             }
+
+        // Animate out old media
             if (oldMedia) {
+            if (!(skipFadeIn && !isDesktop())) {
                 oldMedia.style.transition = 'opacity 180ms cubic-bezier(0.4,0,0.2,1)';
                 oldMedia.style.opacity = '0';
-                oldMedia.addEventListener('transitionend', function onFadeOut(e) {
-                    if (e.target !== oldMedia) return;
-                    oldMedia.removeEventListener('transitionend', onFadeOut);
+                let handled = false;
+                function onFade(e) {
+                    if (handled) return;
+                    if (e && (e.target !== oldMedia || e.propertyName !== 'opacity')) return;
+                    handled = true;
+                    oldMedia.removeEventListener('transitionend', onFade);
                     mediaFaded = true;
-                    tryReplace();
-                });
+                    trySwapInNewContent();
+                }
+                oldMedia.addEventListener('transitionend', onFade);
+                setTimeout(() => { if (!handled) { onFade(); } }, 250);
             } else {
+                // On mobile swipe, remove instantly (no fade)
+                oldMedia.remove();
                 mediaFaded = true;
+                trySwapInNewContent();
             }
-            if (oldOverlay && oldOverlay.classList.contains('show')) {
-                oldOverlay.classList.remove('show');
-                oldOverlay.addEventListener('transitionend', function onOverlayFade(e) {
-                    if (e.target !== oldOverlay) return;
-                    oldOverlay.removeEventListener('transitionend', onOverlayFade);
-                    overlayFaded = true;
-                    tryReplace();
-                });
             } else {
-                overlayFaded = true;
-            }
-            return;
+            mediaFaded = true;
         }
-        // Default: no direction or no media, use old logic
-        if (!direction || !animate || !lightboxContent) {
-            currentLightboxIndex = index;
-            const type = post.dataset.type;
-            const title = post.dataset.title;
-            const subheading = post.dataset.subheading;
-            const desktopDescription = post.dataset.description;
-            const mobileDescription = post.dataset.mobileDescription;
-            const sourceData = post.dataset.src;
-            const poster = post.dataset.poster;
-            if (type && sourceData) {
-                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster, fadeInFast);
+        // Animate out old desc card
+        if (oldDescCard) {
+            if (oldDescCard.classList.contains('show')) {
+                oldDescCard.classList.remove('show');
+                oldDescCard.classList.add('desc-card-slide-out-active');
+                let handled = false;
+                function onDescSlideOut(e) {
+                    if (handled) return;
+                    if (e && e.target !== oldDescCard) return;
+                    handled = true;
+                    oldDescCard.removeEventListener('animationend', onDescSlideOut);
+                    oldDescCard.classList.remove('desc-card-slide-out-active');
+                    descCardFadedOut = true;
+                    trySwapInNewContent();
+                }
+                oldDescCard.addEventListener('animationend', onDescSlideOut);
+                setTimeout(() => { if (!handled) { onDescSlideOut(); } }, 450);
+            } else {
+                // If not visible, remove immediately and skip animation
+                oldDescCard.remove();
+                descCardFadedOut = true;
+                trySwapInNewContent();
             }
-            if (lightboxContent) {
-                lightboxContent.style.transform = 'translateX(0)';
-            }
-            fadeInNewPost();
-            return;
+        } else {
+            descCardFadedOut = true;
         }
-        // Two-step animation for swipe
-        lightboxContent.classList.add('animate');
-        lightboxContent.style.transform = `translateX(${direction * -100}%)`;
-        setTimeout(() => {
-            lightboxContent.classList.remove('animate');
-            lightboxContent.style.transform = `translateX(${direction * 100}%)`;
-            currentLightboxIndex = index;
-            const type = post.dataset.type;
-            const title = post.dataset.title;
-            const subheading = post.dataset.subheading;
-            const desktopDescription = post.dataset.description;
-            const mobileDescription = post.dataset.mobileDescription;
-            const sourceData = post.dataset.src;
-            const poster = post.dataset.poster;
-            if (type && sourceData) {
-                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster, fadeInFast);
-            }
-            setTimeout(() => {
-                lightboxContent.classList.add('animate');
-                lightboxContent.style.transform = 'translateX(0)';
-                fadeInNewPost();
-            }, 20);
-        }, 350);
+        trySwapInNewContent();
     }
 
     // Modify the post click handler to only open the lightbox
@@ -502,9 +664,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const desktopDescription = post.dataset.description;
             const mobileDescription = post.dataset.mobileDescription;
             const sourceData = post.dataset.src;
-            const poster = post.dataset.poster;
             if (type && sourceData) {
-                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription, poster);
+                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription);
             }
         });
     });
@@ -606,11 +767,40 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!lightboxContent) return;
         const media = lightboxContent.querySelector('img, video');
         if (media) {
-            media.style.opacity = '0';
+            const performFadeIn = () => {
+                media.style.opacity = '0'; // Ensure it starts transparent before fade
             media.style.transition = 'opacity 220ms cubic-bezier(0.4,0,0.2,1)';
+                // Brief timeout to allow the opacity: 0 to apply before transitioning to opacity: 1
             setTimeout(() => {
                 media.style.opacity = '1';
-            }, 80);
+                }, 20); // Small delay like 20ms is often enough
+            };
+
+            // Clear previous listeners if any (though `once: true` should handle it)
+            media.removeEventListener('load', performFadeIn);
+            media.removeEventListener('loadeddata', performFadeIn);
+
+            if (media.tagName === 'IMG') {
+                if (media.complete) { // If image is already loaded (e.g., from cache)
+                    performFadeIn();
+                } else {
+                    media.addEventListener('load', performFadeIn, { once: true });
+                }
+            } else if (media.tagName === 'VIDEO') {
+                if (media.readyState >= 3) { // HAVE_FUTURE_DATA or more, enough to play
+                    performFadeIn();
+                } else {
+                    media.addEventListener('loadeddata', performFadeIn, { once: true });
+                }
+            }
+
+            // Fallback: If load events are slow or don't fire, still show the media after a delay
+            setTimeout(() => {
+                if (media.style.opacity !== '1') { // Check if already faded in
+                    // console.warn('Fallback: Fading in media due to timeout.');
+                    performFadeIn(); 
+                }
+            }, 500); // 500ms fallback
         }
     }
 
@@ -654,19 +844,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const targetY = -window.innerHeight;
                 const remaining = Math.abs(targetY - currentY);
                 const total = Math.abs(targetY);
-                const baseDuration = 200; // ms for full swipe
-                const duration = Math.min(Math.max(280, baseDuration * (remaining / total)), 400);
-                // Calculate current scale based on drag position
-                const fadeEnd = 0.95;
-                const dragRatio = Math.min(1, Math.abs(currentY) / (window.innerHeight * fadeEnd));
+                const duration = 400; // ms for smooth effect
                 const minScale = 0.25;
-                const startScale = 1 - (1 - minScale) * dragRatio;
                 // Animate to scale 0.25 as it slides up
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateY(${targetY}px) scale(${minScale})`;
                 // Animate lightbox opacity to 0 as it slides up
                 lightbox.style.transition = `opacity ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightbox.style.opacity = 0;
+                if (media) media.style.transition = `opacity ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 if (media) media.style.opacity = 0;
                 const onTransitionEnd = () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
@@ -676,7 +862,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Reset lightbox opacity after close
                     lightbox.style.transition = '';
                     lightbox.style.opacity = '';
-                    if (media) media.style.opacity = '';
+                    if (media) {
+                        media.style.transition = '';
+                        media.style.opacity = '';
+                    }
                     closeLightbox();
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
@@ -690,7 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const targetX = -window.innerWidth;
                 const remaining = Math.abs(targetX - currentX);
                 const total = Math.abs(targetX);
-                const baseDuration = 250; // ms for full swipe
+                const baseDuration = 450; // ms for full swipe (slowed down)
                 const duration = Math.min(Math.max(180, baseDuration * (remaining / total)), 350);
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
@@ -703,7 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
                     lightboxContent.style.transform = `translateX(0)`;
-                    openLightboxByIndex(currentLightboxIndex + 1, 1, false);
+                    openLightboxByIndex(currentLightboxIndex + 1, 1, false, false, true);
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
@@ -715,7 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const targetX = window.innerWidth;
                 const remaining = Math.abs(targetX - currentX);
                 const total = Math.abs(targetX);
-                const baseDuration = 250; // ms for full swipe
+                const baseDuration = 450; // ms for full swipe (slowed down)
                 const duration = Math.min(Math.max(180, baseDuration * (remaining / total)), 350);
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
@@ -728,7 +917,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
                     lightboxContent.style.transform = `translateX(0)`;
-                    openLightboxByIndex(currentLightboxIndex - 1, -1, false);
+                    openLightboxByIndex(currentLightboxIndex - 1, -1, false, false, true);
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
@@ -1046,172 +1235,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Expose closeLightbox globally for message handler
     window.closeLightbox = closeLightbox;
-
-    // --- Desktop Lightbox Navigation Buttons & Hint ---
-    const desktopHint = document.getElementById('lightbox-desktop-hint');
-    let desktopHintShown = false;
-
-    function isDesktop() {
-        return window.matchMedia('(min-width: 768px)').matches;
-    }
-
-    function showDesktopHint() {
-        if (!isDesktop() || !desktopHint || desktopHintShown) return;
-        desktopHint.style.display = 'block';
-        setTimeout(() => {
-            desktopHint.style.opacity = '0';
-            setTimeout(() => {
-                desktopHint.style.display = 'none';
-                desktopHint.style.opacity = '';
-            }, 600);
-        }, 3200);
-        desktopHintShown = true;
-    }
-
-    // Show hint when lightbox opens (desktop only)
-    const origOpenLightbox = openLightbox;
-    openLightbox = function(...args) {
-        origOpenLightbox.apply(this, args);
-        if (isDesktop()) {
-            showDesktopHint();
-        }
-    };
-
-    // --- Lightbox Description Overlay ---
-    function createLightboxOverlay(description) {
-        const overlay = document.createElement('div');
-        overlay.className = 'lightbox-caption-overlay';
-        overlay.textContent = description || '';
-        overlay.style.pointerEvents = 'none'; // Always non-blocking by default
-        return overlay;
-    }
-
-    let lightboxOverlayVisible = false;
-
-    function setDescCardHeight(wrapper) {
-        if (!wrapper) return;
-        const card = wrapper.querySelector('.lightbox-desc-card');
-        const media = wrapper.querySelector('img, video');
-        if (card && media) {
-            card.style.height = media.offsetHeight + 'px';
-        }
-    }
-
-    function clearDescCardHeight(wrapper) {
-        if (!wrapper) return;
-        const card = wrapper.querySelector('.lightbox-desc-card');
-        if (card) card.style.height = '';
-    }
-
-    function toggleLightboxOverlay(description, wrapper) {
-        if (!wrapper) return;
-        if (isDesktop()) {
-            let card = wrapper.querySelector('.lightbox-desc-card');
-            let content = card ? card.querySelector('.desc-card-content') : null;
-            if (!card) {
-                card = document.createElement('div');
-                card.className = 'lightbox-desc-card';
-                content = document.createElement('div');
-                content.className = 'desc-card-content';
-                content.textContent = description || '';
-                card.appendChild(content);
-                wrapper.appendChild(card);
-            }
-
-            if (wrapper.classList.contains('desc-visible')) {
-                if (content) {
-                    content.classList.remove('desc-content-visible');
-                }
-
-                wrapper.classList.remove('desc-visible');
-                if (card) card.classList.remove('show');
-
-                const onCardCollapseEnd = (eCard) => {
-                    if (eCard.target === card && eCard.propertyName === 'width') {
-                        if (card) card.removeEventListener('transitionend', onCardCollapseEnd);
-                        
-                        if (!wrapper.classList.contains('desc-visible')) {
-                            clearDescCardHeight(wrapper);
-                        }
-                        
-                        if (window.parent && window.parent !== window) {
-                            window.parent.postMessage({ type: 'description-state', open: wrapper.classList.contains('desc-visible') }, '*');
-                        }
-                    }
-                };
-                
-                if (card) {
-                    card.addEventListener('transitionend', onCardCollapseEnd);
-                } else {
-                    if (!wrapper.classList.contains('desc-visible')) {
-                       clearDescCardHeight(wrapper);
-                    }
-                    if (window.parent && window.parent !== window) {
-                        window.parent.postMessage({ type: 'description-state', open: wrapper.classList.contains('desc-visible') }, '*');
-                    }
-                }
-            } else {
-                if (content) content.classList.remove('desc-content-visible');
-                wrapper.classList.remove('desc-visible');
-                if (card) card.classList.remove('show');
-                
-                content.textContent = description || '';
-
-                void card.offsetWidth;
-
-                requestAnimationFrame(() => {
-                    wrapper.classList.add('desc-visible');
-                    if (card) card.classList.add('show');
-                    setDescCardHeight(wrapper);
-
-                    const onWidthTransition = (e) => {
-                        if (e.target === card && e.propertyName === 'width') {
-                            if (content) content.classList.add('desc-content-visible');
-                            if (card) card.removeEventListener('transitionend', onWidthTransition);
-                            if (window.parent && window.parent !== window) {
-                                window.parent.postMessage({ type: 'description-state', open: true }, '*');
-                            }
-                        }
-                    };
-                    if (card) card.addEventListener('transitionend', onWidthTransition);
-                });
-            }
-        } else {
-            // Mobile: use the old overlay logic
-            let overlay = wrapper.querySelector('.lightbox-caption-overlay');
-            if (!overlay) {
-                overlay = createLightboxOverlay(description);
-                wrapper.appendChild(overlay);
-                // Force reflow for animation
-                void overlay.offsetWidth;
-                overlay.classList.add('show');
-                overlay.style.pointerEvents = 'auto'; // Only block when shown
-                lightboxOverlayVisible = true;
-                // Mobile overlay is now visible
-                if (window.parent && window.parent !== window) {
-                    window.parent.postMessage({ type: 'description-state', open: true }, '*');
-                }
-            } else {
-                if (overlay.classList.contains('show')) {
-                    overlay.classList.remove('show');
-                    overlay.style.pointerEvents = 'none';
-                    lightboxOverlayVisible = false;
-                    // Mobile overlay is now hidden
-                    if (window.parent && window.parent !== window) {
-                        window.parent.postMessage({ type: 'description-state', open: false }, '*');
-                    }
-                } else {
-                    overlay.classList.add('show');
-                    overlay.style.pointerEvents = 'auto';
-                    lightboxOverlayVisible = true;
-                    // Mobile overlay is now visible
-                    if (window.parent && window.parent !== window) {
-                        window.parent.postMessage({ type: 'description-state', open: true }, '*');
-                    }
-                }
-            }
-        }
-    }
 
     // Place this at the end of DOMContentLoaded, after all variables and functions are defined
     window.addEventListener('message', function(event) {
