@@ -370,10 +370,45 @@ body {
     align-items: stretch;
     justify-content: center;
     position: relative;
-    border: 2px dashed #4caf50 !important; /* TEST: green border for wrapper */
     min-height: 320px;
     height: 90vh; /* Set a fixed height for the wrapper */
     /* No strict height, let it fit content */
+  }
+  #lightbox-content {
+    border: 4px solid #2ecc71 !important; /* GREEN: content */
+  }
+  .lightbox-media-wrapper {
+    border: 4px solid #3498db !important; /* BLUE: media wrapper */
+  }
+  .desc-card-anim-wrapper {
+    border: 4px solid #9b59b6 !important; /* PURPLE: desc card anim wrapper */
+  }
+  .lightbox-desc-card {
+    border: 4px solid #e67e22 !important; /* ORANGE: desc card */
+    background: #ecececb6 !important; /* Much lighter grey fill */
+    color: #222;
+    width: 90% !important; /* Only fill 90% of purple wrapper */
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .desc-card-inner-border-container {
+    border: 4px dashed #1abc9c !important; /* TEAL: inner border container */
+  }
+  .desc-card-content {
+    border: 4px dotted #34495e !important; /* NAVY: desc card content */
+  }
+  .lightbox-media-wrapper.desc-visible .desc-card-anim-wrapper {
+    width: 350px;
+  }
+  body.projects-window-maximized .lightbox-media-wrapper.desc-visible .desc-card-anim-wrapper {
+    width: 600px;
+  }
+  body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card {
+    --desc-card-current-width: 600px;
+    max-width: 600px;
+  }
+  body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-desc-card {
+    width: 600px;
   }
 }
 
@@ -444,7 +479,6 @@ body {
 
 .lightbox-media-wrapper img,
 .lightbox-media-wrapper video {
-  border: 2px solid #2196f3 !important; /* TEST: blue border for media */
   max-width: 60vw;
   max-height: 70vh;
   min-width: 0;
@@ -456,169 +490,85 @@ body {
   display: block;
   height: 100%;
   object-fit: contain;
-  z-index: 1;
+  z-index: 2;
 }
 
 .lightbox-media-wrapper .lightbox-desc-card {
-  border: 2px solid red !important;
-  --desc-card-current-width: 350px; /* Define default target width */
-  width: 0; /* Hidden state: no width */
-  min-width: 0; /* Hidden state: no min-width */
-  max-width: var(--desc-card-current-width); /* Max width still applies for when visible */
+  --desc-card-current-width: 350px;
+  width: 90% !important;
+  margin-left: auto;
+  margin-right: auto;
   height: 100%;
-  padding-top: 0;
-  padding-bottom: 0;
   border-radius: 18px;
   background: linear-gradient(120deg, rgba(30,30,30,0.98) 80%, rgba(30,30,30,0.92) 100%);
   box-shadow: 0 4px 32px rgba(0,0,0,0.18);
-  display: flex;
+  display: flex; /* To center the new inner container */
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
+  align-items: center; /* Center inner container horizontally */
+  justify-content: center; /* Center inner container vertically */
   font-size: 1.13rem;
   font-weight: 500;
   color: #fff;
-  z-index: 2;
+  z-index: 1;
   box-sizing: border-box;
-  opacity: 0; /* Base state: hidden */
-  transform: translateX(-40px); /* Base state: slid out */
-  overflow: hidden;
-  flex-shrink: 1; /* Allow shrinking, important for width: 0 to work in flex */
-  margin-left: 0; /* Base state: no margin */
+  opacity: 0; 
+  transform: translateX(-40px); 
+  transition: opacity 0.3s, transform 0.3s;
+  overflow: hidden; 
+  flex-shrink: 1;
+}
+
+.desc-card-inner-border-container {
+  width: 95%;
+  height: 95%;
+  border: 1px solid white; /* White border, no fill (background transparent by default) */
+  box-sizing: border-box;
+  display: flex; /* To manage padding or alignment of .desc-card-content if needed */
+  flex-direction: column;
+  justify-content: center; /* Example: center content vertically */
+  align-items: center; /* Example: center content horizontally */
+  padding: 15px; /* Add padding inside the white border, adjust as needed */
+  overflow: hidden; /* Prevent content from spilling out */ 
+  border-radius: 12px; /* Optional: slightly round the corners of the inner border */
+}
+
+.lightbox-media-wrapper.desc-visible .lightbox-desc-card > * {
+  /* This rule might need adjustment if it targets the new inner container directly 
+     or if content opacity is handled differently. For now, let's assume it's okay. */
+  opacity: 1;
+  transition: none !important; /* This was from your existing code, assuming it has a purpose */
+}
+
+/* Adjust desc-card-content if it previously had padding that's now on inner-border-container */
+.lightbox-media-wrapper .lightbox-desc-card .desc-card-content {
+  /* opacity: 0; // Opacity is now on .lightbox-desc-card and handled by its transition */
+  /* transition: none !important; // Opacity transition handled by parent */
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden; /* Should be scrollable if content exceeds space */
+  white-space: normal;
+  word-break: break-word;
+  width: 100%; /* Fill the inner-border-container */
+  height: 100%; /* Fill the inner-border-container */
+  text-align: left; /* Or center, depending on design */
+  /* Remove direct padding if it's now on desc-card-inner-border-container */
+}
+
+.lightbox-media-wrapper.desc-visible .lightbox-desc-card .desc-card-content.desc-content-visible {
+  opacity: 1;
+  transition: none !important; /* Assuming this class is still used and needed */
 }
 
 /* Update width variable when window is maximized */
 body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card {
-  --desc-card-current-width: 480px;
-  /* max-width updated by the variable, width will be set by .show or animation */
-}
-
-/* This class represents the fully static visible state after animations */
-.lightbox-media-wrapper.desc-visible .lightbox-desc-card.show {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-  width: var(--desc-card-current-width); /* Use variable for static visible width */
-  margin-left: 24px; /* Add margin when visible */
-}
-
-.lightbox-media-wrapper .lightbox-desc-card > * {
-  opacity: 0;
-  transition: none !important;
-  min-width: 0;
-  flex-shrink: 1;
-  overflow: hidden;
-  white-space: normal;
-  word-break: break-word;
-}
-
-.lightbox-media-wrapper.desc-visible .lightbox-desc-card {
-  width: var(--desc-card-current-width);
-  opacity: 1;
-  pointer-events: auto;
-  padding: 32px 28px 32px 28px;
-  transition: none !important;
-}
-
-.lightbox-media-wrapper.desc-visible .lightbox-desc-card > * {
-  opacity: 1;
-  transition: none !important;
-}
-
-.lightbox-media-wrapper .lightbox-desc-card .desc-card-content.desc-content-visible {
-  opacity: 1;
-  transition: none !important;
-}
-
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card {
-  max-width: 480px;
+  max-width: 540px;
 }
 
 body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-desc-card {
-  width: 480px;
+  width: 540px !important;
 }
 
-/* Animation for old description card sliding out to the left during navigation */
-@keyframes descCardSlideOutToLeft {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-    width: var(--desc-card-current-width);
-    margin-left: 24px;
-  }
-  to {
-    transform: translateX(-40px);
-    opacity: 0;
-    width: 0;
-    margin-left: 0;
-  }
-}
-
-/* Animation for new description card sliding in from left during navigation */
-@keyframes descCardSlideInFromLeft {
-  from {
-    transform: translateX(-40px);
-    opacity: 0;
-    width: 0;
-    margin-left: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-    width: var(--desc-card-current-width);
-    margin-left: 24px;
-  }
-}
-
-/* Animations for View/Hide Description Toggle */
-@keyframes descCardToggleSlideOut {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-    width: var(--desc-card-current-width);
-    margin-left: 24px;
-  }
-  to {
-    transform: translateX(-40px);
-    opacity: 0;
-    width: 0; /* Slide to no width */
-    margin-left: 0;
-  }
-}
-
-@keyframes descCardToggleSlideIn {
-  from {
-    transform: translateX(-40px);
-    opacity: 0;
-    width: 0; /* Start with no width */
-    margin-left: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-    width: var(--desc-card-current-width);
-    margin-left: 24px;
-  }
-}
-
-.desc-card-slide-out-active { /* For Next/Previous navigation */
-  animation: descCardSlideOutToLeft 400ms cubic-bezier(0.4,0,0.2,1) forwards;
-}
-
-.desc-card-slide-in-active { /* For Next/Previous navigation */
-  animation: descCardSlideInFromLeft 400ms cubic-bezier(0.4,0,0.2,1) forwards;
-}
-
-.desc-card-toggle-slide-out-active { /* For View/Hide toggle */
-  animation: descCardToggleSlideOut 400ms cubic-bezier(0.4,0,0.2,1) forwards;
-  pointer-events: none; /* Disable interaction while sliding out */
-}
-
-.desc-card-toggle-slide-in-active { /* For View/Hide toggle */
-  animation: descCardToggleSlideIn 400ms cubic-bezier(0.4,0,0.2,1) forwards;
-  pointer-events: auto; /* Enable interaction once slid in */
-  /* Initial state (opacity, transform, width, margin) defined by base .lightbox-desc-card and animation 'from' state */
-}
+/* Animations removed as JS handles transitions directly */
 
 @keyframes mobileDescOverlaySlideIn {
   from {
@@ -640,4 +590,33 @@ body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-de
     opacity: 0;
     transform: translateY(16px);
   }
+}
+
+.desc-card-anim-wrapper {
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+}
+body.projects-window-maximized .desc-card-anim-wrapper {
+  max-width: 600px;
+}
+
+.lightbox-media-wrapper.desc-visible .desc-card-anim-wrapper {
+  width: 350px;
+}
+
+.lightbox-desc-card {
+  border: 4px solid #e67e22 !important; /* ORANGE: desc card */
+  background: #ecececb6 !important; /* Much lighter grey fill */
+  color: #222;
+  width: 90% !important; /* Only fill 90% of purple wrapper */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lightbox-media-wrapper.desc-visible .lightbox-desc-card {
+  opacity: 1;
+  transform: translateX(0);
 }

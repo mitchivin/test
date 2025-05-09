@@ -140,7 +140,6 @@ export default class WindowManager {
     this.activeWindow = null;
     this.taskbarItems = {};
     this.windowCount = 0;
-    this.cascadeOffset = 40; // Reduced from 35 for tighter stacking
     this.programData = programData;
     this.baseZIndex =
       parseInt(
