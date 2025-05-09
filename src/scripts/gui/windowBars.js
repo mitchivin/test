@@ -265,6 +265,17 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   buttons.forEach((buttonConfig) => {
     // On mobile, skip the Home button in the My Projects window
     if (isMobile && windowId === "internet-window" && buttonConfig.key === "home") return;
+
+    // Skip 'view-description' button on desktop for 'internet-window'
+    if (!isMobile && windowId === "internet-window" && buttonConfig.key === "view-description") {
+        return; 
+    }
+
+    // Skip buttons marked as desktopOnly if on mobile
+    if (isMobile && buttonConfig.desktopOnly) {
+        return;
+    }
+
     if (buttonConfig.type === "separator") {
       const separator = document.createElement("div");
       separator.className = "vertical_line";

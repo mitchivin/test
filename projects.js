@@ -11,40 +11,6 @@ function clearChildren(el) {
     while (el.firstChild) el.removeChild(el.firstChild);
 }
 
-function sendMessageToParent(payload) {
-    if (window.parent && window.parent !== window) {
-        window.parent.postMessage(payload, '*');
-    }
-}
-
-function createDesktopDescriptionCard(descriptionText) {
-    const animWrapper = createEl('div', 'desc-card-anim-wrapper');
-    const descCard = createEl('div', 'lightbox-desc-card');
-    descCard.textContent = descriptionText || '';
-    
-    animWrapper.appendChild(descCard);
-    return animWrapper;
-}
-
-function createLightboxMediaElement(type, src) {
-    let mediaElement;
-    if (type === 'image') {
-        mediaElement = createEl('img');
-        mediaElement.alt = 'Project Lightbox Image'; // Generic alt text
-    } else if (type === 'video') {
-        mediaElement = createEl('video');
-        mediaElement.alt = 'Project Lightbox Video'; // Generic alt text
-        mediaElement.controls = true;
-        mediaElement.autoplay = true;
-        mediaElement.loop = true;
-        mediaElement.setAttribute('playsinline', '');
-    }
-    if (mediaElement) {
-        mediaElement.src = src;
-    }
-    return mediaElement;
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
@@ -53,11 +19,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedContainer = document.querySelector('.feed-container');
 
     if (!lightbox || !lightboxContent || !lightboxDetails || !feedContainer) {
+        console.error('Lightbox, feedContainer, or critical elements not found, or no posts available.');
         return;
     }
 
+    // Utility to get the Home button in the current window's toolbar
+    function getHomeButton() {
+        return document.querySelector('.toolbar-button.home');
+    }
+
+    function setHomeButtonEnabled(enabled) {
+        const homeButton = getHomeButton();
+        if (homeButton) {
+            if (enabled) {
+                homeButton.classList.remove('disabled');
+            } else {
+                homeButton.classList.add('disabled');
+            }
+        }
+    }
+
     function setHomeButtonEnabledInParent(enabled) {
-        sendMessageToParent({ type: 'set-home-enabled', enabled });
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage(
+                { type: 'set-home-enabled', enabled },
+                '*'
+            );
+        }
     }
 
     function isDesktop() {
@@ -75,38 +63,85 @@ document.addEventListener('DOMContentLoaded', () => {
             subEl.id = 'lightbox-subheading';
             lightboxDetails.appendChild(subEl);
         }
-        // Only add description to lightboxDetails if not on desktop (desktop uses animated card)
-        if (description && !isDesktop()) {
+        if (description) {
             const descEl = createEl('div', null, description);
             descEl.id = 'lightbox-description';
             lightboxDetails.appendChild(descEl);
         }
     }
 
-    function openLightbox() {
+    function openLightbox(type, src, titleText, subheadingText, desktopDescriptionText, mobileDescriptionText, fadeInFast) {
         document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
-
-        // Core content setup is now handled by openLightboxByIndex
-        if (currentLightboxIndex === null) {
-            // This should ideally be set by the click handler before openLightbox is called.
-            // As a fallback, try to find it if only one post exists for some reason (unlikely).
-            if (allPosts.length === 1) currentLightboxIndex = 0;
-            else {
-                return; // Cannot proceed without a current index
-            }
+        if (type === 'image') {
+            lightbox.classList.add('image-lightbox');
+        } else {
+            lightbox.classList.remove('image-lightbox');
         }
-        openLightboxByIndex(currentLightboxIndex, 0); // Direction 0 for initial open
-
-        // General lightbox display logic (already present, keep)
+        clearChildren(lightboxContent);
+        let mediaElement;
+        if (type === 'image') {
+            mediaElement = createEl('img');
+            mediaElement.src = src;
+            mediaElement.alt = 'Project Lightbox Image';
+            mediaElement.style.opacity = '0';
+            mediaElement.addEventListener('load', () => { mediaElement.style.opacity = ''; }, { once: true });
+            setTimeout(() => { mediaElement.style.opacity = ''; }, 500);
+        } else if (type === 'video') {
+            mediaElement = createEl('video');
+            mediaElement.src = src;
+            mediaElement.controls = true;
+            mediaElement.autoplay = true;
+            mediaElement.loop = true;
+            mediaElement.alt = 'Project Lightbox Video';
+            mediaElement.setAttribute('playsinline', '');
+            mediaElement.style.opacity = '0';
+            mediaElement.addEventListener('loadeddata', () => { mediaElement.style.opacity = ''; }, { once: true });
+            setTimeout(() => { mediaElement.style.opacity = ''; }, 700);
+        }
+        if (mediaElement) {
+            const wrapper = createEl('div', 'lightbox-media-wrapper');
+            wrapper.appendChild(mediaElement);
+            if (isDesktop()) {
+                const animWrapper = createEl('div', 'desc-card-anim-wrapper');
+                const descCard = createEl('div', 'lightbox-desc-card');
+                const descContent = createEl('div', 'desc-card-content desc-content-visible', desktopDescriptionText || '');
+                descCard.appendChild(descContent);
+                animWrapper.appendChild(descCard);
+                wrapper.appendChild(animWrapper);
+                wrapper.classList.add('desc-visible');
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                }
+            }
+            lightboxContent.appendChild(wrapper);
+        }
+        updateLightboxDetails(titleText, subheadingText, desktopDescriptionText);
         lightbox.style.display = 'flex';
         lightbox.classList.remove('fade-out');
-        void lightbox.offsetWidth; // reflow
+        void lightbox.offsetWidth;
         requestAnimationFrame(() => {
             lightbox.classList.add('fade-in');
         });
         document.body.style.overflow = 'hidden';
         lightbox.style.visibility = '';
         setHomeButtonEnabledInParent(true);
+
+        // If fadeInFast is true (desktop button nav), use a fast fade-in
+        if (fadeInFast && isDesktop() && lightboxContent) {
+            const media = lightboxContent.querySelector('img, video');
+            if (media) {
+                media.style.transition = 'opacity 120ms cubic-bezier(0.4,0,0.2,1)';
+                media.style.opacity = '0';
+                setTimeout(() => {
+                    media.style.opacity = '1';
+                }, 10);
+            }
+        }
+
+        // Notify parent that lightbox is open (enable back/forward/desc)
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'lightbox-state', open: true }, '*');
+        }
     }
 
     function closeLightbox() {
@@ -147,8 +182,36 @@ document.addEventListener('DOMContentLoaded', () => {
         setHomeButtonEnabledInParent(false);
 
         // Notify parent that lightbox is closed (disable back/forward/desc)
-        sendMessageToParent({ type: 'lightbox-state', open: false });
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'lightbox-state', open: false }, '*');
+        }
     }
+
+    // --- Desktop Lightbox Navigation Buttons & Hint ---
+    const desktopHint = document.getElementById('lightbox-desktop-hint');
+    let desktopHintShown = false;
+
+    function showDesktopHint() {
+        if (!isDesktop() || !desktopHint || desktopHintShown) return;
+        desktopHint.style.display = 'block';
+        setTimeout(() => {
+            desktopHint.style.opacity = '0';
+            setTimeout(() => {
+                desktopHint.style.display = 'none';
+                desktopHint.style.opacity = '';
+            }, 600);
+        }, 3200);
+        desktopHintShown = true;
+    }
+
+    // Show hint when lightbox opens (desktop only)
+    const origOpenLightbox = openLightbox;
+    openLightbox = function(...args) {
+        origOpenLightbox.apply(this, args);
+        if (isDesktop()) {
+            showDesktopHint();
+        }
+    };
 
     // --- Lightbox Description Overlay ---
     function createLightboxOverlay(description) {
@@ -157,6 +220,24 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.textContent = description || '';
         overlay.style.pointerEvents = 'none'; // Always non-blocking by default
         return overlay;
+    }
+
+    function setDescCardHeight(wrapper) {
+        if (!wrapper) return;
+        const card = wrapper.querySelector('.lightbox-desc-card');
+        if (card) {
+            // Rely on CSS (height: 100% on card and align-items: stretch on wrapper)
+            // No explicit height setting here.
+        }
+    }
+
+    function clearDescCardHeight(wrapper) {
+        if (!wrapper) return;
+        const card = wrapper.querySelector('.lightbox-desc-card');
+        if (card) {
+            // No explicit height to clear if we are relying on CSS height: 100%
+            // card.style.height = ''; 
+        }
     }
 
     function toggleLightboxOverlay(description, wrapper) {
@@ -169,38 +250,53 @@ document.addEventListener('DOMContentLoaded', () => {
             const isCurrentlyVisible = wrapper.classList.contains('desc-visible');
 
             if (isCurrentlyVisible) { // HIDING LOGIC
+                console.log('[Toggle Desktop] Hiding: .desc-visible is on wrapper. Removing it.');
                 wrapper.classList.remove('desc-visible');
-                sendMessageToParent({ type: 'description-state', open: false });
-            } else { // SHOWING LOGIC
-                let animWrapper = wrapper.querySelector('.desc-card-anim-wrapper');
-                let card = animWrapper ? animWrapper.querySelector('.lightbox-desc-card') : null;
-                // let contentElement = card ? card.querySelector('.desc-card-content') : null; // No longer needed
-
-                if (!animWrapper) {
-                    animWrapper = createDesktopDescriptionCard(description); // This now sets text on card
-                    wrapper.appendChild(animWrapper);
-                    card = animWrapper.querySelector('.lightbox-desc-card'); // Re-acquire card
-                } else if (!card && animWrapper) { 
-                    // This case implies animWrapper is empty or malformed, recreate card within it
-                    while (animWrapper.firstChild) animWrapper.removeChild(animWrapper.firstChild);
-                    const newCardElement = createDesktopDescriptionCard(description).querySelector('.lightbox-desc-card');
-                    animWrapper.appendChild(newCardElement);
-                    card = newCardElement;
-                } 
-                // No specific need to check for contentElement missing from card, as card itself holds text
-
-                // Ensure text content is set on the card itself
-                if (card) {
-                    card.textContent = description || '';
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'description-state', open: false }, '*');
                 }
-                
-                if (animWrapper) {
-                    animWrapper.style.width = ''; // Clear any inline width from previous operations
-                    void animWrapper.offsetHeight; // Force reflow to establish current state before transition
+            } else { // SHOWING LOGIC
+                console.log('[Toggle Desktop] Showing: .desc-visible is NOT on wrapper. Adding it.');
+                const animWrapper = wrapper.querySelector('.desc-card-anim-wrapper');
+                let card = animWrapper ? animWrapper.querySelector('.lightbox-desc-card') : null;
+                let contentElement = card ? card.querySelector('.desc-card-content') : null;
+
+                // Ensure the full structure exists if it was not there or got cleared
+                if (!animWrapper) {
+                    // This case should ideally be less common if openLightboxByIndex always creates it for desktop
+                    console.warn('[Toggle Desktop] animWrapper not found, creating full structure.');
+                    const newAnimWrapper = document.createElement('div');
+                    newAnimWrapper.className = 'desc-card-anim-wrapper';
+                    card = document.createElement('div');
+                    card.className = 'lightbox-desc-card';
+                    contentElement = document.createElement('div');
+                    contentElement.className = 'desc-card-content desc-content-visible';
+                    
+                    card.appendChild(contentElement);
+                    newAnimWrapper.appendChild(card);
+                    wrapper.appendChild(newAnimWrapper); // Append to the main media wrapper
+                }
+                if (!card && animWrapper) { // animWrapper exists, but card doesn't (unlikely state)
+                    card = document.createElement('div');
+                    card.className = 'lightbox-desc-card';
+                    animWrapper.appendChild(card);
+                }
+                if (!contentElement && card) {
+                    contentElement = document.createElement('div');
+                    contentElement.className = 'desc-card-content desc-content-visible';
+                    card.appendChild(contentElement);
+                }
+
+                if (contentElement && description) {
+                    contentElement.textContent = description;
+                } else if (contentElement) {
+                    contentElement.textContent = ''; // Clear if no description
                 }
                 
                 wrapper.classList.add('desc-visible');
-                sendMessageToParent({ type: 'description-state', open: true });
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                }
             }
         } else {
             // Mobile: use the old overlay logic (assumed to be working correctly)
@@ -212,7 +308,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.classList.remove('hide-anim');
                 overlay.classList.add('show');
                 overlay.style.pointerEvents = 'auto';
-                sendMessageToParent({ type: 'description-state', open: true });
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                }
             } else {
                 if (overlay.classList.contains('show')) {
                     overlay.classList.remove('show');
@@ -222,12 +320,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         overlay.removeEventListener('animationend', onHideAnim);
                         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
                     }, { once: true }); // Added { once: true } for safety
-                    sendMessageToParent({ type: 'description-state', open: false });
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: false }, '*');
+                    }
                 } else {
                     overlay.classList.remove('hide-anim');
                     overlay.classList.add('show');
                     overlay.style.pointerEvents = 'auto';
-                    sendMessageToParent({ type: 'description-state', open: true });
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'description-state', open: true }, '*');
+                    }
                 }
             }
         }
@@ -243,168 +345,231 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!wrapper) {
             wrapper = document.createElement('div');
             wrapper.className = 'lightbox-media-wrapper';
-            // No inline styles should be applied here; CSS will handle styling.
+            wrapper.style.maxWidth = '90vw';
+            wrapper.style.width = '100%';
+            wrapper.style.minWidth = '0';
+            wrapper.style.overflow = 'hidden';
+            wrapper.style.display = 'flex';
+            wrapper.style.alignItems = 'stretch';
+            wrapper.style.justifyContent = 'center';
             lightboxContent.appendChild(wrapper);
         }
         return wrapper;
     }
 
-    // Function to open a specific lightbox item by its index in the allPosts array.
-    // Handles animating out the old content and animating in the new content.
-    // Direction: 1 for next, -1 for previous, 0 for no specific direction (initial open).
-    // animate: boolean, whether to use animations (typically true for navigation).
-    // skipFadeIn: boolean, for mobile swipe, uses a slide transition instead of fade for new media.
-    function openLightboxByIndex(index, direction = 0, skipFadeIn = false) {
+    function openLightboxByIndex(index, direction = 0, animate = true, fadeInFast = false, skipFadeIn = false) {
         if (index < 0) index = allPosts.length - 1;
         if (index >= allPosts.length) index = 0;
         const post = allPosts[index];
         if (!post) return;
-        currentLightboxIndex = index; // Update the global index
-
-        // Extract data from the post element
-        const type = post.dataset.type;
-        const src = post.dataset.src;
+        currentLightboxIndex = index;
+                    const type = post.dataset.type;
+                    const src = post.dataset.src;
         const title = post.dataset.title;
         const subheading = post.dataset.subheading;
         const desktopDescription = post.dataset.description;
         const mobileDescription = post.dataset.mobileDescription;
-        const linkType = post.dataset.linkType; // Get the link type
-        const linkUrl = post.dataset.linkUrl;   // Get the link URL
 
-        // Always use a persistent wrapper for lightbox media and description
+        // Always use a persistent wrapper
         const wrapper = getOrCreateWrapper();
 
-        // --- Animation Coordination for Content Swap ---
-        // Flags to track if old media and description card have finished their exit animations.
+        // Animate out old children (media, desc card)
         const oldMedia = wrapper.querySelector('img, video');
         const oldAnimWrapper = wrapper.querySelector('.desc-card-anim-wrapper');
         const oldDescCard = oldAnimWrapper ? oldAnimWrapper.querySelector('.lightbox-desc-card') : null;
-        let mediaFaded = !oldMedia; // True if no old media to animate out
-        let descCardFadedOut = !oldDescCard; // True if no old description card to animate out
+        let mediaFaded = !oldMedia;
+        let descCardFadedOut = !oldDescCard;
 
-        // This function is called after old media or old description card finishes animating out.
-        // It checks if *both* are done before proceeding to swap in the new content.
         function trySwapInNewContent() {
-            if (mediaFaded && descCardFadedOut) { // Only proceed if both exit animations are complete
-                while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild); // Clear previous content
+            console.log('[Nav In] trySwapInNewContent called. mediaFaded:', mediaFaded, 'descCardFadedOut:', descCardFadedOut);
+            if (mediaFaded && descCardFadedOut) {
+                console.log('[Nav In] Conditions met, swapping content.');
+                while (wrapper.firstChild) wrapper.removeChild(wrapper.firstChild);
 
-                // --- Insert new media (image or video) ---
-                let newMedia = createLightboxMediaElement(type, src);
-
+                // --- Insert new media ---
+                let newMedia;
+                if (type === 'image') {
+                    newMedia = document.createElement('img');
+                    newMedia.src = src;
+                    newMedia.alt = 'Project Lightbox Image';
+                } else if (type === 'video') {
+                    newMedia = document.createElement('video');
+                    newMedia.src = src;
+                    newMedia.controls = true;
+                    newMedia.autoplay = true;
+                    newMedia.loop = true;
+                    newMedia.alt = 'Project Lightbox Video';
+                    newMedia.setAttribute('playsinline', '');
+                }
                 if (newMedia) {
-                    // Original condition for media animation
                     if (!(skipFadeIn && !isDesktop())) {
-                        // Standard fade-in for new media
                         newMedia.style.opacity = '0';
                         newMedia.style.transition = 'opacity 220ms cubic-bezier(0.4,0,0.2,1)';
                         wrapper.appendChild(newMedia); 
-                        setTimeout(() => { newMedia.style.opacity = '1'; }, 10); // Slight delay to ensure transition applies
+                        setTimeout(() => { newMedia.style.opacity = '1'; }, 10);
                     } else {
-                        // Slide-in animation for new media (used for mobile swipe navigation)
                         const slideFrom = direction === 1 ? '100vw' : direction === -1 ? '-100vw' : '100vw';
                         newMedia.style.transform = `translateX(${slideFrom})`;
                         newMedia.style.transition = 'transform 400ms cubic-bezier(0.4,0,0.2,1)';
                         wrapper.appendChild(newMedia); 
-                        void newMedia.offsetWidth; // Force reflow
+                        void newMedia.offsetWidth;
                         setTimeout(() => { newMedia.style.transform = 'translateX(0)'; }, 10);
                     }
                 }
 
-                // --- Insert new description card for desktop ---
                 if (isDesktop()) {
-                    // If the description was visible, remove the class to reset its animation state, then re-add.
                     if (wrapper.classList.contains('desc-visible')) {
                         wrapper.classList.remove('desc-visible');
-                        void wrapper.offsetHeight; // Force reflow
+                        void wrapper.offsetHeight;
+                        console.log('[Nav In] Temporarily REMOVED .desc-visible from wrapper for reset.');
                     }
 
-                    const newAnimWrapper = createDesktopDescriptionCard(desktopDescription);
-                    wrapper.appendChild(newAnimWrapper);
+                    const newAnimWrapper = document.createElement('div');
+                    newAnimWrapper.className = 'desc-card-anim-wrapper';
                     
-                    void newAnimWrapper.offsetHeight; // Ensure this line is present
+                    const newDescCard = document.createElement('div');
+                    newDescCard.className = 'lightbox-desc-card';
+                    
+                    // Create the new inner border container
+                    const newDescContent = document.createElement('div');
+                    newDescContent.className = 'desc-card-content desc-content-visible';
+                    newDescContent.textContent = desktopDescription || ''; 
+                    
+                    // Nest content -> newDescCard -> newAnimWrapper
+                    newDescCard.appendChild(newDescContent);
+                    newAnimWrapper.appendChild(newDescCard);
+                    wrapper.appendChild(newAnimWrapper);
+                    console.log('[Nav In] New anim wrapper, card, and content added to DOM. Wrapper element:', wrapper);
+
+                    void newAnimWrapper.offsetHeight;
+                    console.log('[Nav In] Reflow forced for newAnimWrapper.');
+
                     wrapper.classList.add('desc-visible');
+                    console.log('[Nav In] RE-ADDED .desc-visible to wrapper. Current classes on wrapper:', wrapper.classList);
                 }
                 
-                // --- Update non-animated details in #lightbox-details (title, subheading) ---
-                updateLightboxDetails(title, subheading, isDesktop() ? null : (mobileDescription || desktopDescription));
+                // --- Update non-animated details in #lightbox-details ---
+                // (Your existing logic for #lightbox-title, #lightbox-subheading, #lightbox-description)
+                const removeIfExists = id => {
+                    const el = lightboxDetails.querySelector(id);
+                    if (el) el.remove();
+                };
+                removeIfExists('#lightbox-title');
+                removeIfExists('#lightbox-subheading');
+                removeIfExists('#lightbox-description');
+                if (title) {
+                    const titleElement = document.createElement('div');
+                    titleElement.id = 'lightbox-title';
+                    titleElement.textContent = title;
+                    lightboxDetails.appendChild(titleElement);
+                }
+                if (subheading) {
+                    const subheadingElement = document.createElement('div');
+                    subheadingElement.id = 'lightbox-subheading';
+                    subheadingElement.textContent = subheading;
+                    const titleEl = lightboxDetails.querySelector('#lightbox-title');
+                    if (titleEl && titleEl.nextSibling) {
+                        lightboxDetails.insertBefore(subheadingElement, titleEl.nextSibling);
+                    } else {
+                        lightboxDetails.appendChild(subheadingElement);
+                    }
+                }
+                if (desktopDescription) {
+                    const descriptionElement = document.createElement('div');
+                    descriptionElement.id = 'lightbox-description';
+                    descriptionElement.textContent = desktopDescription;
+                    const subheadingEl = lightboxDetails.querySelector('#lightbox-subheading');
+                    const titleEl = lightboxDetails.querySelector('#lightbox-title');
+                    if (subheadingEl && subheadingEl.nextSibling) {
+                        lightboxDetails.insertBefore(descriptionElement, subheadingEl.nextSibling);
+                    } else if (titleEl && titleEl.nextSibling) {
+                        lightboxDetails.insertBefore(descriptionElement, titleEl.nextSibling);
+                    } else {
+                        lightboxDetails.appendChild(descriptionElement);
+                    }
+                }
 
-                sendMessageToParent({ type: 'description-state', open: isDesktop() });
-                // Send lightbox state including link type and URL
-                sendMessageToParent({ 
-                    type: 'lightbox-state', 
-                    open: true, 
-                    linkType: linkType || null, 
-                    linkUrl: linkUrl || null    
-                });
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'description-state', open: isDesktop() }, '*');
+                }
             }
         }
 
-        // --- Animate out old media ---
+        // Animate out old media
             if (oldMedia) {
-            if (!(skipFadeIn && !isDesktop())) { // Standard fade-out
+            if (!(skipFadeIn && !isDesktop())) {
                 oldMedia.style.transition = 'opacity 180ms cubic-bezier(0.4,0,0.2,1)';
                 oldMedia.style.opacity = '0';
                 let handled = false;
-                function onFade(e) { // Event handler for transition end
+                function onFade(e) {
                     if (handled) return;
                     if (e && (e.target !== oldMedia || e.propertyName !== 'opacity')) return;
                     handled = true;
                     oldMedia.removeEventListener('transitionend', onFade);
-                    mediaFaded = true; // Mark old media as faded
-                    trySwapInNewContent(); // Check if ready to swap
+                    mediaFaded = true;
+                    trySwapInNewContent();
                 }
                 oldMedia.addEventListener('transitionend', onFade);
-                setTimeout(() => { if (!handled) { onFade(); } }, 250); // Fallback timer
+                setTimeout(() => { if (!handled) { onFade(); } }, 250);
             } else {
-                // On mobile swipe, remove instantly (no fade for old media if new one slides)
+                // On mobile swipe, remove instantly (no fade)
                 oldMedia.remove();
                 mediaFaded = true;
                 trySwapInNewContent();
             }
             } else {
-            mediaFaded = true; // No old media to animate
+            mediaFaded = true;
         }
-
-        // --- Animate out old description card (desktop only) ---
+        // Animate out old desc card
         if (oldAnimWrapper) {
-            // Animate opacity and transform of the card itself
+            console.log('[Nav Out] Initiating slide-out for oldAnimWrapper:', oldAnimWrapper);
+            // Ensure CSS transitions are active for opacity/transform on the card itself
             if (oldDescCard) {
                 oldDescCard.style.opacity = '0';
                 oldDescCard.style.transform = 'translateX(-40px)';
+                console.log('[Nav Out] Set opacity/transform on oldDescCard:', oldDescCard);
             }
-            // Animate the width of the animation wrapper to 0 to hide it
+            // Set transition explicitly for the wrapper's width
             oldAnimWrapper.style.transition = 'width 0.4s cubic-bezier(0.4,0,0.2,1)';
-            oldAnimWrapper.style.width = '0px';
+            oldAnimWrapper.style.width = '0px'; // Trigger width transition
+            console.log('[Nav Out] Set width to 0px on oldAnimWrapper.');
             let handled = false;
-            const onOldWrapperTransitionEnd = (e) => { // Event handler for transition end
+            const onOldWrapperTransitionEnd = (e) => {
                 if (handled || (e && (e.target !== oldAnimWrapper || e.propertyName !== 'width'))) {
-                    return; 
+                    return; // Ignore if already handled or not the width transition we care about
                 }
                 handled = true;
+                console.log('[Nav Out] oldAnimWrapper transitionend FIRED for width:', e);
                 oldAnimWrapper.removeEventListener('transitionend', onOldWrapperTransitionEnd);
                 if (oldAnimWrapper.parentNode) {
-                    oldAnimWrapper.remove(); // Remove from DOM
+                    oldAnimWrapper.remove();
+                    console.log('[Nav Out] oldAnimWrapper removed from DOM (transitionend).');
                 }
-                descCardFadedOut = true; // Mark old description card as faded
-                trySwapInNewContent(); // Check if ready to swap
+                descCardFadedOut = true;
+                console.log('[Nav Out] descCardFadedOut set to true (transitionend).');
+                trySwapInNewContent();
             };
             oldAnimWrapper.addEventListener('transitionend', onOldWrapperTransitionEnd);
             // Fallback timeout in case transitionend doesn't fire
             setTimeout(() => {
                 if (!handled) {
-                    handled = true; 
-                    oldAnimWrapper.removeEventListener('transitionend', onOldWrapperTransitionEnd); 
+                    console.warn('[Nav Out] Fallback: Old anim wrapper transitionend did NOT fire in time.');
+                    handled = true; // Prevent transitionend from doing double work if it fires late
+                    oldAnimWrapper.removeEventListener('transitionend', onOldWrapperTransitionEnd); // Cleanup listener
                     if (oldAnimWrapper.parentNode) {
                         oldAnimWrapper.remove();
+                        console.warn('[Nav Out] oldAnimWrapper removed from DOM (fallback).');
                     }
                     descCardFadedOut = true;
+                    console.warn('[Nav Out] descCardFadedOut set to true (fallback).');
                     trySwapInNewContent();
                 }
-            }, 450); 
+            }, 450); // Slightly longer than the 400ms transition
         } else {
-            descCardFadedOut = true; // No old description card to animate
+            console.log('[Nav Out] No oldAnimWrapper to slide out.');
+            descCardFadedOut = true; // No card to animate out
         }
-        trySwapInNewContent(); // Initial check in case there was nothing to animate out
+        trySwapInNewContent();
     }
 
     // Modify the post click handler to only open the lightbox
@@ -413,13 +578,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.target.tagName === 'A') {
                 return;
             }
-            currentLightboxIndex = idx; // Set current index here
-            
-            // Simplified call to openLightbox as it no longer needs explicit data passed
-            const type = post.dataset.type; // Still need to check if post is valid to open
-            const sourceData = post.dataset.src; // Still need to check if post is valid to open
+            currentLightboxIndex = idx;
+            const type = post.dataset.type;
+            const title = post.dataset.title;
+            const subheading = post.dataset.subheading;
+            const desktopDescription = post.dataset.description;
+            const mobileDescription = post.dataset.mobileDescription;
+            const sourceData = post.dataset.src;
             if (type && sourceData) {
-                openLightbox();
+                openLightbox(type, sourceData, title, subheading, desktopDescription, mobileDescription);
             }
         });
     });
@@ -431,49 +598,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Smooth Drag/Swipe Logic for Mobile Lightbox ---
-
-    // Applies transform to the lightbox content for swipe effect.
-    // dx, dy: horizontal and vertical translation.
-    // scale: content scaling (used for vertical swipe-to-close).
+    // --- Smooth Drag/Swipe Logic ---
     function setSwipeContentTransform(dx, dy, scale = 1) {
         if (lightboxContent) {
             lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
             const media = lightboxContent.querySelector('img, video');
-            if (media && dragIsVertical) { // Vertical drag for closing
-                // Calculate fade and scale based on vertical drag distance
-                const fadeEnd = 0.95; // Point at which fade completes
+            if (media && dragIsVertical) {
+                // Calculate fade and scale based on vertical drag
+                const fadeEnd = 0.95;
                 const dragRatio = Math.min(1, Math.abs(dy) / (window.innerHeight * fadeEnd));
-                const fade = 1 - Math.pow(dragRatio, 2); // Non-linear fade
+                const fade = 1 - Math.pow(dragRatio, 2);
                 media.style.opacity = fade;
-                lightbox.style.opacity = fade; // Fade lightbox background as well
-                
-                const minScale = 0.25; // Minimum scale before close
-                const scaleVal = 1 - (1 - minScale) * dragRatio; // Scale down media
+                // Fade out the lightbox background (not background-color, but opacity)
+                lightbox.style.opacity = fade;
+                // Scale from 1 to 0.25 as drag progresses
+                const minScale = 0.25;
+                const scaleVal = 1 - (1 - minScale) * dragRatio;
                 lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scaleVal})`;
-            } else if (media) { // Horizontal drag for navigation
-                media.style.opacity = ''; // Reset media opacity
+            } else if (media) {
+                media.style.opacity = '';
                 lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(1)`;
-                lightbox.style.opacity = ''; // Reset lightbox opacity
+                // Reset lightbox opacity if not swiping up
+                lightbox.style.opacity = '';
             }
         }
     }
 
-    // --- Touch Event State Variables ---
-    let dragStartX = 0;       // Initial X position of touch
-    let dragCurrentX = 0;     // Current X position of touch
-    let dragStartY = 0;       // Initial Y position of touch
-    let dragCurrentY = 0;     // Current Y position of touch
-    let dragging = false;       // Is a drag currently in progress?
-    let dragHasMoved = false;   // Has the touch moved significantly from start?
-    let lastDragDx = 0;       // Last calculated horizontal delta
-    let lastDragDy = 0;       // Last calculated vertical delta
-    let dragRAF = null;         // requestAnimationFrame ID for drag updates
-    let dragIsVertical = false; // Is the current drag predominantly vertical?
+    let dragStartX = 0;
+    let dragCurrentX = 0;
+    let dragStartY = 0;
+    let dragCurrentY = 0;
+    let dragging = false;
+    let dragHasMoved = false;
+    let lastDragDx = 0;
+    let lastDragDy = 0;
+    let dragRAF = null;
+    let dragIsVertical = false;
 
-    // Touch Start: Initialize drag variables
     function handleTouchStart(e) {
-        if (e.touches.length === 1) { // Single touch only
+        if (e.touches.length === 1) {
             dragStartX = e.touches[0].clientX;
             dragCurrentX = dragStartX;
             dragStartY = e.touches[0].clientY;
@@ -484,105 +647,97 @@ document.addEventListener('DOMContentLoaded', () => {
             lastDragDx = 0;
             lastDragDy = 0;
             if (lightboxContent) {
-                lightboxContent.classList.add('swiping'); // Indicate swiping state (e.g., for disabling transitions)
-                lightboxContent.classList.remove('animate'); // Remove class that enables snap-back/swipe-away transitions
+                lightboxContent.classList.add('swiping');
+                lightboxContent.classList.remove('animate');
             }
         }
     }
 
-    // Touch Move: Update content position based on drag
     function handleTouchMove(e) {
         if (!dragging || e.touches.length !== 1) return;
         dragCurrentX = e.touches[0].clientX;
         dragCurrentY = e.touches[0].clientY;
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
-
-        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragHasMoved = true; // Register movement
-
-        // Determine drag direction (vertical or horizontal) based on initial dominant movement
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragHasMoved = true;
         if (!dragIsVertical && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
             dragIsVertical = true;
         } else if (!dragIsVertical && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) {
             dragIsVertical = false;
         }
-
-        if (lightboxContent && !dragIsVertical) { // Horizontal drag
+        if (lightboxContent && !dragIsVertical) {
             setSwipeContentTransform(dx, 0, 1);
         }
-        if (lightboxContent && dragIsVertical) { // Vertical drag
-            const limitedDy = Math.min(0, dy); // Only allow upward swipe for closing effect
-            const minScale = 0.85; // Initial slight scale down on vertical drag start
+        if (lightboxContent && dragIsVertical) {
+            const limitedDy = Math.min(0, dy);
+            const minScale = 0.85;
             const scaleVal = 1 + (minScale - 1) * Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
             lastDragDx = 0;
             lastDragDy = limitedDy;
             if (dragRAF) cancelAnimationFrame(dragRAF);
-            // Use requestAnimationFrame for smoother transform updates
             dragRAF = requestAnimationFrame(() => {
                 setSwipeContentTransform(0, limitedDy, scaleVal);
+                // Do NOT change lightbox bg opacity here
             });
         }
     }
 
-    // Touch End: Determine action (swipe next/prev, swipe close, or snap back)
     function handleTouchEnd() {
         if (!dragging) return;
         dragging = false;
-        if (dragRAF) cancelAnimationFrame(dragRAF); // Cancel any pending animation frame
-
+        if (dragRAF) cancelAnimationFrame(dragRAF);
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
         const media = lightboxContent.querySelector('img, video');
-
         let triggerSwipeUp = false;
         let triggerSwipeLeft = false;
         let triggerSwipeRight = false;
-
-        // Determine if swipe thresholds are met based on media's dragged position
         if (media) {
             const rect = media.getBoundingClientRect();
+            // Calculate where the media would be after the drag
+            const draggedTop = rect.top + dy;
             const draggedBottom = rect.bottom + dy;
             const draggedLeft = rect.left + dx;
             const draggedRight = rect.right + dx;
-
-            // Swipe Up (Close): If media's bottom edge is above vertical center of viewport
+            const draggedCenter = (rect.left + rect.right) / 2 + dx;
+            // Swipe up: if bottom is above vertical center
             if (dragIsVertical && draggedBottom < window.innerHeight / 2 && Math.abs(dy) > Math.abs(dx)) {
                 triggerSwipeUp = true;
             }
-            // Swipe Left (Next): If media's right edge is left of horizontal center (and horizontal drag)
+            // Swipe left: if right edge is left of horizontal center
             if (!dragIsVertical && draggedRight < window.innerWidth / 2 && dx < 0 && Math.abs(dx) > Math.abs(dy)) {
                 triggerSwipeLeft = true;
             }
-            // Swipe Right (Previous): If media's left edge is right of horizontal center (and horizontal drag)
+            // Swipe right: if left edge is right of horizontal center
             if (!dragIsVertical && draggedLeft > window.innerWidth / 2 && dx > 0 && Math.abs(dx) > Math.abs(dy)) {
                 triggerSwipeRight = true;
             }
         }
-
-        // --- Action: Swipe Up to Close ---
+        // --- Swipe Up to Close: Content-relative threshold ---
         if (triggerSwipeUp) {
             if (lightboxContent) {
                 lightboxContent.classList.remove('swiping');
-                lightboxContent.classList.add('animate'); // Enable CSS transition for smooth close
-                const targetY = -window.innerHeight; // Target position off-screen
-                const duration = 400; // Animation duration
-                const minScale = 0.25; // Final scale before closing
-
-                // Animate content sliding up and scaling down
+                lightboxContent.classList.add('animate');
+                const currentY = dy;
+                const targetY = -window.innerHeight;
+                const remaining = Math.abs(targetY - currentY);
+                const total = Math.abs(targetY);
+                const duration = 400; // ms for smooth effect
+                const minScale = 0.25;
+                // Animate to scale 0.25 as it slides up
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateY(${targetY}px) scale(${minScale})`;
-                // Animate lightbox background and media opacity to fade out
+                // Animate lightbox opacity to 0 as it slides up
                 lightbox.style.transition = `opacity ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightbox.style.opacity = 0;
                 if (media) media.style.transition = `opacity ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 if (media) media.style.opacity = 0;
-
-                // After animation, reset styles and close lightbox
                 const onTransitionEnd = () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
                     lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
+                    // Reset lightbox opacity after close
                     lightbox.style.transition = '';
                     lightbox.style.opacity = '';
                     if (media) {
@@ -593,77 +748,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
-            return; // Action handled
+            return;
         }
-
-        // --- Action: Swipe Left (Next) ---
+        // --- Side Swipe: Content-relative threshold ---
         if (triggerSwipeLeft) {
             if (currentLightboxIndex !== null) {
-                const targetX = -window.innerWidth; // Target position off-screen left
-                // Calculate dynamic duration based on how much is left to swipe
                 const currentX = dx;
+                const targetX = -window.innerWidth;
                 const remaining = Math.abs(targetX - currentX);
                 const total = Math.abs(targetX);
-                const baseDuration = 450;
+                const baseDuration = 450; // ms for full swipe (slowed down)
                 const duration = Math.min(Math.max(180, baseDuration * (remaining / total)), 350);
-                
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateX(${targetX}px)`;
-                lightbox.style.transition = ''; // Reset lightbox opacity for side swipes
+                // Reset lightbox opacity for side swipes
+                lightbox.style.transition = '';
                 lightbox.style.opacity = '';
-
-                // After animation, reset transform and open next item
                 const onTransitionEnd = () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
                     lightboxContent.style.transform = `translateX(0)`;
-                    openLightboxByIndex(currentLightboxIndex + 1, 1, true); // skipFadeIn = true for slide
+                    openLightboxByIndex(currentLightboxIndex + 1, 1, false, false, true);
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
-            return; // Action handled
+            return;
         }
-
-        // --- Action: Swipe Right (Previous) ---
         if (triggerSwipeRight) {
             if (currentLightboxIndex !== null) {
-                const targetX = window.innerWidth; // Target position off-screen right
-                // Calculate dynamic duration
                 const currentX = dx;
+                const targetX = window.innerWidth;
                 const remaining = Math.abs(targetX - currentX);
                 const total = Math.abs(targetX);
-                const baseDuration = 450;
+                const baseDuration = 450; // ms for full swipe (slowed down)
                 const duration = Math.min(Math.max(180, baseDuration * (remaining / total)), 350);
-
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateX(${targetX}px)`;
-                lightbox.style.transition = ''; // Reset lightbox opacity
+                // Reset lightbox opacity for side swipes
+                lightbox.style.transition = '';
                 lightbox.style.opacity = '';
-
-                // After animation, reset transform and open previous item
                 const onTransitionEnd = () => {
                     lightboxContent.removeEventListener('transitionend', onTransitionEnd);
                     lightboxContent.classList.remove('animate');
                     lightboxContent.style.transition = '';
                     lightboxContent.style.transform = `translateX(0)`;
-                    openLightboxByIndex(currentLightboxIndex - 1, -1, true); // skipFadeIn = true for slide
+                    openLightboxByIndex(currentLightboxIndex - 1, -1, false, false, true);
                 };
                 lightboxContent.addEventListener('transitionend', onTransitionEnd);
             }
-            return; // Action handled
+            return;
         }
-
-        // --- No Action: Snap Back ---
-        // If no swipe threshold was met, animate content back to its original position.
+        // --- Snap back if no threshold met ---
         if (lightboxContent) {
-            lightboxContent.classList.add('animate'); // Enable CSS transition for snap back
+            lightboxContent.classList.add('animate');
             lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
-            lightboxContent.style.transition = ''; // Use default transition from .animate or specific snap-back
-            if (media) media.style.opacity = ''; // Reset media opacity
-            lightbox.style.transition = ''; // Reset lightbox opacity
+            lightboxContent.style.transition = '';
+            // Reset media opacity only
+            if (media) media.style.opacity = '';
+            // Reset lightbox opacity
+            lightbox.style.transition = '';
             lightbox.style.opacity = '';
         }
     }
@@ -769,6 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const onMediaReadyHandler = function(event) { onMediaReady(this, event.type); };
         const onErrorHandler = function(event) { 
+            console.warn('Masonry: Video failed to load or had an error:', this.src || this.currentSrc);
             onMediaReady(this, event.type); // Count it as "done" to not block layout
         };
 
@@ -818,7 +965,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loadedCount === mediaElements.length) {
                 // Layout is ready, notify parent
                 setTimeout(() => {
-                  sendMessageToParent({ type: 'projects-ready' });
+                  if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'projects-ready' }, '*');
+                  }
                 }, 0);
             }
         }
@@ -833,6 +982,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+    } else {
+        console.error("Masonry: .feed-container not found. Masonry layout not initialized.");
     }
 
     // --- Video Grid Play/Pause Logic for Maximized/Unmaximized States ---
@@ -879,9 +1030,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const maximizedClassName = 'projects-window-maximized';
 
         if (maximized) {
-            bodyEl.classList.add(maximizedClassName);
+            if (!bodyEl.classList.contains(maximizedClassName)) {
+                bodyEl.classList.add(maximizedClassName);
+                console.log('[ProjectsApp] Body class ADDED: projects-window-maximized');
+            } else {
+                console.log('[ProjectsApp] Body class ALREADY PRESENT: projects-window-maximized');
+            }
         } else {
-            bodyEl.classList.remove(maximizedClassName);
+            if (bodyEl.classList.contains(maximizedClassName)) {
+                bodyEl.classList.remove(maximizedClassName);
+                console.log('[ProjectsApp] Body class REMOVED: projects-window-maximized');
+            } else {
+                console.log('[ProjectsApp] Body class ALREADY ABSENT: projects-window-maximized');
+            }
         }
 
         // If the lightbox is currently open and the description card is visible (`.lightbox-media-wrapper` has `.desc-visible`):
@@ -894,8 +1055,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mediaWrapper && mediaWrapper.classList.contains('desc-visible')) {
                 const animWrapper = mediaWrapper.querySelector('.desc-card-anim-wrapper');
                 if (animWrapper) {
+                    console.log('[ProjectsApp] Lightbox open, desc visible. Re-evaluating animWrapper width.');
+                    // Option A: Temporarily change a style that would force re-computation
+                    // This is a bit of a hack but can sometimes kick the rendering engine.
+                    // const originalDisplay = animWrapper.style.display;
+                    // animWrapper.style.display = 'none';
+                    // void animWrapper.offsetWidth; // Force reflow
+                    // animWrapper.style.display = originalDisplay;
+
+                    // Option B: Directly re-set width based on current state if CSS isn't picking it up.
+                    // This means JS takes over from CSS for this specific update, which isn't ideal but can be a fix.
+                    // const targetWidth = maximized ? '480px' : '350px';
+                    // animWrapper.style.width = targetWidth;
+                    // console.log(`[ProjectsApp] Forcing animWrapper width to: ${targetWidth}`);
+                    
                     // Option C: Simpler - just ensure the transition property is there so it re-evaluates on next CSS match
                     animWrapper.style.transition = 'width 0.4s cubic-bezier(0.4,0,0.2,1)';
+                     console.log('[ProjectsApp] Ensured transition property on animWrapper.');
                 }
             }
         }
@@ -918,8 +1094,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('message', (event) => {
         if (event.data && typeof event.data.type === 'string') {
             if (event.data.type === 'window:maximized') {
+                console.log('[ProjectsApp] Received window:maximized message');
                 setMaximizedState(true);
             } else if (event.data.type === 'window:unmaximized') {
+                console.log('[ProjectsApp] Received window:unmaximized message');
                 setMaximizedState(false);
             }
             // Keep existing toolbar-action handling
@@ -928,13 +1106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
                     let description = '';
                     if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
-                        // If on mobile, prefer mobileDescription, fallback to desktopDescription
-                        // If on desktop, always use desktopDescription for the animated card
-                        if (!isDesktop() && allPosts[currentLightboxIndex].dataset.mobileDescription) {
-                            description = allPosts[currentLightboxIndex].dataset.mobileDescription;
-                        } else {
-                            description = allPosts[currentLightboxIndex].dataset.description;
-                        }
+                        description = allPosts[currentLightboxIndex].dataset.description;
                     }
                     toggleLightboxOverlay(description, wrapper);
                 } else if (event.data.action === 'navigateHome') {
@@ -944,12 +1116,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (event.data.action === 'navigatePrevious') {
                     if (lightbox && lightbox.style.display === 'flex' && allPosts.length > 0) {
                         let newIndex = (currentLightboxIndex - 1 + allPosts.length) % allPosts.length;
-                        openLightboxByIndex(newIndex, -1);
+                        openLightboxByIndex(newIndex, -1, true);
                     }
                 } else if (event.data.action === 'navigateNext') {
                     if (lightbox && lightbox.style.display === 'flex' && allPosts.length > 0) {
                         let newIndex = (currentLightboxIndex + 1) % allPosts.length;
-                        openLightboxByIndex(newIndex, 1);
+                        openLightboxByIndex(newIndex, 1, true);
                     }
                 }
             }

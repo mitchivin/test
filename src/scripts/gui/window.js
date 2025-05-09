@@ -182,16 +182,18 @@ export default class WindowManager {
         
         if (event.data && event.data.type === 'lightbox-state') {
             const projectsWindow = this.windows['internet-window'];
-            let viewDescBtn, backBtn, forwardBtn;
+            let viewDescBtn, backBtn, forwardBtn, externalLinkBtn;
 
             if (projectsWindow) {
                  viewDescBtn = projectsWindow.querySelector('.toolbar-button.view-description');
                  backBtn = projectsWindow.querySelector('.toolbar-button.previous');
                  forwardBtn = projectsWindow.querySelector('.toolbar-button.next');
-            } else {
+                 externalLinkBtn = projectsWindow.querySelector('.toolbar-button.viewExternalLink'); 
+            } else { 
                 viewDescBtn = document.querySelector('.toolbar-button.view-description');
                 backBtn = document.querySelector('.toolbar-button.previous');
                 forwardBtn = document.querySelector('.toolbar-button.next');
+                externalLinkBtn = document.querySelector('.toolbar-button.viewExternalLink');
             }
 
             if (viewDescBtn) {
@@ -202,6 +204,41 @@ export default class WindowManager {
             }
             if (forwardBtn) {
                 forwardBtn.classList.toggle('disabled', !event.data.open);
+            }
+            
+            if (externalLinkBtn) {
+                const iconImg = externalLinkBtn.querySelector('img');
+                const textSpan = externalLinkBtn.querySelector('span');
+
+                if (event.data.open && event.data.linkType && event.data.linkUrl) {
+                    externalLinkBtn.classList.remove('disabled');
+                    externalLinkBtn.dataset.urlToOpen = event.data.linkUrl; 
+
+                    switch (event.data.linkType) {
+                        case 'instagram':
+                            if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
+                            if (textSpan) textSpan.textContent = 'View on Instagram';
+                            break;
+                        case 'behance':
+                            if (iconImg) iconImg.src = './assets/gui/start-menu/behance.webp';
+                            if (textSpan) textSpan.textContent = 'View on Behance';
+                            break;
+                        case 'github':
+                            if (iconImg) iconImg.src = './assets/gui/start-menu/github.webp';
+                            if (textSpan) textSpan.textContent = 'View on GitHub';
+                            break;
+                        default: // Fallback to Instagram or a generic state if linkType is unknown
+                            if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
+                            if (textSpan) textSpan.textContent = 'View Link'; 
+                            break;
+                    }
+                } else {
+                    externalLinkBtn.classList.add('disabled');
+                    delete externalLinkBtn.dataset.urlToOpen; 
+                    // Reset to default (Instagram) appearance when no link or lightbox closed
+                    if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
+                    if (textSpan) textSpan.textContent = 'View on Instagram';
+                }
             }
         }
 
@@ -729,17 +766,24 @@ export default class WindowManager {
     // const programName = windowElement.getAttribute("data-program"); // Context if needed
 
     switch (action) {
-        case 'openInternet': // For "My Projects" on "About Me" toolbar (desktop)
-        case 'openProjects': // For "My Projects" on "About Me" toolbar (mobile)
+        case 'openInternet': 
+        case 'openProjects': 
             this.openProgram('internet');
             break;
-        case 'openResume':   // For "My Resume" on "About Me" toolbar (desktop & mobile)
+        case 'openExternalLink': // Renamed from openInstagram
+            const buttonElement = windowElement.querySelector('.toolbar-button.viewExternalLink');
+            if (buttonElement && buttonElement.dataset.urlToOpen && !buttonElement.classList.contains('disabled')) {
+                window.open(buttonElement.dataset.urlToOpen, '_blank');
+            } else {
+                // console.warn("External link not found or button improperly clicked.");
+            }
+            break;
+        case 'openResume':   
             this.openProgram('resume');
             break;
         case 'openContact': // For "Contact Me" on "My Resume" toolbar
             this.openProgram('contact');
             break;
-        // For actions that need to be handled by the specific app's iframe:
         case 'saveResume':
             const link = document.createElement('a');
             link.href = './assets/apps/resume/resumeMitchIvin.pdf';

@@ -410,7 +410,16 @@ const programData = {
           enabled: true,
           icon: "./assets/gui/toolbar/desc.webp",
           text: "View Description",
-          action: "viewDescription"
+          action: "viewDescription",
+        },
+        { type: "separator" },
+        {
+          key: "viewExternalLink",
+          text: "View on Instagram",
+          icon: "./assets/gui/start-menu/instagram.webp",
+          action: "openExternalLink",
+          enabled: false,
+          desktopOnly: true,
         },
       ],
     },
