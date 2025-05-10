@@ -224,6 +224,9 @@ export default class Taskbar {
 
 // --- Balloon Tooltip for Network Icon ---
 export function showNetworkBalloon() {
+  // Prevent balloon if login screen is visible
+  const loginScreen = document.getElementById("login-screen");
+  if (loginScreen && loginScreen.style.display !== "none" && loginScreen.style.opacity !== "0") return;
   if (document.getElementById("balloon-root")) return;
   const icon = document.querySelector(".tray-network-icon");
   if (!icon) return;

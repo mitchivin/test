@@ -741,17 +741,6 @@
 
 /* Media query to disable log off button on mobile */
 @media (max-width: 768px) {
-  .footer-button[data-action="log-off"] {
-    opacity: 0.5;
-    pointer-events: none; /* Prevent clicks */
-    cursor: default;
-    filter: grayscale(1);
-  }
-
-  .footer-button[data-action="log-off"]:hover {
-    background-color: transparent; /* Remove hover effect */
-  }
-
   .menu-item.disabled {
     opacity: 0.5;
     pointer-events: none;
