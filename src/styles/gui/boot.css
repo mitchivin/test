@@ -9,18 +9,13 @@
    1. Overlay Screens (Boot & Login)
    ========================= */
 /* Common styles for overlay screens */
-#pre-boot-overlay,
 #boot-screen,
-#boot-fadeout-overlay,
-#login-screen,
-.welcome-message {
+#login-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: calc(var(--real-vh, 1vh) * 100) !important;
-  min-height: calc(var(--real-vh, 1vh) * 100) !important;
-  max-height: calc(var(--real-vh, 1vh) * 100) !important;
+  height: 100%;
   z-index: 10000; /* Above everything else */
   display: flex;
   justify-content: center;
@@ -709,5 +704,17 @@
   }
   .mobile-bottom-detail {
     display: inline;
+  }
+}
+
+@media (max-width: 768px) {
+  #login-screen,
+  .login-screen,
+  .welcome-message {
+    height: calc(var(--real-vh, 1vh) * 100) !important;
+    width: 100vw !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    box-sizing: border-box !important;
   }
 }
