@@ -21,14 +21,6 @@
   --z-taskbar: 500;
 }
 
-/* Common font for UI elements */
-.taskbar,
-.start-menu,
-.menu-item,
-.all-programs-item {
-  /* font-family: Tahoma, Arial, sans-serif; */
-}
-
 /* =========================
    2. Taskbar Container
    ========================= */
