@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="./src/styles/gui/boot.css" />
   </head>
   <body>
+    <div id="pre-boot-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20000;"></div>
     <div id="boot-screen">
       <div class="loading-container">
         <img
@@ -56,6 +57,7 @@
         <img src="./assets/gui/boot/boot-wordmark.webp" alt="Boot Wordmark" />
       </div>
     </div>
+    <div id="boot-fadeout-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20000;opacity:0;transition:opacity 0.5s;"></div>
     <div id="login-screen">
       <div class="login-screen" style="display: block">
         <div class="login-screen-inner">
@@ -98,6 +100,9 @@
           <span>After you log on, the system's yours to explore.</span>
           <span>Every detail has been designed with a purpose.</span>
         </div>
+      </div>
+      <div class="welcome-message" style="display:none;">
+        <span class="welcome-image-fallback">Welcome</span>
       </div>
     </div>
     <div class="desktop">

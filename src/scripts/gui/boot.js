@@ -63,37 +63,52 @@ export function initBootSequence(eventBus, EVENTS) {
    * @private
    */
   function startBootSequence() {
-    desktop.style.opacity = "0";
-    desktop.style.pointerEvents = "none";
-    loginScreen.style.display = "none";
-    loginScreen.style.opacity = "0";
-    loginScreen.style.pointerEvents = "none";
-    if (crtScanline) crtScanline.style.display = "none";
-    if (crtVignette) crtVignette.style.display = "none";
-    if (!bootScreen) return;
-    bootScreen.style.display = "flex";
-    bootScreen.style.opacity = "1";
-    bootScreen.style.pointerEvents = "auto";
-
-    const minBootTime = 3000; // 3 seconds minimum
-    const bootStart = Date.now();
-
-    // Remove preloading: just wait minBootTime
     setTimeout(() => {
-      bootScreen.style.display = "none";
-      if (isMobileDevice()) {
-        handleLoginSuccess();
-      } else {
-        loginScreen.style.display = "flex";
-        loginScreen.style.opacity = "1";
-        loginScreen.style.pointerEvents = "auto";
-        const loginContent = loginScreen.querySelector(".login-screen");
-        if (loginContent) {
-          loginContent.style.opacity = "1";
-        }
-        attachLoginScreenHandlers();
-      }
-    }, minBootTime);
+      desktop.style.opacity = "0";
+      desktop.style.pointerEvents = "none";
+      if (crtScanline) crtScanline.style.display = "none";
+      if (crtVignette) crtVignette.style.display = "none";
+      if (!bootScreen) return;
+      bootScreen.style.display = "flex";
+      bootScreen.style.opacity = "1";
+      bootScreen.style.pointerEvents = "auto";
+
+      const minBootTime = 5500; // 5.5 seconds minimum
+      const bootFadeoutTime = 1000; // 1s for fadeout
+      const bootStart = Date.now();
+
+      setTimeout(() => {
+        // Fade out boot screen elements first
+        bootScreen.classList.remove("boot-fade-in");
+        setTimeout(() => {
+          // Fade overlay to black
+          const fadeoutOverlay = document.getElementById("boot-fadeout-overlay");
+          if (fadeoutOverlay) {
+            fadeoutOverlay.style.display = "block";
+            void fadeoutOverlay.offsetWidth;
+            fadeoutOverlay.style.transition = "opacity 0.5s";
+            fadeoutOverlay.style.opacity = "1";
+            setTimeout(() => {
+              // Overlay is now fully black. Hide boot, show login.
+              bootScreen.style.display = "none";
+              // Always show login screen, regardless of device
+              loginScreen.style.display = "flex";
+              loginScreen.style.opacity = "1";
+              loginScreen.style.pointerEvents = "auto";
+              const loginContent = loginScreen.querySelector(".login-screen");
+              if (loginContent) loginContent.style.opacity = "1";
+              attachLoginScreenHandlers();
+              // Fade overlay out
+              fadeoutOverlay.style.opacity = "0";
+              setTimeout(() => {
+                fadeoutOverlay.style.display = "none";
+                // Do NOT call handleLoginSuccess() automatically for any device
+              }, 500); // fade-out duration
+            }, 150 + 1000); // 150ms fade to black, 1s fully black
+          }
+        }, 250); // Wait for boot element fade-out
+      }, minBootTime - 150 - 1000 - 250); // Start fadeout 1.4s before boot ends
+    }, 1000); // Delay boot by 1s for pre-boot overlay
   }
 
   /**
@@ -101,30 +116,60 @@ export function initBootSequence(eventBus, EVENTS) {
    * @private
    */
   function handleLoginSuccess() {
-    loginScreen.style.display = "none";
-    loginScreen.style.pointerEvents = "none";
-    loginScreen.style.opacity = "0";
-    desktop.style.opacity = "1";
-    desktop.style.pointerEvents = "auto";
-    if (crtScanline) crtScanline.style.display = "block";
-    if (crtVignette) crtVignette.style.display = "block";
-    document.dispatchEvent(new CustomEvent("reinitScanline"));
-    if (!isMobileDevice()) {
-      try {
-        const loginSound = new Audio("./assets/sounds/login.wav");
-        loginSound.currentTime = 0;
-        loginSound.play();
-      } catch {}
-    }
-    sessionStorage.setItem("logged_in", "true");
-    setTimeout(() => {
-      if (
-        typeof showNetworkBalloon === "function" &&
-        !document.getElementById("balloon-root")
-      ) {
-        showNetworkBalloon();
+    // Always run the login and welcome sequence, even on mobile
+    const loginContent = loginScreen.querySelector(".login-screen");
+    const welcomeMsg = loginScreen.querySelector(".welcome-message");
+    // Only fade out: .back-gradient (user icon/text), .turn-off, .right-bottom, .xp-logo-image, .left-text
+    const fadeTargets = [
+      loginContent.querySelector(".back-gradient"),
+      loginContent.querySelector(".turn-off"),
+      loginContent.querySelector(".right-bottom"),
+      loginContent.querySelector(".xp-logo-image"),
+      loginContent.querySelector(".left-text")
+    ];
+    fadeTargets.forEach(el => {
+      if (el) {
+        el.style.transition = "opacity 0.15s";
+        el.style.opacity = "0";
       }
-    }, 3000);
+    });
+    // After fade out, wait 0.5s, then show welcome message
+    setTimeout(() => {
+      fadeTargets.forEach(el => { if (el) el.style.display = "none"; });
+      // 0.5s delay before welcome fades in
+      setTimeout(() => {
+        welcomeMsg.style.display = "block";
+        setTimeout(() => {
+          welcomeMsg.classList.add("visible");
+        }, 10);
+      }, 500);
+      // After welcome message is visible, proceed to desktop
+      setTimeout(() => {
+        welcomeMsg.classList.remove("visible");
+        loginScreen.style.display = "none";
+        loginScreen.style.pointerEvents = "none";
+        loginScreen.style.opacity = "0";
+        desktop.style.opacity = "1";
+        desktop.style.pointerEvents = "auto";
+        if (crtScanline) crtScanline.style.display = "block";
+        if (crtVignette) crtVignette.style.display = "block";
+        document.dispatchEvent(new CustomEvent("reinitScanline"));
+        try {
+          const loginSound = new Audio("./assets/sounds/login.wav");
+          loginSound.currentTime = 0;
+          loginSound.play();
+        } catch {}
+        sessionStorage.setItem("logged_in", "true");
+        setTimeout(() => {
+          if (
+            typeof showNetworkBalloon === "function" &&
+            !document.getElementById("balloon-root")
+          ) {
+            showNetworkBalloon();
+          }
+        }, 3000);
+      }, 2000 + 500);
+    }, 150); // Wait for fade out (0.15s)
   }
 
   // Event listener for communication with login iframe
@@ -166,6 +211,27 @@ export function initBootSequence(eventBus, EVENTS) {
       loginContent.style.opacity = "1";
       loginContent.style.display = "block";
       loginContent.style.pointerEvents = "auto";
+      // Restore all faded/hidden elements
+      const restoreTargets = [
+        loginContent.querySelector(".back-gradient"),
+        loginContent.querySelector(".turn-off"),
+        loginContent.querySelector(".right-bottom"),
+        loginContent.querySelector(".xp-logo-image"),
+        loginContent.querySelector(".left-text")
+      ];
+      restoreTargets.forEach(el => {
+        if (el) {
+          el.style.opacity = "1";
+          el.style.display = "";
+          el.style.transition = "";
+        }
+      });
+    }
+    // Hide welcome message if visible
+    const welcomeMsg = loginScreen.querySelector(".welcome-message");
+    if (welcomeMsg) {
+      welcomeMsg.classList.remove("visible");
+      welcomeMsg.style.display = "none";
     }
     sessionStorage.setItem("logged_in", "false");
     attachLoginScreenHandlers();
@@ -199,3 +265,14 @@ export function initBootSequence(eventBus, EVENTS) {
 // ==================================================
 // END Boot Sequence Module
 // ==================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  const preBoot = document.getElementById("pre-boot-overlay");
+  const bootScreen = document.getElementById("boot-screen");
+  if (preBoot && bootScreen) {
+    setTimeout(() => {
+      preBoot.parentNode.removeChild(preBoot);
+      bootScreen.classList.add("boot-fade-in");
+    }, 1000);
+  }
+});
