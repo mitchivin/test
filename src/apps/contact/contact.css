@@ -52,7 +52,7 @@ label {
     font-family: inherit;
     font-size: inherit;
     border: 1px solid #7b9ebd;
-    padding: 3px 8px;
+    padding: 5px 8px;
     background-color: #ffffff;
     box-sizing: border-box;
     border-radius: 2px;
@@ -74,7 +74,8 @@ label {
 .input {
     flex: 1; /* Allow input to grow and fill remaining space */
     min-width: 0; /* Allow input to shrink if needed */
-    height: 22px; /* Maintain consistent input height */
+    height: px; /* Maintain consistent input height */
+    padding-left: 8px !important;
 }
 
 .input.readonly {
@@ -88,7 +89,6 @@ label {
     flex: 1; /* Grow to fill remaining vertical space */
     resize: none;
     line-height: 1.4;
-    padding: 5px 8px; /* Slightly more vertical padding */
     min-height: 50px; /* Ensure it's not too small initially */
     overflow: auto; /* Explicitly handle overflow/scrollbar */
     border: none; /* Remove the inherited border */
@@ -97,4 +97,17 @@ label {
         inset 1.75px 1.75px 0 #888,
         inset -1.75px -1.75px 0 #fff,
         inset 0 0 3px 1px #d6d6d6;
+}
+
+@media (pointer: coarse) and (hover: none) {
+  .input,
+  .textarea {
+    font-size: 16px !important;
+    min-height: 2em;
+    padding: 8px 8px;
+    line-height: 1.2;
+  }
+  .textarea {
+    min-height: em;
+  }
 } 

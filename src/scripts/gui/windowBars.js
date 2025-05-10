@@ -234,6 +234,17 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   const isMobile = isMobileDevice && isMobileDevice();
   let buttons = toolbarConfig.buttons;
 
+  // On mobile, for Contact Me only, filter out disabled buttons
+  if (isMobile && windowId === 'contact-window') {
+    // Remove disabled buttons
+    buttons = buttons.filter(btn => btn.enabled !== false || btn.type === 'separator');
+    // Remove the separator immediately after New Message
+    const newMsgIdx = buttons.findIndex(btn => btn.key === 'new');
+    if (newMsgIdx !== -1 && buttons[newMsgIdx + 1] && buttons[newMsgIdx + 1].type === 'separator') {
+      buttons.splice(newMsgIdx + 1, 1);
+    }
+  }
+
   // --- Add close button as first item on mobile only ---
   let mobileCloseBtn = null;
   if (isMobile) {

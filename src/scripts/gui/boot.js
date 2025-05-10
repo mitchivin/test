@@ -218,11 +218,17 @@ export function initBootSequence(eventBus, EVENTS) {
         loginContent.querySelector(".turn-off"),
         loginContent.querySelector(".right-bottom"),
         loginContent.querySelector(".xp-logo-image"),
-        loginContent.querySelector(".left-text")
+        loginContent.querySelector(".left-text"),
+        loginContent.querySelector(".login-separator.mobile-only")
       ];
       restoreTargets.forEach(el => {
         if (el) {
-          el.style.opacity = "1";
+          // Set default opacity for .login-separator.mobile-only, else 1
+          if (el.classList.contains('login-separator') && el.classList.contains('mobile-only')) {
+            el.style.opacity = '0.25';
+          } else {
+            el.style.opacity = '1';
+          }
           el.style.display = "";
           el.style.transition = "";
         }

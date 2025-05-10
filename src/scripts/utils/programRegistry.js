@@ -464,13 +464,13 @@ const programData = {
           text: "New Message",
           action: "newMessage",
         },
+        { type: "separator" },
         {
           key: "attach",
           enabled: false,
           icon: "./assets/gui/toolbar/attach.webp",
           text: null,
         },
-        { type: "separator" },
         {
           key: "sign",
           enabled: false,
