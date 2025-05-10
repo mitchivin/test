@@ -233,7 +233,7 @@ export function showNetworkBalloon() {
   const balloonRoot = document.createElement("div");
   balloonRoot.id = "balloon-root";
   balloonRoot.style.position = "absolute";
-  balloonRoot.style.zIndex = "10010";
+  balloonRoot.style.zIndex = "1400";
   document.body.appendChild(balloonRoot);
   const isMobile = isMobileDevice && isMobileDevice();
   const headerText = "Welcome to my Portfolio";
