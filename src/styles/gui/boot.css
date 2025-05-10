@@ -222,7 +222,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 0;
     margin-left: auto;
     margin-right: auto;
   }
@@ -268,7 +268,7 @@
     min-height: 160px; /* Adjust as needed for vertical space */
   }
   .login-screen .back-gradient .user {
-    margin: 0 0 10px 0; /* space below icon */
+    margin: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -296,6 +296,7 @@
     flex-direction: column;
     align-items: center;
     margin: 0 auto 32px auto;
+    margin-bottom: 0 !important;
   }
   #login-screen .login-screen .login-screen-inner .login-screen-center .right {
     margin-bottom: 0;
@@ -326,6 +327,32 @@
     text-align: center;
     display: flex;
     flex-direction: column;
+  }
+  .back-gradient .user {
+    margin-bottom: 0 !important;
+  }
+  .back-gradient .user img {
+    margin-bottom: 12px !important;
+  }
+
+  .login-screen {
+    border: 2px solid red !important;
+  }
+  .login-screen-inner {
+    border: 2px solid orange !important;
+  }
+  .login-screen-center {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    height: 100% !important;
+    gap: 7vw !important;
+  }
+  .login-screen-center .left,
+  hr.login-separator.mobile-only,
+  .back-gradient {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
   }
 }
 
@@ -645,16 +672,9 @@
   );
 }
 @media (max-width: 768px) {
-  .login-separator {
-    margin: 60px 0 0 0;
-    max-width: 75%;
-    background: linear-gradient(
-      to right,
-      rgba(88,124,219,0),
-      #bad7f8 40%,
-      #bad7f8 60%,
-      rgba(88,124,219,0)
-    );
+  hr.login-separator.mobile-only {
+    margin-top: 12px !important;
+    margin-bottom: 0 !important;
   }
 }
 
@@ -666,7 +686,7 @@
     display: block;
   }
   .login-separator {
-    margin: 60px 0 0 0;
+    margin: 0 !important;
     max-width: 75%;
   }
 }
@@ -738,5 +758,25 @@
   .welcome-message .welcome-image-fallback {
     margin: 0 !important;
     padding: 0 !important;
+  }
+  .login-separator {
+    margin: 0 !important;
+    max-width: 75%;
+    background: linear-gradient(
+      to right,
+      rgba(88,124,219,0),
+      #bad7f8 40%,
+      #bad7f8 60%,
+      rgba(88,124,219,0)
+    );
+  }
+  .back-gradient {
+    margin: 0 !important;
+  }
+  .back-gradient .user {
+    margin: 0 !important;
+  }
+  .login-screen .login-screen-center .left {
+    margin-bottom: 0;
   }
 }
