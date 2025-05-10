@@ -168,7 +168,7 @@
     display: flex;
     justify-content: stretch;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
     padding: 0;
     margin: 0;
     margin-bottom: clamp(30px, 16vh, calc(120px + var(--taskbar-height, 30px)));
@@ -180,7 +180,7 @@
     width: 95vw;
     justify-content: stretch;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     padding: 0;
     margin: 0;
     box-sizing: border-box;
