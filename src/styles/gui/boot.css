@@ -616,7 +616,7 @@
   transition: opacity 0.7s;
   font-family: Tahoma, Arial, sans-serif;
   letter-spacing: 2px;
-  text-shadow: 1px 1px 8px #000;
+  text-shadow: 1px 1px 3px #000;
   display: none;
 }
 .welcome-message.visible {
@@ -651,7 +651,7 @@
   font-size: 3rem;
   color: #fff;
   text-align: center;
-  text-shadow: 2px 2px 8px #000a, 0 1px 0 #3366cc;
+  text-shadow: 1px 1px 3px #000a, 0 1px 0 #3366cc;
   border-radius: 8px;
   padding: 32px 0;
   margin: 0 auto;
