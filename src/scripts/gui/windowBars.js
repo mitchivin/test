@@ -245,6 +245,36 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
     }
   }
 
+  // On mobile, for About Me only, filter out disabled buttons and remove the separator to the right of My Resume
+  if (isMobile && windowId === 'about-window') {
+    buttons = buttons.filter(btn => btn.enabled !== false || btn.type === 'separator');
+    // Remove all separators before and after My Projects and My Resume
+    const projectsIdx = buttons.findIndex(btn => btn.key === 'projects');
+    const resumeIdx = buttons.findIndex(btn => btn.key === 'resume');
+    // Remove separator before My Resume if present
+    if (resumeIdx > 0 && buttons[resumeIdx - 1].type === 'separator') {
+      buttons.splice(resumeIdx - 1, 1);
+      // Adjust indices after removal
+      if (projectsIdx < resumeIdx) resumeIdx--;
+    }
+    // Remove separator after My Resume if present
+    if (buttons[resumeIdx + 1] && buttons[resumeIdx + 1].type === 'separator') {
+      buttons.splice(resumeIdx + 1, 1);
+    }
+    // Ensure separator exists between Projects and Resume
+    if (projectsIdx !== -1 && resumeIdx !== -1 && resumeIdx - projectsIdx === 1) {
+      buttons.splice(resumeIdx, 0, { type: 'separator' });
+    }
+  }
+
+  // On mobile, for My Projects only, remove the separator to the right of view-description
+  if (isMobile && windowId === 'internet-window') {
+    const viewDescIdx = buttons.findIndex(btn => btn.key === 'view-description');
+    if (viewDescIdx !== -1 && buttons[viewDescIdx + 1] && buttons[viewDescIdx + 1].type === 'separator') {
+      buttons.splice(viewDescIdx + 1, 1);
+    }
+  }
+
   // --- Add close button as first item on mobile only ---
   let mobileCloseBtn = null;
   if (isMobile) {
