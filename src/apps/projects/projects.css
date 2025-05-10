@@ -341,13 +341,13 @@ body {
       max-width: 100%; /* Ensures it doesn't exceed its parent's width constraints */
       margin-left: auto; /* To center the 90vw block */
       margin-right: auto; /* To center the 90vw block */
-      border: 2px solid green !important; /* TEMP TEST BORDER */
+      /* border: 2px solid green !important; */ /* TEMP TEST BORDER REMOVED */
     }
     .lightbox-desc-card { /* NOW REDUCED TO ONLY DESKTOP-SPECIFIC OVERRIDES */
       background: #ecececb6 !important;
       color: #222 !important;
       width: 95% !important; /* Changed from 90% */
-      border: 2px solid red !important; /* TEMP TEST BORDER */
+      /* border: 2px solid red !important; */ /* TEMP TEST BORDER REMOVED */
       /* Height should be determined by content and parent flex alignment (stretch) */
     }
     body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-desc-card {
@@ -700,7 +700,7 @@ body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-de
   overflow: hidden;
   /* transition: width 0.4s cubic-bezier(0.4,0,0.2,1); */ /* Removing direct width transition */
   display: flex; /* Remains flex to hold the desc-card */
-  border: 2px solid blue !important; /* TEMP TEST BORDER */
+  /* border: 2px solid blue !important; */ /* TEMP TEST BORDER REMOVED */
   flex: 1 1 auto; /* Takes remaining space, can shrink, auto basis */
   /* Add a margin to separate from media, if they are side-by-side */
   margin-left: 15px; /* Example margin */

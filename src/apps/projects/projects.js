@@ -234,7 +234,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function createLightboxOverlay(text, position = 'bottom', linkType, linkUrl) {
         const overlay = document.createElement('div');
         overlay.className = position === 'top' ? 'lightbox-title-overlay' : 'lightbox-description-overlay';
-        overlay.style.pointerEvents = 'none'; // Always non-blocking by default
+        if (position === 'top') {
+            overlay.style.pointerEvents = 'auto'; // Allow interaction for links in the top overlay
+        } else {
+            overlay.style.pointerEvents = 'none'; // Non-blocking for description overlay
+        }
 
         if (position === 'top') {
             const titleSpan = createEl('span', 'lightbox-overlay-title-text', text || '');
@@ -252,6 +256,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 iconImg.alt = `Open project on ${linkType}`;
                 
                 iconLink.appendChild(iconImg);
+
+                // Prevent tap/click on the icon link from toggling/hiding the overlay
+                iconLink.addEventListener('touchend', function(e) {
+                    e.stopPropagation();
+                });
+                iconLink.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+
                 overlay.appendChild(iconLink);
             }
         } else { // For bottom overlay, it's just text
@@ -1397,21 +1410,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 // It's a tap
                 const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
                 if (!wrapper) return;
-                // Check if overlays are currently visible
-                const titleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
-                const descOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
-                if (titleOverlay || descOverlay) {
-                    // Hide overlays
-                    toggleMobileOverlays('', '', wrapper); // This will hide both overlays
+                const video = lightboxContent.querySelector('video');
+                if (video) {
+                    // Only apply special logic for videos
+                    const rect = video.getBoundingClientRect();
+                    const touchY = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : null;
+                    if (touchY !== null) {
+                        const yPercent = ((touchY - rect.top) / rect.height) * 100;
+                        if (yPercent < 30 || yPercent > 70) {
+                            e.preventDefault(); // Prevent video controls from showing when toggling overlays
+                            // Top 30% or bottom 30%: toggle overlays
+                            const titleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
+                            const descOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
+                            if (titleOverlay || descOverlay) {
+                                // Hide overlays
+                                toggleMobileOverlays('', '', wrapper); // This will hide both overlays
+                            } else {
+                                // Show overlays for current post
+                                if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
+                                    const postData = allPosts[currentLightboxIndex].dataset;
+                                    const title = postData.title || '';
+                                    const desc = postData.mobileDescription || postData.description || '';
+                                    const linkType = postData.linkType;
+                                    const linkUrl = postData.linkUrl;
+                                    toggleMobileOverlays(title, desc, wrapper, linkType, linkUrl);
+                                }
+                            }
+                        }
+                        // If in middle 40%, do nothing (let event bubble to video controls)
+                        return;
+                    }
                 } else {
-                    // Show overlays for current post
-                    if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
-                        const postData = allPosts[currentLightboxIndex].dataset;
-                        const title = postData.title || '';
-                        const desc = postData.mobileDescription || postData.description || '';
-                        const linkType = postData.linkType;
-                        const linkUrl = postData.linkUrl;
-                        toggleMobileOverlays(title, desc, wrapper, linkType, linkUrl);
+                    // Not a video (image): keep old behavior (toggle overlays on any tap)
+                    const titleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
+                    const descOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
+                    if (titleOverlay || descOverlay) {
+                        // Hide overlays
+                        toggleMobileOverlays('', '', wrapper); // This will hide both overlays
+                    } else {
+                        // Show overlays for current post
+                        if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
+                            const postData = allPosts[currentLightboxIndex].dataset;
+                            const title = postData.title || '';
+                            const desc = postData.mobileDescription || postData.description || '';
+                            const linkType = postData.linkType;
+                            const linkUrl = postData.linkUrl;
+                            toggleMobileOverlays(title, desc, wrapper, linkType, linkUrl);
+                        }
                     }
                 }
             }
