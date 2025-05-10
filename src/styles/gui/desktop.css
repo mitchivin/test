@@ -171,7 +171,7 @@
     gap: 16px;
     padding: 0;
     margin: 0;
-    margin-bottom: clamp(30px, 16vh, 120px); + var(--taskbar-height, 30px));
+    margin-bottom: clamp(30px, 16vh, calc(120px + var(--taskbar-height, 30px)));
     box-sizing: border-box;
     height: auto;
   }
