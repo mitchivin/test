@@ -336,10 +336,10 @@
   }
 
   .login-screen {
-    border: 2px solid red !important;
+    /* Removed: border: 2px solid red !important; from .login-screen */
   }
   .login-screen-inner {
-    border: 2px solid orange !important;
+    /* Removed: border: 2px solid orange !important; from .login-screen-inner */
   }
   .login-screen-center {
     display: flex !important;
