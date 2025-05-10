@@ -354,6 +354,11 @@
     margin-top: 0 !important;
     margin-bottom: 0 !important;
   }
+  hr.login-separator.mobile-only {
+    margin-top: 12px !important;
+    margin-bottom: 0 !important;
+    transition: opacity 0.4s !important;
+  }
 }
 
 /* ==================================================

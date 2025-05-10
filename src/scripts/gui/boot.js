@@ -125,7 +125,8 @@ export function initBootSequence(eventBus, EVENTS) {
       loginContent.querySelector(".turn-off"),
       loginContent.querySelector(".right-bottom"),
       loginContent.querySelector(".xp-logo-image"),
-      loginContent.querySelector(".left-text")
+      loginContent.querySelector(".left-text"),
+      loginContent.querySelector(".login-separator.mobile-only")
     ];
     fadeTargets.forEach(el => {
       if (el) {
