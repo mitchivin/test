@@ -1282,10 +1282,19 @@ document.addEventListener('DOMContentLoaded', () => {
         function checkAllLoaded() {
             loadedCount++;
             if (loadedCount === mediaElements.length) {
-                // Layout is ready, notify parent
+                // All media elements have reported (loaded or error)
+                // Ensure masonry layout is applied with final dimensions.
+                applyMasonryLayout();
+
+                // Short delay to allow rendering and layout stabilization before reveal
                 setTimeout(() => {
-                  sendMessageToParent({ type: 'projects-ready' });
-                }, 0);
+                    const feedContainer = document.querySelector('.feed-container');
+                    if (feedContainer) {
+                        feedContainer.classList.add('loaded');
+                    }
+                    // Notify parent that projects app content is ready and visible
+                    sendMessageToParent({ type: 'projects-ready' });
+                }, 100); // 100ms delay, adjust if necessary
             }
         }
         if (mediaElements.length > 0) {

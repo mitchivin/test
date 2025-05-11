@@ -490,78 +490,93 @@ export default class WindowManager {
    * @returns {void}
    */
   openProgram(programName) {
+    if (!programName || !this.programData[programName]) {
+      console.warn(`Program "${programName}" not found in registry.`);
+      return;
+    }
+
     const program = this.programData[programName];
-    if (!program || !program.id) {
-      return;
-    }
+    let windowElement = document.getElementById(program.id);
 
-    const existingWindow = document.getElementById(program.id);
-    if (existingWindow) {
-      // If minimized, restore and bring to front
-      if (
-        existingWindow.windowState &&
-        existingWindow.windowState.isMinimized
-      ) {
-        this.restoreWindow(existingWindow);
+    if (windowElement) {
+      if (windowElement.classList.contains("minimized")) {
+        this.restoreWindow(windowElement);
       } else {
-        this.bringToFront(existingWindow);
+        this.bringToFront(windowElement);
+        this._handleWindowFocus(windowElement.id); // Ensure focus on existing
       }
-      return;
+      this.eventBus.publish(EVENTS.PROGRAM_OPENED, { programName, windowId: windowElement.id });
+      return windowElement;
     }
 
-    if (program.isOpen) {
-      program.isOpen = false;
-    }
-
-    const windowElement = this._createWindowElement(program);
-    if (!windowElement) return;
-
-    // --- Force cascade for internet app ---
-    if (programName === "internet") {
-      windowElement.style.left = "";
-      windowElement.style.top = "";
-      if (windowElement.windowState) {
-        windowElement.windowState.originalStyles.left = "";
-        windowElement.windowState.originalStyles.top = "";
-      }
-    }
-
-    // Add opening animation class before appending
-    windowElement.classList.add("window-opening");
-    // Remove the class after animation ends
-    windowElement.addEventListener("animationend", function handler(e) {
-      if (e.animationName === "windowOpenFadeSlide") {
-        windowElement.classList.remove("window-opening");
-        windowElement.removeEventListener("animationend", handler);
-      }
-    });
-
-    this.windowsContainer.appendChild(windowElement);
+    windowElement = this._createWindowElement(program);
+    this._createTaskbarItem(windowElement, program);
     this._registerWindow(windowElement, program);
-    this.positionWindow(windowElement);
+    this._setupWindowEvents(windowElement);
 
-    // If this is the media player, send a message to load demo videos
-    if (programName === "mediaPlayer") {
-      // Find the iframe
-      let iframe = windowElement.querySelector("iframe");
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "load-demo-videos" }, "*");
+    document.getElementById("windows-container").appendChild(windowElement);
+    this.positionWindowCascade(windowElement); // Use cascade for new windows
+
+    this.eventBus.publish(EVENTS.PROGRAM_OPENING, { programName, windowId: windowElement.id });
+
+    // Special handling for 'internet' (Projects) app to wait for content readiness
+    if (program.id === 'internet') {
+      windowElement.style.opacity = '0'; // Keep it initially invisible
+      windowElement.setAttribute('data-program-loading', 'true'); // Mark as loading
+
+      const iframe = windowElement.querySelector('iframe');
+      if (iframe) {
+        const onProjectsReady = (event) => {
+          if (event.source === iframe.contentWindow && event.data && event.data.type === 'projects-ready') {
+            window.removeEventListener('message', onProjectsReady); // Clean up listener
+            clearTimeout(projectsReadyTimeout); // Clear fallback timeout
+
+            windowElement.style.opacity = '1';
+            windowElement.removeAttribute('data-program-loading');
+            this.bringToFront(windowElement); // Ensure z-index is correct
+            this._handleWindowFocus(windowElement.id); // Now focus
+            this.eventBus.publish(EVENTS.PROGRAM_OPENED, { programName, windowId: windowElement.id });
+          }
+        };
+
+        const projectsReadyTimeout = setTimeout(() => {
+          window.removeEventListener('message', onProjectsReady);
+          if (windowElement.hasAttribute('data-program-loading')) {
+            console.warn('[WindowManager] Timeout waiting for projects-ready message.');
+            windowElement.style.opacity = '1';
+            windowElement.removeAttribute('data-program-loading');
+            this.bringToFront(windowElement);
+            this._handleWindowFocus(windowElement.id);
+            this.eventBus.publish(EVENTS.PROGRAM_OPENED, { programName, windowId: windowElement.id });
+          }
+        }, 7000); // 7-second timeout
+
+        window.addEventListener('message', onProjectsReady);
       }
-    }
-
-    program.isOpen = true;
-    this.eventBus.publish(EVENTS.WINDOW_CREATED, {
-      windowId: windowElement.id,
-      programName,
-      title: program.title,
-      icon: program.icon,
-    });
-
-    if (program.startMinimized) {
-      this.minimizeWindow(windowElement);
-    } else {
+      // For projects app, bringToFront is called here to set z-index, but actual focus/visibility is delayed
       this.bringToFront(windowElement);
+    } else {
+      // Standard handling for other programs - make them briefly invisible to prevent iframe flash
+      windowElement.style.opacity = '0';
+      // Add a transition if you want a fade-in, directly in JS or via a CSS class
+      // For simplicity, a quick fade-in can be done with a short timeout.
+      // Ensure window is brought to front before making it visible for correct z-indexing during transition
+      this.bringToFront(windowElement);
+      
+      requestAnimationFrame(() => { // Or setTimeout(() => {...}, 0); or a slightly longer one like 50ms
+        windowElement.style.transition = 'opacity 0.15s ease-out'; // Smooth, quick fade-in
+        windowElement.style.opacity = '1';
+        // Focus after it's made visible
+        this._handleWindowFocus(windowElement.id);
+        this.eventBus.publish(EVENTS.PROGRAM_OPENED, { programName, windowId: windowElement.id });
+        // Clean up transition after it completes to avoid affecting other opacity changes
+        setTimeout(() => {
+            if (windowElement) windowElement.style.transition = '';
+        }, 150); // Duration of the transition
+      });
     }
+
+    return windowElement;
   }
 
   /**

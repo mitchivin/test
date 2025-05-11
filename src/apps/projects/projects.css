@@ -54,6 +54,12 @@ body {
     box-sizing: border-box;
     margin-left: auto;
     margin-right: auto;
+    opacity: 0; /* Initially hidden to prevent FOUC */
+    transition: opacity 0.3s ease-in-out; /* Smooth transition for reveal */
+}
+
+.feed-container.loaded {
+    opacity: 1; /* Reveal when content is loaded and layout is applied */
 }
 
 /* Tablet and Small Desktop: 3 columns (Changed from 2) */
