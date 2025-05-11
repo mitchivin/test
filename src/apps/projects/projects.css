@@ -99,12 +99,10 @@ body {
 .post.video-post video {
     display: block;
     width: 100%;
-    height: unset;
-    min-height: 180px;
     aspect-ratio: 9/16;
-    min-width: 100%;
-    object-fit: fill;
+    object-fit: contain;
     box-sizing: border-box;
+    background-color: #000;
 }
 
 .placeholder-content {
@@ -210,12 +208,15 @@ body {
 #lightbox-content video {
     display: block;
     width: 100%;
-    height: auto;
+    aspect-ratio: 9/16;
+    object-fit: contain;
+    background-color: #000;
     position: relative;
     z-index: 1;
     margin: 0;
     padding: 0;
     border-radius: 20px;
+    max-height: calc(100vh - 160px);
 }
 
 #project-lightbox.fade-in #lightbox-content img,
