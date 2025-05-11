@@ -157,15 +157,15 @@
     left: auto;
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 0;
+    margin-bottom: 36px;
   }
 
   .container {
-    width: 150px;
-    height: 16px;
+    width: 200px;
+    height: 22px;
     padding-top: 1px;
     padding-bottom: 1px;
-    border-width: 1px;
+    border-width: 3px;
   }
 
   @keyframes loader {
@@ -173,7 +173,7 @@
       transform: translate(-30px);
     }
     100% {
-      transform: translate(150px);
+      transform: translate(200px);
     }
   }
 
@@ -777,6 +777,7 @@
   .welcome-message .welcome-image-fallback {
     margin: 0 !important;
     padding: 0 !important;
+    font-size: 2.5rem !important;
   }
   .login-separator {
     margin: 0 !important;

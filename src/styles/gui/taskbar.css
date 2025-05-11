@@ -442,7 +442,10 @@
    ================================================== */
 
 @media (max-width: 768px) {
-  /* ... existing mobile styles ... */
+  .taskbar-item:hover:not(.active) {
+    background: none !important;
+    box-shadow: none !important;
+  }
   .startmenu .item-title,
   .startmenu .menu-item {
     letter-spacing: -0.2px;
