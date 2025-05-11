@@ -113,6 +113,13 @@ const ALL_PROGRAMS_ITEMS = [
 const RECENTLY_USED_ITEMS = [
   {
     type: "program",
+    programName: "chatgpt",
+    icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
+    label: "ChatGPT",
+    disabled: true,
+  },
+  {
+    type: "program",
     programName: "program1",
     icon: "./assets/gui/start-menu/vanity-apps/photoshop.webp",
     label: "Adobe Photoshop",
@@ -141,59 +148,9 @@ const RECENTLY_USED_ITEMS = [
   },
   {
     type: "program",
-    programName: "indesign",
-    icon: "./assets/gui/start-menu/vanity-apps/indesign.webp",
-    label: "Adobe InDesign",
-    disabled: true,
-  },
-  {
-    type: "program",
-    programName: "lightroom",
-    icon: "./assets/gui/start-menu/vanity-apps/lightroom.webp",
-    label: "Adobe Lightroom",
-    disabled: true,
-  },
-  {
-    type: "program",
     programName: "program6",
     icon: "./assets/gui/start-menu/vanity-apps/blender.webp",
     label: "Blender",
-    disabled: true,
-  },
-  {
-    type: "program",
-    programName: "program5",
-    icon: "./assets/gui/start-menu/vanity-apps/vscode.webp",
-    label: "VS Code",
-    disabled: true,
-  },
-  {
-    type: "program",
-    programName: "figma",
-    icon: "./assets/gui/start-menu/vanity-apps/figma.webp",
-    label: "Figma",
-    disabled: true,
-  },
-  { type: "separator" },
-  {
-    type: "program",
-    programName: "chatgpt",
-    icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
-    label: "ChatGPT",
-    disabled: true,
-  },
-  {
-    type: "program",
-    programName: "sora",
-    icon: "./assets/gui/start-menu/vanity-apps/sora.webp",
-    label: "Sora",
-    disabled: true,
-  },
-  {
-    type: "program",
-    programName: "git-copilot",
-    icon: "./assets/gui/start-menu/vanity-apps/git-copilot.webp",
-    label: "Git Copilot",
     disabled: true,
   },
   {

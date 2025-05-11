@@ -113,6 +113,13 @@ export default class Taskbar {
     new Clock(".time");
 
     this.subscribeToEvents();
+
+    // Listen for fullscreen changes to reset the network balloon
+    document.addEventListener('fullscreenchange', () => {
+      localStorage.removeItem("networkBalloonShown");
+      // Optional: If you want to re-evaluate showing the balloon immediately after fullscreen change:
+      // showNetworkBalloon(); // This might be too intrusive, depends on desired UX
+    });
   }
 
   /**
@@ -235,11 +242,33 @@ export default class Taskbar {
 }
 
 // --- Balloon Tooltip for Network Icon ---
+let balloonTimeouts = [];
+
+export function hideBalloon(instant = false) {
+  const balloonRoot = document.getElementById("balloon-root");
+  if (!balloonRoot) return;
+  const balloon = balloonRoot.querySelector(".balloon");
+  // Clear all timeouts to prevent old ones from firing after removal
+  balloonTimeouts.forEach((t) => clearTimeout(t));
+  balloonTimeouts = [];
+  if (instant) {
+    if (balloonRoot.parentNode) balloonRoot.parentNode.removeChild(balloonRoot);
+    return;
+  }
+  if (balloon) balloon.classList.add("hide");
+  setTimeout(() => {
+    if (balloonRoot.parentNode) balloonRoot.parentNode.removeChild(balloonRoot);
+  }, 1000);
+}
+
 export function showNetworkBalloon() {
   // Prevent balloon if login screen is visible
   const loginScreen = document.getElementById("login-screen");
   if (loginScreen && loginScreen.style.display !== "none" && loginScreen.style.opacity !== "0") return;
   if (document.getElementById("balloon-root")) return;
+  // Clear any previous balloon timeouts before showing a new one
+  balloonTimeouts.forEach((t) => clearTimeout(t));
+  balloonTimeouts = [];
   const icon = document.querySelector(".tray-network-icon");
   if (!icon) return;
   const balloonRoot = document.createElement("div");
@@ -285,20 +314,10 @@ export function showNetworkBalloon() {
   }, 0);
   const balloon = balloonRoot.querySelector(".balloon");
   const closeBtn = balloonRoot.querySelector(".balloon__close");
-  let balloonTimeouts = [];
   closeBtn.onclick = () => hideBalloon();
   balloon.classList.remove("hide");
   balloonTimeouts.push(setTimeout(() => balloon.classList.add("hide"), 7000)); // Start fade out after 7s
   balloonTimeouts.push(setTimeout(() => hideBalloon(), 8000)); // Remove after 8s
-  function hideBalloon() {
-    balloon.classList.add("hide");
-    balloonTimeouts.push(setTimeout(() => clearBalloon(), 1000));
-  }
-  function clearBalloon() {
-    balloonTimeouts.forEach((t) => clearTimeout(t));
-    balloonTimeouts = [];
-    if (balloonRoot.parentNode) balloonRoot.parentNode.removeChild(balloonRoot);
-  }
 }
 
 // Instead, show balloon on click of the network icon
@@ -312,6 +331,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const fullscreenIcon = document.querySelector('.tray-fullscreen-icon');
   if (fullscreenIcon) {
     fullscreenIcon.addEventListener('click', () => {
+      hideBalloon(true); // Instantly hide the balloon when fullscreen is toggled
       // Try Fullscreen API first
       const docElm = document.documentElement;
       if (document.fullscreenElement) {
