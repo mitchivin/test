@@ -158,28 +158,31 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         imgElement.src = src;
         return imgElement;
     } else if (type === 'video') {
-        // Mobile video with a poster gets special container
         if (isTouchDevice() && posterUrl) {
             const container = createEl('div', 'lightbox-mobile-video-container');
-            
             const videoElement = createEl('video');
             videoElement.alt = 'Project Lightbox Video';
             videoElement.controls = true;
-            videoElement.autoplay = true; // Autoplay to trigger loading for poster fade
+            videoElement.autoplay = true;
             videoElement.loop = true;
-            videoElement.muted = true; // Often necessary for autoplay to work, unmute via controls
+            videoElement.muted = true;
             videoElement.setAttribute('playsinline', '');
             videoElement.src = src;
-
             const posterImage = createEl('img', 'lightbox-mobile-video-poster');
             posterImage.src = posterUrl;
             posterImage.alt = 'Loading video...';
-
             container.appendChild(videoElement);
             container.appendChild(posterImage);
-            return container; 
+            // Fade out poster when video is ready
+            function onVideoReady() {
+                posterImage.classList.add('fade-out');
+                videoElement.removeEventListener('canplay', onVideoReady);
+                videoElement.removeEventListener('loadeddata', onVideoReady);
+            }
+            videoElement.addEventListener('canplay', onVideoReady);
+            videoElement.addEventListener('loadeddata', onVideoReady);
+            return container;
         } else {
-            // Desktop video, or mobile video without a poster: direct video element
             const videoElement = createEl('video');
             videoElement.alt = 'Project Lightbox Video';
             videoElement.controls = true;
@@ -190,7 +193,7 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
             return videoElement;
         }
     }
-    return null; // Should not happen if type is 'image' or 'video'
+    return null;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
