@@ -87,10 +87,8 @@ function _attachSoftwareIconTooltips(cardEl, softwareData, softwareIconsListEl) 
 function createDesktopDescriptionCard(titleText, subheadingText, descriptionText, softwareData) {
     const animWrapper = createEl('div', 'desc-card-anim-wrapper');
     const descCard = createEl('div', 'lightbox-desc-card');
-    
-    // Clear any existing content (though typically it's new)
     clearChildren(descCard);
-
+    descCard.appendChild(createLightboxCloseButton());
     if (titleText) {
         const titleEl = createEl('div', 'card-title', titleText);
         descCard.appendChild(titleEl);
@@ -103,25 +101,40 @@ function createDesktopDescriptionCard(titleText, subheadingText, descriptionText
         const bodyEl = createEl('div', 'card-body', descriptionText);
         descCard.appendChild(bodyEl);
     }
-
-    // Add software icons if data is available
     if (softwareData) {
         const cardSoftwareSection = createEl('div', 'card-software-section');
-
         const softwareLabel = createEl('span', 'software-section-label', 'Software Used:');
         cardSoftwareSection.appendChild(softwareLabel);
-
         const softwareIconsList = createEl('div', 'software-icons-list');
         _attachSoftwareIconTooltips(descCard, softwareData, softwareIconsList);
-        
-        if (softwareIconsList.hasChildNodes()) { // Check if icons were actually added
+        if (softwareIconsList.hasChildNodes()) {
             cardSoftwareSection.appendChild(softwareIconsList);
             descCard.appendChild(cardSoftwareSection);
         }
     }
-    
     animWrapper.appendChild(descCard);
     return animWrapper;
+}
+
+// Add this function to create the close button
+function createLightboxCloseButton() {
+    const btn = document.createElement('div');
+    btn.className = 'lightbox-close-btn';
+    btn.setAttribute('role', 'button');
+    btn.setAttribute('tabindex', '0');
+    btn.setAttribute('aria-label', 'Close');
+    btn.innerHTML = '&times;';
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeLightbox();
+    });
+    btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            closeLightbox();
+        }
+    });
+    return btn;
 }
 
 function createLightboxMediaElement(type, src) {
@@ -185,11 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openLightbox() {
         document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
-
-        // Notify parent window of iframe interaction (to close menubar popouts)
-        if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'iframe-interaction' }, '*');
-        }
 
         // Core content setup is now handled by openLightboxByIndex
         if (currentLightboxIndex === null) {
@@ -370,6 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
         userPrefersDescriptionVisible = (titleOverlay && titleOverlay.classList.contains('show')) || 
                                 (descOverlay && descOverlay.classList.contains('show'));
         sendMessageToParent({ type: 'description-state', open: userPrefersDescriptionVisible });
+        // Throttle the toolbar button in the parent shell (for visual feedback)
+        sendMessageToParent({ type: 'throttle-toolbar', key: 'view-description' });
     }
 
     function toggleLightboxOverlay(description, wrapper) { // This now PRIMARILY handles the DESKTOP card
@@ -1439,4 +1449,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    document.addEventListener('click', (event) => {
+        // Optionally: filter out clicks inside your own popouts/menus if needed
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'iframe-interaction' }, '*');
+        }
+    });
 });

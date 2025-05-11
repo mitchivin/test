@@ -36,5 +36,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
             }
         }
+        if (event.data && event.data.type === 'toolbar-action') {
+            if (event.data.action === 'newMessage') {
+                clearForm();
+            } else if (event.data.action === 'sendMessage') {
+                sendMessage();
+            }
+        }
     });
-}); 
+});
+
+function notifyParentIframeInteraction() {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'iframe-interaction', windowId: window.name }, '*');
+  }
+}
+
+document.addEventListener('click', notifyParentIframeInteraction, true); 

@@ -188,10 +188,12 @@
   user-select: none;
 }
 .vertical_line {
-  width: 1px;
+  border-left: 1px solid #d7d4ca;
+  width: 0;
   height: 26px;
-  background: #d7d4ca;
-  margin: 0 4px;
+  margin: 0 2px;
+  background: none;
+  will-change: transform;
 }
 .toolbar-row img, .toolbar-row span {
   margin: 0;
@@ -319,4 +321,12 @@
   border-radius: 0;
 }
 
-/* ===== Responsive: Mobile Adjustments ===== */ 
+/* ===== Responsive: Mobile Adjustments ===== */
+@media (max-width: 767px) {
+  .toolbar-close-button {
+    border-right: 1px solid #d7d4ca;
+    height: 26px;
+    display: flex;
+    align-items: center;
+  }
+} 

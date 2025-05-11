@@ -180,48 +180,15 @@ const programData = {
     appPath: "src/apps/about/about.html",
     toolbarConfig: {
       buttons: [
-        {
-          key: "previous",
-          enabled: false,
-          icon: "./assets/gui/toolbar/back.webp",
-          text: "Previous",
-          action: "navigatePrevious",
-        },
-        {
-          key: "next",
-          enabled: false,
-          icon: "./assets/gui/toolbar/forward.webp",
-          text: "Next",
-          action: "navigateNext",
-        },
-        {
-          key: "up",
-          enabled: false,
-          icon: "./assets/gui/toolbar/up.webp",
-          text: null,
-        },
+        { key: "previous", enabled: false, icon: "./assets/gui/toolbar/back.webp", text: "Previous", action: "navigatePrevious" },
+        { key: "next", enabled: false, icon: "./assets/gui/toolbar/forward.webp", text: "Next", action: "navigateNext" },
         { type: "separator" },
-        {
-          key: "projects",
-          enabled: true,
-          icon: "./assets/gui/desktop/internet.webp",
-          text: "My Projects",
-          action: "openInternet",
-        },
-        {
-          key: "resume",
-          enabled: true,
-          icon: "./assets/gui/desktop/resume.webp",
-          text: "My Resume",
-          action: "openResume",
-        },
+        { key: "up", enabled: false, icon: "./assets/gui/toolbar/up.webp", text: null, action: "navigateUp" },
         { type: "separator" },
-        {
-          key: "views",
-          enabled: false,
-          icon: "./assets/gui/toolbar/views.webp",
-          text: null,
-        },
+        { key: "projects", enabled: true, icon: "./assets/gui/desktop/internet.webp", text: "My Projects", action: "openProjects" },
+        { key: "resume", enabled: true, icon: "./assets/gui/desktop/resume.webp", text: "My Resume", action: "openResume" },
+        { type: "separator" },
+        { key: "views", enabled: false, icon: "./assets/gui/toolbar/views.webp", text: null, action: "toggleViews" },
       ],
     },
     addressBarConfig: {
@@ -273,7 +240,6 @@ const programData = {
           text: "Contact Me",
           action: "openContact",
         },
-        { type: "separator" },
         {
           key: "save",
           enabled: true,
@@ -315,7 +281,6 @@ const programData = {
             text: "Next",
             action: "nextImage",
           },
-          { type: "separator" },
           {
             key: "print",
             enabled: false,
@@ -328,7 +293,6 @@ const programData = {
             icon: "./assets/gui/toolbar/save.webp",
             text: null,
           },
-          { type: "separator" },
           {
             key: "delete",
             enabled: false,
@@ -400,15 +364,13 @@ const programData = {
           text: "Next",
           action: "navigateNext",
         },
-        { type: "separator" },
         {
           key: "view-description",
-          enabled: true,
+          enabled: false,
           icon: "./assets/gui/toolbar/desc.webp",
-          text: "View Description",
+          text: "Show more",
           action: "viewDescription",
         },
-        { type: "separator" },
         {
           key: "viewExternalLink",
           text: "View on Instagram",
@@ -433,7 +395,6 @@ const programData = {
           text: "Send Message",
           action: "sendMessage",
         },
-        { type: "separator" },
         {
           key: "cut",
           enabled: false,
@@ -452,7 +413,6 @@ const programData = {
           icon: "./assets/gui/toolbar/paste.webp",
           text: null,
         },
-        { type: "separator" },
         {
           key: "new",
           enabled: true,
@@ -460,7 +420,6 @@ const programData = {
           text: "New Message",
           action: "newMessage",
         },
-        { type: "separator" },
         {
           key: "attach",
           enabled: false,

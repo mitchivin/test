@@ -272,6 +272,19 @@
   align-items: center;
 }
 
+.tray-fullscreen-icon {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: 0;
+  transform: none;
+  margin: 1px 0 0 0;
+  object-fit: contain;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
 .system-tray img {
   height: var(--taskbar-height);
   display: block;
@@ -437,6 +450,9 @@
   .tray-icons {
     gap: calc(var(--tray-spacing) - 2px);
     margin-right: 6px;
+  }
+  .desktop-only {
+    display: none !important;
   }
 }
 

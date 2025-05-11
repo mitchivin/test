@@ -89,6 +89,27 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
   menuBar.className = "menu-bar";
   // Build menu items
   menuBarConfig.items.forEach((itemConfig) => {
+    // Special handling for Resume app's File menu
+    if (windowId === 'resume-window' && itemConfig.key === 'file' && Array.isArray(itemConfig.dropdown)) {
+      // Remove Print Setup (action: 'pageSetup')
+      itemConfig.dropdown = itemConfig.dropdown.filter(opt => opt.action !== 'pageSetup');
+      // Insert Download above Print (action: 'filePrint')
+      const printIdx = itemConfig.dropdown.findIndex(opt => opt.action === 'filePrint');
+      if (printIdx !== -1) {
+        itemConfig.dropdown.splice(printIdx, 0, {
+          text: 'Download',
+          action: 'saveResume',
+          enabled: true
+        });
+      } else {
+        // If Print not found, just add Download at the end
+        itemConfig.dropdown.push({
+          text: 'Download',
+          action: 'saveResume',
+          enabled: true
+        });
+      }
+    }
     const menuItemDiv = document.createElement("div");
     menuItemDiv.className = `menu-item${!itemConfig.enabled ? " disabled" : ""}`;
     menuItemDiv.textContent = itemConfig.text;
@@ -212,6 +233,62 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
       option.addEventListener("click", (e) => {
         e.stopPropagation();
         const action = option.getAttribute("data-action");
+        let win = _parentWindowElement;
+        // Special handling for Resume app's File > Download
+        if (win && win.id === 'resume-window' && action === 'saveResume') {
+          // Find the parent WindowManager instance and call _handleToolbarAction directly if possible
+          if (window.WindowManager && typeof window.WindowManager.prototype._handleToolbarAction === 'function') {
+            // Find the window element for resume
+            const windowElement = document.getElementById('resume-window');
+            if (windowElement) {
+              // Call the download logic directly
+              window.WindowManager.prototype._handleToolbarAction.call(window.WindowManager.prototype, 'saveResume', windowElement);
+            }
+          } else {
+            // Fallback: create and click a hidden download link
+            const link = document.createElement('a');
+            link.href = './assets/apps/resume/resumeMitchIvin.pdf';
+            link.download = 'resumeMitchIvin.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          closeActiveMenu();
+          return;
+        }
+        // Special handling for Contact Me app's File > New/Send Message
+        if (win && win.id === 'contact-window') {
+          const iframe = win.querySelector('iframe');
+          if (action === 'newMessage') {
+            if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage({ type: 'toolbar-action', action }, '*');
+            }
+            closeActiveMenu();
+            return;
+          } else if (action === 'sendMessage') {
+            if (iframe && iframe.contentWindow) {
+              // Send getFormData to iframe
+              iframe.contentWindow.postMessage({ command: 'getFormData' }, '*');
+              // Listen for the response and open mailto
+              const mailtoListener = (event) => {
+                if (event.source === iframe.contentWindow && event.data && event.data.type === 'contactFormData') {
+                  const formData = event.data.data;
+                  const to = 'mitchellivin@gmail.com';
+                  const subject = encodeURIComponent(formData.subject || '');
+                  const body = encodeURIComponent(formData.message || '');
+                  let mailtoLink = `mailto:${to}`;
+                  mailtoLink += `?subject=${subject}`;
+                  mailtoLink += `&body=${body}`;
+                  window.open(mailtoLink, '_blank');
+                  window.removeEventListener('message', mailtoListener);
+                }
+              };
+              window.addEventListener('message', mailtoListener);
+            }
+            closeActiveMenu();
+            return;
+          }
+        }
         if (action) {
           if (action === "exitProgram" && _parentWindowElement) {
             _parentWindowElement.dispatchEvent(
@@ -307,13 +384,9 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
       }
     });
     toolbarRow.appendChild(mobileCloseBtn);
-    // Add divider after close button
-    const firstDivider = document.createElement("div");
-    firstDivider.className = "vertical_line";
-    toolbarRow.appendChild(firstDivider);
   }
 
-  // Render all toolbar buttons and dividers in order
+  // Render all toolbar buttons in order (with dividers for desktop)
   buttons.forEach((buttonConfig) => {
     // On mobile, skip the Home button in the My Projects window
     if (isMobile && windowId === "internet-window" && buttonConfig.key === "home") return;
@@ -328,11 +401,15 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
         return;
     }
 
-    if (buttonConfig.type === "separator") {
-      const separator = document.createElement("div");
-      separator.className = "vertical_line";
-      toolbarRow.appendChild(separator);
-    } else if (buttonConfig.key) {
+    // --- Desktop: Render separator as a vertical line ---
+    if (!isMobile && buttonConfig.type === 'separator') {
+      const divider = document.createElement('div');
+      divider.className = 'vertical_line';
+      toolbarRow.appendChild(divider);
+      return;
+    }
+
+    if (buttonConfig.key) {
       const buttonDiv = document.createElement("div");
       buttonDiv.className = `toolbar-button ${buttonConfig.key}`;
       if (!buttonConfig.enabled) buttonDiv.classList.add("disabled");

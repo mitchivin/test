@@ -309,4 +309,25 @@ const setupBalloonClick = () => {
 };
 window.addEventListener("DOMContentLoaded", () => {
   setupBalloonClick();
+  const fullscreenIcon = document.querySelector('.tray-fullscreen-icon');
+  if (fullscreenIcon) {
+    fullscreenIcon.addEventListener('click', () => {
+      // Try Fullscreen API first
+      const docElm = document.documentElement;
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+      } else if (docElm.mozRequestFullScreen) { /* Firefox */
+        docElm.mozRequestFullScreen();
+      } else if (docElm.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+        docElm.webkitRequestFullscreen();
+      } else if (docElm.msRequestFullscreen) { /* IE/Edge */
+        docElm.msRequestFullscreen();
+      } else {
+        // Fallback: try to send F11 (not reliable in browsers)
+        alert('Press F11 to enter fullscreen mode.');
+      }
+    });
+  }
 });

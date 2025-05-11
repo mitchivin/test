@@ -441,6 +441,31 @@ body {
     body.projects-window-maximized .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
         padding-right: 64px; /* Apply extra right padding for videos only when maximized */
     }
+
+    .lightbox-desc-card .lightbox-close-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 10;
+        width: 28px;
+        height: 28px;
+        background: #e2e2e2 linear-gradient(to bottom, #fff 0%, #e2e2e2 100%);
+        border: 1px solid #aaa;
+        border-radius: 50%;
+        font-size: 1.4rem;
+        color: #333;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, box-shadow 0.15s;
+    }
+    .lightbox-desc-card .lightbox-close-btn:hover {
+        background: #f8d7da linear-gradient(to bottom, #fff 0%, #f8d7da 100%);
+        color: #a00;
+        box-shadow: 0 4px 16px rgba(160,0,0,0.18);
+    }
 }
 
 /* Hide navigation buttons and hint on mobile */

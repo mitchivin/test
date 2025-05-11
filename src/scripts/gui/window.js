@@ -84,15 +84,6 @@ class WindowTemplates {
         windowId,
         programConfig && programConfig.id === "my-pictures-window"
       );
-      // If this is the My Projects (internet) window, disable the view-description, back, and forward buttons by default
-      if (windowId === "internet-window" && toolbarWrapper) {
-        const viewDescBtn = toolbarWrapper.querySelector('.toolbar-button.view-description');
-        if (viewDescBtn) viewDescBtn.classList.add('disabled');
-        const backBtn = toolbarWrapper.querySelector('.toolbar-button.previous');
-        if (backBtn) backBtn.classList.add('disabled');
-        const forwardBtn = toolbarWrapper.querySelector('.toolbar-button.next');
-        if (forwardBtn) forwardBtn.classList.add('disabled');
-      }
     }
 
     // --- Create Address Bar (if config exists) ---
@@ -107,6 +98,7 @@ class WindowTemplates {
     iframeContainer.style.position = "relative";
     const iframe = document.createElement("iframe");
     Object.assign(iframe, { src: appPath, title: `${windowId}-content` });
+    iframe.name = windowId; // Set unique name for identification
     const attrs = {
       frameborder: "0",
       width: "100%",
@@ -211,6 +203,15 @@ export default class WindowManager {
 
             if (viewDescBtn) {
                 viewDescBtn.classList.toggle('disabled', !event.data.open);
+                const textSpan = viewDescBtn.querySelector('span');
+                // Always set initial text to 'Show more' if not open
+                if (event.data.open) {
+                    if (textSpan) textSpan.textContent = 'Show less';
+                    viewDescBtn.setAttribute('aria-label', 'Show less');
+                } else {
+                    if (textSpan) textSpan.textContent = 'Show more';
+                    viewDescBtn.setAttribute('aria-label', 'Show more');
+                }
             }
             if (backBtn) {
                 backBtn.classList.toggle('disabled', !event.data.open);
@@ -271,13 +272,29 @@ export default class WindowManager {
                 if (viewDescButton) {
                     const textSpan = viewDescButton.querySelector('span');
                     if (event.data.open) {
-                        if (textSpan) textSpan.textContent = 'Hide Description';
-                        viewDescButton.setAttribute('aria-label', 'Hide Description');
+                        if (textSpan) textSpan.textContent = 'Show less';
+                        viewDescButton.setAttribute('aria-label', 'Show less');
                     } else {
-                        if (textSpan) textSpan.textContent = 'View Description';
-                        viewDescButton.setAttribute('aria-label', 'View Description');
+                        if (textSpan) textSpan.textContent = 'Show more';
+                        viewDescButton.setAttribute('aria-label', 'Show more');
                     }
                 }
+            }
+        }
+
+        if (event.data && event.data.type === 'throttle-toolbar' && event.data.key === 'view-description') {
+            const projectsWindow = this.windows['internet-window'];
+            let viewDescBtn;
+            if (projectsWindow) {
+                viewDescBtn = projectsWindow.querySelector('.toolbar-button.view-description');
+            } else {
+                viewDescBtn = document.querySelector('.toolbar-button.view-description');
+            }
+            if (viewDescBtn && !viewDescBtn.classList.contains('disabled')) {
+                viewDescBtn.classList.add('disabled');
+                setTimeout(() => {
+                    viewDescBtn.classList.remove('disabled');
+                }, 500);
             }
         }
 
@@ -291,12 +308,25 @@ export default class WindowManager {
           return;
 
         // Find the .app-window containing the iframe with this contentWindow
-        let windowElement = Array.from(
-          document.querySelectorAll(".app-window"),
-        ).find((win) => {
-          const iframe = win.querySelector("iframe");
-          return iframe && iframe.contentWindow === event.source;
-        });
+        let windowElement = null;
+        if (event.data?.type === 'iframe-interaction' && event.data.windowId) {
+          windowElement = document.getElementById(event.data.windowId);
+        }
+        if (!windowElement) {
+          windowElement = Array.from(
+            document.querySelectorAll(".app-window"),
+          ).find((win) => {
+            const iframe = win.querySelector("iframe");
+            return iframe && iframe.contentWindow === event.source;
+          });
+        }
+        // Fallback: if not found, try to match by src for contact app
+        if (!windowElement && event.data?.type === 'iframe-interaction') {
+          windowElement = Array.from(document.querySelectorAll('.app-window')).find(win => {
+            const iframe = win.querySelector('iframe');
+            return iframe && iframe.src.includes('contact.html');
+          });
+        }
         if (!windowElement) return;
 
         // Handle iframe-interaction message to close menubar popouts
@@ -365,12 +395,25 @@ export default class WindowManager {
           return;
 
         // Find the .app-window containing the iframe with this contentWindow
-        let windowElement = Array.from(
-          document.querySelectorAll(".app-window"),
-        ).find((win) => {
-          const iframe = win.querySelector("iframe");
-          return iframe && iframe.contentWindow === event.source;
-        });
+        let windowElement = null;
+        if (event.data?.type === 'iframe-interaction' && event.data.windowId) {
+          windowElement = document.getElementById(event.data.windowId);
+        }
+        if (!windowElement) {
+          windowElement = Array.from(
+            document.querySelectorAll(".app-window"),
+          ).find((win) => {
+            const iframe = win.querySelector("iframe");
+            return iframe && iframe.contentWindow === event.source;
+          });
+        }
+        // Fallback: if not found, try to match by src for contact app
+        if (!windowElement && event.data?.type === 'iframe-interaction') {
+          windowElement = Array.from(document.querySelectorAll('.app-window')).find(win => {
+            const iframe = win.querySelector('iframe');
+            return iframe && iframe.src.includes('contact.html');
+          });
+        }
         if (!windowElement) return;
 
         // Handle iframe-interaction message to close menubar popouts

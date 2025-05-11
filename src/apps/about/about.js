@@ -30,4 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+});
+
+document.addEventListener('click', (event) => {
+  // Optionally: filter out clicks inside your own popouts/menus if needed
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'iframe-interaction' }, '*');
+  }
 }); 
