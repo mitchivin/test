@@ -740,6 +740,8 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
   opacity: 1;
   transition: opacity 0.4s ease-in-out;
   pointer-events: auto;
+  will-change: opacity, z-index;
+  background: #000 !important; /* Debug: force black background to see stacking */
 }
 
 .lightbox-mobile-video-container .lightbox-mobile-video-poster.fade-out {
@@ -749,6 +751,7 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
 
 .lightbox-mobile-video-container video {
   z-index: 1;
+  position: absolute;
 }
 
 /* Ensure the container itself respects the lightbox content sizing on mobile */
