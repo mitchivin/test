@@ -914,16 +914,7 @@ export default class WindowManager {
             }
             break;
         case 'openResume':   
-            if (isMobileDevice()) {
-                window.open('./assets/apps/resume/resumeMitchIvin.pdf', '_blank');
-            } else {
-                const link = document.createElement('a');
-                link.href = './assets/apps/resume/resumeMitchIvin.pdf';
-                link.download = 'resumeMitchIvin.pdf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            this.openProgram('resume');
             break;
         case 'openContact': // For "Contact Me" on "My Resume" toolbar
             this.openProgram('contact');
