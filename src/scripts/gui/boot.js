@@ -11,7 +11,6 @@
  */
 
 import { showNetworkBalloon } from "./taskbar.js";
-import { isMobileDevice } from "../utils/device.js";
 
 // ===== Boot Sequence Initialization =====
 /**
@@ -74,9 +73,7 @@ export function initBootSequence(eventBus, EVENTS) {
       bootScreen.style.pointerEvents = "auto";
 
       // --- NEW: Initiate project video preloading ---
-      if (!isMobileDevice()) {
-        preloadProjectVideosInBackground();
-      }
+      preloadProjectVideosInBackground();
       // --- END NEW ---
 
       const minBootTime = 5500; // Minimum boot duration (ms)
@@ -152,14 +149,6 @@ export function initBootSequence(eventBus, EVENTS) {
           loginSound.play();
         } catch {}
         sessionStorage.setItem("logged_in", "true");
-
-        // --- NEW: Initiate project video preloading on mobile after login tap ---
-        if (isMobileDevice()) {
-          console.log("Boot: Mobile device detected, initiating project video preload after login.");
-          preloadProjectVideosInBackground();
-        }
-        // --- END NEW ---
-
         setTimeout(() => {
           if (
             typeof showNetworkBalloon === "function" &&
@@ -331,30 +320,20 @@ async function preloadProjectVideosInBackground() {
         
         const tempVideo = document.createElement('video');
         tempVideo.preload = 'auto'; // Hint to the browser
-        tempVideo.muted = true; // Crucial for any chance of programmatic play
-        tempVideo.setAttribute('playsinline', ''); // Good practice for iOS
         
         const videoLoadPromise = new Promise((resolveVideo, rejectVideo) => {
-          // Primary event target: browser believes it can play through
-          tempVideo.oncanplaythrough = () => {
-            console.log(`Boot: Video ${resolvedVideoSrc} event: canplaythrough.`);
-            tempVideo.pause(); // We don't actually want it to play, just load
+          tempVideo.onloadeddata = () => {
+            console.log(`Boot: Video ${resolvedVideoSrc} event: loadeddata.`);
             resolveVideo(resolvedVideoSrc);
           };
-          // Fallback: some data has loaded (less ideal but better than nothing)
-          tempVideo.onloadeddata = () => {
-            console.log(`Boot: Video ${resolvedVideoSrc} event: loadeddata (fallback).`);
-            // Don't resolve here if we are primarily waiting for canplaythrough
-            // unless canplaythrough never fires for some reason.
-          };
           tempVideo.onerror = (e) => {
-            console.error(`Boot: Error preloading video ${resolvedVideoSrc}:`, e.message || e.toString());
+            console.error(`Boot: Error preloading video ${resolvedVideoSrc}:`, e.message || e);
             rejectVideo(new Error(`Error loading ${resolvedVideoSrc}`));
           };
-          // Increased timeout per video, as `canplaythrough` can take longer
-          const perVideoTimeout = 15000; // 15 seconds per video
-          setTimeout(() => rejectVideo(new Error(`Timeout preloading ${resolvedVideoSrc} after ${perVideoTimeout}ms`)), perVideoTimeout);
+          // Fallback timeout for each video
+          setTimeout(() => rejectVideo(new Error(`Timeout preloading ${resolvedVideoSrc}`)), 10000); // 10s timeout per video
         }).catch(err => {
+            // Catch individual video errors so Promise.allSettled still works
             console.warn(`Boot: Caught error for ${resolvedVideoSrc} during preload promise:`, err.message);
             return { status: 'rejected', reason: err.message, video: resolvedVideoSrc };
         });
@@ -363,20 +342,6 @@ async function preloadProjectVideosInBackground() {
         
         tempVideo.src = resolvedVideoSrc;
         tempVideo.load(); // Explicitly call load
-        
-        // Attempt to play. This is a long shot on iOS without prior user gesture,
-        // but it's the strongest hint we can give if combined with muted and playsinline.
-        tempVideo.play().then(() => {
-            console.log(`Boot: Programmatic play() initiated for ${resolvedVideoSrc}`);
-            // It's playing (or trying to), we'll pause it in oncanplaythrough if that fires.
-            // If oncanplaythrough doesn't fire soon, it might keep playing invisibly.
-            // Consider adding a brief timeout here to pause it if canplaythrough is delayed,
-            // though that adds more complexity.
-        }).catch(playError => {
-            // Autoplay was prevented, which is expected on iOS for background videos.
-            // console.warn(`Boot: Programmatic play() rejected for ${resolvedVideoSrc}:`, playError.message);
-            // No need to log this as a warning usually, as it's expected on mobile.
-        });
 
         // Append to a hidden part of the main document to ensure loading
         tempVideo.style.display = 'none';
