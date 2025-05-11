@@ -149,6 +149,12 @@ export function initBootSequence(eventBus, EVENTS) {
           loginSound.play();
         } catch {}
         sessionStorage.setItem("logged_in", "true");
+
+        // --- NEW: Attempt/ensure project video preloading on login tap ---
+        console.log("Boot: Login successful, re-triggering project video preload if needed.");
+        preloadProjectVideosInBackground(); // Call it again, it has an internal check now
+        // --- END NEW ---
+
         setTimeout(() => {
           if (
             typeof showNetworkBalloon === "function" &&
@@ -251,7 +257,15 @@ export function initBootSequence(eventBus, EVENTS) {
 
 // --- NEW: Function to handle preloading of project videos ---
 async function preloadProjectVideosInBackground() {
-  console.log("Boot: Starting project video preloading...");
+  console.log("Boot: Checking to start project video preloading...");
+
+  // If preloader iframe container already exists, assume a preload is/was in progress.
+  if (document.getElementById('project-preloader-iframe-container')) {
+    console.log("Boot: Project video preloading iframe container already exists. Skipping new preload attempt.");
+    return;
+  }
+
+  console.log("Boot: Starting project video preloading process...");
   const iframeContainer = document.createElement('div');
   iframeContainer.id = 'project-preloader-iframe-container';
   iframeContainer.style.display = 'none'; // Keep it hidden
@@ -308,32 +322,30 @@ async function preloadProjectVideosInBackground() {
     videoPosts.forEach((post, index) => {
       const videoDataSrc = post.dataset.src;
       if (videoDataSrc) {
-        // Important: Resolve the relative data-src path correctly.
-        // The data-src is relative to projects.html.
-        // We need to make it relative to index.html or an absolute path.
-        // Assuming projects.html is at 'src/apps/projects/projects.html'
-        // and data-src is like '../../../assets/apps/projects/video1.mp4'
-        // It correctly resolves to 'assets/apps/projects/video1.mp4' from root.
         const resolvedVideoSrc = new URL(videoDataSrc, iframe.src).href;
-
         console.log(`Boot: Attempting to preload video ${index + 1}: ${resolvedVideoSrc}`);
         
         const tempVideo = document.createElement('video');
-        tempVideo.preload = 'auto'; // Hint to the browser
+        tempVideo.preload = 'auto'; 
+        tempVideo.muted = true; 
+        tempVideo.setAttribute('playsinline', ''); 
         
         const videoLoadPromise = new Promise((resolveVideo, rejectVideo) => {
-          tempVideo.onloadeddata = () => {
-            console.log(`Boot: Video ${resolvedVideoSrc} event: loadeddata.`);
+          tempVideo.oncanplaythrough = () => {
+            console.log(`Boot: Video ${resolvedVideoSrc} event: canplaythrough.`);
+            tempVideo.pause(); 
             resolveVideo(resolvedVideoSrc);
           };
+          tempVideo.onloadeddata = () => {
+            console.log(`Boot: Video ${resolvedVideoSrc} event: loadeddata (fallback).`);
+          };
           tempVideo.onerror = (e) => {
-            console.error(`Boot: Error preloading video ${resolvedVideoSrc}:`, e.message || e);
+            console.error(`Boot: Error preloading video ${resolvedVideoSrc}:`, e.message || e.toString());
             rejectVideo(new Error(`Error loading ${resolvedVideoSrc}`));
           };
-          // Fallback timeout for each video
-          setTimeout(() => rejectVideo(new Error(`Timeout preloading ${resolvedVideoSrc}`)), 10000); // 10s timeout per video
+          const perVideoTimeout = 15000; 
+          setTimeout(() => rejectVideo(new Error(`Timeout preloading ${resolvedVideoSrc} after ${perVideoTimeout}ms`)), perVideoTimeout);
         }).catch(err => {
-            // Catch individual video errors so Promise.allSettled still works
             console.warn(`Boot: Caught error for ${resolvedVideoSrc} during preload promise:`, err.message);
             return { status: 'rejected', reason: err.message, video: resolvedVideoSrc };
         });
@@ -341,9 +353,14 @@ async function preloadProjectVideosInBackground() {
         preloadPromises.push(videoLoadPromise);
         
         tempVideo.src = resolvedVideoSrc;
-        tempVideo.load(); // Explicitly call load
+        tempVideo.load(); 
+        
+        tempVideo.play().then(() => {
+            console.log(`Boot: Programmatic play() initiated for ${resolvedVideoSrc}`);
+        }).catch(playError => {
+            // console.warn(`Boot: Programmatic play() rejected for ${resolvedVideoSrc}:`, playError.message);
+        });
 
-        // Append to a hidden part of the main document to ensure loading
         tempVideo.style.display = 'none';
         document.body.appendChild(tempVideo);
         tempVideoElements.push(tempVideo);
@@ -356,11 +373,10 @@ async function preloadProjectVideosInBackground() {
         if (result.status === 'fulfilled') {
           console.log(`Boot: Successfully initiated preload for: ${result.value}`);
         } else {
-          console.warn(`Boot: Failed to initiate/complete preload for a video: ${result.reason?.video || result.reason}`);
+          console.warn(`Boot: Failed to initiate/complete preload for a video: ${result.reason?.video || String(result.reason)}`);
         }
       });
       
-      // Cleanup after all attempts
       console.log("Boot: Cleaning up project video preloading iframe and temporary video elements.");
       if (iframeContainer.parentNode) {
         iframeContainer.parentNode.removeChild(iframeContainer);
@@ -377,21 +393,7 @@ async function preloadProjectVideosInBackground() {
     }
   }
 }
-// --- END NEW ---
 
 // ==================================================
 // END Boot Sequence Module
 // ==================================================
-
-// On DOMContentLoaded, fade in boot screen and remove pre-boot overlay
-// (This is a visual polish step, not part of the main boot logic)
-document.addEventListener("DOMContentLoaded", () => {
-  const preBoot = document.getElementById("pre-boot-overlay");
-  const bootScreen = document.getElementById("boot-screen");
-  if (preBoot && bootScreen) {
-    setTimeout(() => {
-      preBoot.parentNode.removeChild(preBoot);
-      bootScreen.classList.add("boot-fade-in");
-    }, 1000);
-  }
-});
