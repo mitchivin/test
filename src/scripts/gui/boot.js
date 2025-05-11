@@ -11,6 +11,7 @@
  */
 
 import { showNetworkBalloon } from "./taskbar.js";
+import { isMobileDevice } from "../utils/device.js";
 
 // ===== Boot Sequence Initialization =====
 /**
@@ -73,7 +74,9 @@ export function initBootSequence(eventBus, EVENTS) {
       bootScreen.style.pointerEvents = "auto";
 
       // --- NEW: Initiate project video preloading ---
-      preloadProjectVideosInBackground();
+      if (!isMobileDevice()) {
+        preloadProjectVideosInBackground();
+      }
       // --- END NEW ---
 
       const minBootTime = 5500; // Minimum boot duration (ms)
@@ -150,9 +153,11 @@ export function initBootSequence(eventBus, EVENTS) {
         } catch {}
         sessionStorage.setItem("logged_in", "true");
 
-        // --- NEW: Attempt/ensure project video preloading on login tap ---
-        console.log("Boot: Login successful, re-triggering project video preload if needed.");
-        preloadProjectVideosInBackground(); // Call it again, it has an internal check now
+        // --- NEW: Initiate project video preloading on mobile after login tap ---
+        if (isMobileDevice()) {
+          console.log("Boot: Mobile device detected, initiating project video preload after login.");
+          preloadProjectVideosInBackground();
+        }
         // --- END NEW ---
 
         setTimeout(() => {
@@ -257,15 +262,7 @@ export function initBootSequence(eventBus, EVENTS) {
 
 // --- NEW: Function to handle preloading of project videos ---
 async function preloadProjectVideosInBackground() {
-  console.log("Boot: Checking to start project video preloading...");
-
-  // If preloader iframe container already exists, assume a preload is/was in progress.
-  if (document.getElementById('project-preloader-iframe-container')) {
-    console.log("Boot: Project video preloading iframe container already exists. Skipping new preload attempt.");
-    return;
-  }
-
-  console.log("Boot: Starting project video preloading process...");
+  console.log("Boot: Starting project video preloading...");
   const iframeContainer = document.createElement('div');
   iframeContainer.id = 'project-preloader-iframe-container';
   iframeContainer.style.display = 'none'; // Keep it hidden
@@ -322,28 +319,40 @@ async function preloadProjectVideosInBackground() {
     videoPosts.forEach((post, index) => {
       const videoDataSrc = post.dataset.src;
       if (videoDataSrc) {
+        // Important: Resolve the relative data-src path correctly.
+        // The data-src is relative to projects.html.
+        // We need to make it relative to index.html or an absolute path.
+        // Assuming projects.html is at 'src/apps/projects/projects.html'
+        // and data-src is like '../../../assets/apps/projects/video1.mp4'
+        // It correctly resolves to 'assets/apps/projects/video1.mp4' from root.
         const resolvedVideoSrc = new URL(videoDataSrc, iframe.src).href;
+
         console.log(`Boot: Attempting to preload video ${index + 1}: ${resolvedVideoSrc}`);
         
         const tempVideo = document.createElement('video');
-        tempVideo.preload = 'auto'; 
-        tempVideo.muted = true; 
-        tempVideo.setAttribute('playsinline', ''); 
+        tempVideo.preload = 'auto'; // Hint to the browser
+        tempVideo.muted = true; // Crucial for any chance of programmatic play
+        tempVideo.setAttribute('playsinline', ''); // Good practice for iOS
         
         const videoLoadPromise = new Promise((resolveVideo, rejectVideo) => {
+          // Primary event target: browser believes it can play through
           tempVideo.oncanplaythrough = () => {
             console.log(`Boot: Video ${resolvedVideoSrc} event: canplaythrough.`);
-            tempVideo.pause(); 
+            tempVideo.pause(); // We don't actually want it to play, just load
             resolveVideo(resolvedVideoSrc);
           };
+          // Fallback: some data has loaded (less ideal but better than nothing)
           tempVideo.onloadeddata = () => {
             console.log(`Boot: Video ${resolvedVideoSrc} event: loadeddata (fallback).`);
+            // Don't resolve here if we are primarily waiting for canplaythrough
+            // unless canplaythrough never fires for some reason.
           };
           tempVideo.onerror = (e) => {
             console.error(`Boot: Error preloading video ${resolvedVideoSrc}:`, e.message || e.toString());
             rejectVideo(new Error(`Error loading ${resolvedVideoSrc}`));
           };
-          const perVideoTimeout = 15000; 
+          // Increased timeout per video, as `canplaythrough` can take longer
+          const perVideoTimeout = 15000; // 15 seconds per video
           setTimeout(() => rejectVideo(new Error(`Timeout preloading ${resolvedVideoSrc} after ${perVideoTimeout}ms`)), perVideoTimeout);
         }).catch(err => {
             console.warn(`Boot: Caught error for ${resolvedVideoSrc} during preload promise:`, err.message);
@@ -353,14 +362,23 @@ async function preloadProjectVideosInBackground() {
         preloadPromises.push(videoLoadPromise);
         
         tempVideo.src = resolvedVideoSrc;
-        tempVideo.load(); 
+        tempVideo.load(); // Explicitly call load
         
+        // Attempt to play. This is a long shot on iOS without prior user gesture,
+        // but it's the strongest hint we can give if combined with muted and playsinline.
         tempVideo.play().then(() => {
             console.log(`Boot: Programmatic play() initiated for ${resolvedVideoSrc}`);
+            // It's playing (or trying to), we'll pause it in oncanplaythrough if that fires.
+            // If oncanplaythrough doesn't fire soon, it might keep playing invisibly.
+            // Consider adding a brief timeout here to pause it if canplaythrough is delayed,
+            // though that adds more complexity.
         }).catch(playError => {
+            // Autoplay was prevented, which is expected on iOS for background videos.
             // console.warn(`Boot: Programmatic play() rejected for ${resolvedVideoSrc}:`, playError.message);
+            // No need to log this as a warning usually, as it's expected on mobile.
         });
 
+        // Append to a hidden part of the main document to ensure loading
         tempVideo.style.display = 'none';
         document.body.appendChild(tempVideo);
         tempVideoElements.push(tempVideo);
@@ -373,10 +391,11 @@ async function preloadProjectVideosInBackground() {
         if (result.status === 'fulfilled') {
           console.log(`Boot: Successfully initiated preload for: ${result.value}`);
         } else {
-          console.warn(`Boot: Failed to initiate/complete preload for a video: ${result.reason?.video || String(result.reason)}`);
+          console.warn(`Boot: Failed to initiate/complete preload for a video: ${result.reason?.video || result.reason}`);
         }
       });
       
+      // Cleanup after all attempts
       console.log("Boot: Cleaning up project video preloading iframe and temporary video elements.");
       if (iframeContainer.parentNode) {
         iframeContainer.parentNode.removeChild(iframeContainer);
@@ -393,7 +412,21 @@ async function preloadProjectVideosInBackground() {
     }
   }
 }
+// --- END NEW ---
 
 // ==================================================
 // END Boot Sequence Module
 // ==================================================
+
+// On DOMContentLoaded, fade in boot screen and remove pre-boot overlay
+// (This is a visual polish step, not part of the main boot logic)
+document.addEventListener("DOMContentLoaded", () => {
+  const preBoot = document.getElementById("pre-boot-overlay");
+  const bootScreen = document.getElementById("boot-screen");
+  if (preBoot && bootScreen) {
+    setTimeout(() => {
+      preBoot.parentNode.removeChild(preBoot);
+      bootScreen.classList.add("boot-fade-in");
+    }, 1000);
+  }
+});
