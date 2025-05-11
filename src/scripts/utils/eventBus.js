@@ -50,7 +50,8 @@ export const EVENTS = {
   LOG_OFF_REQUESTED: "logoff:requested", // User requested log off
   SHUTDOWN_REQUESTED: "shutdown:requested", // User requested shutdown
   USER_LOGGED_IN: "userLoggedIn", // User has successfully logged in
-  PROJECTS_IFRAME_READY_FOR_PRELOAD: "projectsIframeReadyForPreload" // My Projects iframe is loaded and ready for preload command
+  PROJECTS_IFRAME_READY_FOR_PRELOAD: "projectsIframeReadyForPreload", // My Projects iframe is loaded and ready for preload command
+  PRELOAD_APP_REQUESTED: "preloadAppRequested" // Request to preload a specific app's assets
 };
 
 // ===== EventBus Class =====

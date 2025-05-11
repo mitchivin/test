@@ -473,21 +473,6 @@ export default class WindowManager {
     this.eventBus.subscribe(EVENTS.TASKBAR_ITEM_CLICKED, (data) =>
       this._handleTaskbarClick(data.windowId),
     );
-
-    // NEW: Subscribe to USER_LOGGED_IN to load Projects iframe if it was opened pre-login
-    this.eventBus.subscribe(EVENTS.USER_LOGGED_IN, () => {
-      console.log('[WINDOW.JS] Received USER_LOGGED_IN event.');
-      const projectsWindowId = 'internet-window'; // ID for "My Projects"
-      const projectsWindowElement = this.windows[projectsWindowId];
-      if (projectsWindowElement) {
-        const iframe = projectsWindowElement.querySelector('iframe');
-        // Check if it's still about:blank (meaning it was opened before login and not yet loaded)
-        if (iframe && iframe.src === 'about:blank' && iframe.dataset.realSrc) {
-          console.log('[WINDOW.JS] Projects window was open pre-login. Loading its content now.');
-          this._loadProjectsIframeAndTriggerPreload(projectsWindowElement);
-        }
-      }
-    });
   }
 
   _calculateWindowToTaskbarTransform(windowElement, taskbarItem) {
