@@ -156,6 +156,70 @@ export function initBootSequence(eventBus, EVENTS) {
         }, 3000);
       }, 2500);
     }, 150);
+
+    // Preload critical assets for About and Resume apps
+    const appCriticalAssets = [
+      // Resume App
+      { path: './assets/apps/resume/resume.webp', type: 'image' },
+      { path: './assets/apps/resume/resumeMitchIvin.pdf', type: 'document' },
+      // About App
+      { path: './assets/apps/about/aboutbg.webp', type: 'image' },
+      { path: './assets/apps/about/pullup-alt.webp', type: 'image' },
+      { path: './assets/apps/about/pullup.webp', type: 'image' },
+      { path: './assets/apps/about/skill1.webp', type: 'image' },
+      { path: './assets/apps/about/skill2.webp', type: 'image' },
+      { path: './assets/apps/about/skill3.webp', type: 'image' },
+      { path: './assets/apps/about/skill4.webp', type: 'image' },
+      { path: './assets/apps/about/skill5.webp', type: 'image' },
+      { path: './assets/apps/about/software1.webp', type: 'image' },
+      { path: './assets/apps/about/software2.webp', type: 'image' },
+      { path: './assets/apps/about/software3.webp', type: 'image' },
+      { path: './assets/apps/about/software4.webp', type: 'image' },
+      { path: './assets/apps/about/p1.webp', type: 'image' },
+      { path: './assets/apps/about/p2.webp', type: 'image' },
+      { path: './assets/apps/about/p3.webp', type: 'image' },
+      { path: './assets/apps/about/p4.webp', type: 'image' },
+      { path: './assets/apps/about/p5.webp', type: 'image' },
+      // Toolbar Icons
+      { path: './assets/gui/toolbar/barlogo.webp', type: 'image' },
+      { path: './assets/gui/toolbar/attach.webp', type: 'image' },
+      { path: './assets/gui/toolbar/back.webp', type: 'image' },
+      { path: './assets/gui/toolbar/copy.webp', type: 'image' },
+      { path: './assets/gui/toolbar/cut.webp', type: 'image' },
+      { path: './assets/gui/toolbar/delete.webp', type: 'image' },
+      { path: './assets/gui/toolbar/email.webp', type: 'image' },
+      { path: './assets/gui/toolbar/forward.webp', type: 'image' },
+      { path: './assets/gui/toolbar/go.webp', type: 'image' },
+      { path: './assets/gui/toolbar/home.webp', type: 'image' },
+      { path: './assets/gui/toolbar/min.webp', type: 'image' },
+      { path: './assets/gui/toolbar/new.webp', type: 'image' },
+      { path: './assets/gui/toolbar/paste.webp', type: 'image' },
+      { path: './assets/gui/toolbar/print.webp', type: 'image' },
+      { path: './assets/gui/toolbar/save.webp', type: 'image' },
+      { path: './assets/gui/toolbar/search.webp', type: 'image' },
+      { path: './assets/gui/toolbar/send.webp', type: 'image' },
+      { path: './assets/gui/toolbar/sign.webp', type: 'image' },
+      { path: './assets/gui/toolbar/size.webp', type: 'image' },
+      { path: './assets/gui/toolbar/slideshow.webp', type: 'image' },
+      { path: './assets/gui/toolbar/star.webp', type: 'image' },
+      { path: './assets/gui/toolbar/tooldropdown.webp', type: 'image' },
+      { path: './assets/gui/toolbar/up.webp', type: 'image' },
+      { path: './assets/gui/toolbar/views.webp', type: 'image' },
+      { path: './assets/gui/toolbar/zoomin.webp', type: 'image' },
+      { path: './assets/gui/toolbar/zoomout.webp', type: 'image' },
+      { path: './assets/gui/toolbar/desc.webp', type: 'image' }
+    ];
+
+    appCriticalAssets.forEach(asset => {
+      const img = new Image();
+      img.src = asset.path;
+      img.onload = () => {
+        // Asset loaded successfully
+      };
+      img.onerror = () => {
+        console.error(`Failed to load asset: ${asset.path}`);
+      };
+    });
   }
 
   // Listen for shutdown requests from login iframe

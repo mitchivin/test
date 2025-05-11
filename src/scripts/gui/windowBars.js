@@ -93,21 +93,24 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
     if (windowId === 'resume-window' && itemConfig.key === 'file' && Array.isArray(itemConfig.dropdown)) {
       // Remove Print Setup (action: 'pageSetup')
       itemConfig.dropdown = itemConfig.dropdown.filter(opt => opt.action !== 'pageSetup');
-      // Insert Download above Print (action: 'filePrint')
-      const printIdx = itemConfig.dropdown.findIndex(opt => opt.action === 'filePrint');
-      if (printIdx !== -1) {
-        itemConfig.dropdown.splice(printIdx, 0, {
-          text: 'Download',
-          action: 'saveResume',
-          enabled: true
-        });
-      } else {
-        // If Print not found, just add Download at the end
-        itemConfig.dropdown.push({
-          text: 'Download',
-          action: 'saveResume',
-          enabled: true
-        });
+      // Prevent duplicate Download option
+      if (!itemConfig.dropdown.some(opt => opt.action === 'saveResume')) {
+        // Insert Download above Print (action: 'filePrint')
+        const printIdx = itemConfig.dropdown.findIndex(opt => opt.action === 'filePrint');
+        if (printIdx !== -1) {
+          itemConfig.dropdown.splice(printIdx, 0, {
+            text: 'Download',
+            action: 'saveResume',
+            enabled: true
+          });
+        } else {
+          // If Print not found, just add Download at the end
+          itemConfig.dropdown.push({
+            text: 'Download',
+            action: 'saveResume',
+            enabled: true
+          });
+        }
       }
     }
     const menuItemDiv = document.createElement("div");
@@ -230,9 +233,12 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
       ".dropdown-menu .menu-option:not(.disabled)",
     );
     menuOptions.forEach((option) => {
-      option.addEventListener("click", (e) => {
+      const newOption = option.cloneNode(true);
+      option.replaceWith(newOption);
+      newOption.addEventListener("click", (e) => {
         e.stopPropagation();
-        const action = option.getAttribute("data-action");
+        e.preventDefault();
+        const action = newOption.getAttribute("data-action");
         let win = _parentWindowElement;
         // Special handling for Resume app's File > Download
         if (win && win.id === 'resume-window' && action === 'saveResume') {

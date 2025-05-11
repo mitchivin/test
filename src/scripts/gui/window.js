@@ -837,9 +837,11 @@ export default class WindowManager {
     // Add listeners for toolbar actions within this window
     const toolbarButtons = windowElement.querySelectorAll('.toolbar-button[data-action]');
     toolbarButtons.forEach(button => {
-        this._bindControl(button, 'click', () => {
-            if (button.classList.contains('disabled')) return; // Do nothing if button is disabled
-            const action = button.getAttribute('data-action');
+        const newButton = button.cloneNode(true);
+        button.replaceWith(newButton);
+        this._bindControl(newButton, 'click', () => {
+            if (newButton.classList.contains('disabled')) return;
+            const action = newButton.getAttribute('data-action');
             this._handleToolbarAction(action, windowElement);
         });
     });
@@ -912,18 +914,31 @@ export default class WindowManager {
             }
             break;
         case 'openResume':   
-            this.openProgram('resume');
+            if (isMobileDevice()) {
+                window.open('./assets/apps/resume/resumeMitchIvin.pdf', '_blank');
+            } else {
+                const link = document.createElement('a');
+                link.href = './assets/apps/resume/resumeMitchIvin.pdf';
+                link.download = 'resumeMitchIvin.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
             break;
         case 'openContact': // For "Contact Me" on "My Resume" toolbar
             this.openProgram('contact');
             break;
         case 'saveResume':
-            const link = document.createElement('a');
-            link.href = './assets/apps/resume/resumeMitchIvin.pdf';
-            link.download = 'resumeMitchIvin.pdf';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            if (isMobileDevice()) {
+                window.open('./assets/apps/resume/resumeMitchIvin.pdf', '_blank');
+            } else {
+                const link = document.createElement('a');
+                link.href = './assets/apps/resume/resumeMitchIvin.pdf';
+                link.download = 'resumeMitchIvin.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
             break;
         case 'navigatePrevious':
         case 'navigateNext':
