@@ -72,6 +72,10 @@ export function initBootSequence(eventBus, EVENTS) {
       bootScreen.style.opacity = "1";
       bootScreen.style.pointerEvents = "auto";
 
+      // --- NEW: Initiate project video preloading ---
+      preloadProjectVideosInBackground();
+      // --- END NEW ---
+
       const minBootTime = 5500; // Minimum boot duration (ms)
       setTimeout(() => {
         bootScreen.classList.remove("boot-fade-in");
@@ -244,6 +248,136 @@ export function initBootSequence(eventBus, EVENTS) {
     }
   }
 }
+
+// --- NEW: Function to handle preloading of project videos ---
+async function preloadProjectVideosInBackground() {
+  console.log("Boot: Starting project video preloading...");
+  const iframeContainer = document.createElement('div');
+  iframeContainer.id = 'project-preloader-iframe-container';
+  iframeContainer.style.display = 'none'; // Keep it hidden
+  document.body.appendChild(iframeContainer);
+
+  const iframe = document.createElement('iframe');
+  iframe.style.width = '1px'; // Minimize resource usage for the iframe itself
+  iframe.style.height = '1px';
+  iframe.style.opacity = '0';
+  iframe.style.position = 'absolute';
+  iframe.style.top = '-100px'; // Move off-screen
+  iframe.style.left = '-100px';
+  iframe.style.border = 'none';
+  iframeContainer.appendChild(iframe);
+
+  // Create a promise that resolves when iframe content is loaded
+  const iframeLoadPromise = new Promise((resolve, reject) => {
+    iframe.onload = () => {
+      console.log("Boot: projects.html iframe loaded for preloading.");
+      resolve(iframe.contentDocument);
+    };
+    iframe.onerror = (err) => {
+      console.error("Boot: Error loading projects.html iframe for preloading.", err);
+      reject(new Error("Iframe load error for projects.html"));
+      if (iframeContainer.parentNode) {
+        iframeContainer.parentNode.removeChild(iframeContainer);
+      }
+    };
+  });
+
+  // Path to projects.html relative to index.html
+  iframe.src = './src/apps/projects/projects.html';
+
+  try {
+    const projectsDoc = await iframeLoadPromise;
+    if (!projectsDoc) {
+      console.error("Boot: Projects document within iframe is null after load.");
+      if (iframeContainer.parentNode) iframeContainer.parentNode.removeChild(iframeContainer);
+      return;
+    }
+
+    const videoPosts = projectsDoc.querySelectorAll('.post.video-post');
+    console.log(`Boot: Found ${videoPosts.length} video posts in projects.html to preload.`);
+
+    if (videoPosts.length === 0) {
+      console.log("Boot: No video posts found to preload. Cleaning up.");
+      if (iframeContainer.parentNode) iframeContainer.parentNode.removeChild(iframeContainer);
+      return;
+    }
+
+    const preloadPromises = [];
+    const tempVideoElements = []; // To keep track of elements for potential later cleanup
+
+    videoPosts.forEach((post, index) => {
+      const videoDataSrc = post.dataset.src;
+      if (videoDataSrc) {
+        // Important: Resolve the relative data-src path correctly.
+        // The data-src is relative to projects.html.
+        // We need to make it relative to index.html or an absolute path.
+        // Assuming projects.html is at 'src/apps/projects/projects.html'
+        // and data-src is like '../../../assets/apps/projects/video1.mp4'
+        // It correctly resolves to 'assets/apps/projects/video1.mp4' from root.
+        const resolvedVideoSrc = new URL(videoDataSrc, iframe.src).href;
+
+        console.log(`Boot: Attempting to preload video ${index + 1}: ${resolvedVideoSrc}`);
+        
+        const tempVideo = document.createElement('video');
+        tempVideo.preload = 'auto'; // Hint to the browser
+        
+        const videoLoadPromise = new Promise((resolveVideo, rejectVideo) => {
+          tempVideo.onloadeddata = () => {
+            console.log(`Boot: Video ${resolvedVideoSrc} event: loadeddata.`);
+            resolveVideo(resolvedVideoSrc);
+          };
+          tempVideo.onerror = (e) => {
+            console.error(`Boot: Error preloading video ${resolvedVideoSrc}:`, e.message || e);
+            rejectVideo(new Error(`Error loading ${resolvedVideoSrc}`));
+          };
+          // Fallback timeout for each video
+          setTimeout(() => rejectVideo(new Error(`Timeout preloading ${resolvedVideoSrc}`)), 10000); // 10s timeout per video
+        }).catch(err => {
+            // Catch individual video errors so Promise.allSettled still works
+            console.warn(`Boot: Caught error for ${resolvedVideoSrc} during preload promise:`, err.message);
+            return { status: 'rejected', reason: err.message, video: resolvedVideoSrc };
+        });
+        
+        preloadPromises.push(videoLoadPromise);
+        
+        tempVideo.src = resolvedVideoSrc;
+        tempVideo.load(); // Explicitly call load
+
+        // Append to a hidden part of the main document to ensure loading
+        tempVideo.style.display = 'none';
+        document.body.appendChild(tempVideo);
+        tempVideoElements.push(tempVideo);
+      }
+    });
+
+    Promise.allSettled(preloadPromises).then(results => {
+      console.log("Boot: Preloading attempts for project videos settled.");
+      results.forEach(result => {
+        if (result.status === 'fulfilled') {
+          console.log(`Boot: Successfully initiated preload for: ${result.value}`);
+        } else {
+          console.warn(`Boot: Failed to initiate/complete preload for a video: ${result.reason?.video || result.reason}`);
+        }
+      });
+      
+      // Cleanup after all attempts
+      console.log("Boot: Cleaning up project video preloading iframe and temporary video elements.");
+      if (iframeContainer.parentNode) {
+        iframeContainer.parentNode.removeChild(iframeContainer);
+      }
+      tempVideoElements.forEach(vid => {
+        if (vid.parentNode) vid.parentNode.removeChild(vid);
+      });
+    });
+
+  } catch (error) {
+    console.error("Boot: Critical error in project video preloading process:", error);
+    if (iframeContainer.parentNode) {
+      iframeContainer.parentNode.removeChild(iframeContainer);
+    }
+  }
+}
+// --- END NEW ---
 
 // ==================================================
 // END Boot Sequence Module

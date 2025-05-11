@@ -137,79 +137,26 @@ function createLightboxCloseButton() {
     return btn;
 }
 
-// --- Preload project videos for instant lightbox display ---
-
-function createLightboxMediaElement(type, src, posterSrc) {
+function createLightboxMediaElement(type, src) {
     let mediaElement;
     if (type === 'image') {
         mediaElement = createEl('img');
-        mediaElement.alt = 'Project Lightbox Image';
-        mediaElement.src = src;
+        mediaElement.alt = 'Project Lightbox Image'; // Generic alt text
     } else if (type === 'video') {
-        // Show poster image first
-        const posterImg = createEl('img');
-        posterImg.alt = 'Project Video Poster';
-        posterImg.src = posterSrc;
-        posterImg.className = 'lightbox-poster';
-        // Prepare video element (hidden initially)
-        const video = createEl('video');
-        video.src = src;
-        video.poster = posterSrc;
-        video.controls = true;
-        video.autoplay = true;
-        video.loop = true;
-        video.muted = false;
-        video.setAttribute('playsinline', '');
-        video.style.display = 'none';
-        // When video is ready, swap in
-        video.addEventListener('canplay', () => {
-            posterImg.style.display = 'none';
-            video.style.display = '';
-            video.play();
-        }, { once: true });
-        // Return a wrapper div containing both
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'relative';
-        wrapper.appendChild(posterImg);
-        wrapper.appendChild(video);
-        mediaElement = wrapper;
+        mediaElement = createEl('video');
+        mediaElement.alt = 'Project Lightbox Video'; // Generic alt text
+        mediaElement.controls = true;
+        mediaElement.autoplay = true;
+        mediaElement.loop = true;
+        mediaElement.setAttribute('playsinline', '');
+    }
+    if (mediaElement) {
+        mediaElement.src = src;
     }
     return mediaElement;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Projects Preload Gating ---
-    const projectsRoot = document.querySelector('.scroll-content') || document.body;
-    let loadingOverlay = document.createElement('div');
-    loadingOverlay.className = 'projects-loading-overlay';
-    loadingOverlay.style.position = 'fixed';
-    loadingOverlay.style.top = 0;
-    loadingOverlay.style.left = 0;
-    loadingOverlay.style.width = '100vw';
-    loadingOverlay.style.height = '100vh';
-    loadingOverlay.style.background = 'rgba(20,20,20,0.92)';
-    loadingOverlay.style.zIndex = 99999;
-    loadingOverlay.style.display = 'flex';
-    loadingOverlay.style.alignItems = 'center';
-    loadingOverlay.style.justifyContent = 'center';
-    loadingOverlay.style.color = '#fff';
-    loadingOverlay.style.fontSize = '2rem';
-    loadingOverlay.innerHTML = 'Loading Projects…';
-    projectsRoot.appendChild(loadingOverlay);
-
-    const startProjects = (videoMetaMap) => {
-        if (loadingOverlay && loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay);
-        // ... existing code for grid rendering ...
-    };
-
-    if (window.projectsPreloadPromise) {
-        window.projectsPreloadPromise.then(startProjects).catch(() => {
-            loadingOverlay.innerHTML = 'Failed to load Projects assets.';
-        });
-    } else {
-        startProjects({});
-    }
-
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
@@ -635,14 +582,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // --- Insert new media (image or video) ---
-                let posterSrc = undefined;
-                if (type === 'video') {
-                    // Map video src to poster
-                    if (src.includes('video1.mp4')) posterSrc = 'assets/apps/projects/videoposter1.webp';
-                    else if (src.includes('video2.mp4')) posterSrc = 'assets/apps/projects/videoposter2.webp';
-                    else if (src.includes('video3.mp4')) posterSrc = 'assets/apps/projects/videoposter3.webp';
-                }
-                let newMedia = createLightboxMediaElement(type, src, posterSrc);
+                let newMedia = createLightboxMediaElement(type, src);
+
                 if (newMedia) {
                     // Original condition for media animation
                     if (!(skipFadeIn && !isDesktop())) {
