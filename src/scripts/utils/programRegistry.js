@@ -182,7 +182,6 @@ const programData = {
       buttons: [
         { key: "previous", enabled: false, icon: "./assets/gui/toolbar/back.webp", text: "Previous", action: "navigatePrevious" },
         { key: "next", enabled: false, icon: "./assets/gui/toolbar/forward.webp", text: "Next", action: "navigateNext" },
-        { type: "separator" },
         { key: "up", enabled: false, icon: "./assets/gui/toolbar/up.webp", text: null, action: "navigateUp" },
         { type: "separator" },
         { key: "projects", enabled: true, icon: "./assets/gui/desktop/internet.webp", text: "My Projects", action: "openProjects" },
@@ -350,20 +349,22 @@ const programData = {
           text: "Home",
           action: "navigateHome",
         },
+        { type: "separator" },
         {
           key: "previous",
-          enabled: true,
+          enabled: false,
           icon: "./assets/gui/toolbar/back.webp",
           text: "Previous",
           action: "navigatePrevious",
         },
         {
           key: "next",
-          enabled: true,
+          enabled: false,
           icon: "./assets/gui/toolbar/forward.webp",
           text: "Next",
           action: "navigateNext",
         },
+        { type: "separator" },
         {
           key: "view-description",
           enabled: false,
@@ -395,6 +396,7 @@ const programData = {
           text: "Send Message",
           action: "sendMessage",
         },
+        { type: "separator" },
         {
           key: "cut",
           enabled: false,
@@ -420,6 +422,7 @@ const programData = {
           text: "New Message",
           action: "newMessage",
         },
+        { type: "separator" },
         {
           key: "attach",
           enabled: false,

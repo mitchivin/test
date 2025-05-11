@@ -1388,16 +1388,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Tap to toggle overlays on mobile ---
     if (lightboxContent) {
+        let isTapToToggleThrottled = false; // Added for throttling
+        let tapToToggleTimeout = null;      // Added for throttling
+
         lightboxContent.addEventListener('touchend', function(e) {
             if (isDesktop()) return;
-            // Only trigger if not a swipe (movement < 10px)
+
+            // Only trigger if not a swipe (movement < 10px) and not currently throttled
             const dx = Math.abs(dragCurrentX - dragStartX);
             const dy = Math.abs(dragCurrentY - dragStartY);
+
             if (dx < 10 && dy < 10 && !dragHasMoved) {
+                if (isTapToToggleThrottled) { // Check if throttled
+                    e.preventDefault(); // Prevent any default action if throttled
+                    return;
+                }
+                isTapToToggleThrottled = true; // Set throttle flag
+
                 // It's a tap
                 const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
-                if (!wrapper) return;
+                if (!wrapper) {
+                    isTapToToggleThrottled = false; // Reset if no wrapper
+                    return;
+                }
+                
                 const video = lightboxContent.querySelector('video');
+                let shouldToggleOverlays = false;
+
                 if (video) {
                     // Only apply special logic for videos
                     const rect = video.getBoundingClientRect();
@@ -1406,34 +1423,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         const yPercent = ((touchY - rect.top) / rect.height) * 100;
                         if (yPercent < 30 || yPercent > 70) {
                             e.preventDefault(); // Prevent video controls from showing when toggling overlays
-                            // Top 30% or bottom 30%: toggle overlays
-                            const titleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
-                            const descOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
-                            if (titleOverlay || descOverlay) {
-                                // Hide overlays
-                                toggleMobileOverlays('', '', wrapper); // This will hide both overlays
-                            } else {
-                                // Show overlays for current post
-                                if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
-                                    const postData = allPosts[currentLightboxIndex].dataset;
-                                    const title = postData.title || '';
-                                    const desc = postData.mobileDescription || postData.description || '';
-                                    const linkType = postData.linkType;
-                                    const linkUrl = postData.linkUrl;
-                                    toggleMobileOverlays(title, desc, wrapper, linkType, linkUrl);
-                                }
-                            }
+                            shouldToggleOverlays = true;
                         }
                         // If in middle 40%, do nothing (let event bubble to video controls)
-                        return;
                     }
                 } else {
-                    // Not a video (image): keep old behavior (toggle overlays on any tap)
+                    // Not a video (image): always toggle overlays on tap
+                    shouldToggleOverlays = true;
+                }
+
+                if (shouldToggleOverlays) {
                     const titleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
                     const descOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
                     if (titleOverlay || descOverlay) {
                         // Hide overlays
-                        toggleMobileOverlays('', '', wrapper); // This will hide both overlays
+                        toggleMobileOverlays('', '', wrapper); 
                     } else {
                         // Show overlays for current post
                         if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
@@ -1446,6 +1450,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 }
+                
+                // Set timeout to reset throttle flag
+                clearTimeout(tapToToggleTimeout);
+                tapToToggleTimeout = setTimeout(() => {
+                    isTapToToggleThrottled = false;
+                }, 500);
             }
         });
     }

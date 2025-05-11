@@ -324,9 +324,23 @@
 /* ===== Responsive: Mobile Adjustments ===== */
 @media (max-width: 767px) {
   .toolbar-close-button {
-    border-right: 1px solid #d7d4ca;
-    height: 26px;
+    border-right: none;
+    padding: 6px 8px; /* Ensure consistent padding with other toolbar buttons */
     display: flex;
     align-items: center;
+    position: relative; /* For ::after pseudo-element positioning */
+    margin-right: 3px;  /* Create space for the divider line and some padding after it */
+  }
+
+  .toolbar-close-button::after {
+    content: "";
+    position: absolute;
+    left: calc(100% + 1px); /* Position 1px to the right of the button's edge */
+    top: 50%;
+    width: 0; /* The line is created by the border */
+    height: 22px; /* Vertical height of the line */
+    border-left: 1px solid #909090; /* 1px solid line, color can be adjusted for sharpness */
+    transform: translateY(-50%) scaleX(0.5); /* Vertically center and scale to 0.5px width */
+    transform-origin: left center; /* Scale from the left edge for sharpness */
   }
 } 

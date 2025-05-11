@@ -762,6 +762,12 @@
     line-height: calc(32px - 2px);
   }
 
+  .middle-right .menu-item {
+    height: 35px;
+    min-height: 35px;
+    max-height: 35px;
+  }
+
   .item-title {
     margin-bottom: 0;
     line-height: 1;
