@@ -25,41 +25,122 @@ let globalTaskbarInstance = null;
 
 // ===== App Initialization =====
 document.addEventListener("DOMContentLoaded", () => {
-  globalTaskbarInstance = new Taskbar(eventBus);
-  new Desktop(eventBus);
-  new WindowManager(eventBus);
-  initBootSequence(eventBus, EVENTS);
-  eventBus.subscribe(EVENTS.SHUTDOWN_REQUESTED, () => {
-    sessionStorage.removeItem("logged_in");
-    const currentPath = window.location.pathname;
-    window.location.assign(currentPath + "?forceBoot=true");
-  });
-  initRandomScanline();
-  setupTooltips("[data-tooltip]");
-  ensureLandscapeBlock();
-  handleOrientationBlock();
-  window.addEventListener("orientationchange", handleOrientationBlock);
-  window.addEventListener("resize", handleOrientationBlock);
-  setRealVh();
-  scaleDesktopIconsToFitMobile();
-  document.addEventListener('touchstart', (event) => {
-    const now = Date.now();
-    const timeSinceLastTouch = now - lastTouchStartTime;
-    const doubleTapThreshold = 300;
-    if (timeSinceLastTouch < doubleTapThreshold && event.touches.length === 1) {
-      event.preventDefault();
-    }
-    lastTouchStartTime = now;
-  }, { passive: false });
+  // Preload app iframes before showing desktop
+  const preloadApps = [
+    { id: "about-window", src: "src/apps/about/about.html" },
+    { id: "resume-window", src: "src/apps/resume/resume.html" },
+    { id: "internet-window", src: "src/apps/projects/projects.html" },
+    { id: "contact-window", src: "src/apps/contact/contact.html" },
+  ];
 
-  // Listen for postMessages from iframes (e.g., resume interaction)
-  window.addEventListener('message', (event) => {
-    if (event?.data?.type === 'resume-interaction' && globalTaskbarInstance) {
-      const startMenu = globalTaskbarInstance.startMenuComponent;
-      if (startMenu && startMenu.startMenu?.classList.contains('active')) {
-        startMenu.closeStartMenu();
-      }
+  // Preload all assets in assets/apps/projects
+  const projectAssets = [
+    "left.webp",
+    "right.webp",
+    "close.webp",
+    "projectsbg.webp",
+    "videoposter3.webp",
+    "videoposter2.webp",
+    "videoposter1.webp",
+    "videothumb1.mp4",
+    "videothumb2.mp4",
+    "videothumb3.mp4",
+    "video1.mp4",
+    "video2.mp4",
+    "video3.mp4",
+    "carousel1.webp",
+    "carousel2.webp",
+    "carousel3.webp",
+    "image1.webp",
+    "image2.webp",
+    "image3.webp",
+    "image4.webp",
+    "image5.webp",
+    "image6.webp"
+  ];
+  // Preload sounds
+  const soundAssets = [
+    "login.wav",
+    "logoff.wav"
+  ];
+  const head = document.head || document.getElementsByTagName('head')[0];
+  projectAssets.forEach(filename => {
+    const ext = filename.split('.').pop();
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.href = `assets/apps/projects/${filename}`;
+    if (ext === 'webp') {
+      link.as = 'image';
+    } else if (ext === 'mp4') {
+      link.as = 'video';
+    } else {
+      link.as = 'fetch';
     }
+    head.appendChild(link);
+  });
+  soundAssets.forEach(filename => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.href = `assets/apps/sounds/${filename}`;
+    link.as = 'audio';
+    head.appendChild(link);
+  });
+
+  const preloadContainer = document.createElement("div");
+  preloadContainer.style.display = "none";
+  preloadContainer.id = "preload-apps-container";
+  document.body.appendChild(preloadContainer);
+  let loadedCount = 0;
+  function onAllPreloaded() {
+    preloadContainer.remove();
+    // Now initialize the rest of the app
+    globalTaskbarInstance = new Taskbar(eventBus);
+    new Desktop(eventBus);
+    new WindowManager(eventBus);
+    initBootSequence(eventBus, EVENTS);
+    eventBus.subscribe(EVENTS.SHUTDOWN_REQUESTED, () => {
+      sessionStorage.removeItem("logged_in");
+      const currentPath = window.location.pathname;
+      window.location.assign(currentPath + "?forceBoot=true");
+    });
+    initRandomScanline();
+    setupTooltips("[data-tooltip]");
+    ensureLandscapeBlock();
+    handleOrientationBlock();
+    window.addEventListener("orientationchange", handleOrientationBlock);
+    window.addEventListener("resize", handleOrientationBlock);
+    setRealVh();
+    scaleDesktopIconsToFitMobile();
+    document.addEventListener('touchstart', (event) => {
+      const now = Date.now();
+      const timeSinceLastTouch = now - lastTouchStartTime;
+      const doubleTapThreshold = 300;
+      if (timeSinceLastTouch < doubleTapThreshold && event.touches.length === 1) {
+        event.preventDefault();
+      }
+      lastTouchStartTime = now;
+    }, { passive: false });
+    window.addEventListener('message', (event) => {
+      if (event?.data?.type === 'resume-interaction' && globalTaskbarInstance) {
+        const startMenu = globalTaskbarInstance.startMenuComponent;
+        if (startMenu && startMenu.startMenu?.classList.contains('active')) {
+          startMenu.closeStartMenu();
+        }
+      }
+    });
+  }
+  preloadApps.forEach(app => {
+    const iframe = document.createElement('iframe');
+    iframe.src = app.src;
+    iframe.name = app.id + '-preload';
+    iframe.setAttribute('data-preload-app', app.id);
+    iframe.onload = () => {
+      loadedCount++;
+      if (loadedCount === preloadApps.length) {
+        onAllPreloaded();
+      }
+    };
+    preloadContainer.appendChild(iframe);
   });
 });
 
