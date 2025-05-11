@@ -1,18 +1,22 @@
-// ==================================================
-//  CRT Effect Utilities for Windows XP Simulation
-// ==================================================
 /**
- * @fileoverview CRT visual effect utilities for Windows XP simulation.
- * Handles CSS injection and scanline/flicker animation logic.
+ * crtEffect.js — CRT Visual Effect Utilities for Windows XP Simulation
+ *
+ * Handles:
+ * - CSS injection and scanline/flicker animation logic
+ * - Randomized scanline movement for CRT simulation
  *
  * Usage:
  *   import { initRandomScanline } from './crtEffect.js';
  *   initRandomScanline();
+ *
+ * @module crtEffect
  */
 
-// CRT Effect: Combined CSS and JS
+// ==================================================
+//  CRT Effect Utilities for Windows XP Simulation
+// ==================================================
 
-// Removed large CSS string and injection logic
+// CRT Effect: Combined CSS and JS
 
 // Animation timing constants for CRT scanline effect
 const SCANLINE_MIN_DELAY_MS = 1000;
@@ -20,6 +24,7 @@ const SCANLINE_MAX_DELAY_MS = 3000;
 const SCANLINE_MIN_DURATION_MS = 4000;
 const SCANLINE_MAX_DURATION_MS = 3000;
 
+// ===== CRT Scanline Effect =====
 /**
  * Initializes and manages the moving scanline CRT effect
  *

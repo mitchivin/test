@@ -1,6 +1,14 @@
 /**
- * @fileoverview Entry point for the Windows XP simulation that initializes all core components
- * and sets up event handling. This file orchestrates the application's lifecycle.
+ * main.js — Application Entrypoint for Windows XP Simulation
+ *
+ * Orchestrates initialization of all core components and sets up global event handling.
+ * Handles:
+ * - Taskbar, Desktop, WindowManager, Boot sequence
+ * - Tooltip and CRT scanline effect initialization
+ * - Mobile/landscape handling and viewport scaling
+ *
+ * Usage:
+ *   Entry point, loaded by index.html
  *
  * @module main
  */
@@ -13,9 +21,11 @@ import { setupTooltips } from "./gui/tooltip.js";
 import { initRandomScanline } from "./utils/crtEffect.js";
 
 let lastTouchStartTime = 0;
+let globalTaskbarInstance = null;
 
+// ===== App Initialization =====
 document.addEventListener("DOMContentLoaded", () => {
-  new Taskbar(eventBus);
+  globalTaskbarInstance = new Taskbar(eventBus);
   new Desktop(eventBus);
   new WindowManager(eventBus);
   initBootSequence(eventBus, EVENTS);
@@ -41,6 +51,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     lastTouchStartTime = now;
   }, { passive: false });
+
+  // Listen for postMessages from iframes (e.g., resume interaction)
+  window.addEventListener('message', (event) => {
+    if (event?.data?.type === 'resume-interaction' && globalTaskbarInstance) {
+      const startMenu = globalTaskbarInstance.startMenuComponent;
+      if (startMenu && startMenu.startMenu?.classList.contains('active')) {
+        startMenu.closeStartMenu();
+      }
+    }
+  });
 });
 
 function ensureLandscapeBlock() {

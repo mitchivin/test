@@ -1,0 +1,69 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background: #97958f; /* Slightly darker than #ece9d8 */
+  color: #000; /* XP default text color */
+  font-family: Tahoma, Verdana, sans-serif; /* Default XP font */
+  font-size: 11px; /* Default XP font size */
+  overflow: hidden; /* Prevent body scroll, let .app-root handle its own. */
+}
+.app-root {
+  box-sizing: border-box;
+  padding: 16px;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+}
+
+/* Mobile specific padding */
+@media (max-width: 767px) {
+  .app-root {
+    padding: 8px;
+  }
+}
+
+/* Desktop maximized padding override */
+@media (min-width: 768px) {
+  .maximized-mode.app-root {
+    padding: 16px 0;
+  }
+}
+.resume-image {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: zoom-in;
+  transition: max-width 0.2s, max-height 0.2s, width 0.2s, height 0.2s;
+  box-sizing: content-box;
+}
+.resume-image.zoomed {
+  max-width: none;
+  max-height: none;
+  width: 160%;
+  height: auto;
+  cursor: zoom-out;
+}
+@media (min-width: 700px) {
+  .resume-image.zoomed {
+    width: 850px;
+    max-width: 90vw;
+  }
+}
+.resume-image.dragging {
+  cursor: grabbing;
+}
+.maximized-mode .resume-image:not(.zoomed) {
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  margin-bottom: 0;
+  display: block;
+}

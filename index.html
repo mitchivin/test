@@ -1,3 +1,15 @@
+<!--
+  index.html — Main HTML Entrypoint for Windows XP Simulation
+
+  Provides the structure for:
+  - Boot and login screens
+  - Desktop and desktop icons
+  - Taskbar and system tray
+  - CRT visual effects overlays
+  - Application script entrypoint
+
+  @file index.html
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -32,10 +44,11 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="./src/styles/main.css" />
-    <link rel="stylesheet" href="./src/styles/gui/boot.css" />
   </head>
   <body>
-    <div id="pre-boot-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20000;"></div>
+    <!-- ===== Pre-Boot Overlay ===== -->
+    <div id="pre-boot-overlay" class="pre-boot-overlay-style"></div>
+    <!-- ===== Boot Screen ===== -->
     <div id="boot-screen">
       <div class="loading-container">
         <img
@@ -57,9 +70,10 @@
         <img src="./assets/gui/boot/boot-wordmark.webp" alt="Boot Wordmark" />
       </div>
     </div>
-    <div id="boot-fadeout-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:20000;opacity:0;transition:opacity 0.5s;"></div>
+    <div id="boot-fadeout-overlay" class="boot-fadeout-overlay-style"></div>
+    <!-- ===== Login Screen ===== -->
     <div id="login-screen">
-      <div class="login-screen" style="display: block">
+      <div class="login-screen login-screen-initial-display">
         <div class="login-screen-inner">
           <div class="login-screen-center">
             <div class="left">
@@ -104,10 +118,11 @@
           <span class="mobile-bottom-detail">View the site on desktop for the full experience.</span>
         </div>
       </div>
-      <div class="welcome-message" style="display:none;">
+      <div class="welcome-message welcome-message-initial-hidden">
         <span class="welcome-image-fallback">Welcome</span>
       </div>
     </div>
+    <!-- ===== Desktop & Icons ===== -->
     <div class="desktop">
       <div class="desktop-icons-second-row">
         <div class="desktop-icon" data-program-name="behance" data-tooltip="Behance">
@@ -162,7 +177,9 @@
         </div>
       </div>
     </div>
+    <!-- ===== Windows Container ===== -->
     <div id="windows-container"></div>
+    <!-- ===== Taskbar ===== -->
     <div class="taskbar">
       <button class="start-button" id="start-button">
         <img src="./assets/gui/taskbar/start-button.webp" alt="Start" />
@@ -187,7 +204,9 @@
         </div>
       </div>
     </div>
+    <!-- ===== Application Entrypoint ===== -->
     <script type="module" src="./src/scripts/main.js"></script>
+    <!-- ===== CRT Effects Overlays ===== -->
     <div class="crt-effect"></div>
     <div class="crt-scanline"></div>
     <div class="crt-vignette"></div>

@@ -1,3 +1,13 @@
+/*
+ * window.css — Window Styles for Windows XP Simulation
+ *
+ * Styles for:
+ * - App window container, title bar, controls, status bar, overlays, and animations
+ * - Responsive/mobile adjustments
+ *
+ * @file src/styles/gui/window.css
+ */
+
 /* ==================================================
    Window Styles for Windows XP Simulation
    ==================================================
@@ -5,16 +15,7 @@
    - Matches the look and feel of Windows XP.
    ================================================== */
 
-/* =========================
-   1. Root Variables
-   ========================= */
-:root {
-  --z-window: 100;
-}
-
-/* =========================
-   2. App Window Container
-   ========================= */
+/* ===== App Window Container ===== */
 .app-window {
   border: 2px solid #284ffd;
   border-top-width: 1.5px;
@@ -106,9 +107,7 @@
   flex: 1;
 }
 
-/* =========================
-   5. Status Bar
-   ========================= */
+/* ===== Status Bar ===== */
 .status-bar {
   height: 22px;
   flex-shrink: 0;
@@ -153,77 +152,7 @@
   display: block;
 }
 
-/* =========================
-   7. Animations (Open, Close, Minimize, Restore)
-   ========================= */
-/* Remove all XP-style window open/close/minimize animations */
-
-@keyframes windowOpenFadeSlide {
-  from {
-    opacity: 0;
-    transform: translate(-24px, -24px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.window-opening {
-  animation: windowOpenFadeSlide 0.2s ease-out;
-}
-
-@keyframes windowCloseFade {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-.window-closing {
-  animation: windowCloseFade 0.15s ease-in;
-}
-
-@keyframes windowMinimizeZoom {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 0.5;
-    transform: var(--window-minimize-transform, scale(0.55));
-  }
-}
-
-.window-minimizing {
-  animation: windowMinimizeZoom 0.15s ease-in forwards;
-  transform-origin: bottom center;
-}
-
-@keyframes windowRestoreZoom {
-  from {
-    opacity: 0.5;
-    transform: var(--window-restore-transform, scale(0.55));
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.window-restoring {
-  animation: windowRestoreZoom 0.15s ease-out;
-  transform-origin: bottom center;
-}
-
-.app-window:not(.active) .status-bar {
-  background-color: #f3f3f3;
-  color: #aaa;
-  border-top: 1px solid #e0e0e0;
-}
-
+/* ===== Window Mask & Overlays ===== */
 .iframe-overlay {
   position: absolute;
   inset: 0;
@@ -295,10 +224,74 @@
   box-sizing: border-box;
 }
 
-/* ==================================================
-   END Window Styles
-   ================================================== */
+/* ===== Animations ===== */
+@keyframes windowOpenFadeSlide {
+  from {
+    opacity: 0;
+    transform: translate(-24px, -24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
+.window-opening {
+  animation: windowOpenFadeSlide 0.2s ease-out;
+}
+
+@keyframes windowCloseFade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.window-closing {
+  animation: windowCloseFade 0.15s ease-in;
+}
+
+@keyframes windowMinimizeZoom {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0.5;
+    transform: var(--window-minimize-transform, scale(0.55));
+  }
+}
+
+.window-minimizing {
+  animation: windowMinimizeZoom 0.15s ease-in forwards;
+  transform-origin: bottom center;
+}
+
+@keyframes windowRestoreZoom {
+  from {
+    opacity: 0.5;
+    transform: var(--window-restore-transform, scale(0.55));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.window-restoring {
+  animation: windowRestoreZoom 0.15s ease-out;
+  transform-origin: bottom center;
+}
+
+.app-window:not(.active) .status-bar {
+  background-color: #f3f3f3;
+  color: #aaa;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* ===== Responsive: Mobile Adjustments ===== */
 @media (max-width: 768px) {
   .app-window,
   .window-body.iframe-container {
@@ -323,3 +316,7 @@
 .iframe-container > iframe {
   transition: opacity 0.35s;
 }
+
+/* ==================================================
+   END Window Styles
+   ================================================== */

@@ -1,3 +1,9 @@
+<!--
+  contact.html — Contact App for Windows XP Simulation
+  Provides the Contact Me window content and structure.
+  Loaded as an iframe in the main shell.
+  @file contact.html
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -25,38 +31,5 @@
         </div>
         <textarea id="contact-message" class="textarea" placeholder="Write your message here"></textarea>
     </div>
-    <script>
-      window.addEventListener('message', function(event) {
-        // It's a good practice to check the origin of the message for security
-        // For local development or same-origin iframes, this might not be strictly necessary,
-        // but in a broader context, you'd want to verify event.origin.
-        // Example: if (event.origin !== 'expected_origin') return;
-
-        if (event.data && event.data.type === 'toolbar-action' && event.data.action === 'newMessage') {
-          const fromField = document.getElementById('contact-from');
-          const subjectField = document.getElementById('contact-subject');
-          const messageField = document.getElementById('contact-message');
-
-          if (fromField) fromField.value = '';
-          if (subjectField) subjectField.value = '';
-          if (messageField) messageField.value = '';
-        } else if (event.data && event.data.type === 'getContactFormData') {
-          const from = document.getElementById('contact-from').value;
-          const subject = document.getElementById('contact-subject').value;
-          const message = document.getElementById('contact-message').value;
-          const to = document.getElementById('contact-to').value; // Although fixed, send it for completeness
-
-          event.source.postMessage({
-            type: 'contactFormDataResponse',
-            data: {
-              to: to,
-              from: from,
-              subject: subject,
-              message: message
-            }
-          }, event.origin); // Respond to the specific origin that sent the request
-        }
-      });
-    </script>
   </body>
 </html> 

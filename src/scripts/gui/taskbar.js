@@ -1,6 +1,10 @@
 /**
- * @fileoverview Taskbar module for managing the Windows XP start menu, system tray, and clock.
- * Integrates with StartMenu, EventBus, and tooltip utilities.
+ * taskbar.js — Taskbar Component for Windows XP Simulation
+ *
+ * Handles the taskbar UI, including:
+ * - Start menu integration and toggling
+ * - System tray and clock management
+ * - Responsive layout and event-driven updates
  *
  * Usage:
  *   import Taskbar from './taskbar.js';
@@ -9,6 +13,8 @@
  * Edge Cases:
  *   - If required DOM elements are missing, some features are disabled.
  *   - Tooltips and clock are initialized on startup.
+ *
+ * @module taskbar
  */
 import StartMenu from "./startMenu.js";
 import { EVENTS } from "../utils/eventBus.js";
@@ -58,6 +64,12 @@ class Clock {
     if (!this.#clockElement) return;
     this.#clockElement.textContent = this.#timeFormatter.format(new Date());
   }
+
+  destroy() {
+    clearTimeout(this.#initialTimeoutId);
+    clearInterval(this.#intervalId);
+    this.#clockElement = null;
+  }
 }
 
 /**
@@ -79,7 +91,7 @@ export default class Taskbar {
     this.startMenuComponent = new StartMenu(this.eventBus);
     this.programsContainer = document.querySelector(".taskbar-programs");
     this.systemTray = document.querySelector(".system-tray");
-    this.taskbar = document.querySelector(".taskbar"); // Cache taskbar
+    this.taskbar = document.querySelector(".taskbar");
 
     // Always use the desktop start button asset
     this._setStartButtonImage();
@@ -235,7 +247,7 @@ export function showNetworkBalloon() {
   balloonRoot.style.position = "absolute";
   balloonRoot.style.zIndex = "1400";
   document.body.appendChild(balloonRoot);
-  const isMobile = isMobileDevice && isMobileDevice();
+  const isMobile = isMobileDevice();
   const headerText = "Welcome to my Portfolio";
   const mainText = isMobile
     ? "Hey, I'm Mitch - I thought I'd mix things up a bit.<br>For the best experience, view this site on desktop."
@@ -275,7 +287,6 @@ export function showNetworkBalloon() {
   const closeBtn = balloonRoot.querySelector(".balloon__close");
   let balloonTimeouts = [];
   closeBtn.onclick = () => hideBalloon();
-  // Remove balloon.onclick handler so clicking the balloon does nothing
   balloon.classList.remove("hide");
   balloonTimeouts.push(setTimeout(() => balloon.classList.add("hide"), 7000)); // Start fade out after 7s
   balloonTimeouts.push(setTimeout(() => hideBalloon(), 8000)); // Remove after 8s
@@ -290,7 +301,6 @@ export function showNetworkBalloon() {
   }
 }
 
-// Remove the DOMContentLoaded event for auto-show
 // Instead, show balloon on click of the network icon
 const setupBalloonClick = () => {
   const icon = document.querySelector(".tray-network-icon");

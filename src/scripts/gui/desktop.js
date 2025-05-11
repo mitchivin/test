@@ -1,31 +1,27 @@
 /**
- * @fileoverview Desktop Component for the Windows XP simulation.
- * Manages desktop icons, selection, drag, and wallpaper logic.
+ * desktop.js — Desktop Component for Windows XP Simulation
+ *
+ * Handles the desktop UI, including:
+ * - Icon rendering, selection, and drag selection
+ * - Wallpaper logic (desktop/mobile)
+ * - Event-driven integration with the rest of the system
  *
  * Usage:
  *   import Desktop from './desktop.js';
  *   const desktop = new Desktop(eventBus);
  *
- * Edge Cases:
- *   - If .desktop element is missing, most functionality is disabled.
- *   - If there are no .desktop-icon elements, icon logic is skipped.
- *   - Wallpaper selection adapts to ultrawide screens.
+ * @module desktop
  */
 import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
 
+// ===== Desktop Class =====
 /**
- * Desktop class manages the Windows XP desktop UI, including icon selection, drag, and wallpaper.
- *
- * @class
- * @example
- * import Desktop from './desktop.js';
- * const desktop = new Desktop(eventBus);
+ * Manages the Windows XP desktop UI: icons, selection, drag, and wallpaper.
  */
 export default class Desktop {
   /**
-   * Create a new Desktop instance.
-   * @param {EventBus} eventBus - The event bus instance for communication.
+   * @param {EventBus} eventBus - Event bus for cross-component communication
    */
   constructor(eventBus) {
     this.eventBus = eventBus;
@@ -45,46 +41,38 @@ export default class Desktop {
     this.setupDesktopEvents();
     this.setupPointerSelectionEvents();
 
-    // Set the default wallpaper class
-    this.desktop.classList.remove('wallpaper-default', 'wallpaper-mobile'); // Clear existing first
+    // Set wallpaper class based on device
+    this.desktop.classList.remove('wallpaper-default', 'wallpaper-mobile');
     if (isMobileDevice()) {
       this.desktop.classList.add('wallpaper-mobile');
     } else {
       this.desktop.classList.add('wallpaper-default');
     }
 
+    // Event subscriptions for selection/drag state
     this.eventBus.subscribe(EVENTS.WINDOW_CREATED, () => this.clearSelection());
     this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, () => this.clearSelection());
-
-    // New subscriptions to reset drag selection state
     this.eventBus.subscribe(EVENTS.PROGRAM_OPEN, () => this.resetDragSelectionState());
     this.eventBus.subscribe(EVENTS.STARTMENU_OPENED, () => this.resetDragSelectionState());
-    // Also reset on window focus, as clearSelection() might not be enough for a stuck drag box
-    this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, () => this.resetDragSelectionState());
   }
 
   /**
-   * Helper to always get the current set of desktop icons.
+   * Get all desktop icon elements.
    * @returns {NodeListOf<Element>} NodeList of .desktop-icon elements
    */
   getIcons() {
     return this.desktop.querySelectorAll(".desktop-icon");
   }
 
-  // Utility: Selection overlay for desktop icons
   /**
-   * Remove any existing selection box artifacts from previous interactions.
-   * @returns {void}
+   * Remove any selection box artifacts from previous interactions.
    */
   cleanupArtifacts() {
-    document
-      .querySelectorAll("#selection-box, .selection-box")
-      .forEach((box) => box.remove());
+    document.querySelectorAll("#selection-box, .selection-box").forEach((box) => box.remove());
   }
 
   /**
    * Create the selection overlay element if it does not exist.
-   * @returns {void}
    */
   createSelectionOverlay() {
     if (!this.overlay) {
@@ -95,37 +83,25 @@ export default class Desktop {
   }
 
   /**
-   * Attach click and interaction events to desktop icons.
-   * @returns {void}
+   * Attach click/tap events to desktop icons for selection and opening.
    */
   setupIconEvents() {
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     this.getIcons().forEach((icon) => {
-      // If the icon is an anchor (for social links), let the default action happen
-      if (icon.tagName === "A") return;
+      if (icon.tagName === "A") return; // Let anchors handle their own events
       const iconSpan = icon.querySelector("span");
-      const iconId = iconSpan
-        ? iconSpan.textContent.trim().toLowerCase().replace(/\s+/g, "-")
-        : "";
-
-      // Combined click/tap handling for selection and opening
+      const iconId = iconSpan ? iconSpan.textContent.trim().toLowerCase().replace(/\s+/g, "-") : "";
       const handleIconActivate = (e) => {
         e.stopPropagation();
-        // Prevent both click and touchend from firing for the same tap
-        if (isTouch && e.type === "click") return;
+        if (isTouch && e.type === "click") return; // Prevent double event on touch
         const now = Date.now();
-        const DOUBLE_CLICK_THRESHOLD = 400; // ms
+        const DOUBLE_CLICK_THRESHOLD = 400;
         const lastTime = this.lastClickTimes[iconId] || 0;
-
         if (now - lastTime < DOUBLE_CLICK_THRESHOLD) {
-          // This is a double-click/tap
-          if (!icon.classList.contains("selected")) {
-            this.selectIcon(icon, true);
-          }
+          // Double-click/tap: open program or social link
+          if (!icon.classList.contains("selected")) this.selectIcon(icon, true);
           let programName = icon.getAttribute("data-program-name");
           const socialKeys = ["github", "instagram", "behance", "linkedin"];
-
-          // Special case: social icons (check programName directly)
           if (socialKeys.includes(programName)) {
             const urls = {
               github: "https://github.com/mitchivin",
@@ -135,20 +111,15 @@ export default class Desktop {
             };
             window.open(urls[programName], "_blank");
           } else {
-            // Default action: open program via event bus
             this.eventBus.publish(EVENTS.PROGRAM_OPEN, { programName });
           }
-
-          // Reset last click time to prevent triple click issues
           this.lastClickTimes[iconId] = 0;
         } else {
-          // This is a single click/tap
+          // Single click/tap: select icon
           this.toggleIconSelection(icon, e.ctrlKey);
-          // Record the time for potential double-click detection
           this.lastClickTimes[iconId] = now;
         }
       };
-
       if (isTouch) {
         icon.addEventListener("touchend", handleIconActivate);
       } else {
@@ -159,7 +130,6 @@ export default class Desktop {
 
   /**
    * Attach click handler to desktop background for clearing selection.
-   * @returns {void}
    */
   setupDesktopEvents() {
     this.desktop.addEventListener("click", (e) => {
@@ -174,35 +144,20 @@ export default class Desktop {
   /**
    * Set up pointer events for click-and-drag selection of desktop icons.
    * Handles pointerdown, pointermove, pointerup for selection box.
-   * @returns {void}
    */
   setupPointerSelectionEvents() {
     window.addEventListener("pointerdown", (e) => {
       if (e.target !== this.overlay && e.target !== this.desktop) return;
-
       if (isMobileDevice()) {
-        // If an activeDragPointerId exists and it's different from the current event's pointer,
-        // it implies a multi-touch scenario (e.g., pinch) or a stuck state from a previous drag.
-        // Reset any existing drag state aggressively.
+        // Multi-touch or stuck drag: reset state
         if (this.activeDragPointerId !== null && this.activeDragPointerId !== e.pointerId) {
-          this.resetDragSelectionState(); 
-          // After resetting, this new pointer (e.pointerId) can now attempt to start a fresh drag.
+          this.resetDragSelectionState();
         } else if (this.isDragging && this.activeDragPointerId === e.pointerId) {
-          // Unlikely scenario: pointerdown for the same pointer that's already dragging.
-          // Reset to be safe and ensure a clean state before potentially restarting.
           this.resetDragSelectionState();
         }
       }
-
-      // If, after the above checks, a drag is STILL considered in progress, bail out.
-      // This typically shouldn't happen if resetDragSelectionState() was called correctly.
-      if (this.isDragging) {
-        return;
-      }
-
-      if (!e.ctrlKey) {
-        this.clearSelection();
-      }
+      if (this.isDragging) return;
+      if (!e.ctrlKey) this.clearSelection();
       const rect = this.desktop.getBoundingClientRect();
       this.startX = e.clientX - rect.left;
       this.startY = e.clientY - rect.top;
@@ -217,14 +172,12 @@ export default class Desktop {
       });
       this.desktop.appendChild(this.selectionBox);
       this.isDragging = true;
-      this.hasDragged = false; // Ensure hasDragged is reset here too
-      this.activeDragPointerId = e.pointerId; // Store the ID of the pointer starting the drag
+      this.hasDragged = false;
+      this.activeDragPointerId = e.pointerId;
     });
     window.addEventListener("pointermove", (e) => {
       if (!this.isDragging || !this.selectionBox) return;
-      // On mobile, only respond to the active drag pointer
       if (isMobileDevice() && e.pointerId !== this.activeDragPointerId) return;
-
       this.hasDragged = true;
       const rect = this.desktop.getBoundingClientRect();
       const currentX = e.clientX - rect.left;
@@ -241,14 +194,9 @@ export default class Desktop {
       });
       this.highlightIconsIntersecting(x, y, w, h);
     });
-    window.addEventListener("pointerup", (e) => { // Modified 'e' for event object
+    window.addEventListener("pointerup", (e) => {
       if (!this.isDragging || !this.selectionBox) return;
-
-      // On mobile, only the original pointer can finalize the drag
-      if (isMobileDevice() && e.pointerId !== this.activeDragPointerId) {
-        return; 
-      }
-
+      if (isMobileDevice() && e.pointerId !== this.activeDragPointerId) return;
       this.isDragging = false;
       this.getIcons().forEach((icon) => {
         if (icon.classList.contains("hover-by-selection")) {
@@ -261,18 +209,16 @@ export default class Desktop {
         this.selectionBox.parentNode.removeChild(this.selectionBox);
         this.selectionBox = null;
       }
-      this.activeDragPointerId = null; // Clear the active pointer ID
+      this.activeDragPointerId = null;
     });
   }
 
   /**
    * Highlight desktop icons that intersect with the selection rectangle.
-   * Uses bounding box intersection logic to determine which icons are selected.
    * @param {number} left - Left X of selection box (relative to desktop)
    * @param {number} top - Top Y of selection box (relative to desktop)
    * @param {number} width - Width of selection box
    * @param {number} height - Height of selection box
-   * @returns {void}
    */
   highlightIconsIntersecting(left, top, width, height) {
     const selectionRect = {
@@ -304,6 +250,9 @@ export default class Desktop {
     });
   }
 
+  /**
+   * Toggle selection state for an icon (supports ctrl multi-select).
+   */
   toggleIconSelection(icon, isCtrlPressed) {
     if (isCtrlPressed) {
       if (icon.classList.contains("selected")) {
@@ -320,12 +269,18 @@ export default class Desktop {
     }
   }
 
+  /**
+   * Select a single icon, optionally clearing others.
+   */
   selectIcon(icon, clearOthers = true) {
     if (clearOthers) this.clearSelection();
     icon.classList.add("selected");
     this.selectedIcons.add(icon);
   }
 
+  /**
+   * Clear all icon selection and highlights.
+   */
   clearSelection() {
     this.getIcons().forEach((icon) => {
       icon.classList.remove("selected", "hover-by-selection");
@@ -333,6 +288,9 @@ export default class Desktop {
     this.selectedIcons.clear();
   }
 
+  /**
+   * Remove temporary selection highlights from icons.
+   */
   clearTemporaryHighlights() {
     this.getIcons().forEach((icon) =>
       icon.classList.remove("hover-by-selection"),
@@ -340,18 +298,17 @@ export default class Desktop {
   }
 
   /**
-   * Forcefully resets the state of any ongoing drag selection.
-   * This is useful to clean up if an interaction is interrupted.
+   * Forcefully reset any ongoing drag selection state.
+   * Useful for cleaning up after interrupted interactions.
    */
   resetDragSelectionState() {
     this.isDragging = false;
     this.hasDragged = false;
     this.activeDragPointerId = null;
-
     if (this.selectionBox && this.selectionBox.parentNode) {
       this.selectionBox.parentNode.removeChild(this.selectionBox);
       this.selectionBox = null;
     }
-    this.clearTemporaryHighlights(); // Ensure any visual highlights on icons are cleared
+    this.clearTemporaryHighlights();
   }
 }

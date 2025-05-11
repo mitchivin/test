@@ -1,6 +1,10 @@
 /**
- * @fileoverview Utility for displaying tooltips on elements in the Windows XP simulation.
- * Tooltips appear on hover, are positioned relative to the element, and are styled for XP look.
+ * tooltip.js — Tooltip Utility for Windows XP Simulation
+ *
+ * Handles dynamic tooltips for UI elements, including:
+ * - Delegated event listeners for hover/click
+ * - Positioning and viewport overflow handling
+ * - XP-style appearance and integration
  *
  * Usage:
  *   import { setupTooltips } from './tooltip.js';
@@ -9,6 +13,8 @@
  * Edge Cases:
  *   - If an element does not have a tooltip text (via data-tooltip or title), no tooltip is shown.
  *   - If the tooltip would overflow the viewport, it is repositioned to stay visible.
+ *
+ * @module tooltip
  */
 
 import { isMobileDevice } from "../utils/device.js";
@@ -32,21 +38,7 @@ export function setupTooltips(
     tooltipContainer.querySelector('.dynamic-tooltip') ||
     (() => {
       const el = document.createElement('div');
-      el.className = 'dynamic-tooltip';
-      Object.assign(el.style, {
-        position: 'absolute',
-        display: 'none',
-        zIndex: '10000',
-        backgroundColor: '#FFFFE1',
-        border: '1px solid #000000',
-        padding: '2px 5px',
-        fontSize: '8pt',
-        whiteSpace: 'nowrap',
-        fontFamily: 'Tahoma, sans-serif',
-        pointerEvents: 'none',
-        boxShadow: '1px 1px 3px rgba(0,0,0,0.2)',
-        borderRadius: '3px',
-      });
+      el.className = 'dynamic-tooltip dynamic-tooltip-style';
       tooltipContainer.appendChild(el);
       return el;
     })();
@@ -93,7 +85,6 @@ export function setupTooltips(
   // Only attach hover/click tooltip listeners on non-mobile devices
   // Balloon tooltips triggered separately by click handlers are unaffected
   if (!isMobileDevice()) {
-    // Remove any previous listeners if re-initializing
     // Attach delegated listeners
     document.body.addEventListener('mouseover', function(event) {
       const target = event.target.closest(selector);

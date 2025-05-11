@@ -1,3 +1,13 @@
+/*
+ * startMenu.css — Start Menu Styles for Windows XP Simulation
+ *
+ * Styles for:
+ * - Main start menu, submenus, menu items, and footer
+ * - Responsive/mobile adjustments
+ *
+ * @file src/styles/gui/startMenu.css
+ */
+
 /* ==================================================
    Start Menu Styles for Windows XP Simulation
    ==================================================
@@ -5,9 +15,7 @@
    - Matches the look and feel of Windows XP.
    ================================================== */
 
-/* =========================
-   1. Main Start Menu Container
-   ========================= */
+/* ===== Main Start Menu Container ===== */
 /* Windows XP Start Menu Styles */
 
 /* Main Start Menu container */
@@ -128,7 +136,7 @@
 
 /* Left section */
 .middle-left {
-  width: 52%; /* Increased from 49.5% to 52% (+2.5%) */
+  width: 52%;
   display: flex;
   flex-direction: column;
   background-color: white;
@@ -139,7 +147,7 @@
 
 /* Right section */
 .middle-right {
-  width: 48%; /* Decreased from 50.5% to 48% (-2.5%) */
+  width: 48%;
   display: flex;
   flex-direction: column;
   background-color: #d2e5fa;
@@ -318,7 +326,7 @@
 .middle-left .menu-divider {
   list-style: none;
   padding: 0;
-  margin: 0; /* Changed from 2px 0 */
+  margin: 0;
   height: 1px;
   flex: 0 0 auto; /* Keep non-growing */
 }
@@ -338,10 +346,10 @@
   align-items: center;
   width: 100%;
   height: 35px;
-  font-weight: 600; /* Changed from 700 to 600 to match Internet and Email */
+  font-weight: 600;
   font-size: 12px;
   box-shadow: inset 0 1px 1px rgb(255 255 255 / 30%);
-  padding-left: 10px; /* Increased from 7px to 10px */
+  padding-left: 10px;
 }
 
 .all-programs-button span {
@@ -449,7 +457,7 @@
 }
 
 /* =============================================
-  Submenus (All Programs, Most Used Tools, AI Tools)
+  Submenus: All Programs & Recent
 ============================================= */
 
 /* Base styles for submenu containers */
@@ -694,7 +702,6 @@
 .all-programs-item.disabled {
   color: #999 !important;
   opacity: 0.93 !important;
-  cursor: default !important;
   background: none !important;
   filter: grayscale(0.25) !important;
   box-shadow: none !important;
@@ -732,11 +739,7 @@
 
 .recently-used-item.disabled:hover img,
 .all-programs-item.disabled:hover img {
-  filter: grayscale(1);
-}
-
-:root {
-  --z-startmenu: 1500;
+  filter: grayscale(100%) opacity(0.6);
 }
 
 /* Media query to disable log off button on mobile */
@@ -788,8 +791,8 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    #a1c4fc 50%,
-    /* dark blue */ transparent 100%
+    #a1c4fc 50%, /* dark blue */
+    transparent 100%
   );
 }
 
@@ -797,7 +800,6 @@
 .startmenu .menu-item.disabled {
   opacity: 0.6 !important; /* Make it visually more distinct */
   pointer-events: none !important;
-  cursor: default !important;
   filter: grayscale(0.8) !important; /* Apply grayscale */
   background-color: transparent !important; /* Ensure no hover/active background */
   box-shadow: none !important;

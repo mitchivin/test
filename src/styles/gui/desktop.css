@@ -1,3 +1,14 @@
+/*
+ * desktop.css — Desktop Styles for Windows XP Simulation
+ *
+ * Styles for:
+ * - Desktop background and wallpaper
+ * - Icon grid, selection overlays, and icon states
+ * - Responsive/mobile adjustments
+ *
+ * @file src/styles/gui/desktop.css
+ */
+
 /* ==================================================
    Desktop Styles for Windows XP Simulation
    ==================================================
@@ -5,9 +16,7 @@
    - Matches the look and feel of Windows XP.
    ================================================== */
 
-/* =========================
-   1. Root Variables
-   ========================= */
+/* ===== Root Variables ===== */
 :root {
   --desktop-selection-color: rgb(49 106 197 / 15%);
   --desktop-selection-hover: rgb(49 106 197 / 25%);
@@ -21,9 +30,7 @@
   --icon-selected-bg: rgb(49 106 197 / 50%);
 }
 
-/* =========================
-   2. Desktop Container & Background
-   ========================= */
+/* ===== Desktop Container & Wallpaper ===== */
 /* Main desktop container */
 .desktop {
   width: 100%;
@@ -42,9 +49,7 @@
   background-position: top center;
 }
 
-/* =========================
-   3. Selection Overlay & Box
-   ========================= */
+/* ===== Selection Overlay & Box ===== */
 /* Selection overlay – sits behind everything, handles drag logic */
 .selection-overlay {
   position: fixed;
@@ -65,19 +70,17 @@
   pointer-events: none;
 }
 
-/* When desktop icons are hovered by box (no border) */
-.desktop-icon.hover-by-selection {
-  background-color: var(--desktop-selection-hover);
-}
-
 /* Hover effect for selected icons */
 .desktop-icon.selected:hover {
   background-color: rgb(49 106 197 / 30%);
 }
 
-/* =========================
-   4. Desktop Icon Grid & Icons
-   ========================= */
+/* Hover-by-selection highlight */
+.desktop-icon.hover-by-selection {
+  background-color: var(--icon-hover-bg);
+}
+
+/* ===== Desktop Icon Grid & Icons ===== */
 /* Desktop icon grid */
 .desktop-icons {
   padding: 16px 0 0 16px;
@@ -111,16 +114,10 @@
 }
 
 /* Selected state */
-.desktop-icon.selected,
-.desktop-icon.selected:hover {
+.desktop-icon.selected {
   background-color: var(--icon-selected-bg);
   border: 1px dotted rgba(255, 255, 255, 0.5);
   border-radius: var(--icon-border-radius);
-}
-
-/* Hover-by-selection highlight */
-.desktop-icon.hover-by-selection {
-  background-color: var(--icon-hover-bg);
 }
 
 /* Icon image */
@@ -151,6 +148,7 @@
   display: none;
 }
 
+/* ===== Responsive: Mobile Adjustments ===== */
 @media (max-width: 768px) {
   .desktop {
     display: flex;

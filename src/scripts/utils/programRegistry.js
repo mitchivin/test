@@ -1,9 +1,13 @@
 /**
- * @fileoverview Program Registry for the Windows XP simulation
+ * programRegistry.js — Program Registry for Windows XP Simulation
  *
- * Defines configuration data for all available applications including window properties,
- * dimensions, icons, and content sources. This centralized registry ensures consistent
- * program initialization throughout the application.
+ * Centralized configuration for all available applications, including:
+ * - Window properties, dimensions, icons, and content sources
+ * - Default templates and menu/toolbar configurations
+ *
+ * Usage:
+ *   import programData from './programRegistry.js';
+ *   const aboutConfig = programData['about'];
  *
  * @module programRegistry
  */
@@ -14,18 +18,13 @@ import { isMobileDevice } from "./device.js";
 //  Program Registry for Windows XP Simulation
 // ==================================================
 
-// =========================
-// 1. Default Templates & Helpers
-// =========================
+// ===== Default Templates & Helpers =====
 
 /**
  * Default configuration templates for program properties
  *
- * @constant
  * @type {Object}
  */
-// --- Default Window Size for All Programs ---
-// The default window width and height for all programs are set here. If a program does not override these values, it will use these defaults.
 const defaults = {
   iframe: {
     template: "iframe-standard",
@@ -55,7 +54,6 @@ const createProgram = (key, title, icon, extraProps = {}) => ({
   title,
   icon: `./assets/gui/${icon}`,
   ...defaults.iframe,
-  appPath: `placeholder.html?app=${key}`,
   ...extraProps,
 });
 
@@ -102,9 +100,7 @@ const FILE_DROPDOWN_CONTACT = [
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
 
-// =========================
-// 2. Program Data Registry
-// =========================
+// ===== Program Data Registry =====
 
 /**
  * Complete registry of all application configurations

@@ -1,3 +1,13 @@
+/*
+ * main.css — Main Stylesheet for Windows XP Simulation
+ *
+ * Styles for:
+ * - Imports all core and utility stylesheets
+ * - Z-index hierarchy, global overrides, window states, iframe apps, and scrollbars
+ *
+ * @file src/styles/main.css
+ */
+
 /* ==================================================
    Main Stylesheet for Windows XP Simulation
    ==================================================
@@ -5,9 +15,7 @@
    - Defines z-index hierarchy and global overrides.
    ================================================== */
 
-/* =========================
-   1. Imports
-   ========================= */
+/* ===== Imports ===== */
 @import url("reset.css");
 @import url("gui/desktop.css");
 @import url("gui/taskbar.css");
@@ -17,14 +25,10 @@
 @import url("gui/boot.css");
 @import url("utils/crtEffect.css");
 
-/* =========================
-   2. Z-Index Hierarchy
-   ========================= */
+/* ===== Z-Index Hierarchy ===== */
 /* (Moved to reset.css) */
 
-/* =========================
-   3. Window States & Maximized Styles
-   ========================= */
+/* ===== Window States & Maximized Styles ===== */
 .window.maximized {
   position: absolute;
   border-radius: 0;
@@ -54,9 +58,7 @@
 
 /* Add styles here to override or supplement xp.css */
 
-/* =========================
-   4. Global Layout & Body Styles
-   ========================= */
+/* ===== Global Layout & Body Styles ===== */
 /* (Moved to reset.css) */
 
 /* ==================================================
@@ -70,9 +72,9 @@
    - Ensures consistent rendering across app windows.
    ================================================== */
 
-/* =========================
-   1. Window Body & Links
-   ========================= */
+/* ===== Iframe App Styles ===== */
+
+/* ===== 1. Window Body & Links ===== */
 /**
  * Common styles for iframe-based applications
  * Ensures consistent rendering across different application windows
@@ -157,7 +159,7 @@ iframe a {
    XP.css-Inspired Custom Scrollbar Styles (Global)
    ==================================================
    - Ensures all scrollable areas (windows, menus, lists) use a consistent Windows XP look.
-   - Applies to .window-body, .all-programs-items, .recently-used-items, .ai-tools-items, .menu-items, and any scrollable container.
+   - Applies to .window-body, .all-programs-items, .recently-used-items, .menu-items, and any scrollable container.
    - Uses both ::-webkit-scrollbar (WebKit) and scrollbar-color/width (Firefox) for cross-browser support.
    - Colors and sizing match XP.css and Windows XP visual style.
    ================================================== */
@@ -221,3 +223,42 @@ iframe a {
 /* ==================================================
    END XP.css-Inspired Custom Scrollbar Styles
    ================================================== */
+
+/* ===== Root & Base Element Styles ===== */
+
+/* Prevent text selection across the UI, allow for inputs/textareas */
+.disabled, [disabled] {
+  cursor: default !important;
+  user-select: none !important; /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
+}
+
+.overflow-y-auto-x-hidden {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Style for dynamic tooltips created by tooltip.js */
+.dynamic-tooltip-style {
+  position: absolute;
+  display: none;
+  z-index: 10000;
+  background-color: #FFFFE1; /* XP tooltip yellow */
+  border: 1px solid #000000; /* Standard black border */
+  padding: 2px 5px;
+  font-size: 8pt; /* XP standard tooltip font size */
+  white-space: nowrap;
+  font-family: Tahoma, sans-serif; /* Standard XP font */
+  pointer-events: none; /* Tooltip should not be interactive */
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+/* Global box-sizing and font smoothing */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

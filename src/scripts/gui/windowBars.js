@@ -1,14 +1,22 @@
+/**
+ * windowBars.js — Window Bar Utilities for Windows XP Simulation
+ *
+ * Handles creation and initialization of:
+ * - MenuBar (with dropdowns and event logic)
+ * - Toolbar (with dynamic button logic)
+ * - AddressBar (XP-style address bar)
+ *
+ * Usage:
+ *   import { createMenuBar, createToolbar, createAddressBar } from './windowBars.js';
+ *
+ * @module windowBars
+ */
 // windowBars.js
 // Handles creation and initialization of menubar and toolbar for windows in the XP simulation
 
 import { isMobileDevice } from "../utils/device.js";
 
-/**
- * @fileoverview Handles creation and initialization of menubar and toolbar for windows in the XP simulation.
- * Provides AddressBar, MenuBar, and Toolbar creation utilities.
- */
-
-// AddressBar - Standalone Address Bar for XP Simulation
+// ===== Address Bar Utility =====
 /**
  * Creates a Windows XP-style address bar component.
  * @param {Object} options - Options for the address bar.
@@ -45,8 +53,6 @@ export function createAddressBar({
   `;
   return container;
 }
-
-// --- CSS Injection Helpers ---
 
 // --- MenuBar Creation ---
 export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
@@ -147,6 +153,11 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
         "request-close-window",
         closeActiveMenu,
       );
+      // New: Close menu on iframe interaction (focus/click)
+      _parentWindowElement.addEventListener(
+        "iframe-interaction",
+        closeActiveMenu,
+      );
     }
     // Menu item click
     const menuItems = menuBarContainer.querySelectorAll(
@@ -231,7 +242,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   const toolbarRow = document.createElement("div");
   toolbarRow.className = "toolbar-row";
   if (isBottom) toolbarRow.classList.add("toolbar-bottom");
-  const isMobile = isMobileDevice && isMobileDevice();
+  const isMobile = isMobileDevice();
   let buttons = toolbarConfig.buttons;
 
   // On mobile, for Contact Me only, filter out disabled buttons

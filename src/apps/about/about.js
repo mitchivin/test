@@ -1,12 +1,19 @@
-// Function to handle opening external links safely
-// (No longer needed for social links)
+// ==================================================
+//  about.js — About App Interactivity for Windows XP Simulation
+// ==================================================
+/**
+ * Handles expand/collapse logic for left panel cards in the About Me app.
+ * Loaded as an iframe in the main shell.
+ * @file about.js
+ */
 
-// Initialize listeners when the DOM is ready
+/**
+ * Initialize listeners for card collapse/expand on DOMContentLoaded.
+ */
 document.addEventListener('DOMContentLoaded', () => {
-    // Only keep the card collapse/expand logic
     document.querySelectorAll('.left-panel__card__header__img').forEach(icon => {
         icon.addEventListener('click', function (e) {
-            e.stopPropagation(); // Prevent bubbling if needed
+            e.stopPropagation(); // Prevent bubbling
             const card = this.closest('.left-panel__card');
             card.classList.toggle('collapsed');
 

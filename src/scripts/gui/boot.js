@@ -1,28 +1,22 @@
 // ==================================================
-//  Boot Sequence & Login Handling for Windows XP Simulation
+//  boot.js — Boot Sequence & Login Handling for Windows XP Simulation
 // ==================================================
 /**
- * @fileoverview Boot sequence and login handling for Windows XP simulation
- *
- * This module manages the boot animation sequence, login process, and session handling
- * for the Windows XP simulation. It controls transitions between boot screen, login
- * screen, and desktop, and handles session persistence.
+ * Handles the boot animation, login process, and session state for the Windows XP simulation.
+ * - Manages transitions between boot, login, and desktop screens.
+ * - Handles session persistence and event-driven logoff/shutdown.
+ * - Integrates with the event bus for cross-component communication.
  *
  * @module boot
  */
 
 import { showNetworkBalloon } from "./taskbar.js";
-import { isMobileDevice } from "../utils/device.js";
 
-// =========================
-// 1. Boot Sequence Initialization
-// =========================
+// ===== Boot Sequence Initialization =====
 /**
- * Initializes the boot sequence for the Windows XP simulation
- *
- * @param {Object} eventBus - Event bus instance for pub/sub communication
+ * Initialize the boot sequence and login handling.
+ * @param {Object} eventBus - Pub/sub event bus instance
  * @param {Object} EVENTS - Event name constants
- * @returns {void}
  */
 export function initBootSequence(eventBus, EVENTS) {
   const bootScreen = document.getElementById("boot-screen");
@@ -33,6 +27,7 @@ export function initBootSequence(eventBus, EVENTS) {
   const urlParams = new URLSearchParams(window.location.search);
   const forceBoot = urlParams.get("forceBoot") === "true";
 
+  // Boot logic: force boot, skip for returning users, or run full sequence
   if (forceBoot) {
     const newUrl = window.location.pathname + window.location.hash;
     history.replaceState({}, document.title, newUrl);
@@ -48,8 +43,7 @@ export function initBootSequence(eventBus, EVENTS) {
   }
 
   /**
-   * Bypasses boot sequence for returning users
-   * @private
+   * Instantly show desktop for returning users (bypass boot/login)
    */
   function skipBootSequence() {
     bootScreen.style.display = "none";
@@ -59,8 +53,7 @@ export function initBootSequence(eventBus, EVENTS) {
   }
 
   /**
-   * Executes the full boot animation sequence
-   * @private
+   * Run the animated boot sequence, then show login screen.
    */
   function startBootSequence() {
     setTimeout(() => {
@@ -73,15 +66,11 @@ export function initBootSequence(eventBus, EVENTS) {
       bootScreen.style.opacity = "1";
       bootScreen.style.pointerEvents = "auto";
 
-      const minBootTime = 5500; // 5.5 seconds minimum
-      const bootFadeoutTime = 1000; // 1s for fadeout
-      const bootStart = Date.now();
-
+      const minBootTime = 5500; // Minimum boot duration (ms)
       setTimeout(() => {
-        // Fade out boot screen elements first
         bootScreen.classList.remove("boot-fade-in");
         setTimeout(() => {
-          // Fade overlay to black
+          // Fade to black overlay, then show login
           const fadeoutOverlay = document.getElementById("boot-fadeout-overlay");
           if (fadeoutOverlay) {
             fadeoutOverlay.style.display = "block";
@@ -89,37 +78,30 @@ export function initBootSequence(eventBus, EVENTS) {
             fadeoutOverlay.style.transition = "opacity 0.5s";
             fadeoutOverlay.style.opacity = "1";
             setTimeout(() => {
-              // Overlay is now fully black. Hide boot, show login.
               bootScreen.style.display = "none";
-              // Always show login screen, regardless of device
               loginScreen.style.display = "flex";
               loginScreen.style.opacity = "1";
               loginScreen.style.pointerEvents = "auto";
               const loginContent = loginScreen.querySelector(".login-screen");
               if (loginContent) loginContent.style.opacity = "1";
               attachLoginScreenHandlers();
-              // Fade overlay out
               fadeoutOverlay.style.opacity = "0";
               setTimeout(() => {
                 fadeoutOverlay.style.display = "none";
-                // Do NOT call handleLoginSuccess() automatically for any device
-              }, 500); // fade-out duration
-            }, 150 + 1000); // 150ms fade to black, 1s fully black
+              }, 500);
+            }, 1150); // 150ms fade + 1s black
           }
-        }, 250); // Wait for boot element fade-out
-      }, minBootTime - 150 - 1000 - 250); // Start fadeout 1.4s before boot ends
-    }, 1000); // Delay boot by 1s for pre-boot overlay
+        }, 250);
+      }, minBootTime - 1400); // Start fadeout before boot ends
+    }, 1000); // Pre-boot overlay delay
   }
 
   /**
-   * Handle successful login from login iframe
-   * @private
+   * Handle successful login: fade out login, show welcome, then desktop.
    */
   function handleLoginSuccess() {
-    // Always run the login and welcome sequence, even on mobile
     const loginContent = loginScreen.querySelector(".login-screen");
     const welcomeMsg = loginScreen.querySelector(".welcome-message");
-    // Only fade out: .back-gradient (user icon/text), .turn-off, .right-bottom, .xp-logo-image, .left-text
     const fadeTargets = [
       loginContent.querySelector(".back-gradient"),
       loginContent.querySelector(".turn-off"),
@@ -134,17 +116,14 @@ export function initBootSequence(eventBus, EVENTS) {
         el.style.opacity = "0";
       }
     });
-    // After fade out, wait 0.5s, then show welcome message
     setTimeout(() => {
       fadeTargets.forEach(el => { if (el) el.style.display = "none"; });
-      // 0.5s delay before welcome fades in
       setTimeout(() => {
         welcomeMsg.style.display = "block";
         setTimeout(() => {
           welcomeMsg.classList.add("visible");
         }, 10);
       }, 500);
-      // After welcome message is visible, proceed to desktop
       setTimeout(() => {
         welcomeMsg.classList.remove("visible");
         loginScreen.style.display = "none";
@@ -169,11 +148,11 @@ export function initBootSequence(eventBus, EVENTS) {
             showNetworkBalloon();
           }
         }, 3000);
-      }, 2000 + 500);
-    }, 150); // Wait for fade out (0.15s)
+      }, 2500);
+    }, 150);
   }
 
-  // Event listener for communication with login iframe
+  // Listen for shutdown requests from login iframe
   window.addEventListener("message", (event) => {
     if (event.data?.type === "shutdownRequest") {
       if (eventBus && EVENTS) {
@@ -182,15 +161,8 @@ export function initBootSequence(eventBus, EVENTS) {
     }
   });
 
-  // Set up log off event handler
-  if (!eventBus || !EVENTS) {
-    return;
-  }
-
-  /**
-   * Handle log off request
-   * Shows login screen without full reboot
-   */
+  // Log off: show login screen, hide desktop, reset session
+  if (!eventBus || !EVENTS) return;
   eventBus.subscribe(EVENTS.LOG_OFF_REQUESTED, () => {
     try {
       const logoffSound = new Audio("./assets/sounds/logoff.wav");
@@ -223,7 +195,6 @@ export function initBootSequence(eventBus, EVENTS) {
       ];
       restoreTargets.forEach(el => {
         if (el) {
-          // Set default opacity for .login-separator.mobile-only, else 1
           if (el.classList.contains('login-separator') && el.classList.contains('mobile-only')) {
             el.style.opacity = '0.25';
           } else {
@@ -245,8 +216,8 @@ export function initBootSequence(eventBus, EVENTS) {
   });
 
   /**
-   * Attach login and shutdown event listeners to the login screen elements
-   * Ensures listeners are attached every time the login screen is shown
+   * Attach login and shutdown event listeners to login screen elements.
+   * Ensures listeners are attached every time the login screen is shown.
    */
   function attachLoginScreenHandlers() {
     const profileElement = document.querySelector(".back-gradient");
@@ -273,6 +244,8 @@ export function initBootSequence(eventBus, EVENTS) {
 // END Boot Sequence Module
 // ==================================================
 
+// On DOMContentLoaded, fade in boot screen and remove pre-boot overlay
+// (This is a visual polish step, not part of the main boot logic)
 document.addEventListener("DOMContentLoaded", () => {
   const preBoot = document.getElementById("pre-boot-overlay");
   const bootScreen = document.getElementById("boot-screen");

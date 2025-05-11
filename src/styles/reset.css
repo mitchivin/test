@@ -1,3 +1,13 @@
+/*
+ * reset.css — Modern CSS Reset for Windows XP Simulation
+ *
+ * Styles for:
+ * - Resets browser defaults and applies XP-specific adjustments
+ * - Z-index hierarchy and global containers
+ *
+ * @file src/styles/reset.css
+ */
+
 /* ==================================================
    Modern CSS Reset for Windows XP Simulation
    ==================================================
@@ -5,9 +15,7 @@
    - Ensures consistent look and feel across browsers.
    ================================================== */
 
-/* =========================
-   1. Universal Box Sizing & Font Smoothing
-   ========================= */
+/* ===== Universal Box Sizing & Font Smoothing ===== */
 * , *::before, *::after {
   margin: 0;
   padding: 0;
@@ -16,7 +24,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Document */
+/* ===== Document & Body ===== */
 html {
   font-size: 100%;
   height: 100%;
@@ -34,19 +42,19 @@ body {
   line-height: 1.5;
 }
 
-/* Windows XP specific user interaction settings */
+/* Windows XP User Interaction Adjustments */
 .desktop,
 .desktop * {
   cursor: default;
 }
 
-/* Remove list styles */
+/* ===== List Styles ===== */
 ul,
 ol {
   list-style: none;
 }
 
-/* Images */
+/* ===== Image Styles ===== */
 img,
 svg {
   vertical-align: middle;
@@ -54,26 +62,26 @@ svg {
   height: auto;
 }
 
-/* Tables */
+/* ===== Table Styles ===== */
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-/* Form elements */
-
+/* ===== Form Styles ===== */
 button, input, select, textarea {
   font-size: 11px;
 }
 
-/* Links */
+/* ===== Link Styles ===== */
 a {
   color: inherit;
   text-decoration: none;
 }
 
-/* Project-wide rule to prevent all text selection */
+/* ===== Selection Styles ===== */
 * {
+  user-select: none !important; /* Standard */
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
@@ -91,13 +99,15 @@ a {
   --z-startmenu: 1500;
 }
 
+/*
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevent scrollbars on body */
+  overflow: hidden; // Prevent scrollbars on body
 }
+*/
 
 #windows-container {
   position: absolute;

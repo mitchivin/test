@@ -1,6 +1,10 @@
 /**
- * @fileoverview Start Menu module for Windows XP simulation.
- * Handles start menu display, interaction, submenus, and event-driven integration.
+ * startMenu.js — Start Menu Component for Windows XP Simulation
+ *
+ * Handles the start menu UI, including:
+ * - Menu display, toggling, and submenu logic
+ * - Dynamic menu building for programs, socials, and recently used
+ * - Event-driven integration with the rest of the system
  *
  * Usage:
  *   import StartMenu from './startMenu.js';
@@ -10,6 +14,8 @@
  *   - If #start-button is missing, menu cannot be toggled by user.
  *   - If .startmenu already exists, it is replaced.
  *   - Submenus are dynamically created and destroyed as needed.
+ *
+ * @module startMenu
  */
 import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
@@ -101,7 +107,6 @@ const ALL_PROGRAMS_ITEMS = [
     label: "Command Prompt",
     disabled: true, // Always disabled
   }
-  // The original separator and social links are removed from here as they are moved to the top.
 ];
 
 // Add menu item arrays for abstraction
@@ -405,7 +410,6 @@ export default class StartMenu {
    * @returns {string} HTML string for the start menu.
    */
   getMenuTemplate() {
-    const isMobile = isMobileDevice();
     // Helper to render a menu item with optional disabling
     function renderMenuItem({
       id,
@@ -607,7 +611,7 @@ export default class StartMenu {
         const clickedOnButton = this.startButton.contains(target);
         const clickedOnAllPrograms = this.allProgramsMenu?.contains(target);
 
-        // NEW: Check if click was in the Recently Used Tools or AI Tools menus
+        // Check if click was in the Recently Used Tools menu
         const clickedOnRecentlyUsed = this.recentlyUsedMenu?.contains(target);
 
         // If the click was NOT on menu/button/submenu AND not the overlay/iframe, close.
@@ -728,14 +732,14 @@ export default class StartMenu {
   setupMenuItems() {
     this.setupAllProgramsMenu(); // Setup submenu immediately
 
-    // Setup Recently Used Tools submenu (previously Creative Suite)
-    const recentlyUsedButton = this.startMenu.querySelector("#menu-program4"); // Keep ID for now
+    // Setup Recently Used Tools submenu
+    const recentlyUsedButton = this.startMenu.querySelector("#menu-program4");
     if (recentlyUsedButton) {
       recentlyUsedButton.setAttribute("data-action", "toggle-recently-used"); // Ensure action is set
       recentlyUsedButton.style.position = "relative";
       recentlyUsedButton.style.width = "100%";
-      const mutArrowSpan = document.createElement("span"); // Renamed variable
-      mutArrowSpan.className = "mut-menu-arrow"; // Renamed class
+      const mutArrowSpan = document.createElement("span");
+      mutArrowSpan.className = "mut-menu-arrow";
       mutArrowSpan.innerHTML = "►";
       mutArrowSpan.style.position = "absolute";
       mutArrowSpan.style.right = "8px";
@@ -871,6 +875,10 @@ export default class StartMenu {
       // Activate overlay on the window that is active *at this moment*
       const currentActiveWindow = document.querySelector(".window.active");
       this.updateContentOverlay(currentActiveWindow?.id);
+      // Attach iframe focus listeners
+      this.attachIframeFocusListeners();
+      // Attach window blur listener
+      this.attachWindowBlurListener();
     } else {
       this.closeStartMenu(); // This will hide the overlay
     }
@@ -879,10 +887,10 @@ export default class StartMenu {
   /**
    * Close the start menu
    */
-  closeStartMenu(force = false) {
+  closeStartMenu() {
     const isActive = this.startMenu?.classList.contains("active");
 
-    if (!this.startMenu || (!isActive && !force)) {
+    if (!this.startMenu || !isActive) {
       return;
     }
 
@@ -892,6 +900,11 @@ export default class StartMenu {
 
     // Deactivate overlay state immediately after removing .active class
     this.updateContentOverlay(null);
+
+    // Remove iframe focus listeners
+    this.removeIframeFocusListeners();
+    // Remove window blur listener
+    this.removeWindowBlurListener();
 
     // Apply style changes in the next frame
     requestAnimationFrame(() => {
@@ -1008,6 +1021,47 @@ export default class StartMenu {
     }
     const button = this.startMenu?.querySelector("#menu-program4");
     button?.classList.remove("active-submenu-trigger");
+  }
+
+  /**
+   * Attach focus listeners to all iframes to close the Start Menu when focused.
+   */
+  attachIframeFocusListeners() {
+    // Store the handler so it can be removed later
+    this._iframeFocusHandler = () => this.closeStartMenu();
+    // Attach to all iframes currently in the DOM
+    document.querySelectorAll('iframe').forEach(iframe => {
+      iframe.addEventListener('focus', this._iframeFocusHandler);
+    });
+  }
+
+  /**
+   * Remove focus listeners from all iframes.
+   */
+  removeIframeFocusListeners() {
+    if (!this._iframeFocusHandler) return;
+    document.querySelectorAll('iframe').forEach(iframe => {
+      iframe.removeEventListener('focus', this._iframeFocusHandler);
+    });
+    this._iframeFocusHandler = null;
+  }
+
+  /**
+   * Attach blur listener to window to close the Start Menu when window loses focus (e.g., clicking into an iframe).
+   */
+  attachWindowBlurListener() {
+    this._windowBlurHandler = () => this.closeStartMenu();
+    window.addEventListener('blur', this._windowBlurHandler);
+  }
+
+  /**
+   * Remove blur listener from window.
+   */
+  removeWindowBlurListener() {
+    if (this._windowBlurHandler) {
+      window.removeEventListener('blur', this._windowBlurHandler);
+      this._windowBlurHandler = null;
+    }
   }
 }
 

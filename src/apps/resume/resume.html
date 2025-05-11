@@ -1,3 +1,9 @@
+<!--
+  resume.html — Resume App for Windows XP Simulation
+  Provides the My Resume window content and structure.
+  Loaded as an iframe in the main shell.
+  @file resume.html
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -5,75 +11,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Resume</title>
     <!-- XP.css: Use CDN link, adjust if using local dependency -->
-    <link rel="stylesheet" href="https://unpkg.com/xp.css">
-    <style>
-      html, body, .app-root {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        background: #97958f; /* Slightly darker than #ece9d8 */
-        color: #000; /* XP default text color */
-        /* margin/padding moved to html, body rule */
-        font-family: Tahoma, Verdana, sans-serif; /* Default XP font */
-        font-size: 11px; /* Default XP font size */
-        overflow: auto;
-      }
-      .app-root {
-        box-sizing: border-box;
-        padding: 16px;
-        height: 100%;
-        width: 100%;
-        overflow: auto;
-        min-width: 100vw;
-        min-height: 100vh;
-      }
-      .maximized-mode.app-root {
-        padding: 16px 0;
-      }
-      .resume-image {
-        display: block;
-        margin: 0 auto;
-        max-width: 100%;
-        width: auto;
-        height: auto;
-        object-fit: contain;
-        cursor: zoom-in;
-        transition: max-width 0.2s, max-height 0.2s, width 0.2s, height 0.2s;
-        box-sizing: content-box;
-      }
-      .resume-image.zoomed {
-        max-width: none;
-        max-height: none;
-        width: 160%;
-        height: auto;
-        cursor: zoom-out;
-      }
-      @media (min-width: 700px) {
-        .resume-image.zoomed {
-          width: 850px;
-          max-width: 90vw;
-        }
-      }
-      .resume-image.dragging {
-        cursor: grabbing;
-      }
-      .maximized-mode .resume-image:not(.zoomed) {
-        width: auto;
-        height: 100%;
-        max-width: 100%;
-        object-fit: contain;
-        margin-bottom: 0;
-        display: block;
-      }
-      /* Add any other base styles needed for all apps */
-    </style>
+    <link rel="stylesheet" href="https://unpkg.com/xp.css@0.2.3/dist/XP.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="resume.css">
   </head>
   <body>
     <div class="app-root" id="appRoot">
-      <!-- Replaced placeholder div with actual resume image -->
       <img 
         id="resumeImage" 
         src="../../../assets/apps/resume/resume.webp"
@@ -82,160 +24,6 @@
       />
     </div>
 
-    <script>
-      // Helper: Find parent window with .app-window class
-      function getParentAppWindow() {
-        let win = window.frameElement;
-        while (win && win.parentElement) {
-          if (win.parentElement.classList && win.parentElement.classList.contains('app-window')) {
-            return win.parentElement;
-          }
-          win = win.parentElement;
-        }
-        // Fallback: try top-level
-        if (window.frameElement && window.frameElement.closest) {
-          return window.frameElement.closest('.app-window');
-        }
-        return null;
-      }
-      function updateMaximizedMode() {
-        const appRoot = document.getElementById('appRoot');
-        let maximized = false;
-        try {
-          // Try to detect maximized state from parent window
-          if (window.parent && window.parent !== window) {
-            const frame = window.frameElement;
-            if (frame && frame.parentElement && frame.parentElement.classList.contains('app-window')) {
-              maximized = frame.parentElement.classList.contains('maximized');
-            }
-          }
-        } catch (e) {}
-        if (maximized) {
-          appRoot.classList.add('maximized-mode');
-        } else {
-          appRoot.classList.remove('maximized-mode');
-        }
-      }
-      // Listen for maximized/unmaximized events from parent
-      window.addEventListener('message', function(event) {
-        if (event.data && event.data.type === 'window:maximized') {
-          document.getElementById('appRoot').classList.add('maximized-mode');
-        } else if (event.data && event.data.type === 'window:unmaximized') {
-          document.getElementById('appRoot').classList.remove('maximized-mode');
-        }
-      });
-      document.addEventListener('DOMContentLoaded', () => {
-        updateMaximizedMode();
-        const resumeImage = document.getElementById('resumeImage');
-        const scroller = document.getElementById('appRoot'); // Target .app-root for scrolling
-        
-        let isDragging = false;
-        let startX, startY, startScrollLeft, startScrollTop;
-        let didDrag = false; // Flag to distinguish click from drag
-
-        if (resumeImage) {
-          resumeImage.addEventListener('dragstart', (e) => e.preventDefault());
-
-          // --- Zoom Logic --- 
-          resumeImage.addEventListener('click', (e) => {
-            if (didDrag) { // If we just finished dragging, don't toggle zoom
-                didDrag = false;
-                return; 
-            }
-
-            const isZoomed = resumeImage.classList.contains('zoomed');
-
-            if (!isZoomed) {
-              // --- Zooming IN --- 
-              // Store pre-zoom state
-              const clickX = e.offsetX; // Click position relative to image element
-              const clickY = e.offsetY;
-              const originalWidth = resumeImage.clientWidth;
-              const originalHeight = resumeImage.clientHeight;
-
-              // Apply zoom class
-              resumeImage.classList.add('zoomed');
-
-              // Use requestAnimationFrame to ensure dimensions are updated after class change
-              requestAnimationFrame(() => {
-                const zoomedWidth = resumeImage.clientWidth;
-                const zoomedHeight = resumeImage.clientHeight;
-                const scale = zoomedWidth / originalWidth; // Assuming uniform scale
-
-                // Calculate where the clicked point is in the zoomed image's coordinate space
-                const targetX = clickX * scale;
-                const targetY = clickY * scale;
-
-                // Calculate the scroll needed to center the target point
-                // (We want targetX - scrollLeft = viewportCenterX)
-                // (We want targetY - scrollTop = viewportCenterY)
-                // Let's try centering based on the viewport dimensions
-                const viewportWidth = scroller.clientWidth;
-                const viewportHeight = scroller.clientHeight;
-
-                let targetScrollLeft = targetX - viewportWidth / 2;
-                let targetScrollTop = targetY - viewportHeight / 2;
-
-                // Clamp scroll values to be within bounds
-                targetScrollLeft = Math.max(0, Math.min(targetScrollLeft, scroller.scrollWidth - viewportWidth));
-                targetScrollTop = Math.max(0, Math.min(targetScrollTop, scroller.scrollHeight - viewportHeight));
-
-                scroller.scrollTo({
-                  left: targetScrollLeft,
-                  top: targetScrollTop,
-                  behavior: 'auto' // Use 'smooth' for animation if desired
-                });
-              });
-
-            } else {
-              // --- Zooming OUT --- 
-              resumeImage.classList.remove('zoomed');
-              // Reset scroll position
-              scroller.scrollTo({ left: 0, top: 0, behavior: 'auto' });
-            }
-          });
-
-          // --- Panning Logic (remains the same) ---
-          resumeImage.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            didDrag = false;
-            resumeImage.classList.add('dragging');
-            startX = e.clientX;
-            startY = e.clientY;
-            startScrollLeft = scroller.scrollLeft;
-            startScrollTop = scroller.scrollTop;
-            e.preventDefault(); 
-          });
-
-          document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault(); 
-            didDrag = true;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            scroller.scrollLeft = startScrollLeft - dx;
-            scroller.scrollTop = startScrollTop - dy;
-          });
-
-          document.addEventListener('mouseup', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            resumeImage.classList.remove('dragging');
-          });
-          
-          document.addEventListener('mouseleave', () => {
-             if (isDragging) {
-                 isDragging = false;
-                 resumeImage.classList.remove('dragging');
-             }
-          });
-
-        } else {
-          console.error("Resume image element not found.");
-        }
-        // Initial maximized mode check
-        updateMaximizedMode();
-      });
-    </script>
+    <script src="resume.js" defer></script>
   </body>
 </html> 

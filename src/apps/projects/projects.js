@@ -1,7 +1,20 @@
+// ==================================================
+//  projects.js — Projects App Interactivity for Windows XP Simulation
+// ==================================================
+/**
+ * Handles lightbox, masonry layout, and interactivity for the My Projects app.
+ * Loaded as an iframe in the main shell.
+ * @file projects.js
+ */
+
+// ===== Global State & Utility Functions =====
 // JavaScript for Projects App Lightbox
 
 // Global state for persistent description visibility
 let userPrefersDescriptionVisible = false;
+
+// === Constants ===
+const MIN_SWIPE_DISTANCE = 44; // Minimum px for swipe to trigger navigation
 
 // Utility functions
 function createEl(tag, className, text) {
@@ -20,6 +33,57 @@ function sendMessageToParent(payload) {
     }
 }
 
+// ===== Description Card Creation =====
+
+function _attachSoftwareIconTooltips(cardEl, softwareData, softwareIconsListEl) {
+    if (!softwareData || !cardEl || !softwareIconsListEl) return;
+
+    const softwareList = softwareData.split(',').map(s => s.trim()).filter(s => s);
+    softwareList.forEach(softwareName => {
+        const iconEl = createEl('img', 'software-icon');
+        iconEl.src = `../../../assets/gui/start-menu/vanity-apps/${softwareName}.webp`;
+        iconEl.alt = softwareName;
+
+        iconEl.addEventListener('mouseenter', (e) => {
+            const existingTooltip = cardEl.querySelector('.software-tooltip');
+            if (existingTooltip) existingTooltip.remove();
+
+            const formattedSoftwareName = softwareName
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            const tooltip = createEl('div', 'software-tooltip', formattedSoftwareName);
+            cardEl.appendChild(tooltip);
+
+            const iconRect = iconEl.getBoundingClientRect();
+            const cardRect = cardEl.getBoundingClientRect();
+            
+            const iconsListRect = softwareIconsListEl.getBoundingClientRect();
+            tooltip.style.left = `${iconsListRect.left - cardRect.left + (iconsListRect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+            tooltip.style.top = `${iconRect.top - cardRect.top - tooltip.offsetHeight - 30}px`;
+
+            tooltip.classList.add('visible');
+        });
+
+        iconEl.addEventListener('mouseleave', () => {
+            const tooltip = cardEl.querySelector('.software-tooltip.visible');
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+                setTimeout(() => tooltip.remove(), 300);
+            }
+        });
+        softwareIconsListEl.appendChild(iconEl);
+    });
+}
+
+/**
+ * Creates the desktop description card for the lightbox.
+ * @param {string} titleText - The project title
+ * @param {string} subheadingText - The subheading (e.g., type)
+ * @param {string} descriptionText - The project description
+ * @param {string} softwareData - Comma-separated software list
+ * @returns {HTMLElement} The animated wrapper containing the card
+ */
 function createDesktopDescriptionCard(titleText, subheadingText, descriptionText, softwareData) {
     const animWrapper = createEl('div', 'desc-card-anim-wrapper');
     const descCard = createEl('div', 'lightbox-desc-card');
@@ -48,49 +112,9 @@ function createDesktopDescriptionCard(titleText, subheadingText, descriptionText
         cardSoftwareSection.appendChild(softwareLabel);
 
         const softwareIconsList = createEl('div', 'software-icons-list');
-        const softwareList = softwareData.split(',').map(s => s.trim()).filter(s => s);
-        softwareList.forEach(softwareName => {
-            const iconEl = createEl('img', 'software-icon');
-            iconEl.src = `../../../assets/gui/start-menu/vanity-apps/${softwareName}.webp`;
-            iconEl.alt = softwareName;
-
-            iconEl.addEventListener('mouseenter', (e) => {
-                const existingTooltip = descCard.querySelector('.software-tooltip');
-                if (existingTooltip) existingTooltip.remove(); // Remove any lingering tooltip
-
-                const formattedSoftwareName = softwareName
-                    .split('-')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ');
-                const tooltip = createEl('div', 'software-tooltip', formattedSoftwareName);
-                descCard.appendChild(tooltip);
-
-                const iconRect = iconEl.getBoundingClientRect();
-                const cardRect = descCard.getBoundingClientRect();
-
-                // Position tooltip centered above the icon initially for measurement
-                tooltip.style.top = `${iconRect.top - cardRect.top - tooltip.offsetHeight - 36}px`; // 30px above icon (36 - 6)
-                
-                // Adjust left to be centered within the softwareIconsList container
-                const iconsListRect = softwareIconsList.getBoundingClientRect();
-                tooltip.style.left = `${iconsListRect.left - cardRect.left + (iconsListRect.width / 2) - (tooltip.offsetWidth / 2)}px`;
-
-                tooltip.classList.add('visible');
-            });
-
-            iconEl.addEventListener('mouseleave', () => {
-                const tooltip = descCard.querySelector('.software-tooltip.visible');
-                if (tooltip) {
-                    tooltip.classList.remove('visible');
-                    // Optionally, remove after a delay or animation
-                    setTimeout(() => tooltip.remove(), 300); // Matches typical transition duration
-                }
-            });
-
-            softwareIconsList.appendChild(iconEl);
-        });
+        _attachSoftwareIconTooltips(descCard, softwareData, softwareIconsList);
         
-        if (softwareList.length > 0) {
+        if (softwareIconsList.hasChildNodes()) { // Check if icons were actually added
             cardSoftwareSection.appendChild(softwareIconsList);
             descCard.appendChild(cardSoftwareSection);
         }
@@ -161,6 +185,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openLightbox() {
         document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
+
+        // Notify parent window of iframe interaction (to close menubar popouts)
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'iframe-interaction' }, '*');
+        }
 
         // Core content setup is now handled by openLightboxByIndex
         if (currentLightboxIndex === null) {
@@ -286,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
             titleOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
             titleOverlay.classList.add('show');
             titleOverlay.style.pointerEvents = 'auto';
-            // Potentially send message to parent: sendMessageToParent({ type: 'title-overlay-state', open: true });
         } else { // If it exists, toggle its visibility
             if (titleOverlay.classList.contains('show')) {
                 titleOverlay.classList.remove('show');
@@ -296,7 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.removeEventListener('animationend', onHide);
                     if (this.parentNode) this.parentNode.removeChild(this);
                 }, { once: true });
-                // Potentially send message to parent: sendMessageToParent({ type: 'title-overlay-state', open: false });
             } else {
                 // This case (exists but not shown) implies it was hidden and removed by animationend.
                 // So, we re-create and show it.
@@ -307,7 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 titleOverlay.classList.remove('hide-anim');
                 titleOverlay.classList.add('show');
                 titleOverlay.style.pointerEvents = 'auto';
-                // Potentially send message to parent: sendMessageToParent({ type: 'title-overlay-state', open: true });
             }
         }
 
@@ -320,7 +346,6 @@ document.addEventListener('DOMContentLoaded', () => {
             descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
             descOverlay.classList.add('show');
             descOverlay.style.pointerEvents = 'auto';
-            sendMessageToParent({ type: 'description-state', open: true }); // Existing message
         } else { // If it exists, toggle its visibility
             if (descOverlay.classList.contains('show')) {
                 descOverlay.classList.remove('show');
@@ -330,7 +355,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.removeEventListener('animationend', onHide);
                     if (this.parentNode) this.parentNode.removeChild(this);
                 }, { once: true });
-                sendMessageToParent({ type: 'description-state', open: false }); // Existing message
             } else {
                 descOverlay.remove();
                 descOverlay = createLightboxOverlay(descriptionText, 'bottom', linkType, linkUrl);
@@ -339,14 +363,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 descOverlay.classList.remove('hide-anim');
                 descOverlay.classList.add('show');
                 descOverlay.style.pointerEvents = 'auto';
-                sendMessageToParent({ type: 'description-state', open: true }); // Existing message
             }
         }
 
         // After handling both overlays, update the persistent state based on their visibility
-        let anyOverlayVisible = (titleOverlay && titleOverlay.classList.contains('show')) || 
+        userPrefersDescriptionVisible = (titleOverlay && titleOverlay.classList.contains('show')) || 
                                 (descOverlay && descOverlay.classList.contains('show'));
-        userPrefersDescriptionVisible = anyOverlayVisible;
+        sendMessageToParent({ type: 'description-state', open: userPrefersDescriptionVisible });
     }
 
     function toggleLightboxOverlay(description, wrapper) { // This now PRIMARILY handles the DESKTOP card
@@ -360,8 +383,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isCurrentlyVisible) { // HIDING LOGIC
                 wrapper.classList.remove('desc-visible');
-                sendMessageToParent({ type: 'description-state', open: false });
                 userPrefersDescriptionVisible = false; // Update persistent state
+                sendMessageToParent({ type: 'description-state', open: false });
             } else { // SHOWING LOGIC
                 let animWrapper = wrapper.querySelector('.desc-card-anim-wrapper');
                 let card = animWrapper ? animWrapper.querySelector('.lightbox-desc-card') : null;
@@ -401,55 +424,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         cardSoftwareSection.appendChild(softwareLabel);
 
                         const softwareIconsList = createEl('div', 'software-icons-list');
-                        const softwareList = currentPostData.software.split(',').map(s => s.trim()).filter(s => s);
-                        softwareList.forEach(softwareName => {
-                            const iconEl = createEl('img', 'software-icon');
-                            iconEl.src = `../../../assets/gui/start-menu/vanity-apps/${softwareName}.webp`;
-                            iconEl.alt = softwareName;
-
-                            // Add event listeners for tooltips (mirrored logic)
-                            iconEl.addEventListener('mouseenter', (e) => {
-                                const cardForTooltip = iconEl.closest('.lightbox-desc-card');
-                                if (!cardForTooltip) return;
-
-                                const existingTooltip = cardForTooltip.querySelector('.software-tooltip');
-                                if (existingTooltip) existingTooltip.remove();
-
-                                const formattedSoftwareName = softwareName
-                                    .split('-')
-                                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                                    .join(' ');
-                                const tooltip = createEl('div', 'software-tooltip', formattedSoftwareName);
-                                cardForTooltip.appendChild(tooltip);
-
-                                const iconRect = iconEl.getBoundingClientRect();
-                                const cardRect = cardForTooltip.getBoundingClientRect();
-
-                                // Adjust left to be centered within the softwareIconsList container
-                                const currentSoftwareIconsList = cardForTooltip.querySelector('.software-icons-list');
-                                if (!currentSoftwareIconsList) return; // Safety check
-                                const iconsListRect = currentSoftwareIconsList.getBoundingClientRect();
-                                tooltip.style.left = `${iconsListRect.left - cardRect.left + (iconsListRect.width / 2) - (tooltip.offsetWidth / 2)}px`;
-                                
-                                tooltip.style.top = `${iconRect.top - cardRect.top - tooltip.offsetHeight - 30}px`; // 30px above icon (36 - 6)
-                                
-                                tooltip.classList.add('visible');
-                            });
-
-                            iconEl.addEventListener('mouseleave', () => {
-                                const cardForTooltip = iconEl.closest('.lightbox-desc-card');
-                                if (!cardForTooltip) return;
-                                const tooltip = cardForTooltip.querySelector('.software-tooltip.visible');
-                                if (tooltip) {
-                                    tooltip.classList.remove('visible');
-                                    setTimeout(() => tooltip.remove(), 300);
-                                }
-                            });
-
-                            softwareIconsList.appendChild(iconEl);
-                        });
-
-                        if (softwareList.length > 0) {
+                        // Call the new helper function
+                        _attachSoftwareIconTooltips(card, currentPostData.software, softwareIconsList);
+                        
+                        if (softwareIconsList.hasChildNodes()) { // Check if icons were actually added
                             cardSoftwareSection.appendChild(softwareIconsList);
                             card.appendChild(cardSoftwareSection);
                         }
@@ -462,20 +440,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 wrapper.classList.add('desc-visible');
-                sendMessageToParent({ type: 'description-state', open: isDesktop() });
                 userPrefersDescriptionVisible = true; // Update persistent state
+                sendMessageToParent({ type: 'description-state', open: true });
             }
-        } else {
-            // Mobile: This path might be deprecated if toggleMobileOverlays handles all mobile cases.
-            // For now, let it call the new function for the description part as a fallback.
-            // However, the title part won't be handled here.
-            // It's better if the 'toolbar-action' directly calls toggleMobileOverlays.
-            // console.warn('toggleLightboxOverlay called on mobile, should use toggleMobileOverlays');
-            // toggleMobileOverlays('', description, wrapper); // Example: only handling description
         }
     }
 
-    // --- CLEANED UP NAVIGATION LOGIC ---
     let currentLightboxIndex = null;
     let allPosts = Array.from(document.querySelectorAll('.post'));
 
@@ -494,7 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to open a specific lightbox item by its index in the allPosts array.
     // Handles animating out the old content and animating in the new content.
     // Direction: 1 for next, -1 for previous, 0 for no specific direction (initial open).
-    // animate: boolean, whether to use animations (typically true for navigation).
     // skipFadeIn: boolean, for mobile swipe, uses a slide transition instead of fade for new media.
     function openLightboxByIndex(index, direction = 0, skipFadeIn = false) {
         if (index < 0) index = allPosts.length - 1;
@@ -784,9 +753,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Smooth Drag/Swipe Logic for Mobile Lightbox ---
 
-    // Applies transform to the lightbox content for swipe effect.
-    // dx, dy: horizontal and vertical translation.
-    // scale: content scaling (used for vertical swipe-to-close).
+    /**
+     * Applies transform to the lightbox content for swipe effect.
+     * @param {number} dx - Horizontal translation in px.
+     * @param {number} dy - Vertical translation in px.
+     * @param {number} scale - Content scaling (used for vertical swipe-to-close).
+     */
     function setSwipeContentTransform(dx, dy, scale = 1) {
         if (lightboxContent) {
             lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
@@ -836,9 +808,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastDragDy = 0;       // Last calculated vertical delta
     let dragRAF = null;         // requestAnimationFrame ID for drag updates
     let dragIsVertical = false; // Is the current drag predominantly vertical?
-    let tapTimeout = null;      // For tap detection
 
-    // Touch Start: Initialize drag variables
+    /**
+     * Touch Start: Initialize drag variables
+     * @param {TouchEvent} e
+     */
     function handleTouchStart(e) {
         if (e.touches.length === 1) { // Single touch only
             dragStartX = e.touches[0].clientX;
@@ -869,7 +843,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Touch Move: Update content position based on drag
+    /**
+     * Touch Move: Update content position based on drag
+     * @param {TouchEvent} e
+     */
     function handleTouchMove(e) {
         if (!dragging || e.touches.length !== 1) return;
         dragCurrentX = e.touches[0].clientX;
@@ -903,7 +880,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Touch End: Determine action (swipe next/prev, swipe close, or snap back)
+    /**
+     * Touch End: Determine action (swipe next/prev, swipe close, or snap back)
+     */
     function handleTouchEnd() {
         if (!dragging) return;
         dragging = false;
@@ -912,8 +891,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const dx = dragCurrentX - dragStartX;
         const dy = dragCurrentY - dragStartY;
         const media = lightboxContent.querySelector('img, video');
-
-        const MIN_SWIPE_DISTANCE = 44; // Industry standard minimum touch target (44px)
 
         let triggerSwipeUp = false;
         let triggerSwipeLeft = false;

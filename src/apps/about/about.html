@@ -1,3 +1,9 @@
+<!--
+  about.html — About App for Windows XP Simulation
+  Provides the About Me window content and structure.
+  Loaded as an iframe in the main shell.
+  @file about.html
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +15,7 @@
 </head>
 <body>
     <div class="main-window-content">
-        <aside class="left-panel">
+        <aside class="left-panel overflow-y-auto-x-hidden">
             <div class="left-panel__card left-panel__card--social">
                 <div class="left-panel__card__header">
                     <span class="left-panel__card__header__text">Social Links</span>
@@ -94,8 +100,8 @@
             </div>
         </aside>
 
-        <div class="scroll-content">
-            <main class="main">
+        <div class="scroll-content overflow-y-auto-x-hidden">
+            <main class="main overflow-y-auto-x-hidden">
                 <div class="main-content-wrapper">
                     <h3 class="welcome_text">About Me</h3>
                     <div class="section_text about-body">

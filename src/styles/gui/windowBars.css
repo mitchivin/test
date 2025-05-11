@@ -1,3 +1,13 @@
+/*
+ * windowBars.css — Window Bars, Toolbar, and Address Bar Styles for XP Simulation
+ *
+ * Styles for:
+ * - Menu bar, toolbar, and address bar for app windows
+ * - Responsive/mobile adjustments
+ *
+ * @file src/styles/gui/windowBars.css
+ */
+
 /* ==================================================
    Window Bars, Toolbar, and Address Bar Styles for XP Simulation
    ==================================================
@@ -5,7 +15,7 @@
    - Matches the look and feel of Windows XP.
    ================================================== */
 
-/* --- Menu Bar Styles (Previously Injected) --- */
+/* ===== Menu Bar Styles ===== */
 .menu-bar-container {
   width: 100%;
   background: #ece9d8;
@@ -50,7 +60,6 @@
 }
 .menu-bar .menu-item.disabled {
   color: #bcbcbc;
-  cursor: default;
 }
 .menu-bar .menu-item.disabled:hover {
     background: none;
@@ -99,7 +108,6 @@
 }
 .menu-bar-container .menu-option.disabled {
   color: #bcbcbc;
-  cursor: default;
 }
 .menu-bar-container .menu-separator {
   border-top: 1px solid #d7d4ca;
@@ -107,7 +115,7 @@
   height: 0;
 }
 
-/* --- Toolbar Styles (Previously Injected) --- */
+/* ===== Toolbar Styles ===== */
 .toolbar-button {
   display: flex;
   align-items: center;
@@ -125,7 +133,6 @@
 }
 .toolbar-button.disabled {
   opacity: 0.5;
-  cursor: default;
   pointer-events: none;
 }
 .toolbar-button.disabled:hover,
@@ -202,7 +209,7 @@
   border-bottom: 2px solid #d7d4ca;
 }
 
-/* --- Address Bar Styles (Existing + Refinements) --- */
+/* ===== Address Bar Styles ===== */
 .addressbar-container {
   width: 100%;
   border: none;
@@ -310,4 +317,6 @@
   z-index: 2;
   background: none;
   border-radius: 0;
-} 
+}
+
+/* ===== Responsive: Mobile Adjustments ===== */ 

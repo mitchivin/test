@@ -1,6 +1,14 @@
-/* CRT Effect - Enhanced Version */
+/*
+ * crtEffect.css — CRT Visual Effects Styles for Windows XP Simulation
+ *
+ * Styles for:
+ * - CRT scanlines, flicker, noise, vignette, aberration, and overlays
+ * - Animation keyframes and customizable variables
+ *
+ * @file src/styles/utils/crtEffect.css
+ */
 
-/* Customizable variables */
+/* ===== CRT Customizable Variables ===== */
 :root {
     --crt-background: rgb(15 20 25);
     --crt-glow-color: rgb(0 150 150 / 12%);
@@ -17,7 +25,7 @@
     --header-glow-color: rgb(120 255 150 / 40%);
 }
 
-/* Animation definitions */
+/* ===== Animation Keyframes ===== */
 @keyframes scanline {
     0% {
         transform: translateY(-100%);
@@ -254,7 +262,7 @@
     100% { background-position: 0 10px; } /* Adjust for subtle drift */
 }
 
-/* CRT overlay effect */
+/* ===== CRT Overlays & Effects ===== */
 .crt,
 .crt-effect {
     position: fixed;
@@ -467,4 +475,6 @@ body {
     transform-origin: center center;
     filter: brightness(1.15);
 }
-*/ 
+*/
+
+/* ===== Responsive: Mobile Adjustments ===== */ 

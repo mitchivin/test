@@ -1,4 +1,10 @@
-/* src/apps/projects/projects.css */
+/*
+ * projects.css — Styles for Projects App in Windows XP Simulation
+ * Styles the My Projects window, feed, lightbox, and responsive layout.
+ * @file projects.css
+ */
+
+/* ===== Base Layout & Background ===== */
 html, body {
     margin: 0;
     padding: 0;
@@ -190,7 +196,7 @@ body {
     max-width: 1440px;
     height: 100%;
     box-sizing: border-box;
-    overflow: visible !important; /* TEMP TEST - was hidden */
+    overflow: visible !important;
 }
 
 #lightbox-content {
@@ -261,7 +267,7 @@ body {
 }
 
 /* Mobile Layout (becomes Base Layout) */
-#project-lightbox { /* Removed :not(.desktop-layout) */
+#project-lightbox {
   height: 100vh; 
   min-height: 100vh;
   align-items: center;
@@ -270,7 +276,7 @@ body {
   margin: 0;
   overflow: hidden;
 }
-#project-lightbox #lightbox-inner-wrapper { /* Removed :not(.desktop-layout) */
+#project-lightbox #lightbox-inner-wrapper { 
   height: 100vh;
   min-height: 100vh;
   display: flex;
@@ -280,7 +286,7 @@ body {
   padding: 0;
   margin: 0;
 }
-#project-lightbox #lightbox-content { /* Removed :not(.desktop-layout) */
+#project-lightbox #lightbox-content { 
   height: 100vh;
   min-height: 100vh;
   max-height: 100vh;
@@ -293,28 +299,26 @@ body {
   margin: 0;
 }
 
-#project-lightbox #lightbox-title, /* Combined and removed :not(.desktop-layout) */
-#project-lightbox #lightbox-subheading, /* Combined and removed :not(.desktop-layout) */
-#project-lightbox #lightbox-description { /* Combined and removed :not(.desktop-layout) */
+#project-lightbox #lightbox-title, 
+#project-lightbox #lightbox-subheading, 
+#project-lightbox #lightbox-description { 
     display: none;
 }
 
-#project-lightbox #lightbox-details { /* Removed :not(.desktop-layout) */
+#project-lightbox #lightbox-details { 
     justify-content: center;
     background-color: transparent;
     padding: 0;
     flex-grow: 0; 
 }
 
-/* Mobile: Make lightbox media fill more of the viewport (becomes Base media styles) */
-#project-lightbox #lightbox-content img, /* Combined and removed :not(.desktop-layout) */
-#project-lightbox #lightbox-content video { /* Combined and removed :not(.desktop-layout) */
+#project-lightbox #lightbox-content img, 
+#project-lightbox #lightbox-content video { 
   max-width: calc(100vw - 24px);
   max-height: calc(100vh - 24px);
   width: auto;
   height: auto;
   object-fit: contain;
-  /* border-radius: 20px; */ /* Removed from here */
   display: block;
   padding: 0;
   border: none;
@@ -341,17 +345,11 @@ body {
       max-width: 100%; /* Ensures it doesn't exceed its parent's width constraints */
       margin-left: auto; /* To center the 90vw block */
       margin-right: auto; /* To center the 90vw block */
-      /* border: 2px solid green !important; */ /* TEMP TEST BORDER REMOVED */
     }
-    .lightbox-desc-card { /* NOW REDUCED TO ONLY DESKTOP-SPECIFIC OVERRIDES */
+    .lightbox-desc-card {
       background: #ecececb6 !important;
       color: #222 !important;
       width: 95% !important; /* Changed from 90% */
-      /* border: 2px solid red !important; */ /* TEMP TEST BORDER REMOVED */
-      /* Height should be determined by content and parent flex alignment (stretch) */
-    }
-    body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-desc-card {
-      /* width: 600px; */ /* No longer fixed, relies on 95% of its parent */
     }
 
     /* Styling for title, subheading, body within the description card */
@@ -378,10 +376,6 @@ body {
         font-weight: 400;
         color: inherit;
         line-height: 1.6;
-        /* width: 90%; */ /* REMOVED */
-        /* margin-left: 0; */ /* REMOVED */
-        /* margin-right: auto; */ /* REMOVED */
-        /* white-space: pre-wrap; */ /* If you want to preserve whitespace/newlines from data-description */
     }
 
     /* Software Icons Styling */
@@ -393,7 +387,6 @@ body {
         margin-top: auto; /* Push to the bottom of the card */
         padding-top: 16px; /* Reduced top padding */
         border-top: 1px solid rgba(0, 0, 0, 0.1); /* Subtle separator line */
-        /* gap: 24px; */ /* Removed: Gap is for items within software-icons-list now */
     }
 
     .lightbox-media-wrapper .lightbox-desc-card .software-section-label {
@@ -414,7 +407,6 @@ body {
     .lightbox-media-wrapper .lightbox-desc-card .software-icon {
         width: 30px !important; /* Icons smaller by 2px */
         height: 30px !important; /* Icons smaller by 2px */
-        /* margin-right: 24px !important; */ /* Removed, using gap on software-icons-list */
         margin-bottom: 6px; /* Reduced bottom margin for wrapped icons */
         object-fit: contain;
         border: none !important; /* Force remove any borders */
@@ -444,11 +436,6 @@ body {
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
-    }
-
-    /* Specific padding for desc card when media is a video */
-    .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
-        /* padding-right: 64px; */ /* Removed from here, will be applied only when maximized */
     }
 
     body.projects-window-maximized .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
@@ -581,24 +568,18 @@ body {
 
 .lightbox-media-wrapper img,
 .lightbox-media-wrapper video {
-  /* max-width: 60vw; */ /* Remove fixed max-width, let flexbox handle it */
-  /* max-height: 70vh; */ /* Remove fixed max-height, let flexbox handle it */
   max-height: 100%; /* Max height of its allocated space in the flex container */
   min-width: 0; /* Necessary for flex items */
   min-height: 0; /* Necessary for flex items */
   flex: 0 0 auto; /* CHANGED: No grow, NO SHRINK, basis is auto */
-  /* border-radius: 20px; */ /* Ensured by #lightbox-content img/video rule */
   box-shadow: 0 2px 16px rgba(0,0,0,0.18);
   margin-right: 0; /* Was already 0, ensure it stays for spacing if desc card is next */
   display: block; 
-  /* height: 100%; */ /* REMOVE THIS, was causing aspect ratio issues */
   object-fit: contain; /* Crucial for aspect ratio */
   z-index: 2;
-  /* border: 3px solid yellow !important; */ /* TEMP TEST BORDER - REMOVED */
 }
 
 .lightbox-media-wrapper .lightbox-desc-card {
-  --desc-card-current-width: 350px; /* This variable might be unused now */
   margin-left: auto; 
   margin-right: 0; 
   height: 100%; 
@@ -607,8 +588,6 @@ body {
   box-shadow: 0 4px 32px rgba(0,0,0,0.18);
   display: flex; 
   flex-direction: column;
-  /* align-items: center; */ /* Text will be aligned left, not centered as a block */
-  /* justify-content: center; */ /* Content will flow from top */
   font-size: 1.13rem;
   font-weight: 500;
   color: #fff; /* Default color */
@@ -624,27 +603,6 @@ body {
   word-break: break-word; /* Ensure long words break */
   flex-shrink: 1; /* Default, good */
 }
-
-/* .lightbox-media-wrapper.desc-visible .lightbox-desc-card > * rule might be less relevant 
-   if text is directly in .lightbox-desc-card. Opacity is handled by the card itself. */
-/* .lightbox-media-wrapper.desc-visible .lightbox-desc-card > * {
-  opacity: 1;
-  transition: none !important;
-} */
-
-/* .lightbox-media-wrapper.desc-visible .lightbox-desc-card .desc-card-content.desc-content-visible rule removed */
-
-/* Update width variable when window is maximized */
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card {
-  /* --desc-card-current-width: 600px; */ /* No longer fixed */
-  /* max-width: 600px; */ /* No longer fixed */
-}
-
-body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-desc-card {
-  /* width: 600px; */ /* No longer fixed, relies on 95% of its parent */
-}
-
-/* Animations removed as JS handles transitions directly */
 
 /* Renamed mobileDescOverlaySlideIn to mobileBottomOverlaySlideIn */
 @keyframes mobileBottomOverlaySlideIn {
@@ -694,37 +652,25 @@ body.projects-window-maximized .lightbox-media-wrapper.desc-visible .lightbox-de
 }
 
 .desc-card-anim-wrapper {
-  /* width: 0; */ /* Transitioning width is an issue with flex; rely on opacity/transform or flex basis for hide/show */
-  min-width: 0; /* Allow shrinking to 0 if we hide it by changing flex basis */
-  max-width: 600px; /* Added max-width */
+  min-width: 0;
+  max-width: 600px;
   overflow: hidden;
-  /* transition: width 0.4s cubic-bezier(0.4,0,0.2,1); */ /* Removing direct width transition */
-  display: flex; /* Remains flex to hold the desc-card */
-  /* border: 2px solid blue !important; */ /* TEMP TEST BORDER REMOVED */
-  flex: 1 1 auto; /* Takes remaining space, can shrink, auto basis */
-  /* Add a margin to separate from media, if they are side-by-side */
-  margin-left: 15px; /* Example margin */
+  display: flex;
+  flex: 1 1 auto;
+  margin-left: 15px;
 }
 
 .lightbox-media-wrapper.video-media-active .desc-card-anim-wrapper {
-  max-width: 450px; /* Further reduced for videos to achieve 100px total reduction */
+  max-width: 450px;
 }
 
 body.projects-window-maximized .lightbox-media-wrapper.video-media-active .desc-card-anim-wrapper {
-  max-width: 545px; /* Adjusted for maximized videos */
+  max-width: 545px;
 }
 
-/* REMOVE maximized fixed width for desc-card-anim-wrapper - This whole block can be removed if the above max-width is sufficient */
-/* body.projects-window-maximized .desc-card-anim-wrapper {
-  max-width: 600px; 
-} */
-
-/* Control visibility of desc-card-anim-wrapper using opacity/transform or by changing flex basis via JS */
 .lightbox-media-wrapper.desc-visible .desc-card-anim-wrapper {
-  /* width: 350px; */ /* Removed fixed width */
-  /* Instead of width, ensure it's visible and takes up its flex space */
-  opacity: 1; /* Ensure it's visible when .desc-visible is set */
-  transform: translateX(0); /* Ensure it's in place */
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .lightbox-media-wrapper.desc-visible .lightbox-desc-card {

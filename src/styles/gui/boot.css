@@ -1,3 +1,14 @@
+/*
+ * boot.css — Boot & Login Screen Styles for Windows XP Simulation
+ *
+ * Styles for:
+ * - Boot animation and overlay
+ * - Login screen and transitions
+ * - Responsive/mobile adjustments
+ *
+ * @file src/styles/gui/boot.css
+ */
+
 /* ==================================================
    Boot & Login Screen Styles for Windows XP Simulation
    ==================================================
@@ -5,9 +16,7 @@
    - Matches the look and feel of Windows XP.
    ================================================== */
 
-/* =========================
-   1. Overlay Screens (Boot & Login)
-   ========================= */
+/* ===== Overlay Screens: Boot & Login ===== */
 /* Common styles for overlay screens */
 #boot-screen,
 #login-screen {
@@ -97,18 +106,13 @@
 
 /* Login screen - container for iframe */
 #login-screen {
-  background-color: #000; /* Reverted from transparent to original black */
+  background-color: #000; 
   pointer-events: none; /* Disabled initially */
   padding: 0;
   overflow: hidden; /* Hide potential iframe scrollbars */
   opacity: 1;
   z-index: 9999;
 }
-
-/* Hide the desktop initially (remove if not used) */
-/* .desktop {
-    opacity: 0; 
-} */
 
 /* Boot Screen Bottom Corner Elements */
 .boot-bottom-left {
@@ -120,7 +124,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* Left-align text */
-  line-height: 1.4; /* Reverted */
+  line-height: 1.4; 
 }
 
 .boot-bottom-right {
@@ -133,17 +137,6 @@
   display: block;
   height: 35px; /* Fixed height */
   width: auto; /* Maintain aspect ratio */
-}
-
-/* Animation for fading in elements */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 /* Fade-in for login content */
@@ -336,10 +329,8 @@
   }
 
   .login-screen {
-    /* Removed: border: 2px solid red !important; from .login-screen */
   }
   .login-screen-inner {
-    /* Removed: border: 2px solid orange !important; from .login-screen-inner */
   }
   .login-screen-center {
     display: flex !important;
@@ -372,6 +363,7 @@
    - Matches the look and feel of Windows XP.
    ================================================== */
 
+/* ===== Login Screen Layout & Elements ===== */
 /* =========================
    1. Login Screen Container & Base Styles
    ========================= */
@@ -784,4 +776,42 @@
   .login-screen .login-screen-center .left {
     margin-bottom: 0;
   }
+}
+
+@media (max-width: 480px) {
+  .container {
+    transform: scale(0.75);
+  }
+}
+
+/* Styles for elements previously styled inline in index.html */
+.pre-boot-overlay-style {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  background:#000;
+  z-index:20000;
+}
+
+.boot-fadeout-overlay-style {
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  background:#000;
+  z-index:20000;
+  opacity:0;
+  transition:opacity 0.5s;
+}
+
+.login-screen-initial-display {
+  display: block;
+}
+
+.welcome-message-initial-hidden {
+  display:none;
 }

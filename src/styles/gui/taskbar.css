@@ -1,3 +1,13 @@
+/*
+ * taskbar.css — Taskbar Styles for Windows XP Simulation
+ *
+ * Styles for:
+ * - Taskbar, start button, quick launch, taskbar items, system tray, and clock
+ * - Balloon tooltips and responsive adjustments
+ *
+ * @file src/styles/gui/taskbar.css
+ */
+
 /* ==================================================
    Taskbar Styles for Windows XP Simulation
    ==================================================
@@ -5,9 +15,7 @@
    - Matches the look and feel of Windows XP.
    ================================================== */
 
-/* =========================
-   1. Root Variables
-   ========================= */
+/* ===== Root Variables ===== */
 :root {
   --taskbar-height: 30px;
   --taskbar-item-height: 24px; /* Set to 24px */
@@ -21,9 +29,7 @@
   --z-taskbar: 500;
 }
 
-/* =========================
-   2. Taskbar Container
-   ========================= */
+/* ===== Taskbar Container ===== */
 .taskbar {
   position: fixed;
   bottom: 0;
@@ -39,9 +45,7 @@
   overflow: hidden;
 }
 
-/* =========================
-   3. Start Button
-   ========================= */
+/* ===== Start Button ===== */
 /* Start button */
 .start-button {
   position: relative;
@@ -56,7 +60,6 @@
   transition: filter 0.1s ease;
   -webkit-tap-highlight-color: transparent; /* Prevents tap highlight on mobile */
   flex-shrink: 0; /* Prevent shrinking */
-  /* -webkit-user-select: none !important; */
 }
 
 .start-button:hover {
@@ -87,9 +90,7 @@
   outline: none !important;
 }
 
-/* =========================
-   4. Quick Launch & Programs Area
-   ========================= */
+/* ===== Quick Launch & Programs Area ===== */
 /* Programs area */
 .taskbar-programs {
   flex-grow: 1;
@@ -102,9 +103,7 @@
   min-width: 0;
 }
 
-/* =========================
-   5. Taskbar Items
-   ========================= */
+/* ===== Taskbar Items ===== */
 /* Taskbar program buttons */
 .taskbar-item {
   height: var(--taskbar-item-height);
@@ -173,8 +172,6 @@
 
   box-shadow:
     inset 0 1px 2px rgb(0 0 0 / 25%),
-    /* Less intense inner top shadow */ inset 0 -1px 0 rgb(255 255 255 / 12%),
-    /* Adjusted bottom highlight */ inset 1px 0 1px rgb(0 0 0 / 15%),
     inset -1px 0 1px rgb(0 0 0 / 15%); /* Adjusted inner side shadows */
 }
 
@@ -211,17 +208,10 @@
   min-width: 0;
 }
 
-/* =========================
-   6. System Tray & Tray Icons
-   ========================= */
+/* ===== System Tray & Clock ===== */
 /* System tray */
 .system-tray {
   height: 100%;
-  position: relative;
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  /* Responsive width: remove fixed width and min-width */
   width: auto;
   min-width: 0;
   flex-shrink: 0;
@@ -287,9 +277,6 @@
   display: block;
 }
 
-/* =========================
-   7. Clock
-   ========================= */
 /* Clock */
 .time {
   position: static;
@@ -302,9 +289,7 @@
   margin-right: 0;
 }
 
-/* =========================
-   8. Balloon Tooltip Styles
-   ========================= */
+/* ===== Balloon Tooltip ===== */
 /* Start Menu styles moved to startmenu.css */
 
 /* === Balloon Tooltip Styles === */
@@ -323,7 +308,7 @@
   display: block;
   animation: fadein 1s forwards;
   z-index: 10;
-  transform: scale(0.93); /* Scale reduced by 0.1 */
+  transform: scale(0.93);
 }
 .balloon.hide {
   animation: fadeout 1s forwards;
@@ -392,10 +377,8 @@
 }
 .balloon__close:active,
 .balloon__close:focus:active {
-  /* outline: none; */
   background: #a00a0a !important;
   background-color: #a00a0a !important;
-  background-image: none !important;
 }
 .balloon__close:before,
 .balloon__close:after {
@@ -455,4 +438,9 @@
     gap: calc(var(--tray-spacing) - 2px);
     margin-right: 6px;
   }
+}
+
+/* Media query to disable log off button on mobile */
+@media (max-width: 768px) {
+  /* ... existing code ... */
 }

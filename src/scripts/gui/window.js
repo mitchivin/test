@@ -1,6 +1,10 @@
 /**
- * @fileoverview Window manager module for handling all window operations in the Windows XP simulation.
- * Handles window creation, focus, minimize, maximize, close, drag, cascade, and integration with the taskbar and event bus.
+ * window.js — Window Manager for Windows XP Simulation
+ *
+ * Handles all window operations, including:
+ * - Window creation, focus, minimize, maximize, close, drag, and cascade
+ * - Taskbar and event bus integration
+ * - Dynamic content and toolbar/address bar logic
  *
  * Usage:
  *   import WindowManager from './window.js';
@@ -9,6 +13,8 @@
  * Edge Cases:
  *   - If required DOM containers are missing, window creation will fail.
  *   - If program registry is missing entries, unknown apps cannot be opened.
+ *
+ * @module window
  */
 import programData from "../utils/programRegistry.js";
 import { EVENTS } from "../utils/eventBus.js";
@@ -110,6 +116,21 @@ class WindowTemplates {
     };
     for (const [attr, value] of Object.entries(attrs))
       iframe.setAttribute(attr, value);
+
+    // Send initial maximized/unmaximized state to iframe on load
+    iframe.onload = () => {
+      if (iframe.contentWindow) {
+        const appWindow = iframe.closest('.app-window');
+        if (appWindow) {
+          if (appWindow.classList.contains('maximized')) {
+            iframe.contentWindow.postMessage({ type: "window:maximized" }, "*");
+          } else {
+            iframe.contentWindow.postMessage({ type: "window:unmaximized" }, "*");
+          }
+        }
+      }
+    };
+
     iframeContainer.appendChild(iframe);
 
     // --- Append in correct order: MenuBar, Toolbar, AddressBar, IframeContainer ---
@@ -158,14 +179,6 @@ export default class WindowManager {
 
     this._setupGlobalHandlers();
     this._subscribeToEvents();
-
-    // --- RUNTIME CHECK: Ensure .taskbar is a sibling of #windows-container, not a child ---
-    const windowsContainer = document.getElementById("windows-container");
-    const taskbar = document.querySelector(".taskbar");
-    if (windowsContainer && taskbar) {
-      if (taskbar.parentElement === windowsContainer) {
-      }
-    }
 
     // Listen for messages from iframes
     window.addEventListener('message', (event) => {
@@ -267,6 +280,44 @@ export default class WindowManager {
                 }
             }
         }
+
+        // Accept messages from same-origin or file protocol (local dev)
+        if (
+          !(
+            window.location.protocol === "file:" ||
+            event.origin === window.origin
+          )
+        )
+          return;
+
+        // Find the .app-window containing the iframe with this contentWindow
+        let windowElement = Array.from(
+          document.querySelectorAll(".app-window"),
+        ).find((win) => {
+          const iframe = win.querySelector("iframe");
+          return iframe && iframe.contentWindow === event.source;
+        });
+        if (!windowElement) return;
+
+        // Handle iframe-interaction message to close menubar popouts
+        if (event.data?.type === 'iframe-interaction') {
+          windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
+          return;
+        }
+
+        if (event.data?.type === "minimize-window") {
+          this.minimizeWindow(windowElement);
+        } else if (event.data?.type === "close-window") {
+          this.closeWindow(windowElement);
+        } else if (
+          event.data?.type === "updateStatusBar" &&
+          typeof event.data.text === "string"
+        ) {
+          // Handle status bar updates from specific apps (like Notepad)
+          if (windowElement.statusBarField) {
+            windowElement.statusBarField.textContent = event.data.text;
+          }
+        }
     });
 
     // Add click handler to Home button to send close-lightbox message to Projects app iframe only
@@ -322,6 +373,12 @@ export default class WindowManager {
         });
         if (!windowElement) return;
 
+        // Handle iframe-interaction message to close menubar popouts
+        if (event.data?.type === 'iframe-interaction') {
+          windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
+          return;
+        }
+
         if (event.data?.type === "minimize-window") {
           this.minimizeWindow(windowElement);
         } else if (event.data?.type === "close-window") {
@@ -361,6 +418,29 @@ export default class WindowManager {
     );
   }
 
+  _calculateWindowToTaskbarTransform(windowElement, taskbarItem) {
+    if (!taskbarItem) return "scale(0.55)"; // Fallback if taskbar item not found
+
+    const winRect = windowElement.getBoundingClientRect();
+    const taskbarRect = taskbarItem.getBoundingClientRect();
+
+    // Window bottom center (origin for minimize animation)
+    const winBottomCenterX = winRect.left + winRect.width / 2;
+    const winBottomCenterY = winRect.top + winRect.height;
+
+    // Taskbar icon center (target for minimize animation)
+    const taskbarCenterX = taskbarRect.left + taskbarRect.width / 2;
+    const taskbarCenterY = taskbarRect.top + taskbarRect.height / 2;
+
+    const scale = 0.55; // XP-like scale factor for the animation
+
+    // Calculate translation needed to move window's bottom-center to taskbar icon's center
+    const translateX = taskbarCenterX - winBottomCenterX;
+    const translateY = taskbarCenterY - winBottomCenterY;
+
+    return `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
+  }
+
   /**
    * Open a program window by name. Handles overlays and standard windows.
    * @param {string} programName - The name/key of the program to open.
@@ -374,7 +454,7 @@ export default class WindowManager {
 
     const existingWindow = document.getElementById(program.id);
     if (existingWindow) {
-      // FIX: If minimized, restore and bring to front
+      // If minimized, restore and bring to front
       if (
         existingWindow.windowState &&
         existingWindow.windowState.isMinimized
@@ -459,7 +539,7 @@ export default class WindowManager {
     windowElement.innerHTML = this._getWindowBaseHTML(program);
 
     // --- Mobile Maximized Logic ---
-    if (isMobileDevice && isMobileDevice()) {
+    if (isMobileDevice()) {
       windowElement.classList.add("maximized");
       windowElement.style.position = "fixed";
       windowElement.style.left = "0";
@@ -488,7 +568,7 @@ export default class WindowManager {
     }
 
     // Create Status Bar
-    const programName = program.id.replace("-window", ""); // Get program name
+    const programName = program.id.replace("-window", "");
     if (programName !== "cmd") {
       const statusBar = document.createElement("div");
       statusBar.className = "status-bar";
@@ -501,7 +581,6 @@ export default class WindowManager {
         initialText = program.statusBarText; // Use static text from registry
       }
       statusBarField.textContent = initialText;
-      // --- Add Notepad-specific static items ---
       // Append the main status field
       statusBar.appendChild(statusBarField);
 
@@ -538,7 +617,7 @@ export default class WindowManager {
    * @returns {string} HTML string for the window base.
    */
   _getWindowBaseHTML(program) {
-    const isMobile = isMobileDevice && isMobileDevice();
+    const isMobile = isMobileDevice();
     return `
             <div class="window-inactive-mask"></div>
             <div class="title-bar">
@@ -744,7 +823,6 @@ export default class WindowManager {
             }
           }, throttleDuration - timeSinceLastClick);
         }
-        // console.log(`Action "${action}" on window "${windowId}" throttled.`);
         return; // Ignore the click if it's too soon
       }
       
@@ -763,19 +841,17 @@ export default class WindowManager {
       }
     }
 
-    // const programName = windowElement.getAttribute("data-program"); // Context if needed
-
     switch (action) {
         case 'openInternet': 
         case 'openProjects': 
             this.openProgram('internet');
             break;
-        case 'openExternalLink': // Renamed from openInstagram
+        case 'openExternalLink': 
             const buttonElement = windowElement.querySelector('.toolbar-button.viewExternalLink');
             if (buttonElement && buttonElement.dataset.urlToOpen && !buttonElement.classList.contains('disabled')) {
                 window.open(buttonElement.dataset.urlToOpen, '_blank');
             } else {
-                // console.warn("External link not found or button improperly clicked.");
+                // External link not found or button was clicked when disabled.
             }
             break;
         case 'openResume':   
@@ -829,8 +905,7 @@ export default class WindowManager {
             }
             break;
         default:
-            // Optionally log unhandled actions or send a generic message
-            // console.warn(`Unhandled toolbar action: ${action} for window: ${windowElement.id}`);
+            // Unhandled toolbar action: send a generic message
             const genericIframe = windowElement.querySelector('iframe');
             if (genericIframe && genericIframe.contentWindow) {
                 genericIframe.contentWindow.postMessage({ type: 'toolbar-action', action: action }, '*');
@@ -874,6 +949,14 @@ export default class WindowManager {
         });
         windowElement.iframeOverlays.push(overlay);
       }
+
+      // --- New: Listen for focus/click on iframe to close menubar popouts ---
+      iframe.addEventListener('focus', () => {
+        windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
+      });
+      iframe.addEventListener('mousedown', () => {
+        windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
+      });
     });
   }
 
@@ -1084,25 +1167,10 @@ export default class WindowManager {
    */
   minimizeWindow(windowElement) {
     if (!windowElement || windowElement.windowState.isMinimized) return;
-    // Calculate transform to taskbar icon (bottom center to icon center)
+
     const taskbarItem = this.taskbarItems[windowElement.id];
-    let minimizeTransform = "scale(0.55)"; // fallback
-    if (taskbarItem) {
-      const winRect = windowElement.getBoundingClientRect();
-      const taskbarRect = taskbarItem.getBoundingClientRect();
-      // Window bottom center
-      const winBottomCenterX = winRect.left + winRect.width / 2;
-      const winBottomCenterY = winRect.top + winRect.height;
-      // Taskbar icon center
-      const taskbarCenterX = taskbarRect.left + taskbarRect.width / 2;
-      const taskbarCenterY = taskbarRect.top + taskbarRect.height / 2;
-      // Scale factor (XP-like)
-      const scale = 0.55;
-      // Translate X and Y so window bottom center moves to taskbar icon center
-      const translateX = taskbarCenterX - winBottomCenterX;
-      const translateY = taskbarCenterY - winBottomCenterY;
-      minimizeTransform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-    }
+    const minimizeTransform = this._calculateWindowToTaskbarTransform(windowElement, taskbarItem);
+
     windowElement.style.setProperty(
       "--window-minimize-transform",
       minimizeTransform,
@@ -1147,25 +1215,10 @@ export default class WindowManager {
     windowElement.classList.remove("minimized");
     windowElement.windowState.isMinimized = false;
     windowElement.style.display = "flex";
-    // Calculate transform from taskbar icon (bottom center to icon center)
+
     const taskbarItem = this.taskbarItems[windowElement.id];
-    let restoreTransform = "scale(0.55)"; // fallback
-    if (taskbarItem) {
-      const winRect = windowElement.getBoundingClientRect();
-      const taskbarRect = taskbarItem.getBoundingClientRect();
-      // Window bottom center
-      const winBottomCenterX = winRect.left + winRect.width / 2;
-      const winBottomCenterY = winRect.top + winRect.height;
-      // Taskbar icon center
-      const taskbarCenterX = taskbarRect.left + taskbarRect.width / 2;
-      const taskbarCenterY = taskbarRect.top + taskbarRect.height / 2;
-      // Scale factor (XP-like)
-      const scale = 0.55;
-      // Translate X and Y so window bottom center moves from taskbar icon center
-      const translateX = taskbarCenterX - winBottomCenterX;
-      const translateY = taskbarCenterY - winBottomCenterY;
-      restoreTransform = `scale(${scale}) translate(${translateX}px, ${translateY}px)`;
-    }
+    const restoreTransform = this._calculateWindowToTaskbarTransform(windowElement, taskbarItem);
+
     windowElement.style.setProperty(
       "--window-restore-transform",
       restoreTransform,
@@ -1220,7 +1273,9 @@ export default class WindowManager {
 
         state.isMaximized = true;
         windowElement.classList.add("maximized"); // Add class to trigger CSS styles
-        if (maximizeBtn) maximizeBtn.classList.add("restore");
+        if (maximizeBtn) {
+          maximizeBtn.classList.add("restore");
+        }
         // Send maximized message to iframe if present
         const iframe = windowElement.querySelector("iframe");
         if (iframe && iframe.contentWindow) {
@@ -1247,7 +1302,9 @@ export default class WindowManager {
 
         state.isMaximized = false;
         windowElement.classList.remove("maximized"); // Remove class
-        if (maximizeBtn) maximizeBtn.classList.remove("restore");
+        if (maximizeBtn) {
+          maximizeBtn.classList.remove("restore");
+        }
         // Send unmaximized message to iframe if present
         const iframe = windowElement.querySelector("iframe");
         if (iframe && iframe.contentWindow) {

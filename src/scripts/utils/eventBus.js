@@ -1,10 +1,15 @@
 /**
- * @fileoverview EventBus - Communication system for the Windows XP simulation
+ * eventBus.js — Event Bus Utilities for Windows XP Simulation
  *
- * Implements a publish-subscribe pattern to enable decoupled communication
- * between components of the application. This centralized event system
- * prevents tight coupling between UI components, window management, and
- * application logic.
+ * Implements a publish-subscribe pattern for decoupled communication between components.
+ * Provides:
+ * - Centralized event name constants
+ * - EventBus class for subscribing, publishing, and unsubscribing
+ * - Singleton eventBus instance for global use
+ *
+ * Usage:
+ *   import { eventBus, EVENTS } from './eventBus.js';
+ *   eventBus.subscribe(EVENTS.PROGRAM_OPEN, handler);
  *
  * @module eventBus
  */
@@ -13,9 +18,7 @@
 //  EventBus Utilities for Windows XP Simulation
 // ==================================================
 
-// =========================
-// 1. Event Name Constants
-// =========================
+// ===== Event Name Constants =====
 /**
  * Centralized event name constants for the application
  *
@@ -39,13 +42,9 @@ export const EVENTS = {
   STARTMENU_CLOSE_REQUEST: "startmenu:close-request", // Request to close start menu
   LOG_OFF_REQUESTED: "logoff:requested", // User requested log off
   SHUTDOWN_REQUESTED: "shutdown:requested", // User requested shutdown
-
-  // Cross-frame Communication
 };
 
-// =========================
-// 2. EventBus Class
-// =========================
+// ===== EventBus Class =====
 /**
  * EventBus implements the publish-subscribe pattern for decoupled communication.
  *
@@ -101,8 +100,9 @@ class EventBus {
    */
   unsubscribe(event, callback) {
     // Check if event exists and has subscribers before filtering
-    this.events[event]?.length &&
-      (this.events[event] = this.events[event].filter((cb) => cb !== callback));
+    if (this.events[event] && this.events[event].length > 0) {
+      this.events[event] = this.events[event].filter((cb) => cb !== callback);
+    }
   }
 
   /**
@@ -120,7 +120,7 @@ class EventBus {
   }
 }
 
-// Create and export a singleton instance
+// ===== Singleton EventBus Instance =====
 /**
  * Singleton instance of EventBus for global use.
  * @type {EventBus}
