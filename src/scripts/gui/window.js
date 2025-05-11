@@ -168,6 +168,7 @@ export default class WindowManager {
     this.taskbarItems = {};
     this.windowCount = 0;
     this.programData = programData;
+    this.preloadedAppIframes = {}; // NEW: To store hidden iframes used for preloading
     this.baseZIndex =
       parseInt(
         getComputedStyle(document.documentElement).getPropertyValue(
@@ -472,6 +473,10 @@ export default class WindowManager {
     );
     this.eventBus.subscribe(EVENTS.TASKBAR_ITEM_CLICKED, (data) =>
       this._handleTaskbarClick(data.windowId),
+    );
+    // NEW: Subscribe to PRELOAD_APP_REQUESTED
+    this.eventBus.subscribe(EVENTS.PRELOAD_APP_REQUESTED, (data) => 
+      this._handlePreloadAppRequested(data)
     );
   }
 
@@ -1226,6 +1231,12 @@ export default class WindowManager {
     if (programName && this.programData[programName]) {
       this.programData[programName].isOpen = false;
     }
+    // NEW: If closing My Projects window, ensure its hidden preload iframe is also removed
+    if (windowId === 'internet-window' && this.preloadedAppIframes['internet']) {
+        this.preloadedAppIframes['internet'].remove();
+        delete this.preloadedAppIframes['internet'];
+        console.log('[WINDOW.JS] Removed hidden preload iframe for My Projects due to window closure.');
+    }
     this.eventBus.publish(EVENTS.WINDOW_CLOSED, { windowId });
   }
 
@@ -1793,6 +1804,56 @@ export default class WindowManager {
   }
 
   // NEW PRIVATE METHOD
+  _handlePreloadAppRequested(data) {
+    if (!data || !data.programName) return;
+    const { programName } = data;
+
+    if (programName === 'internet') { // Currently, only handling preload for My Projects
+      if (this.preloadedAppIframes['internet']) {
+        console.log('[WINDOW.JS] Preload for \'internet\' app already initiated.');
+        return;
+      }
+
+      const programConfig = this.programData[programName];
+      if (!programConfig || !programConfig.appPath) {
+        console.error(`[WINDOW.JS] Cannot preload ${programName}: No program config or appPath.`);
+        return;
+      }
+
+      console.log(`[WINDOW.JS] Initiating hidden preload for ${programName} from ${programConfig.appPath}`);
+      const preloadIframe = document.createElement('iframe');
+      preloadIframe.src = programConfig.appPath; // Load real path directly
+      preloadIframe.id = `preload-iframe-${programName}`;
+      preloadIframe.style.display = 'none';
+      preloadIframe.style.position = 'absolute';
+      preloadIframe.style.width = '1px'; // Minimize resource usage for hidden iframe
+      preloadIframe.style.height = '1px';
+      preloadIframe.style.left = '-9999px';
+      preloadIframe.style.top = '-9999px';
+      preloadIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads');
+      preloadIframe.setAttribute('allow', 'autoplay');
+
+      preloadIframe.onload = () => {
+        console.log(`[WINDOW.JS] Hidden preload iframe for ${programName} (${preloadIframe.src}) loaded. Sending "preloadVideos" message.`);
+        if (preloadIframe.contentWindow) {
+          preloadIframe.contentWindow.postMessage("preloadVideos", "*");
+          // We don't publish PROJECTS_IFRAME_READY_FOR_PRELOAD here, as that's for the VISIBLE iframe.
+        }
+        this.preloadedAppIframes[programName] = preloadIframe; // Store it
+      };
+
+      preloadIframe.onerror = () => {
+        console.error(`[WINDOW.JS] Error loading hidden preload iframe for ${programName}: ${preloadIframe.src}`);
+        if (preloadIframe.parentNode) {
+            preloadIframe.remove();
+        }
+        delete this.preloadedAppIframes[programName];
+      };
+      
+      document.body.appendChild(preloadIframe); 
+    }
+  }
+
   _loadProjectsIframeAndTriggerPreload(projectsWindowElement) {
     if (!projectsWindowElement) {
         console.error('[WINDOW.JS] _loadProjectsIframeAndTriggerPreload called with no window element.');
@@ -1803,29 +1864,37 @@ export default class WindowManager {
         console.log(`[WINDOW.JS] Loading real src for My Projects iframe: ${iframe.dataset.realSrc}`);
         iframe.src = iframe.dataset.realSrc;
 
-        // The existing iframe.onload in createIframeContainer will handle sending window state (maximized/minimized).
-        // We add a specific, one-time listener here to send the "preloadVideos" message *after* this specific src load.
         const handleProjectsLoadOnce = () => {
-            console.log(`[WINDOW.JS] My Projects iframe content loaded (src: ${iframe.src}). Sending "preloadVideos" message.`);
+            console.log(`[WINDOW.JS] My Projects (visible) iframe content loaded (src: ${iframe.src}). Sending "preloadVideos" message.`);
             if (iframe.contentWindow) {
                 iframe.contentWindow.postMessage("preloadVideos", "*");
             }
-            // Publish event that iframe is now ready and preload has been triggered
             this.eventBus.publish(EVENTS.PROJECTS_IFRAME_READY_FOR_PRELOAD, { windowId: projectsWindowElement.id });
             
-            iframe.removeEventListener('load', handleProjectsLoadOnce); // Clean up this specific listener
-            console.log('[WINDOW.JS] Removed one-time load listener for preload trigger.');
+            iframe.removeEventListener('load', handleProjectsLoadOnce);
+            console.log('[WINDOW.JS] Removed one-time load listener for visible My Projects iframe.');
+
+            // NEW: Clean up the hidden preload iframe now that the visible one is ready
+            if (this.preloadedAppIframes['internet']) {
+                this.preloadedAppIframes['internet'].remove();
+                delete this.preloadedAppIframes['internet'];
+                console.log('[WINDOW.JS] Removed hidden preload iframe for My Projects.');
+            }
         };
         iframe.addEventListener('load', handleProjectsLoadOnce);
     } else if (iframe && iframe.src !== 'about:blank') {
-        console.log('[WINDOW.JS] My Projects iframe already has a real src, attempting to send "preloadVideos" message directly (e.g. for re-focus).');
-        // If src is already set (e.g. window re-focused), we can try sending the message.
-        // The projects.js listener should be idempotent or handle multiple calls if needed.
+        console.log('[WINDOW.JS] My Projects (visible) iframe already has a real src. Sending "preloadVideos" message (e.g. for re-focus).');
         if (iframe.contentWindow) {
             iframe.contentWindow.postMessage("preloadVideos", "*");
         }
+        // If it's already loaded, also attempt cleanup of hidden iframe, just in case.
+        if (this.preloadedAppIframes['internet']) {
+            this.preloadedAppIframes['internet'].remove();
+            delete this.preloadedAppIframes['internet'];
+            console.log('[WINDOW.JS] Removed hidden preload iframe for My Projects (during re-focus/already loaded scenario).');
+        }
     } else {
-        console.warn('[WINDOW.JS] _loadProjectsIframeAndTriggerPreload: My Projects iframe or realSrc not found, or src not about:blank as expected.', iframe);
+        console.warn('[WINDOW.JS] _loadProjectsIframeAndTriggerPreload: My Projects (visible) iframe or realSrc not found, or src not about:blank as expected.', iframe);
     }
   }
 }
