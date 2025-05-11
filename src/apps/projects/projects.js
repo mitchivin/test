@@ -181,30 +181,40 @@ if (document.readyState === 'loading') {
   preloadProjectVideos();
 }
 
-function createLightboxMediaElement(type, src) {
+function createLightboxMediaElement(type, src, posterSrc) {
     let mediaElement;
     if (type === 'image') {
         mediaElement = createEl('img');
-        mediaElement.alt = 'Project Lightbox Image'; // Generic alt text
+        mediaElement.alt = 'Project Lightbox Image';
         mediaElement.src = src;
     } else if (type === 'video') {
-        // Use preloaded video if available
-        if (preloadedVideos[src]) {
-            mediaElement = preloadedVideos[src];
-            mediaElement.controls = true;
-            mediaElement.autoplay = true;
-            mediaElement.loop = true;
-            mediaElement.muted = false;
-            mediaElement.style.display = '';
-        } else {
-            mediaElement = createEl('video');
-            mediaElement.alt = 'Project Lightbox Video'; // Generic alt text
-            mediaElement.controls = true;
-            mediaElement.autoplay = true;
-            mediaElement.loop = true;
-            mediaElement.setAttribute('playsinline', '');
-            mediaElement.src = src;
-        }
+        // Show poster image first
+        const posterImg = createEl('img');
+        posterImg.alt = 'Project Video Poster';
+        posterImg.src = posterSrc;
+        posterImg.className = 'lightbox-poster';
+        // Prepare video element (hidden initially)
+        const video = createEl('video');
+        video.src = src;
+        video.poster = posterSrc;
+        video.controls = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = false;
+        video.setAttribute('playsinline', '');
+        video.style.display = 'none';
+        // When video is ready, swap in
+        video.addEventListener('canplay', () => {
+            posterImg.style.display = 'none';
+            video.style.display = '';
+            video.play();
+        }, { once: true });
+        // Return a wrapper div containing both
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        wrapper.appendChild(posterImg);
+        wrapper.appendChild(video);
+        mediaElement = wrapper;
     }
     return mediaElement;
 }
@@ -635,8 +645,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // --- Insert new media (image or video) ---
-                let newMedia = createLightboxMediaElement(type, src);
-
+                let posterSrc = undefined;
+                if (type === 'video') {
+                    // Map video src to poster
+                    if (src.includes('video1.mp4')) posterSrc = 'assets/apps/projects/videoposter1.webp';
+                    else if (src.includes('video2.mp4')) posterSrc = 'assets/apps/projects/videoposter2.webp';
+                    else if (src.includes('video3.mp4')) posterSrc = 'assets/apps/projects/videoposter3.webp';
+                }
+                let newMedia = createLightboxMediaElement(type, src, posterSrc);
                 if (newMedia) {
                     // Original condition for media animation
                     if (!(skipFadeIn && !isDesktop())) {
