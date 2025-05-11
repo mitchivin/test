@@ -1409,6 +1409,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 setMaximizedState(true);
             } else if (event.data.type === 'window:unmaximized') {
                 setMaximizedState(false);
+            } else if (event.data.type === 'window:restored') {
+                console.log('[ProjectsApp] Received window:restored event. Re-applying Masonry layout.');
+                // Re-apply the Masonry layout. Using requestAnimationFrame to ensure it runs
+                // after the browser has had a chance to update dimensions from the restore.
+                requestAnimationFrame(() => {
+                    if (typeof applyMasonryLayout === 'function') {
+                        applyMasonryLayout();
+                    }
+                });
             }
             // Keep existing toolbar-action handling
             if (event.data.type === 'toolbar-action') {

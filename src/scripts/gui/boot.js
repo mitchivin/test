@@ -130,59 +130,6 @@ export function initBootSequence(eventBus, EVENTS) {
           welcomeMsg.classList.add("visible");
         }, 10);
 
-        // Preload/Prefetch apps
-        const appHtmlFiles = [
-          { path: './src/apps/about/about.html', type: 'document' },
-          { path: './src/apps/projects/projects.html', type: 'document' },
-          { path: './src/apps/resume/resume.html', type: 'document' },
-          { path: './src/apps/contact/contact.html', type: 'document' }
-        ];
-
-        appHtmlFiles.forEach(app => {
-          const link = document.createElement('link');
-          link.rel = 'prefetch'; // Use prefetch for documents
-          link.href = app.path;
-          link.as = app.type; // 'document'
-          document.head.appendChild(link);
-          console.log(`Prefetching ${app.type}: ${app.path}`);
-        });
-
-        // Preload critical assets for About and Resume apps
-        const appCriticalAssets = [
-          // Resume App
-          { path: './assets/apps/resume/resume.webp', type: 'image' },
-          { path: './assets/apps/resume/resumeMitchIvin.pdf', type: 'document' },
-          // About App
-          { path: './assets/apps/about/aboutbg.webp', type: 'image' },
-          { path: './assets/apps/about/pullup-alt.webp', type: 'image' },
-          { path: './assets/apps/about/pullup.webp', type: 'image' },
-          { path: './assets/apps/about/skill1.webp', type: 'image' },
-          { path: './assets/apps/about/skill2.webp', type: 'image' },
-          { path: './assets/apps/about/skill3.webp', type: 'image' },
-          { path: './assets/apps/about/skill4.webp', type: 'image' },
-          { path: './assets/apps/about/skill5.webp', type: 'image' },
-          { path: './assets/apps/about/software1.webp', type: 'image' },
-          { path: './assets/apps/about/software2.webp', type: 'image' },
-          { path: './assets/apps/about/software3.webp', type: 'image' },
-          { path: './assets/apps/about/software4.webp', type: 'image' },
-          { path: './assets/apps/about/p1.webp', type: 'image' },
-          { path: './assets/apps/about/p2.webp', type: 'image' },
-          { path: './assets/apps/about/p3.webp', type: 'image' },
-          { path: './assets/apps/about/p4.webp', type: 'image' },
-          { path: './assets/apps/about/p5.webp', type: 'image' }
-        ];
-
-        appCriticalAssets.forEach(asset => {
-          const link = document.createElement('link');
-          link.rel = 'preload';
-          link.href = asset.path;
-          link.as = asset.type; // 'image'
-          // For images, you can also specify media queries or imagesrcset/imagesizes if needed
-          // but for these specific items, a simple preload is likely sufficient.
-          document.head.appendChild(link);
-          console.log(`Preloading ${asset.type}: ${asset.path}`);
-        });
-
       }, 500); // Welcome message appears after this delay
       setTimeout(() => {
         welcomeMsg.classList.remove("visible");

@@ -510,7 +510,6 @@ export default class WindowManager {
     }
 
     windowElement = this._createWindowElement(program);
-    this._createTaskbarItem(windowElement, program);
     this._registerWindow(windowElement, program);
     this._setupWindowEvents(windowElement);
 
@@ -1287,6 +1286,14 @@ export default class WindowManager {
         windowElement.classList.remove("window-restoring");
         windowElement.style.removeProperty("--window-restore-transform");
         windowElement.removeEventListener("animationend", handler);
+
+        // Notify 'internet' app iframe that it has been restored
+        if (windowElement.id === 'internet-window') {
+          const iframe = windowElement.querySelector('iframe');
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: "window:restored" }, "*");
+          }
+        }
       }
     });
     this._updateStackOrder(windowElement.id, "add");
