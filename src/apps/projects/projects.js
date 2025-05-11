@@ -158,40 +158,14 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         imgElement.src = src;
         return imgElement;
     } else if (type === 'video') {
-        if (isTouchDevice() && posterUrl) {
-            const container = createEl('div', 'lightbox-mobile-video-container');
-            const videoElement = createEl('video');
-            videoElement.alt = 'Project Lightbox Video';
-            videoElement.controls = true;
-            videoElement.autoplay = true;
-            videoElement.loop = true;
-            videoElement.muted = true;
-            videoElement.setAttribute('playsinline', '');
-            videoElement.src = src;
-            const posterImage = createEl('img', 'lightbox-mobile-video-poster');
-            posterImage.src = posterUrl;
-            posterImage.alt = 'Loading video...';
-            container.appendChild(videoElement);
-            container.appendChild(posterImage);
-            // Fade out poster when video is ready
-            function onVideoReady() {
-                posterImage.classList.add('fade-out');
-                videoElement.removeEventListener('canplay', onVideoReady);
-                videoElement.removeEventListener('loadeddata', onVideoReady);
-            }
-            videoElement.addEventListener('canplay', onVideoReady);
-            videoElement.addEventListener('loadeddata', onVideoReady);
-            return container;
-        } else {
-            const videoElement = createEl('video');
-            videoElement.alt = 'Project Lightbox Video';
-            videoElement.controls = true;
-            videoElement.autoplay = true;
-            videoElement.loop = true;
-            videoElement.setAttribute('playsinline', '');
-            videoElement.src = src;
-            return videoElement;
-        }
+        const videoElement = createEl('video');
+        videoElement.alt = 'Project Lightbox Video';
+        videoElement.controls = true;
+        videoElement.autoplay = true;
+        videoElement.loop = true;
+        videoElement.setAttribute('playsinline', '');
+        videoElement.src = src;
+        return videoElement;
     }
     return null;
 }
@@ -525,7 +499,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!post) return;
         currentLightboxIndex = index; // Update the global index
 
-        // Extract data from the post element
         const type = post.dataset.type;
         const src = post.dataset.src;
         const title = post.dataset.title;
@@ -534,7 +507,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const linkType = post.dataset.linkType;
         const linkUrl = post.dataset.linkUrl;
         const software = post.dataset.software;
-        const poster = post.dataset.poster; // For videos
 
         const dynamicSubheading = type === 'image' ? 'Social Graphics' : type === 'video' ? 'Video Production' : '';
 
@@ -617,91 +589,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     wrapper.classList.add('image-media-active');
                 }
 
-                let newMedia = createLightboxMediaElement(type, src, poster);
+                // Pass null for posterUrl as poster logic is removed
+                let newMedia = createLightboxMediaElement(type, src, null);
 
                 if (newMedia) {
-                    if (!(skipFadeIn && !isDesktop())) {
-                        newMedia.style.opacity = '0';
-                        newMedia.style.transition = 'opacity 220ms cubic-bezier(0.4,0,0.2,1)';
+                    if (!(skipFadeIn && !isDesktop())) { // Condition for initial mobile open
+                        // Cleaned: Only append newMedia. Its visibility relies on parent and CSS.
                         wrapper.appendChild(newMedia);
-                        setTimeout(() => { newMedia.style.opacity = '1'; }, 10);
-                    } else {
+                    } else { // This is for mobile swipe navigation OR desktop
                         const slideFrom = direction === 1 ? '100vw' : direction === -1 ? '-100vw' : '100vw';
                         newMedia.style.transform = `translateX(${slideFrom})`;
                         newMedia.style.transition = 'transform 400ms cubic-bezier(0.4,0,0.2,1)';
+                        newMedia.style.opacity = '1'; 
+                        newMedia.style.visibility = 'visible';
+                        newMedia.style.display = (newMedia.tagName === 'IMG' || newMedia.tagName === 'VIDEO') ? 'block' : 'flex'; 
+
                         wrapper.appendChild(newMedia);
                         void newMedia.offsetWidth; 
                         setTimeout(() => { newMedia.style.transform = 'translateX(0)'; }, 10);
                     }
                 }
-
-                // --- Handle poster fade-out for mobile videos ---
-                // Check if newMedia is the container (i.e., it's a mobile video with a poster)
-                if (type === 'video' && isTouchDevice() && poster && newMedia.classList.contains('lightbox-mobile-video-container')) {
-                    console.log('[Mobile Video Debug] newMedia is container:', newMedia);
-                    const videoEl = newMedia.querySelector('video');
-                    const posterEl = newMedia.querySelector('.lightbox-mobile-video-poster');
-                    console.log('[Mobile Video Debug] videoEl:', videoEl);
-                    console.log('[Mobile Video Debug] posterEl:', posterEl);
-
-                    if (videoEl && posterEl) {
-                        posterEl.style.opacity = '1'; // Ensure it starts visible
-                        console.log('[Mobile Video Debug] Poster opacity set to 1.');
-
-                        const onVideoReady = () => {
-                            console.log('[Mobile Video Debug] onVideoReady triggered for:', videoEl.src);
-                            if (posterEl.parentNode) {
-                                posterEl.classList.add('fade-out');
-                                console.log('[Mobile Video Debug] Poster fade-out class added.');
-                                posterEl.addEventListener('transitionend', () => {
-                                    console.log('[Mobile Video Debug] Poster transitionend.');
-                                    if (posterEl.parentNode) {
-                                        // posterEl.parentNode.removeChild(posterEl); // Or just hide
-                                        posterEl.style.display = 'none';
-                                        console.log('[Mobile Video Debug] Poster display set to none.');
-                                    }
-                                }, { once: true });
-                            }
-                            videoEl.muted = false; // Unmute after interaction or readiness
-                            console.log('[Mobile Video Debug] Video unmuted.');
-                            videoEl.removeEventListener('loadeddata', onVideoReady);
-                            videoEl.removeEventListener('canplay', onVideoReady);
-                            videoEl.removeEventListener('error', onVideoError);
-                        };
-                        
-                        const onVideoError = (e) => {
-                            console.error("[Mobile Video Debug] onVideoError triggered for:", videoEl.src, e);
-                            if (posterEl && posterEl.parentNode) {
-                                posterEl.alt = "Error loading video."; 
-                            }
-                            videoEl.removeEventListener('loadeddata', onVideoReady);
-                            videoEl.removeEventListener('canplay', onVideoReady);
-                            videoEl.removeEventListener('error', onVideoError);
-                        };
-
-                        console.log('[Mobile Video Debug] Adding event listeners to video element.');
-                        videoEl.addEventListener('loadeddata', onVideoReady);
-                        // Consider adding canplay as well for more robustness on mobile
-                        videoEl.addEventListener('canplay', onVideoReady); 
-                        videoEl.addEventListener('error', onVideoError);
-                        
-                        console.log(`[Mobile Video Debug] Video current readyState: ${videoEl.readyState} for ${videoEl.src}`);
-                        if (videoEl.readyState >= 3) { // HAVE_FUTURE_DATA or more
-                           console.log('[Mobile Video Debug] Video already in readyState >= 3. Triggering onVideoReady soon.');
-                           setTimeout(onVideoReady, 50); // Small delay for CSS to apply
-                        } else {
-                            console.log('[Mobile Video Debug] Video not yet ready. Waiting for events.');
-                        }
-                        // Attempt to play, as some browsers might need it for `loadeddata` with `autoplay`
-                        // videoEl.play().catch(err => console.warn("[Mobile Video Debug] videoEl.play() rejected on initial try:", err));
-
-                    } else {
-                         console.warn("[Mobile Video Debug] Mobile video and/or poster elements not found within the container as expected.");
-                    }
-                } else if (type === 'video' && isTouchDevice() && poster) {
-                    console.warn('[Mobile Video Debug] newMedia was NOT the expected container, but it is mobile video with poster. newMedia:', newMedia);
-                }
-                // --- End poster fade-out logic ---
 
                 if (isDesktop()) {
                     if (wrapper.classList.contains('desc-visible')) {
