@@ -1310,11 +1310,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!intersectionObserver) return;
         // Find all visible videos
         const visibleVideos = gridVideos.filter(video => video.__isIntersecting);
-        // Only play the first 2 visible, pause the rest
-        visibleVideos.slice(0, 2).forEach(video => video.play());
-        visibleVideos.slice(2).forEach(video => video.pause());
-        // Pause all non-visible
-        gridVideos.filter(video => !video.__isIntersecting).forEach(video => video.pause());
+        // Play ALL visible videos, pause all non-visible ones
+        gridVideos.forEach(video => {
+            if (video.__isIntersecting) {
+                // Attempt to play if intersecting
+                if (video.paused) {
+                    video.play().catch(error => {
+                        // Autoplay was prevented, typically on mobile if not muted or no user interaction yet.
+                        // Since videos are muted, this is less likely but good to be aware of.
+                        // console.warn("Video autoplay prevented for: ", video.src, error);
+                    });
+                }
+            } else {
+                // Pause if not intersecting
+                if (!video.paused) {
+                    video.pause();
+                }
+            }
+        });
     }
 
     function setupIntersectionObserver() {
