@@ -442,21 +442,7 @@
    ================================================== */
 
 @media (max-width: 768px) {
-  .taskbar-item:hover:not(.active) {
-    background: none !important;
-    box-shadow: none !important;
-  }
-  .startmenu .item-title,
-  .startmenu .menu-item {
-    letter-spacing: -0.2px;
-  }
-  .tray-icons {
-    gap: calc(var(--tray-spacing) - 2px);
-    margin-right: 6px;
-  }
-  .desktop-only {
-    display: none !important;
-  }
+  /* Removed the override that disabled .taskbar-item:hover:not(.active) background and box-shadow */
 }
 
 /* Media query to disable log off button on mobile */

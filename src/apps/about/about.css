@@ -11,6 +11,10 @@ html, body {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 body {
@@ -41,6 +45,10 @@ body {
   background-position: center bottom;
   background-size: cover;
   background-attachment: fixed;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .main {
@@ -55,6 +63,10 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .left-panel {
@@ -72,6 +84,10 @@ body {
   z-index: 1;
   border-right: none;
   flex-shrink: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 .left-panel::after {
   content: '';
@@ -98,6 +114,10 @@ body {
   overflow: hidden;
   margin-bottom: 0px;
   padding: 14px 0 0 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 .left-panel__card:first-child {
   padding-top: 20px;
@@ -332,4 +352,12 @@ body {
 
 .left-panel__card__row:hover .left-panel__card__text {
   text-decoration: underline;
+}
+
+/* Allow selection in links (if needed) */
+.left-panel__card__text.link, a {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }

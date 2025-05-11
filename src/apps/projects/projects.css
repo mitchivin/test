@@ -702,3 +702,18 @@ body.projects-window-maximized .lightbox-media-wrapper.video-media-active .desc-
   opacity: 1;
   transform: translateX(0);
 }
+
+body, .scroll-content, .feed-container, .post, .main-window-content {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Allow selection in links (if needed) */
+.post a, a {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}

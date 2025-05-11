@@ -265,6 +265,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Notify parent that lightbox is closed (disable back/forward/desc)
         sendMessageToParent({ type: 'lightbox-state', open: false });
+
+        // Restore grid video playback logic after closing lightbox
+        if (typeof isMaximized !== 'undefined' && isMaximized) {
+          gridVideos.forEach(video => video.play());
+        } else if (typeof setupIntersectionObserver === 'function') {
+          setupIntersectionObserver();
+        }
     }
 
     // --- Lightbox Description Overlay ---

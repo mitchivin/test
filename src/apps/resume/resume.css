@@ -67,3 +67,18 @@ body {
   margin-bottom: 0;
   display: block;
 }
+
+body, .app-root, .resume-image {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Allow selection in input and textarea fields (if any) */
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
