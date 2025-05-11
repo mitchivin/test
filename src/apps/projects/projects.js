@@ -138,48 +138,6 @@ function createLightboxCloseButton() {
 }
 
 // --- Preload project videos for instant lightbox display ---
-const PROJECT_VIDEO_SOURCES = [
-  'assets/apps/projects/video1.mp4',
-  'assets/apps/projects/video2.mp4',
-  'assets/apps/projects/video3.mp4',
-  'assets/apps/projects/videothumb1.mp4',
-  'assets/apps/projects/videothumb2.mp4',
-  'assets/apps/projects/videothumb3.mp4',
-];
-const preloadedVideos = {};
-
-function createHiddenPreloadContainer() {
-  let container = document.getElementById('preloaded-project-videos');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'preloaded-project-videos';
-    container.style.display = 'none';
-    document.body.appendChild(container);
-  }
-  return container;
-}
-
-function preloadProjectVideos() {
-  const container = createHiddenPreloadContainer();
-  PROJECT_VIDEO_SOURCES.forEach(src => {
-    if (!preloadedVideos[src]) {
-      const video = document.createElement('video');
-      video.src = src;
-      video.preload = 'auto';
-      video.muted = true;
-      video.setAttribute('playsinline', '');
-      video.load();
-      preloadedVideos[src] = video;
-      container.appendChild(video);
-    }
-  });
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', preloadProjectVideos);
-} else {
-  preloadProjectVideos();
-}
 
 function createLightboxMediaElement(type, src, posterSrc) {
     let mediaElement;
@@ -220,6 +178,38 @@ function createLightboxMediaElement(type, src, posterSrc) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Projects Preload Gating ---
+    const projectsRoot = document.querySelector('.scroll-content') || document.body;
+    let loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'projects-loading-overlay';
+    loadingOverlay.style.position = 'fixed';
+    loadingOverlay.style.top = 0;
+    loadingOverlay.style.left = 0;
+    loadingOverlay.style.width = '100vw';
+    loadingOverlay.style.height = '100vh';
+    loadingOverlay.style.background = 'rgba(20,20,20,0.92)';
+    loadingOverlay.style.zIndex = 99999;
+    loadingOverlay.style.display = 'flex';
+    loadingOverlay.style.alignItems = 'center';
+    loadingOverlay.style.justifyContent = 'center';
+    loadingOverlay.style.color = '#fff';
+    loadingOverlay.style.fontSize = '2rem';
+    loadingOverlay.innerHTML = 'Loading Projects…';
+    projectsRoot.appendChild(loadingOverlay);
+
+    const startProjects = (videoMetaMap) => {
+        if (loadingOverlay && loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay);
+        // ... existing code for grid rendering ...
+    };
+
+    if (window.projectsPreloadPromise) {
+        window.projectsPreloadPromise.then(startProjects).catch(() => {
+            loadingOverlay.innerHTML = 'Failed to load Projects assets.';
+        });
+    } else {
+        startProjects({});
+    }
+
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
