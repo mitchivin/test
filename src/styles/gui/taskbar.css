@@ -442,7 +442,9 @@
    ================================================== */
 
 @media (max-width: 768px) {
-  /* Removed the override that disabled .taskbar-item:hover:not(.active) background and box-shadow */
+  .desktop-only {
+    display: none !important;
+  }
 }
 
 /* Media query to disable log off button on mobile */
