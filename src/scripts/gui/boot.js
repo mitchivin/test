@@ -145,6 +145,13 @@ export function initBootSequence(eventBus, EVENTS) {
           loginSound.play();
         } catch {}
         sessionStorage.setItem("logged_in", "true");
+
+        // Publish USER_LOGGED_IN event
+        if (eventBus && EVENTS && EVENTS.USER_LOGGED_IN) {
+            eventBus.publish(EVENTS.USER_LOGGED_IN);
+            console.log('[BOOT.JS] Published USER_LOGGED_IN event.');
+        }
+
         setTimeout(() => {
           if (
             typeof showNetworkBalloon === "function" &&

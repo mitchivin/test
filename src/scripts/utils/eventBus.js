@@ -33,6 +33,13 @@ export const EVENTS = {
   WINDOW_FOCUSED: "window:focused", // Window has received focus
   WINDOW_MINIMIZED: "window:minimized", // Window has been minimized
   WINDOW_RESTORED: "window:restored", // Window has been restored from minimized
+  WINDOW_MAXIMIZED: "window:maximized",
+  WINDOW_UNMAXIMIZED: "window:unmaximized",
+  WINDOW_DRAG_START: "window:dragStart",
+  WINDOW_DRAG_END: "window:dragEnd",
+  PROGRAM_CLOSE: "program:close",
+  BRING_TO_FRONT: "bringToFront",
+  REFRESH_ACTIVE_WINDOW: "refreshActiveWindow",
 
   // UI Control Events
   TASKBAR_ITEM_CLICKED: "taskbar:item:clicked", // Taskbar button clicked
@@ -42,6 +49,8 @@ export const EVENTS = {
   STARTMENU_CLOSE_REQUEST: "startmenu:close-request", // Request to close start menu
   LOG_OFF_REQUESTED: "logoff:requested", // User requested log off
   SHUTDOWN_REQUESTED: "shutdown:requested", // User requested shutdown
+  USER_LOGGED_IN: "userLoggedIn", // User has successfully logged in
+  PROJECTS_IFRAME_READY_FOR_PRELOAD: "projectsIframeReadyForPreload" // My Projects iframe is loaded and ready for preload command
 };
 
 // ===== EventBus Class =====

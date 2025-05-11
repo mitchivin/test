@@ -1334,7 +1334,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Listen for maximize/unmaximize messages from parent
+    // The existing message listener for maximize/unmaximize and toolbar actions stays INSIDE DOMContentLoaded
+    // because it might interact with DOM elements selected/cached within this scope.
     window.addEventListener('message', (event) => {
         if (event.data && typeof event.data.type === 'string') {
             if (event.data.type === 'window:maximized') {
@@ -1342,7 +1343,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (event.data.type === 'window:unmaximized') {
                 setMaximizedState(false);
             }
-            // Keep existing toolbar-action handling
             if (event.data.type === 'toolbar-action') {
                 if (event.data.action === 'viewDescription') {
                     const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
@@ -1478,4 +1478,24 @@ document.addEventListener('DOMContentLoaded', () => {
             window.parent.postMessage({ type: 'iframe-interaction' }, '*');
         }
     });
+
+    // ===== NEW: Global listener specifically for preloadVideos command from parent shell =====
+    if (event.data === "preloadVideos") {
+        console.log('[PROJECTS.JS] Received "preloadVideos" message from parent (Global Listener).');
+        const feedContainer = document.querySelector('.feed-container'); // Query at time of message
+        if (feedContainer) {
+            const videosToPreload = feedContainer.querySelectorAll('video');
+            if (videosToPreload.length > 0) {
+                console.log(`[PROJECTS.JS] Found ${videosToPreload.length} videos in .feed-container to preload.`);
+                videosToPreload.forEach((video, index) => {
+                    console.log(`[PROJECTS.JS] Calling load() on video ${index + 1}: ${video.src}`);
+                    video.load();
+                });
+            } else {
+                console.log('[PROJECTS.JS] No videos found in .feed-container to preload at this time.');
+            }
+        } else {
+            console.log('[PROJECTS.JS] .feed-container not found at this time, cannot preload videos.');
+        }
+    }
 });
