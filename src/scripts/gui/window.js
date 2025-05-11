@@ -97,35 +97,21 @@ class WindowTemplates {
     iframeContainer.className = "iframe-container";
     iframeContainer.style.position = "relative";
     const iframe = document.createElement("iframe");
-
-    // MODIFICATION FOR DEFERRED LOADING OF PROJECTS APP
-    if (programConfig && programConfig.id === 'internet') { // 'internet' is the ID for My Projects
-        iframe.src = 'about:blank';
-        iframe.dataset.realSrc = appPath; // Store the actual path
-        console.log(`[WINDOW.JS] My Projects iframe (${windowId}) initially set to about:blank. Real src: ${appPath}`);
-    } else {
-        iframe.src = appPath;
-    }
-    iframe.title = `${windowId}-content`;
+    Object.assign(iframe, { src: appPath, title: `${windowId}-content` });
     iframe.name = windowId; // Set unique name for identification
-
     const attrs = {
       frameborder: "0",
       width: "100%",
       height: "100%",
       sandbox:
         "allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads",
-      allow: "autoplay", // Added for mobile video autoplay consistency
-      loading: "eager"     // Added as per suggestion
     };
     for (const [attr, value] of Object.entries(attrs))
       iframe.setAttribute(attr, value);
 
     // Send initial maximized/unmaximized state to iframe on load
-    // This onload will fire when src is set, either initially or when changed from about:blank
     iframe.onload = () => {
       if (iframe.contentWindow) {
-        console.log(`[WINDOW.JS] iframe ${iframe.name} (src: ${iframe.src}) loaded. Sending window state.`);
         const appWindow = iframe.closest('.app-window');
         if (appWindow) {
           if (appWindow.classList.contains('maximized')) {
@@ -168,7 +154,6 @@ export default class WindowManager {
     this.taskbarItems = {};
     this.windowCount = 0;
     this.programData = programData;
-    this.preloadedAppIframes = {}; // NEW: To store hidden iframes used for preloading
     this.baseZIndex =
       parseInt(
         getComputedStyle(document.documentElement).getPropertyValue(
@@ -474,10 +459,6 @@ export default class WindowManager {
     this.eventBus.subscribe(EVENTS.TASKBAR_ITEM_CLICKED, (data) =>
       this._handleTaskbarClick(data.windowId),
     );
-    // NEW: Subscribe to PRELOAD_APP_REQUESTED
-    this.eventBus.subscribe(EVENTS.PRELOAD_APP_REQUESTED, (data) => 
-      this._handlePreloadAppRequested(data)
-    );
   }
 
   _calculateWindowToTaskbarTransform(windowElement, taskbarItem) {
@@ -511,12 +492,12 @@ export default class WindowManager {
   openProgram(programName) {
     const program = this.programData[programName];
     if (!program || !program.id) {
-      console.warn(`[WINDOW.JS] Program configuration not found for: ${programName}`);
       return;
     }
 
     const existingWindow = document.getElementById(program.id);
     if (existingWindow) {
+      // If minimized, restore and bring to front
       if (
         existingWindow.windowState &&
         existingWindow.windowState.isMinimized
@@ -528,19 +509,14 @@ export default class WindowManager {
       return;
     }
 
-    // Reset isOpen flag if it was somehow stuck from a previous session without proper cleanup
-    // (Though session persistence of 'isOpen' isn't typical for this kind of app state)
     if (program.isOpen) {
-        // console.warn(`[WINDOW.JS] Program ${programName} was marked as open, resetting.`);
-        program.isOpen = false; 
+      program.isOpen = false;
     }
 
     const windowElement = this._createWindowElement(program);
-    if (!windowElement) {
-        console.error(`[WINDOW.JS] Failed to create window element for ${programName}.`);
-        return;
-    }
+    if (!windowElement) return;
 
+    // --- Force cascade for internet app ---
     if (programName === "internet") {
       windowElement.style.left = "";
       windowElement.style.top = "";
@@ -550,7 +526,9 @@ export default class WindowManager {
       }
     }
 
+    // Add opening animation class before appending
     windowElement.classList.add("window-opening");
+    // Remove the class after animation ends
     windowElement.addEventListener("animationend", function handler(e) {
       if (e.animationName === "windowOpenFadeSlide") {
         windowElement.classList.remove("window-opening");
@@ -562,13 +540,9 @@ export default class WindowManager {
     this._registerWindow(windowElement, program);
     this.positionWindow(windowElement);
 
-    // MODIFICATION: If it's "My Projects" and user is already logged in, load iframe content immediately.
-    if (program.id === 'internet' && sessionStorage.getItem("logged_in") === "true") {
-        console.log('[WINDOW.JS] My Projects opened post-login. Loading content immediately.');
-        this._loadProjectsIframeAndTriggerPreload(windowElement);
-    }
-
+    // If this is the media player, send a message to load demo videos
     if (programName === "mediaPlayer") {
+      // Find the iframe
       let iframe = windowElement.querySelector("iframe");
       if (iframe && iframe.contentWindow) {
         iframe.contentWindow.postMessage({ type: "load-demo-videos" }, "*");
@@ -599,18 +573,13 @@ export default class WindowManager {
   _createWindowElement(program) {
     const windowElement = document.createElement("div");
     windowElement.id = program.id;
-    // Ensure classList is always an array-like object for spread/iteration safety later
-    windowElement.className = "app-window"; 
+    windowElement.className = "app-window";
     windowElement.setAttribute(
       "data-program",
       program.id.replace("-window", ""),
     );
-    
-    // Default to empty string if program.title is undefined
-    const windowTitle = program.title || 'Untitled Window';
-    const windowIcon = program.icon || './assets/icons/default.png'; // Fallback icon
 
-    windowElement.innerHTML = this._getWindowBaseHTML({ ...program, title: windowTitle, icon: windowIcon });
+    windowElement.innerHTML = this._getWindowBaseHTML(program);
 
     // --- Mobile Maximized Logic ---
     if (isMobileDevice()) {
@@ -1231,12 +1200,6 @@ export default class WindowManager {
     if (programName && this.programData[programName]) {
       this.programData[programName].isOpen = false;
     }
-    // NEW: If closing My Projects window, ensure its hidden preload iframe is also removed
-    if (windowId === 'internet-window' && this.preloadedAppIframes['internet']) {
-        this.preloadedAppIframes['internet'].remove();
-        delete this.preloadedAppIframes['internet'];
-        console.log('[WINDOW.JS] Removed hidden preload iframe for My Projects due to window closure.');
-    }
     this.eventBus.publish(EVENTS.WINDOW_CLOSED, { windowId });
   }
 
@@ -1800,101 +1763,6 @@ export default class WindowManager {
   _bindControl(element, eventType, handler, useCapture = false) {
     if (element) {
       element.addEventListener(eventType, handler, useCapture);
-    }
-  }
-
-  // NEW PRIVATE METHOD
-  _handlePreloadAppRequested(data) {
-    if (!data || !data.programName) return;
-    const { programName } = data;
-
-    if (programName === 'internet') { // Currently, only handling preload for My Projects
-      if (this.preloadedAppIframes['internet']) {
-        console.log('[WINDOW.JS] Preload for \'internet\' app already initiated.');
-        return;
-      }
-
-      const programConfig = this.programData[programName];
-      if (!programConfig || !programConfig.appPath) {
-        console.error(`[WINDOW.JS] Cannot preload ${programName}: No program config or appPath.`);
-        return;
-      }
-
-      console.log(`[WINDOW.JS] Initiating hidden preload for ${programName} from ${programConfig.appPath}`);
-      const preloadIframe = document.createElement('iframe');
-      preloadIframe.src = programConfig.appPath; // Load real path directly
-      preloadIframe.id = `preload-iframe-${programName}`;
-      preloadIframe.style.display = 'none';
-      preloadIframe.style.position = 'absolute';
-      preloadIframe.style.width = '1px'; // Minimize resource usage for hidden iframe
-      preloadIframe.style.height = '1px';
-      preloadIframe.style.left = '-9999px';
-      preloadIframe.style.top = '-9999px';
-      preloadIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads');
-      preloadIframe.setAttribute('allow', 'autoplay');
-
-      preloadIframe.onload = () => {
-        console.log(`[WINDOW.JS] Hidden preload iframe for ${programName} (${preloadIframe.src}) loaded. Sending "preloadVideos" message.`);
-        if (preloadIframe.contentWindow) {
-          preloadIframe.contentWindow.postMessage("preloadVideos", "*");
-          // We don't publish PROJECTS_IFRAME_READY_FOR_PRELOAD here, as that's for the VISIBLE iframe.
-        }
-        this.preloadedAppIframes[programName] = preloadIframe; // Store it
-      };
-
-      preloadIframe.onerror = () => {
-        console.error(`[WINDOW.JS] Error loading hidden preload iframe for ${programName}: ${preloadIframe.src}`);
-        if (preloadIframe.parentNode) {
-            preloadIframe.remove();
-        }
-        delete this.preloadedAppIframes[programName];
-      };
-      
-      document.body.appendChild(preloadIframe); 
-    }
-  }
-
-  _loadProjectsIframeAndTriggerPreload(projectsWindowElement) {
-    if (!projectsWindowElement) {
-        console.error('[WINDOW.JS] _loadProjectsIframeAndTriggerPreload called with no window element.');
-        return;
-    }
-    const iframe = projectsWindowElement.querySelector('iframe');
-    if (iframe && iframe.dataset.realSrc && iframe.src === 'about:blank') {
-        console.log(`[WINDOW.JS] Loading real src for My Projects iframe: ${iframe.dataset.realSrc}`);
-        iframe.src = iframe.dataset.realSrc;
-
-        const handleProjectsLoadOnce = () => {
-            console.log(`[WINDOW.JS] My Projects (visible) iframe content loaded (src: ${iframe.src}). Sending "preloadVideos" message.`);
-            if (iframe.contentWindow) {
-                iframe.contentWindow.postMessage("preloadVideos", "*");
-            }
-            this.eventBus.publish(EVENTS.PROJECTS_IFRAME_READY_FOR_PRELOAD, { windowId: projectsWindowElement.id });
-            
-            iframe.removeEventListener('load', handleProjectsLoadOnce);
-            console.log('[WINDOW.JS] Removed one-time load listener for visible My Projects iframe.');
-
-            // NEW: Clean up the hidden preload iframe now that the visible one is ready
-            if (this.preloadedAppIframes['internet']) {
-                this.preloadedAppIframes['internet'].remove();
-                delete this.preloadedAppIframes['internet'];
-                console.log('[WINDOW.JS] Removed hidden preload iframe for My Projects.');
-            }
-        };
-        iframe.addEventListener('load', handleProjectsLoadOnce);
-    } else if (iframe && iframe.src !== 'about:blank') {
-        console.log('[WINDOW.JS] My Projects (visible) iframe already has a real src. Sending "preloadVideos" message (e.g. for re-focus).');
-        if (iframe.contentWindow) {
-            iframe.contentWindow.postMessage("preloadVideos", "*");
-        }
-        // If it's already loaded, also attempt cleanup of hidden iframe, just in case.
-        if (this.preloadedAppIframes['internet']) {
-            this.preloadedAppIframes['internet'].remove();
-            delete this.preloadedAppIframes['internet'];
-            console.log('[WINDOW.JS] Removed hidden preload iframe for My Projects (during re-focus/already loaded scenario).');
-        }
-    } else {
-        console.warn('[WINDOW.JS] _loadProjectsIframeAndTriggerPreload: My Projects (visible) iframe or realSrc not found, or src not about:blank as expected.', iframe);
     }
   }
 }

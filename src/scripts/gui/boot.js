@@ -144,6 +144,15 @@ export function initBootSequence(eventBus, EVENTS) {
           loginSound.currentTime = 0;
           loginSound.play();
         } catch {}
+        sessionStorage.setItem("logged_in", "true");
+        setTimeout(() => {
+          if (
+            typeof showNetworkBalloon === "function" &&
+            !document.getElementById("balloon-root")
+          ) {
+            showNetworkBalloon();
+          }
+        }, 3000);
       }, 2500);
     }, 150);
   }
@@ -220,20 +229,6 @@ export function initBootSequence(eventBus, EVENTS) {
     if (profileElement && !profileElement._loginHandlerAttached) {
       profileElement.addEventListener("click", function () {
         profileElement.classList.add("active");
-
-        // Publish USER_LOGGED_IN event immediately on profile click
-        if (eventBus && EVENTS && EVENTS.USER_LOGGED_IN) {
-            sessionStorage.setItem("logged_in", "true"); // Set logged_in state here too
-            eventBus.publish(EVENTS.USER_LOGGED_IN);
-            console.log('[BOOT.JS] User profile clicked. Published USER_LOGGED_IN event.');
-            
-            // NEW: Request preload for Projects app
-            if (EVENTS.PRELOAD_APP_REQUESTED) {
-                eventBus.publish(EVENTS.PRELOAD_APP_REQUESTED, { programName: 'internet' });
-                console.log('[BOOT.JS] Requested preload for \'internet\' app.');
-            }
-        }
-
         handleLoginSuccess();
       });
       profileElement._loginHandlerAttached = true;
