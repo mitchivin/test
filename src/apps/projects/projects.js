@@ -137,21 +137,74 @@ function createLightboxCloseButton() {
     return btn;
 }
 
+// --- Preload project videos for instant lightbox display ---
+const PROJECT_VIDEO_SOURCES = [
+  'assets/apps/projects/video1.mp4',
+  'assets/apps/projects/video2.mp4',
+  'assets/apps/projects/video3.mp4',
+  'assets/apps/projects/videothumb1.mp4',
+  'assets/apps/projects/videothumb2.mp4',
+  'assets/apps/projects/videothumb3.mp4',
+];
+const preloadedVideos = {};
+
+function createHiddenPreloadContainer() {
+  let container = document.getElementById('preloaded-project-videos');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'preloaded-project-videos';
+    container.style.display = 'none';
+    document.body.appendChild(container);
+  }
+  return container;
+}
+
+function preloadProjectVideos() {
+  const container = createHiddenPreloadContainer();
+  PROJECT_VIDEO_SOURCES.forEach(src => {
+    if (!preloadedVideos[src]) {
+      const video = document.createElement('video');
+      video.src = src;
+      video.preload = 'auto';
+      video.muted = true;
+      video.setAttribute('playsinline', '');
+      video.load();
+      preloadedVideos[src] = video;
+      container.appendChild(video);
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', preloadProjectVideos);
+} else {
+  preloadProjectVideos();
+}
+
 function createLightboxMediaElement(type, src) {
     let mediaElement;
     if (type === 'image') {
         mediaElement = createEl('img');
         mediaElement.alt = 'Project Lightbox Image'; // Generic alt text
-    } else if (type === 'video') {
-        mediaElement = createEl('video');
-        mediaElement.alt = 'Project Lightbox Video'; // Generic alt text
-        mediaElement.controls = true;
-        mediaElement.autoplay = true;
-        mediaElement.loop = true;
-        mediaElement.setAttribute('playsinline', '');
-    }
-    if (mediaElement) {
         mediaElement.src = src;
+    } else if (type === 'video') {
+        // Use preloaded video if available
+        if (preloadedVideos[src]) {
+            mediaElement = preloadedVideos[src];
+            mediaElement.controls = true;
+            mediaElement.autoplay = true;
+            mediaElement.loop = true;
+            mediaElement.muted = false;
+            mediaElement.style.display = '';
+        } else {
+            mediaElement = createEl('video');
+            mediaElement.alt = 'Project Lightbox Video'; // Generic alt text
+            mediaElement.controls = true;
+            mediaElement.autoplay = true;
+            mediaElement.loop = true;
+            mediaElement.setAttribute('playsinline', '');
+            mediaElement.src = src;
+        }
     }
     return mediaElement;
 }

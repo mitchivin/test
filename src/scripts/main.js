@@ -58,11 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "image5.webp",
     "image6.webp"
   ];
-  // Preload sounds
-  const soundAssets = [
-    "login.wav",
-    "logoff.wav"
-  ];
   const head = document.head || document.getElementsByTagName('head')[0];
   projectAssets.forEach(filename => {
     const ext = filename.split('.').pop();
@@ -76,13 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       link.as = 'fetch';
     }
-    head.appendChild(link);
-  });
-  soundAssets.forEach(filename => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.href = `assets/apps/sounds/${filename}`;
-    link.as = 'audio';
     head.appendChild(link);
   });
 

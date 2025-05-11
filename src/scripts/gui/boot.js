@@ -27,6 +27,12 @@ export function initBootSequence(eventBus, EVENTS) {
   const urlParams = new URLSearchParams(window.location.search);
   const forceBoot = urlParams.get("forceBoot") === "true";
 
+  // Preload login and logoff sounds for instant playback
+  const loginSound = new Audio("./assets/sounds/login.wav");
+  const logoffSound = new Audio("./assets/sounds/logoff.wav");
+  loginSound.load();
+  logoffSound.load();
+
   // Boot logic: force boot, skip for returning users, or run full sequence
   if (forceBoot) {
     const newUrl = window.location.pathname + window.location.hash;
@@ -135,7 +141,6 @@ export function initBootSequence(eventBus, EVENTS) {
         if (crtVignette) crtVignette.style.display = "block";
         document.dispatchEvent(new CustomEvent("reinitScanline"));
         try {
-          const loginSound = new Audio("./assets/sounds/login.wav");
           loginSound.currentTime = 0;
           loginSound.play();
         } catch {}
@@ -165,7 +170,7 @@ export function initBootSequence(eventBus, EVENTS) {
   if (!eventBus || !EVENTS) return;
   eventBus.subscribe(EVENTS.LOG_OFF_REQUESTED, () => {
     try {
-      const logoffSound = new Audio("./assets/sounds/logoff.wav");
+      logoffSound.currentTime = 0;
       logoffSound.play();
     } catch {}
     const balloon = document.getElementById("balloon-root");
