@@ -25,7 +25,7 @@
   --taskbar-gradient-end: #1e5aa0;
   --taskbar-text-shadow: 1px 1px 1px rgb(0 0 0 / 60%);
   --tray-spacing: 6px;
-  --icon-size-small: 16px;
+  --icon-size-small: 15px;
   --z-taskbar: 500;
 }
 
@@ -107,9 +107,9 @@
 /* Taskbar program buttons */
 .taskbar-item {
   height: var(--taskbar-item-height);
-  margin: 0 1px;
+  margin: 0.5px;
   padding: 0 8px;
-  border-radius: 5px; /* Adjusted from 4px to 5px */
+  border-radius: 4px; /* Adjusted from 4px to 5px */
   display: flex;
   align-items: center;
   justify-content: flex-start; /* Ensures consistent horizontal alignment */
@@ -121,11 +121,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
-  border: 1px solid rgb(0 0 0 / 15%); /* Slightly lighter border */
+  border: 1px solid rgba(0, 13, 88, 0.377); /* Slightly lighter border */
   background: linear-gradient(
     to bottom,
-    #3590e8 0%,
-    #1e5aa0 100%
+    #1b7fdd 0%,
+    #17569e 100%
   ); /* Slightly less bright gradient */
 
   /* Added smooth transition for width changes */
@@ -135,7 +135,7 @@
 
 /* Only use icon-only mode as an absolute last resort */
 .taskbar-item.icon-only {
-  padding: 0 6px;
+  padding: 0 8px;
   justify-content: center;
   min-width: 36px; /* Minimum width for icon-only mode */
 }
