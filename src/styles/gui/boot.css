@@ -556,6 +556,7 @@
 }
 
 .login-screen .text-wrap .name {
+  font-family: 'Tahoma', Arial, sans-serif;
   font-size: 24px;
   font-weight: 400;
   margin-bottom: 0.5px;
@@ -564,6 +565,7 @@
 
 /* Added styles for user title/subheading */
 .login-screen .text-wrap .user-title {
+  font-family: 'Tahoma', Arial, sans-serif;
   font-size: 13px;
   font-weight: bold;
   color: #000080;
