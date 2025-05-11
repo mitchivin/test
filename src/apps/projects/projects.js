@@ -160,12 +160,23 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
     } else if (type === 'video') {
         const videoElement = createEl('video');
         videoElement.alt = 'Project Lightbox Video';
-        videoElement.controls = true;
+        videoElement.controls = false;
         videoElement.autoplay = true;
         videoElement.loop = true;
         videoElement.setAttribute('playsinline', '');
+        videoElement.muted = true;
+        videoElement.setAttribute('muted', '');
         videoElement.src = src;
         if (posterUrl) videoElement.poster = posterUrl;
+        videoElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            videoElement.muted = !videoElement.muted;
+            if (videoElement.muted) {
+                videoElement.setAttribute('muted', '');
+            } else {
+                videoElement.removeAttribute('muted');
+            }
+        });
         return videoElement;
     }
     return null;
@@ -343,6 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
             titleOverlay.style.pointerEvents = 'auto';
         } else { // If it exists, toggle its visibility
             if (titleOverlay.classList.contains('show')) {
+                titleOverlay.style.animation = ''; // Clear inline animation before applying new class animation
+                titleOverlay.style.transition = '';
                 titleOverlay.classList.remove('show');
                 titleOverlay.classList.add('hide-anim');
                 titleOverlay.style.pointerEvents = 'none';
@@ -351,8 +364,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (this.parentNode) this.parentNode.removeChild(this);
                 }, { once: true });
             } else {
-                // This case (exists but not shown) implies it was hidden and removed by animationend.
-                // So, we re-create and show it.
                 titleOverlay.remove(); // Clean up any remnants
                 titleOverlay = createLightboxOverlay(titleText, 'top', linkType, linkUrl);
                 wrapper.appendChild(titleOverlay);
@@ -374,6 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
             descOverlay.style.pointerEvents = 'auto';
         } else { // If it exists, toggle its visibility
             if (descOverlay.classList.contains('show')) {
+                descOverlay.style.animation = ''; // Clear inline animation before applying new class animation
+                descOverlay.style.transition = '';
                 descOverlay.classList.remove('show');
                 descOverlay.classList.add('hide-anim');
                 descOverlay.style.pointerEvents = 'none';
@@ -530,6 +543,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeTitleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
             if (activeTitleOverlay) {
                 mobileTitleOverlayFadedOut = false; // Mark as needing to fade
+                activeTitleOverlay.style.animation = ''; // Clear inline style before adding .hide-anim
+                activeTitleOverlay.style.transition = '';
                 activeTitleOverlay.classList.remove('show'); 
                 activeTitleOverlay.classList.add('hide-anim');
                 activeTitleOverlay.style.pointerEvents = 'none';
@@ -555,6 +570,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeDescOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
             if (activeDescOverlay) {
                 mobileDescOverlayFadedOut = false; // Mark as needing to fade
+                activeDescOverlay.style.animation = ''; // Clear inline style before adding .hide-anim
+                activeDescOverlay.style.transition = '';
                 activeDescOverlay.classList.remove('show');
                 activeDescOverlay.classList.add('hide-anim');
                 activeDescOverlay.style.pointerEvents = 'none';
@@ -630,42 +647,49 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else { // Mobile logic for applying persistent state
                     // Always remove any existing mobile overlays before deciding to show new ones.
                     // This ensures we're working with a clean slate for the new item's overlays.
-                    wrapper.querySelectorAll('.lightbox-title-overlay, .lightbox-description-overlay').forEach(o => o.remove());
-
+                    // --- PATCH: Only re-create overlays if not already visible ---
+                    const existingTitleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
+                    const existingDescOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
                     if (userPrefersDescriptionVisible) {
-                        const createAndShowOverlays = () => {
-                            const postData = allPosts[currentLightboxIndex].dataset;
-                            const newTitle = postData.title || '';
-                            const newDesc = postData.mobileDescription || postData.description || '';
-                            const newLinkType = postData.linkType;
-                            const newLinkUrl = postData.linkUrl;
+                        if (!existingTitleOverlay || !existingDescOverlay) {
+                            // Remove any old overlays (not visible)
+                            wrapper.querySelectorAll('.lightbox-title-overlay, .lightbox-description-overlay').forEach(o => o.remove());
+                            const createAndShowOverlays = () => {
+                                const postData = allPosts[currentLightboxIndex].dataset;
+                                const newTitle = postData.title || '';
+                                const newDesc = postData.mobileDescription || postData.description || '';
+                                const newLinkType = postData.linkType;
+                                const newLinkUrl = postData.linkUrl;
 
-                            // Create and show title overlay for the new item
-                            const titleOverlay = createLightboxOverlay(newTitle, 'top', newLinkType, newLinkUrl);
-                            wrapper.appendChild(titleOverlay);
-                            void titleOverlay.offsetWidth; // Reflow
-                            titleOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
-                            titleOverlay.classList.add('show');
-                            titleOverlay.style.pointerEvents = 'auto';
+                                // Create and show title overlay for the new item
+                                const titleOverlay = createLightboxOverlay(newTitle, 'top', newLinkType, newLinkUrl);
+                                wrapper.appendChild(titleOverlay);
+                                void titleOverlay.offsetWidth; // Reflow
+                                titleOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
+                                titleOverlay.classList.add('show');
+                                titleOverlay.style.pointerEvents = 'auto';
 
-                            // Create and show description overlay for the new item
-                            const descOverlay = createLightboxOverlay(newDesc, 'bottom');
-                            wrapper.appendChild(descOverlay);
-                            void descOverlay.offsetWidth; // Reflow
-                            descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
-                            descOverlay.classList.add('show');
-                            descOverlay.style.pointerEvents = 'auto';
-                        };
-
-                        if (skipFadeIn) { // skipFadeIn is true for swipe navigation
-                            setTimeout(createAndShowOverlays, 600); // Increased delay from 500ms to 600ms
-                        } else {
-                            createAndShowOverlays(); // Show immediately for other cases (e.g., initial open)
+                                // Create and show description overlay for the new item
+                                const descOverlay = createLightboxOverlay(newDesc, 'bottom');
+                                wrapper.appendChild(descOverlay);
+                                void descOverlay.offsetWidth; // Reflow
+                                descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
+                                descOverlay.classList.add('show');
+                                descOverlay.style.pointerEvents = 'auto';
+                            };
+                            if (skipFadeIn) {
+                                setTimeout(createAndShowOverlays, 600);
+                            } else {
+                                createAndShowOverlays();
+                            }
                         }
+                        // If overlays are already visible, do nothing (prevents flash)
+                    } else {
+                        // If userPrefersDescriptionVisible is false, old overlays were removed above,
+                        // and no new ones are created. The initial hide animations for the *outgoing*
+                        // item's overlays are handled at the start of openLightboxByIndex.
+                        wrapper.querySelectorAll('.lightbox-title-overlay, .lightbox-description-overlay').forEach(o => o.remove());
                     }
-                    // If userPrefersDescriptionVisible is false, old overlays were removed above,
-                    // and no new ones are created. The initial hide animations for the *outgoing*
-                    // item's overlays are handled at the start of openLightboxByIndex.
                 }
                 
                 // --- Update non-animated details in #lightbox-details (title, subheading) ---
@@ -907,7 +931,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Touch End: Determine action (swipe next/prev, swipe close, or snap back)
      */
-    function handleTouchEnd() {
+    function handleTouchEnd(e) {
         if (!dragging) return;
         dragging = false;
         if (dragRAF) cancelAnimationFrame(dragRAF); // Cancel any pending animation frame
@@ -916,6 +940,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const dy = dragCurrentY - dragStartY;
         const media = lightboxContent.querySelector('img, video');
 
+        if (!dragHasMoved) { // This is a TAP
+            // For a tap, we don't want to clear the style.animation = 'none' set by handleTouchStart
+            // if the overlay is meant to remain static. The function initiating a new animation
+            // will be responsible for clearing it.
+
+            // Handle the tap itself based on the target
+            if (e && e.target && media && e.target === media) {
+                // Tap was on video, let video's click handler (which has stopPropagation) do its thing.
+                return;
+            }
+            // Tap was on lightbox content, but not the video.
+            // Keep stopPropagation to prevent potential backdrop click issues.
+            if (e) {
+                e.stopPropagation();
+            }
+            return;
+        }
+
+        // --- Swiping Logic (if dragHasMoved is true) ---
         let triggerSwipeUp = false;
         let triggerSwipeLeft = false;
         let triggerSwipeRight = false;
@@ -1094,6 +1137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lightboxContent) {
         lightboxContent.addEventListener('touchstart', handleTouchStart, { passive: true });
         lightboxContent.addEventListener('touchmove', handleTouchMove, { passive: true });
+        // Pass event to handleTouchEnd so we can check event.target
         lightboxContent.addEventListener('touchend', handleTouchEnd, { passive: true });
     }
 
@@ -1399,80 +1443,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Expose closeLightbox globally for message handler
     window.closeLightbox = closeLightbox;
-
-    // --- Tap to toggle overlays on mobile ---
-    if (lightboxContent) {
-        let isTapToToggleThrottled = false; // Added for throttling
-        let tapToToggleTimeout = null;      // Added for throttling
-
-        lightboxContent.addEventListener('touchend', function(e) {
-            if (isTouchDevice()) return;
-
-            // Only trigger if not a swipe (movement < 10px) and not currently throttled
-            const dx = Math.abs(dragCurrentX - dragStartX);
-            const dy = Math.abs(dragCurrentY - dragStartY);
-
-            if (dx < 10 && dy < 10 && !dragHasMoved) {
-                if (isTapToToggleThrottled) { // Check if throttled
-                    e.preventDefault(); // Prevent any default action if throttled
-                    return;
-                }
-                isTapToToggleThrottled = true; // Set throttle flag
-
-                // It's a tap
-                const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
-                if (!wrapper) {
-                    isTapToToggleThrottled = false; // Reset if no wrapper
-                    return;
-                }
-                
-                const video = lightboxContent.querySelector('video');
-                let shouldToggleOverlays = false;
-
-                if (video) {
-                    // Only apply special logic for videos
-                    const rect = video.getBoundingClientRect();
-                    const touchY = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : null;
-                    if (touchY !== null) {
-                        const yPercent = ((touchY - rect.top) / rect.height) * 100;
-                        if (yPercent < 30 || yPercent > 70) {
-                            e.preventDefault(); // Prevent video controls from showing when toggling overlays
-                            shouldToggleOverlays = true;
-                        }
-                        // If in middle 40%, do nothing (let event bubble to video controls)
-                    }
-                } else {
-                    // Not a video (image): always toggle overlays on tap
-                    shouldToggleOverlays = true;
-                }
-
-                if (shouldToggleOverlays) {
-                    const titleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
-                    const descOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
-                    if (titleOverlay || descOverlay) {
-                        // Hide overlays
-                        toggleMobileOverlays('', '', wrapper); 
-                    } else {
-                        // Show overlays for current post
-                        if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
-                            const postData = allPosts[currentLightboxIndex].dataset;
-                            const title = postData.title || '';
-                            const desc = postData.mobileDescription || postData.description || '';
-                            const linkType = postData.linkType;
-                            const linkUrl = postData.linkUrl;
-                            toggleMobileOverlays(title, desc, wrapper, linkType, linkUrl);
-                        }
-                    }
-                }
-                
-                // Set timeout to reset throttle flag
-                clearTimeout(tapToToggleTimeout);
-                tapToToggleTimeout = setTimeout(() => {
-                    isTapToToggleThrottled = false;
-                }, 500);
-            }
-        });
-    }
 
     document.addEventListener('click', (event) => {
         // Optionally: filter out clicks inside your own popouts/menus if needed
