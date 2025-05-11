@@ -165,6 +165,7 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         videoElement.loop = true;
         videoElement.setAttribute('playsinline', '');
         videoElement.src = src;
+        if (posterUrl) videoElement.poster = posterUrl;
         return videoElement;
     }
     return null;
@@ -501,6 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const type = post.dataset.type;
         const src = post.dataset.src;
+        const poster = post.dataset.poster || null;
         const title = post.dataset.title;
         const desktopDescription = post.dataset.description;
         const mobileDescription = post.dataset.mobileDescription;
@@ -590,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Pass null for posterUrl as poster logic is removed
-                let newMedia = createLightboxMediaElement(type, src, null);
+                let newMedia = createLightboxMediaElement(type, src, poster);
 
                 if (newMedia) {
                     if (!(skipFadeIn && !isDesktop())) { // Condition for initial mobile open
