@@ -875,6 +875,7 @@ body {
   display: flex;
   flex: 1 1 auto;
   margin-left: 15px;
+  border-radius: 18px;
 }
 
 .lightbox-media-wrapper.video-media-active .desc-card-anim-wrapper {
