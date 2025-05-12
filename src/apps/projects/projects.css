@@ -787,14 +787,13 @@ body {
 
 .lightbox-media-wrapper img,
 .lightbox-media-wrapper video {
-  max-height: 100%; /* Max height of its allocated space in the flex container */
-  min-width: 0; /* Necessary for flex items */
-  min-height: 0; /* Necessary for flex items */
-  flex: 0 0 auto; /* CHANGED: No grow, NO SHRINK, basis is auto */
-  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
-  margin-right: 0; /* Was already 0, ensure it stays for spacing if desc card is next */
+  max-height: 100%; 
+  min-width: 0; 
+  min-height: 0; 
+  flex: 0 0 auto; 
+  margin-right: 0; 
   display: block; 
-  object-fit: contain; /* Crucial for aspect ratio */
+  object-fit: contain; 
   z-index: 2;
 }
 
