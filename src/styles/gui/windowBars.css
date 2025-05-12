@@ -151,6 +151,11 @@
   box-shadow: inset 2px 2px 5px #b9b6aa, inset -1.5px -1.5px 3px #fff;
   background: #e4e3dc;
 }
+.toolbar-button.touch-active {
+  border: 1.5px solid #888;
+  box-shadow: inset 2px 2px 5px #b9b6aa, inset -1.5px -1.5px 3px #fff;
+  background: #e4e3dc;
+}
 .toolbar-button > img + span {
   margin-left: 5px;
 }

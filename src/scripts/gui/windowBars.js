@@ -498,3 +498,23 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
 
   return toolbarWrapper;
 }
+
+// Add this at the end of the file to ensure all toolbar buttons get the correct pressed-in effect on both desktop and mobile
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.toolbar-button').forEach(btn => {
+      btn.addEventListener('pointerdown', function() {
+        btn.classList.add('touch-active');
+      });
+      btn.addEventListener('pointerup', function() {
+        btn.classList.remove('touch-active');
+      });
+      btn.addEventListener('pointerleave', function() {
+        btn.classList.remove('touch-active');
+      });
+      btn.addEventListener('pointercancel', function() {
+        btn.classList.remove('touch-active');
+      });
+    });
+  });
+}
