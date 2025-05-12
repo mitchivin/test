@@ -13,6 +13,12 @@
 // Global state for persistent description visibility
 let userPrefersDescriptionVisible = false;
 
+// --- Global mute preference for lightbox videos ---
+let userPrefersMuted = true; // Default: videos start muted
+if (window.sessionStorage && sessionStorage.getItem('projectsUserPrefersMuted') !== null) {
+    userPrefersMuted = sessionStorage.getItem('projectsUserPrefersMuted') === 'true';
+}
+
 // === Constants ===
 const MIN_SWIPE_DISTANCE = 44; // Minimum px for swipe to trigger navigation
 
@@ -169,8 +175,12 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         videoElement.autoplay = true;
         videoElement.loop = true;
         videoElement.setAttribute('playsinline', '');
-        videoElement.muted = true;
-        videoElement.setAttribute('muted', '');
+        videoElement.muted = userPrefersMuted;
+        if (userPrefersMuted) {
+            videoElement.setAttribute('muted', '');
+        } else {
+            videoElement.removeAttribute('muted');
+        }
         videoElement.src = src;
         if (posterUrl) videoElement.poster = posterUrl;
         
@@ -210,20 +220,33 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
             } else {
                 videoElement.removeAttribute('muted');
             }
+            // Update global preference and persist
+            userPrefersMuted = videoElement.muted;
+            if (window.sessionStorage) {
+                sessionStorage.setItem('projectsUserPrefersMuted', userPrefersMuted);
+            }
             showMuteIfPlayed();
         });
         // --- Desktop hover: show mute/unmute overlay on hover ---
         if (!isTouchDevice()) {
+            let fadeOutTimeout = null;
             wrapper.addEventListener('mouseenter', () => {
+                if (fadeOutTimeout) {
+                    clearTimeout(fadeOutTimeout);
+                    fadeOutTimeout = null;
+                }
                 showMuteIconOverlay(videoElement, videoElement.muted);
             });
             wrapper.addEventListener('mouseleave', () => {
-                // Remove overlay immediately (fade out if present)
-                const overlay = wrapper.querySelector('.mute-icon-overlay');
-                if (overlay) {
-                    overlay.classList.remove('show');
-                    setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 200);
-                }
+                if (fadeOutTimeout) clearTimeout(fadeOutTimeout);
+                fadeOutTimeout = setTimeout(() => {
+                    // Remove overlay after 2s delay, then fade out
+                    const overlay = wrapper.querySelector('.mute-icon-overlay');
+                    if (overlay) {
+                        overlay.classList.remove('show');
+                        setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 200);
+                    }
+                }, 2000); // 2 seconds delay before fade out
             });
             // Also update overlay if mute state changes while hovered
             videoElement.addEventListener('volumechange', () => {
@@ -364,6 +387,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (position === 'top') {
             const titleSpan = createEl('span', 'lightbox-overlay-title-text', text || '');
             overlay.appendChild(titleSpan);
+        } else { // For bottom overlay, show subheading and icon (if present)
+            // Create a flex row: subheading left, icon right (if present)
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.width = '100%';
+
+            const subheadingSpan = document.createElement('span');
+            subheadingSpan.textContent = text || '';
+            subheadingSpan.style.flexGrow = '1';
+            row.appendChild(subheadingSpan);
 
             if (linkType && linkUrl) {
                 const iconLink = createEl('a', 'mobile-title-link-icon');
@@ -375,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lowerLinkType = linkType.toLowerCase();
                 iconImg.src = `../../../assets/gui/start-menu/${lowerLinkType}.webp`;
                 iconImg.alt = `Open project on ${linkType}`;
-                
                 iconLink.appendChild(iconImg);
 
                 // Prevent tap/click on the icon link from toggling/hiding the overlay
@@ -386,10 +419,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     e.stopPropagation();
                 });
 
-                overlay.appendChild(iconLink);
+                row.appendChild(iconLink);
             }
-        } else { // For bottom overlay, it's just text
-            overlay.textContent = text || '';
+            overlay.appendChild(row);
         }
         return overlay;
     }
@@ -488,14 +520,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!animWrapper) {
                     // Fetch current post data if we need to create everything new
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Highlight Reel' : '';
+                    const dynamicSubheading = getSubheadingName(currentPostData.title);
                     animWrapper = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description);
                     wrapper.appendChild(animWrapper);
                     card = animWrapper.querySelector('.lightbox-desc-card'); 
                 } else if (!card && animWrapper) { 
                     while (animWrapper.firstChild) animWrapper.removeChild(animWrapper.firstChild);
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Highlight Reel' : '';
+                    const dynamicSubheading = getSubheadingName(currentPostData.title);
                     const newCardElement = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description).querySelector('.lightbox-desc-card');
                     animWrapper.appendChild(newCardElement);
                     card = newCardElement;
@@ -506,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // If card exists, but children are missing, or text needs update (e.g. if desc could change dynamically)
                     // This part might need enhancement if card content can change without full recreation
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Highlight Reel' : '';
+                    const dynamicSubheading = getSubheadingName(currentPostData.title);
                     clearChildren(card); // Clear old single text node if any
                     if (currentPostData.title) card.appendChild(createEl('div', 'card-title', currentPostData.title));
                     if (dynamicSubheading) card.appendChild(createEl('div', 'card-subheading', dynamicSubheading));
@@ -561,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const linkUrl = post.dataset.linkUrl;
         const software = post.dataset.software;
 
-        const dynamicSubheading = type === 'image' ? 'Social Graphics' : type === 'video' ? 'Highlight Reel' : '';
+        const dynamicSubheading = getSubheadingName(title);
 
         // Always use a persistent wrapper for lightbox media and description
         const wrapper = getOrCreateWrapper();
@@ -712,7 +744,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             const createAndShowOverlays = () => {
                                 const postData = allPosts[currentLightboxIndex].dataset;
                                 const newTitle = postData.title || '';
-                                const newDesc = postData.mobileDescription || postData.description || '';
+                                // Use the same subheading logic as desktop
+                                const newSubheading = getSubheadingName(newTitle);
                                 const newLinkType = postData.linkType;
                                 const newLinkUrl = postData.linkUrl;
 
@@ -724,8 +757,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 titleOverlay.classList.add('show');
                                 titleOverlay.style.pointerEvents = 'auto';
 
-                                // Create and show description overlay for the new item
-                                const descOverlay = createLightboxOverlay(newDesc, 'bottom');
+                                // Create and show description overlay for the new item (now subheading)
+                                const descOverlay = createLightboxOverlay(newSubheading, 'bottom', newLinkType, newLinkUrl);
                                 wrapper.appendChild(descOverlay);
                                 void descOverlay.offsetWidth; // Reflow
                                 descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
@@ -1485,25 +1518,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
                     let description = '';
                     if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
-                        // If on mobile, prefer mobileDescription, fallback to desktopDescription
-                        // If on desktop, always use desktopDescription for the animated card
-                        const currentPostType = allPosts[currentLightboxIndex].dataset.type;
+                        // If on mobile, show subheading in the bottom overlay
                         const currentPostData = allPosts[currentLightboxIndex].dataset;
-                        
                         if (isTouchDevice()) {
-                            // For mobile, we need to toggle both title and description overlays
                             const title = currentPostData.title || '';
-                            let descText = '';
-                            if (currentPostData.mobileDescription) {
-                                descText = currentPostData.mobileDescription;
-                            } else {
-                                descText = currentPostData.description;
-                            }
-                            const linkTypeFromData = currentPostData.linkType; // Get linkType
-                            const linkUrlFromData = currentPostData.linkUrl;   // Get linkUrl
-                            
-                            // Pass the wrapper to the generalized toggle function
-                            toggleMobileOverlays(title, descText, wrapper, linkTypeFromData, linkUrlFromData); // Pass linkType, linkUrl
+                            // Use the same subheading logic as desktop
+                            const subheading = getSubheadingName(title);
+                            const linkTypeFromData = currentPostData.linkType;
+                            const linkUrlFromData = currentPostData.linkUrl;
+                            // Pass the wrapper to the generalized toggle function, using subheading for the bottom overlay
+                            toggleMobileOverlays(title, subheading, wrapper, linkTypeFromData, linkUrlFromData);
                         } else {
                             // Desktop: only toggle the description card via the existing logic
                             let descForDesktopCard = currentPostData.description || '';
@@ -1541,4 +1565,21 @@ document.addEventListener('DOMContentLoaded', () => {
             window.parent.postMessage({ type: 'iframe-interaction' }, '*');
         }
     });
+
+    // Helper to extract person/team name for subheading
+    function getSubheadingName(title) {
+        // Add custom mappings for all projects
+        if (/mavs win/i.test(title)) return "Dallas Mavericks";
+        if (/all blacks/i.test(title)) return "New Zealand All Blacks";
+        if (/sua'?ali'i/i.test(title)) return "Joseph Sua'ali'i";
+        if (/mahomes/i.test(title)) return "Patrick Mahomes";
+        if (/flashback/i.test(title)) return "Dwayne Wade";
+        if (/minnesota/i.test(title)) return "Edwards & Justin";
+        if (/saquon/i.test(title)) return "Saquon Barkley";
+        if (/blues/i.test(title)) return "Auckland Blues";
+        if (/bryant/i.test(title)) return "Kobe Bryant";
+        if (/barkley big head/i.test(title)) return "Saquon Barkley";
+        // Fallback: use first 2 words
+        return title.split(/\s+/).slice(0,2).join(' ');
+    }
 });
