@@ -151,6 +151,36 @@ function createLightboxCloseButton() {
     return btn;
 }
 
+function createSpinnerOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'video-spinner-overlay';
+    overlay.innerHTML = '<div class="video-spinner"></div>';
+    return overlay;
+}
+
+function createMuteIconOverlay(isMuted) {
+    const overlay = document.createElement('div');
+    overlay.className = 'mute-icon-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = `<img src="../../../assets/apps/projects/${isMuted ? 'voldown' : 'volup'}.webp" alt="${isMuted ? 'Muted' : 'Unmuted'}" draggable="false" style="width:100%;height:100%;object-fit:contain;" />`;
+    return overlay;
+}
+
+function showMuteIconOverlay(videoElement, isMuted) {
+    // Remove any existing overlay
+    const existing = videoElement.parentElement.querySelector('.mute-icon-overlay');
+    if (existing) existing.remove();
+    const overlay = createMuteIconOverlay(isMuted);
+    videoElement.parentElement.appendChild(overlay);
+    // Force reflow for animation
+    void overlay.offsetWidth;
+    overlay.classList.add('show');
+    setTimeout(() => {
+        overlay.classList.remove('show');
+        setTimeout(() => overlay.remove(), 400);
+    }, 900);
+}
+
 function createLightboxMediaElement(type, src, posterUrl = null) {
     if (type === 'image') {
         const imgElement = createEl('img');
@@ -158,13 +188,6 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         imgElement.src = src;
         return imgElement;
     } else if (type === 'video') {
-        // Create a wrapper to hold video and indicator
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'relative';
-        wrapper.style.display = 'inline-block';
-        wrapper.style.width = '100%';
-        wrapper.style.height = '100%';
-
         const videoElement = createEl('video');
         videoElement.alt = 'Project Lightbox Video';
         videoElement.controls = false;
@@ -175,46 +198,30 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         videoElement.setAttribute('muted', '');
         videoElement.src = src;
         if (posterUrl) videoElement.poster = posterUrl;
-        videoElement.style.width = '100%';
-        videoElement.style.height = '100%';
-        videoElement.style.display = 'block';
+        // Wrap in a container for overlay positioning
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        wrapper.style.display = 'inline-block';
         wrapper.appendChild(videoElement);
-
-        // Mute indicator overlay
-        const indicator = document.createElement('div');
-        indicator.className = 'mute-indicator';
-        indicator.style.position = 'absolute';
-        indicator.style.top = '50%';
-        indicator.style.left = '50%';
-        indicator.style.transform = 'translate(-50%, -50%)';
-        indicator.style.fontSize = '7.8rem';
-        indicator.style.zIndex = '10';
-        indicator.style.opacity = '0';
-        indicator.style.transition = 'opacity 0.35s';
-        indicator.style.pointerEvents = 'none';
-        indicator.style.background = 'none'; // Remove background so only the icon is visible
-        indicator.style.boxShadow = 'none'; // Remove shadow so only the icon is visible
-        indicator.style.borderRadius = '50%';
-        indicator.style.padding = '7px';
-        indicator.style.display = 'flex';
-        indicator.style.alignItems = 'center';
-        indicator.style.justifyContent = 'center';
-        // Muted: Speaker with X, Unmuted: Speaker with 3 waves
-        const mutedSVG = '<svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
-        const unmutedSVG = '<svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15 8.5C16.657 10.157 16.657 13.843 15 15.5"/><path d="M17.5 6C20.537 9.037 20.537 14.963 17.5 18"/><path d="M20 3C24 7 24 17 20 21"/></svg>';
-        indicator.innerHTML = videoElement.muted ? mutedSVG : unmutedSVG;
-        wrapper.appendChild(indicator);
-
-        let indicatorTimeout = null;
-        function showIndicator(isMuted) {
-          indicator.innerHTML = isMuted ? mutedSVG : unmutedSVG;
-          indicator.style.opacity = '1';
-          if (indicatorTimeout) clearTimeout(indicatorTimeout);
-          indicatorTimeout = setTimeout(() => {
-            indicator.style.opacity = '0';
-          }, 1000);
+        // Add spinner overlay while loading
+        const spinner = createSpinnerOverlay();
+        wrapper.appendChild(spinner);
+        let hasPlayed = false;
+        function hideSpinner() {
+            if (spinner.parentNode) spinner.parentNode.removeChild(spinner);
         }
-
+        function showMuteIfPlayed() {
+            if (hasPlayed) showMuteIconOverlay(videoElement, videoElement.muted);
+        }
+        videoElement.addEventListener('playing', () => {
+            hasPlayed = true;
+            hideSpinner();
+            showMuteIconOverlay(videoElement, videoElement.muted);
+        });
+        videoElement.addEventListener('canplay', () => {
+            // If autoplay fails, hide spinner after a short delay
+            setTimeout(() => { if (!hasPlayed) hideSpinner(); }, 1200);
+        });
         videoElement.addEventListener('click', (e) => {
             e.stopPropagation();
             videoElement.muted = !videoElement.muted;
@@ -223,10 +230,8 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
             } else {
                 videoElement.removeAttribute('muted');
             }
-            showIndicator(videoElement.muted);
+            showMuteIfPlayed();
         });
-        // Show indicator on initial load (muted)
-        setTimeout(() => showIndicator(videoElement.muted), 300);
         return wrapper;
     }
     return null;
