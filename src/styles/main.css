@@ -16,6 +16,7 @@
    ================================================== */
 
 /* ===== Imports ===== */
+@import url("fonts.css");
 @import url("reset.css");
 @import url("gui/desktop.css");
 @import url("gui/taskbar.css");
@@ -261,21 +262,4 @@ iframe a {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@font-face {
-  font-family: 'Tahoma';
-  src: url('/assets/fonts/tahoma.woff2') format('woff2'),
-       url('/assets/fonts/tahoma.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Tahoma';
-  src: url('/assets/fonts/tahomabd.woff2') format('woff2'),
-       url('/assets/fonts/tahomabd.woff') format('woff');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
 }

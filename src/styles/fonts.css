@@ -1,0 +1,17 @@
+@font-face {
+  font-family: 'Tahoma';
+  src: url('../../assets/fonts/tahoma.woff2') format('woff2'),
+       url('../../assets/fonts/tahoma.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tahoma';
+  src: url('../../assets/fonts/tahomabd.woff2') format('woff2'),
+       url('../../assets/fonts/tahomabd.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+} 
