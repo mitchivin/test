@@ -15,7 +15,7 @@ let userPrefersDescriptionVisible = false;
 
 // --- Global mute preference for lightbox videos ---
 let userPrefersMuted = true; // Default: videos start muted
-if (window.sessionStorage && sessionStorage.getItem('projectsUserPrefersMuted') !== null) {
+if (isDesktop() && window.sessionStorage && sessionStorage.getItem('projectsUserPrefersMuted') !== null) {
     userPrefersMuted = sessionStorage.getItem('projectsUserPrefersMuted') === 'true';
 }
 
@@ -175,11 +175,17 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         videoElement.autoplay = true;
         videoElement.loop = true;
         videoElement.setAttribute('playsinline', '');
-        videoElement.muted = userPrefersMuted;
-        if (userPrefersMuted) {
-            videoElement.setAttribute('muted', '');
+        // --- Only remember mute state on desktop. On mobile, always start muted. ---
+        if (isDesktop()) {
+            videoElement.muted = userPrefersMuted;
+            if (userPrefersMuted) {
+                videoElement.setAttribute('muted', '');
+            } else {
+                videoElement.removeAttribute('muted');
+            }
         } else {
-            videoElement.removeAttribute('muted');
+            videoElement.muted = true;
+            videoElement.setAttribute('muted', '');
         }
         videoElement.src = src;
         if (posterUrl) videoElement.poster = posterUrl;
@@ -220,10 +226,12 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
             } else {
                 videoElement.removeAttribute('muted');
             }
-            // Update global preference and persist
-            userPrefersMuted = videoElement.muted;
-            if (window.sessionStorage) {
-                sessionStorage.setItem('projectsUserPrefersMuted', userPrefersMuted);
+            // Update global preference and persist ONLY on desktop
+            if (isDesktop()) {
+                userPrefersMuted = videoElement.muted;
+                if (window.sessionStorage) {
+                    sessionStorage.setItem('projectsUserPrefersMuted', userPrefersMuted);
+                }
             }
             showMuteIfPlayed();
         });
