@@ -156,27 +156,26 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         videoElement.setAttribute('muted', '');
         videoElement.src = src;
         if (posterUrl) videoElement.poster = posterUrl;
-        // Wrap in a container for overlay positioning
+        
         const wrapper = document.createElement('div');
         wrapper.style.position = 'relative'; // Keep for overlay positioning
 
-        // Apply styles to make the wrapper behave as a constrained flex item
-        wrapper.style.display = 'block'; // Use 'block' for the wrapper
-        wrapper.style.flexGrow = '0';    // Equivalent to flex: 0 0 auto
-        wrapper.style.flexShrink = '0';  // Equivalent to flex: 0 0 auto
-        // flex-basis: 'auto' is implied
-
-        // Constrain the wrapper's height to 100% of its allocation in .lightbox-media-wrapper
-        wrapper.style.maxHeight = '100%';
-
-        // Video element should fill this constrained wrapper.
-        // object-fit: contain (from CSS) will handle aspect ratio.
+        // RESTORED: Styles to make the wrapper behave as a constrained flex item for desktop
+        wrapper.style.display = 'block'; // Or 'flex' could also work for internal alignment
+        wrapper.style.flexGrow = '0';    
+        wrapper.style.flexShrink = '0';  
+        wrapper.style.maxHeight = '100%'; // Crucial: constrain wrapper height to available space
+        // wrapper.style.width = 'auto'; // Let flexbox or content determine width initially
+        // wrapper.style.height = 'auto'; // Let flexbox or content determine height initially
+        
+        // RESTORED: Video element should fill this constrained wrapper.
+        // object-fit: contain (from CSS) will handle aspect ratio within these bounds.
         videoElement.style.width = '100%';
         videoElement.style.height = '100%';
         // Note: .lightbox-media-wrapper video CSS provides display:block and object-fit:contain
-
+        
         wrapper.appendChild(videoElement);
-        // Add spinner overlay while loading
+        
         const spinner = createSpinnerOverlay();
         wrapper.appendChild(spinner);
         let hasPlayed = false;
