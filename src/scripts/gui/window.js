@@ -298,6 +298,29 @@ export default class WindowManager {
             }
         }
 
+        if (event.data && event.data.type === 'set-external-link-enabled') {
+            const projectsWindow = this.windows && this.windows['internet-window'];
+            let externalLinkBtn;
+            if (projectsWindow) {
+                externalLinkBtn = projectsWindow.querySelector('.toolbar-button.viewExternalLink');
+            } else {
+                externalLinkBtn = document.querySelector('.toolbar-button.viewExternalLink');
+            }
+            if (externalLinkBtn) {
+                if (event.data.enabled) {
+                    externalLinkBtn.classList.remove('disabled');
+                    externalLinkBtn.style.display = '';
+                    if (event.data.url) {
+                        externalLinkBtn.dataset.urlToOpen = event.data.url;
+                    }
+                } else {
+                    externalLinkBtn.classList.add('disabled');
+                    externalLinkBtn.style.display = 'none';
+                    delete externalLinkBtn.dataset.urlToOpen;
+                }
+            }
+        }
+
         // Accept messages from same-origin or file protocol (local dev)
         if (
           !(

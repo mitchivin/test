@@ -85,16 +85,15 @@ function createLightboxCloseButton() {
     btn.setAttribute('tabindex', '0');
     btn.setAttribute('aria-label', 'Close');
 
-    const iconSpan = document.createElement('span');
-    iconSpan.className = 'close-icon';
-    iconSpan.innerHTML = '&times;';
-
-    const textSpan = document.createElement('span');
-    textSpan.className = 'close-text';
-    textSpan.textContent = 'Close';
-
-    btn.appendChild(iconSpan);
-    btn.appendChild(textSpan);
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const closeSvg = document.createElementNS(svgNS, 'svg');
+    closeSvg.setAttribute('width', '12');
+    closeSvg.setAttribute('height', '12');
+    closeSvg.setAttribute('viewBox', '0 0 18 18');
+    closeSvg.setAttribute('aria-hidden', 'true');
+    closeSvg.style.display = 'block';
+    closeSvg.innerHTML = `<line x1="4" y1="4" x2="14" y2="14" stroke="#222" stroke-width="2.2" stroke-linecap="round"/><line x1="14" y1="4" x2="4" y2="14" stroke="#222" stroke-width="2.2" stroke-linecap="round"/>`;
+    btn.appendChild(closeSvg);
 
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -459,14 +458,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!animWrapper) {
                     // Fetch current post data if we need to create everything new
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Video Production' : '';
+                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Highlight Reel' : '';
                     animWrapper = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description);
                     wrapper.appendChild(animWrapper);
                     card = animWrapper.querySelector('.lightbox-desc-card'); 
                 } else if (!card && animWrapper) { 
                     while (animWrapper.firstChild) animWrapper.removeChild(animWrapper.firstChild);
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Video Production' : '';
+                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Highlight Reel' : '';
                     const newCardElement = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description).querySelector('.lightbox-desc-card');
                     animWrapper.appendChild(newCardElement);
                     card = newCardElement;
@@ -477,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // If card exists, but children are missing, or text needs update (e.g. if desc could change dynamically)
                     // This part might need enhancement if card content can change without full recreation
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Video Production' : '';
+                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Highlight Reel' : '';
                     clearChildren(card); // Clear old single text node if any
                     if (currentPostData.title) card.appendChild(createEl('div', 'card-title', currentPostData.title));
                     if (dynamicSubheading) card.appendChild(createEl('div', 'card-subheading', dynamicSubheading));
@@ -532,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const linkUrl = post.dataset.linkUrl;
         const software = post.dataset.software;
 
-        const dynamicSubheading = type === 'image' ? 'Social Graphics' : type === 'video' ? 'Video Production' : '';
+        const dynamicSubheading = type === 'image' ? 'Social Graphics' : type === 'video' ? 'Highlight Reel' : '';
 
         // Always use a persistent wrapper for lightbox media and description
         const wrapper = getOrCreateWrapper();
@@ -713,6 +712,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     linkUrl: linkUrl || null    
                 });
                 sendMessageToParent({ type: 'description-state', open: userPrefersDescriptionVisible });
+                if (linkType && linkUrl) {
+                    sendMessageToParent({ type: 'set-external-link-enabled', enabled: true, url: linkUrl });
+                } else {
+                    sendMessageToParent({ type: 'set-external-link-enabled', enabled: false });
+                }
             }
         }
 

@@ -379,6 +379,7 @@ const programData = {
           action: "openExternalLink",
           enabled: false,
           desktopOnly: true,
+          style: 'display: none;',
         },
       ],
     },

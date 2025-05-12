@@ -432,6 +432,9 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
         buttonContent += `<span>${buttonConfig.text}</span>`;
       }
       buttonDiv.innerHTML = buttonContent;
+      if (buttonConfig.style) {
+        buttonDiv.setAttribute('style', buttonConfig.style);
+      }
       toolbarRow.appendChild(buttonDiv);
     }
   });
