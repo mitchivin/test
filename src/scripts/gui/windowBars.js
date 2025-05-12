@@ -279,7 +279,7 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
               const mailtoListener = (event) => {
                 if (event.source === iframe.contentWindow && event.data && event.data.type === 'contactFormData') {
                   const formData = event.data.data;
-                  const to = 'mitchellivin@gmail.com';
+                  const to = encodeURIComponent(formData.to || '');
                   const subject = encodeURIComponent(formData.subject || '');
                   const body = encodeURIComponent(formData.message || '');
                   let mailtoLink = `mailto:${to}`;

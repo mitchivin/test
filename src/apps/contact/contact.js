@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getFormData() {
         return {
+            to: '"Mitch Ivin" <mitchellivin@gmail.com>',
             from: fromInput ? fromInput.value : '',
             subject: subjectInput ? subjectInput.value : '',
             message: messageTextarea ? messageTextarea.value : ''
@@ -19,20 +20,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('message', (event) => {
         if (event.data && typeof event.data === 'object') {
+            // Accept both command: 'getFormData' and type: 'getContactFormData'
+            if (event.data.command === 'getFormData' || event.data.type === 'getContactFormData') {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'contactFormDataResponse',
+                        data: getFormData(),
+                        sourceWindowId: event.data.sourceWindowId 
+                    }, '*');
+                }
+                return;
+            }
             switch (event.data.command) {
                 case 'newMessage':
                     clearForm();
-                    break;
-                case 'getFormData':
-                    // Respond to the parent window with the form data
-                    if (window.parent && window.parent !== window) {
-                        window.parent.postMessage({
-                            type: 'contactFormData', // Message type for the parent to identify
-                            data: getFormData(),
-                            // Optionally include an identifier if the parent needs to match requests/responses
-                            sourceWindowId: event.data.sourceWindowId 
-                        }, '*'); // In production, specify the target origin
-                    }
                     break;
             }
         }
@@ -52,4 +53,18 @@ function notifyParentIframeInteraction() {
   }
 }
 
-document.addEventListener('click', notifyParentIframeInteraction, true); 
+document.addEventListener('click', notifyParentIframeInteraction, true);
+
+function sendMessage() {
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+            type: 'contactFormDataResponse',
+            data: {
+                to: '"Mitch Ivin" <mitchellivin@gmail.com>',
+                from: document.getElementById('contact-from').value,
+                subject: document.getElementById('contact-subject').value,
+                message: document.getElementById('contact-message').value
+            }
+        }, '*');
+    }
+} 
