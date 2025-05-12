@@ -332,6 +332,7 @@ body {
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
+    border: 2px solid red !important;
 }
 
 #project-lightbox.fade-in {
@@ -352,6 +353,7 @@ body {
     height: 100%;
     box-sizing: border-box;
     overflow: visible !important;
+    border: 2px solid blue !important;
 }
 
 #lightbox-content {
@@ -359,6 +361,7 @@ body {
     display: flex;
     align-items: flex-end;
     justify-content: center;
+    border: 2px solid green !important;
 }
 
 #lightbox-content img,
@@ -660,6 +663,19 @@ body {
         padding-right: 5px; /* ADDED padding here, on hover state */
         /* color: #111; */ 
     }
+
+    .lightbox-media-wrapper > img,
+    .lightbox-media-wrapper > div, /* for video wrapper */
+    .lightbox-media-wrapper > video {
+      height: 100% !important;
+      max-height: 100% !important;
+      object-fit: contain !important;
+    }
+    .lightbox-media-wrapper > div > video {
+      height: 100% !important;
+      max-height: 100% !important;
+      object-fit: contain !important;
+    }
 }
 
 /* Hide navigation buttons and hint on mobile */
@@ -795,6 +811,7 @@ body {
   display: block; 
   object-fit: contain; 
   z-index: 2;
+  border: 2px solid hotpink !important;
 }
 
 .lightbox-media-wrapper .lightbox-desc-card {
@@ -819,6 +836,7 @@ body {
   white-space: normal; 
   word-break: break-word; 
   flex-shrink: 1; 
+  border: 2px solid purple !important;
 }
 
 /* Renamed mobileDescOverlaySlideIn to mobileBottomOverlaySlideIn */
@@ -876,6 +894,7 @@ body {
   flex: 1 1 auto;
   margin-left: 15px;
   border-radius: 18px;
+  border: 2px solid orange !important;
 }
 
 .lightbox-media-wrapper.video-media-active .desc-card-anim-wrapper {
