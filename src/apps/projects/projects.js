@@ -129,13 +129,31 @@ function showMuteIconOverlay(videoElement, isMuted) {
     if (existing) existing.remove();
     const overlay = createMuteIconOverlay(isMuted);
     videoElement.parentElement.appendChild(overlay);
-    // Force reflow for animation
-    void overlay.offsetWidth;
-    overlay.classList.add('show');
-    setTimeout(() => {
-        overlay.classList.remove('show');
-        setTimeout(() => overlay.remove(), 1800);
-    }, 1800);
+    // Only fade in if video is ready (poster is gone)
+    if (videoElement.readyState >= 3 && !videoElement.paused) {
+        // Force reflow for animation
+        void overlay.offsetWidth;
+        overlay.classList.add('show');
+        setTimeout(() => {
+            overlay.classList.remove('show');
+            setTimeout(() => overlay.remove(), 1800);
+        }, 1800);
+    } else {
+        // Wait for 'playing' event before showing overlay
+        const onPlay = () => {
+            // Only show if overlay is still in DOM
+            if (overlay.parentNode) {
+                void overlay.offsetWidth;
+                overlay.classList.add('show');
+                setTimeout(() => {
+                    overlay.classList.remove('show');
+                    setTimeout(() => overlay.remove(), 1800);
+                }, 1800);
+            }
+            videoElement.removeEventListener('playing', onPlay);
+        };
+        videoElement.addEventListener('playing', onPlay);
+    }
 }
 
 function createLightboxMediaElement(type, src, posterUrl = null) {
@@ -158,20 +176,12 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         
         const wrapper = document.createElement('div');
         wrapper.style.position = 'relative'; // Keep for overlay positioning
-
-        // Styles for the JS-created div wrapper for video
         wrapper.style.display = 'inline-block'; // Changed from 'block' to allow shrink-to-fit
         wrapper.style.flexGrow = '0';    
         wrapper.style.flexShrink = '0';  
         wrapper.style.maxHeight = '100%'; 
         wrapper.style.maxWidth = '100%'; // Added to ensure it respects parent bounds
         wrapper.style.verticalAlign = 'middle'; // Added for better inline-block alignment
-        
-        // Video element styles: width and height are removed to let CSS handle sizing
-        // videoElement.style.width = '100%'; // REMOVED
-        // videoElement.style.height = '100%'; // REMOVED
-        // Note: .lightbox-media-wrapper video CSS provides display:block and object-fit:contain
-        // and width:auto, height:auto, max-width, max-height which will now take effect.
         
         wrapper.appendChild(videoElement);
         
@@ -202,6 +212,26 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
             }
             showMuteIfPlayed();
         });
+        // --- Desktop hover: show mute/unmute overlay on hover ---
+        if (!isTouchDevice()) {
+            wrapper.addEventListener('mouseenter', () => {
+                showMuteIconOverlay(videoElement, videoElement.muted);
+            });
+            wrapper.addEventListener('mouseleave', () => {
+                // Remove overlay immediately (fade out if present)
+                const overlay = wrapper.querySelector('.mute-icon-overlay');
+                if (overlay) {
+                    overlay.classList.remove('show');
+                    setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 200);
+                }
+            });
+            // Also update overlay if mute state changes while hovered
+            videoElement.addEventListener('volumechange', () => {
+                if (wrapper.matches(':hover')) {
+                    showMuteIconOverlay(videoElement, videoElement.muted);
+                }
+            });
+        }
         return wrapper;
     }
     return null;
@@ -545,6 +575,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let descCardFadedOut = !oldDescCard; // True if no old description card to animate out
         let mobileTitleOverlayFadedOut = true; // Assume true if not mobile or no overlay
         let mobileDescOverlayFadedOut = true; // Assume true if not mobile or no overlay
+
+        // --- NEW: Fade out mute icon overlay if present ---
+        if (oldMedia && oldMedia.parentElement) {
+            const muteOverlay = oldMedia.parentElement.querySelector('.mute-icon-overlay.show');
+            if (muteOverlay) {
+                muteOverlay.classList.remove('show');
+                let removed = false;
+                const removeMuteOverlay = () => {
+                    if (removed) return;
+                    removed = true;
+                    muteOverlay.removeEventListener('transitionend', removeMuteOverlay);
+                    if (muteOverlay.parentNode) muteOverlay.parentNode.removeChild(muteOverlay);
+                };
+                muteOverlay.addEventListener('transitionend', removeMuteOverlay);
+                setTimeout(removeMuteOverlay, 250); // Fallback in case transitionend doesn't fire
+            }
+        }
 
         // --- Mobile Overlays: Trigger hide animation before content swap --- 
         if (isTouchDevice()) {

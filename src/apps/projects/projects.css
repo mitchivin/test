@@ -917,8 +917,8 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
-  width: 38px;
-  height: 38px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -30,6 +30,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Intercept Instagram link click
+    const instagramLink = document.querySelector('.social-link a[href*="instagram.com"]');
+    if (instagramLink) {
+        instagramLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'open-instagram-from-about' }, '*');
+            }
+        });
+    }
 });
 
 document.addEventListener('click', (event) => {
