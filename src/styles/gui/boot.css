@@ -187,17 +187,9 @@
 
   /* Mobile reset for .login-screen-inner */
   .login-screen .login-screen-inner {
-    position: static;
-    width: 100%;
-    left: auto;
-    right: auto;
-    top: auto;
-    bottom: auto;
-    height: auto;
-    min-height: 0;
-    max-width: 100vw;
-    background: none;
-    inset: unset;
+    position: absolute !important;
+    inset: 70px 0 !important;
+    background: #587cdb !important;
   }
 
   .login-screen .login-screen-center {
@@ -336,13 +328,14 @@
   .login-screen {
   }
   .login-screen-inner {
+    min-height: 320px;
   }
   .login-screen-center {
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     height: 100% !important;
-    gap: 7vw !important;
+    gap: 10vw !important;
   }
   .login-screen-center .left,
   hr.login-separator.mobile-only,
@@ -361,11 +354,16 @@
     align-items: center;
     text-align: center;
     position: absolute;
-    bottom: 38px;
+    bottom: 25px !important;
     
   }
   #login-screen .login-screen .login-screen-inner .login-screen-center .left .left-text {
     margin-top: 0px !important;
+  }
+
+  .login-screen .login-screen-inner::before,
+  .login-screen .login-screen-inner::after {
+    height: 1.5px !important;
   }
 }
 
