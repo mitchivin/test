@@ -177,8 +177,8 @@ function showMuteIconOverlay(videoElement, isMuted) {
     overlay.classList.add('show');
     setTimeout(() => {
         overlay.classList.remove('show');
-        setTimeout(() => overlay.remove(), 400);
-    }, 900);
+        setTimeout(() => overlay.remove(), 1800);
+    }, 1800);
 }
 
 function createLightboxMediaElement(type, src, posterUrl = null) {
@@ -213,15 +213,14 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         function showMuteIfPlayed() {
             if (hasPlayed) showMuteIconOverlay(videoElement, videoElement.muted);
         }
+        // Remove spinner only when video is actually playing
         videoElement.addEventListener('playing', () => {
             hasPlayed = true;
             hideSpinner();
             showMuteIconOverlay(videoElement, videoElement.muted);
         });
-        videoElement.addEventListener('canplay', () => {
-            // If autoplay fails, hide spinner after a short delay
-            setTimeout(() => { if (!hasPlayed) hideSpinner(); }, 1200);
-        });
+        // Fallback: hide spinner after 8s if video never plays
+        setTimeout(() => { if (!hasPlayed) hideSpinner(); }, 8000);
         videoElement.addEventListener('click', (e) => {
             e.stopPropagation();
             videoElement.muted = !videoElement.muted;
