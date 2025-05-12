@@ -160,19 +160,19 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         const wrapper = document.createElement('div');
         wrapper.style.position = 'relative'; // Keep for overlay positioning
 
-        // RESTORED: Styles to make the wrapper behave as a constrained flex item for desktop
-        wrapper.style.display = 'block'; // Or 'flex' could also work for internal alignment
+        // Styles for the JS-created div wrapper for video
+        wrapper.style.display = 'inline-block'; // Changed from 'block' to allow shrink-to-fit
         wrapper.style.flexGrow = '0';    
         wrapper.style.flexShrink = '0';  
-        wrapper.style.maxHeight = '100%'; // Crucial: constrain wrapper height to available space
-        // wrapper.style.width = 'auto'; // Let flexbox or content determine width initially
-        // wrapper.style.height = 'auto'; // Let flexbox or content determine height initially
+        wrapper.style.maxHeight = '100%'; 
+        wrapper.style.maxWidth = '100%'; // Added to ensure it respects parent bounds
+        wrapper.style.verticalAlign = 'middle'; // Added for better inline-block alignment
         
-        // RESTORED: Video element should fill this constrained wrapper.
-        // object-fit: contain (from CSS) will handle aspect ratio within these bounds.
-        videoElement.style.width = '100%';
-        videoElement.style.height = '100%';
+        // Video element styles: width and height are removed to let CSS handle sizing
+        // videoElement.style.width = '100%'; // REMOVED
+        // videoElement.style.height = '100%'; // REMOVED
         // Note: .lightbox-media-wrapper video CSS provides display:block and object-fit:contain
+        // and width:auto, height:auto, max-width, max-height which will now take effect.
         
         wrapper.appendChild(videoElement);
         
