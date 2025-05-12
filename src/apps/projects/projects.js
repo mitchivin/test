@@ -297,7 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openLightbox() {
-        document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
+        // Pause all grid videos ONLY when opening the lightbox
+        document.querySelectorAll('.feed-container .video-post video').forEach(v => { v.pause(); });
 
         // Core content setup is now handled by openLightboxByIndex
         if (currentLightboxIndex === null) {
@@ -1454,6 +1455,12 @@ document.addEventListener('DOMContentLoaded', () => {
         gridVideos.forEach(video => { delete video.__isIntersecting; });
     }
 
+    // Helper to check if the lightbox is open
+    function isLightboxOpen() {
+        const lightbox = document.getElementById('project-lightbox');
+        return lightbox && lightbox.style.display === 'flex';
+    }
+
     function setMaximizedState(maximized) {
         isMaximized = maximized;
         const bodyEl = document.body;
@@ -1469,30 +1476,38 @@ document.addEventListener('DOMContentLoaded', () => {
         // try to force a re-evaluation of its width by toggling a class that affects layout/sizing,
         // or directly re-applying its width based on the new state.
         // This is a more direct attempt to ensure the CSS takes hold.
-        const lightboxIsOpen = lightbox && lightbox.style.display === 'flex';
+        const lightboxIsOpen = isLightboxOpen();
         if (lightboxIsOpen) {
+            gridVideos.forEach(video => video.pause());
+        } else {
+            // Only play grid videos if lightbox is closed
+            if (isMaximized) {
+                cleanupIntersectionObserver();
+                gridVideos.forEach(video => video.play());
+            } else {
+                gridVideos.forEach(video => video.pause());
+                setupIntersectionObserver();
+            }
+        }
+
+        // ... existing code for resizing description card ...
+        const lightbox = document.getElementById('project-lightbox');
+        const lightboxContent = document.getElementById('lightbox-content');
+        const lightboxIsOpenForCard = lightbox && lightbox.style.display === 'flex';
+        if (lightboxIsOpenForCard) {
             const mediaWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
             if (mediaWrapper && mediaWrapper.classList.contains('desc-visible')) {
                 const animWrapper = mediaWrapper.querySelector('.desc-card-anim-wrapper');
                 if (animWrapper) {
-                    // Option C: Simpler - just ensure the transition property is there so it re-evaluates on next CSS match
                     animWrapper.style.transition = 'width 0.4s cubic-bezier(0.4,0,0.2,1)';
                 }
             }
         }
 
-        // Existing video grid logic based on the global isMaximized flag
         document.querySelectorAll('.video-post').forEach(post => {
             if (isMaximized) post.classList.add('maximized');
             else post.classList.remove('maximized');
         });
-        if (isMaximized) {
-            cleanupIntersectionObserver();
-            gridVideos.forEach(video => video.play());
-        } else {
-            gridVideos.forEach(video => video.pause());
-            setupIntersectionObserver();
-        }
     }
 
     // Listen for maximize/unmaximize messages from parent
