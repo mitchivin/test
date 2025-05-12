@@ -87,7 +87,7 @@
   display: grid;
   grid-template-columns: 90px;
   grid-auto-rows: 90px;
-  grid-gap: 6px;
+  grid-gap: 12px;
   place-content: start start;
   height: calc(100% - 30px);
 }

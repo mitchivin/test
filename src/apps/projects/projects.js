@@ -49,56 +49,14 @@ function sendMessageToParent(payload) {
 
 // ===== Description Card Creation =====
 
-function _attachSoftwareIconTooltips(cardEl, softwareData, softwareIconsListEl) {
-    if (!softwareData || !cardEl || !softwareIconsListEl) return;
-
-    const softwareList = softwareData.split(',').map(s => s.trim()).filter(s => s);
-    softwareList.forEach(softwareName => {
-        const iconEl = createEl('img', 'software-icon');
-        iconEl.src = `../../../assets/gui/start-menu/vanity-apps/${softwareName}.webp`;
-        iconEl.alt = softwareName;
-
-        iconEl.addEventListener('mouseenter', (e) => {
-            const existingTooltip = cardEl.querySelector('.software-tooltip');
-            if (existingTooltip) existingTooltip.remove();
-
-            const formattedSoftwareName = softwareName
-                .split('-')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-            const tooltip = createEl('div', 'software-tooltip', formattedSoftwareName);
-            cardEl.appendChild(tooltip);
-
-            const iconRect = iconEl.getBoundingClientRect();
-            const cardRect = cardEl.getBoundingClientRect();
-            
-            const iconsListRect = softwareIconsListEl.getBoundingClientRect();
-            tooltip.style.left = `${iconsListRect.left - cardRect.left + (iconsListRect.width / 2) - (tooltip.offsetWidth / 2)}px`;
-            tooltip.style.top = `${iconRect.top - cardRect.top - tooltip.offsetHeight - 30}px`;
-
-            tooltip.classList.add('visible');
-        });
-
-        iconEl.addEventListener('mouseleave', () => {
-            const tooltip = cardEl.querySelector('.software-tooltip.visible');
-            if (tooltip) {
-                tooltip.classList.remove('visible');
-                setTimeout(() => tooltip.remove(), 300);
-            }
-        });
-        softwareIconsListEl.appendChild(iconEl);
-    });
-}
-
 /**
  * Creates the desktop description card for the lightbox.
  * @param {string} titleText - The project title
  * @param {string} subheadingText - The subheading (e.g., type)
  * @param {string} descriptionText - The project description
- * @param {string} softwareData - Comma-separated software list
  * @returns {HTMLElement} The animated wrapper containing the card
  */
-function createDesktopDescriptionCard(titleText, subheadingText, descriptionText, softwareData) {
+function createDesktopDescriptionCard(titleText, subheadingText, descriptionText) {
     const animWrapper = createEl('div', 'desc-card-anim-wrapper');
     const descCard = createEl('div', 'lightbox-desc-card');
     clearChildren(descCard);
@@ -115,29 +73,29 @@ function createDesktopDescriptionCard(titleText, subheadingText, descriptionText
         const bodyEl = createEl('div', 'card-body', descriptionText);
         descCard.appendChild(bodyEl);
     }
-    if (softwareData) {
-        const cardSoftwareSection = createEl('div', 'card-software-section');
-        const softwareLabel = createEl('span', 'software-section-label', 'Software Used:');
-        cardSoftwareSection.appendChild(softwareLabel);
-        const softwareIconsList = createEl('div', 'software-icons-list');
-        _attachSoftwareIconTooltips(descCard, softwareData, softwareIconsList);
-        if (softwareIconsList.hasChildNodes()) {
-            cardSoftwareSection.appendChild(softwareIconsList);
-            descCard.appendChild(cardSoftwareSection);
-        }
-    }
     animWrapper.appendChild(descCard);
     return animWrapper;
 }
 
-// Add this function to create the close button
+// Add this function to create the lightbox close button
 function createLightboxCloseButton() {
     const btn = document.createElement('div');
     btn.className = 'lightbox-close-btn';
     btn.setAttribute('role', 'button');
     btn.setAttribute('tabindex', '0');
     btn.setAttribute('aria-label', 'Close');
-    btn.innerHTML = '&times;';
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'close-icon';
+    iconSpan.innerHTML = '&times;';
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'close-text';
+    textSpan.textContent = 'Close';
+
+    btn.appendChild(iconSpan);
+    btn.appendChild(textSpan);
+
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
         closeLightbox();
@@ -200,8 +158,23 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         if (posterUrl) videoElement.poster = posterUrl;
         // Wrap in a container for overlay positioning
         const wrapper = document.createElement('div');
-        wrapper.style.position = 'relative';
-        wrapper.style.display = 'inline-block';
+        wrapper.style.position = 'relative'; // Keep for overlay positioning
+
+        // Apply styles to make the wrapper behave as a constrained flex item
+        wrapper.style.display = 'block'; // Use 'block' for the wrapper
+        wrapper.style.flexGrow = '0';    // Equivalent to flex: 0 0 auto
+        wrapper.style.flexShrink = '0';  // Equivalent to flex: 0 0 auto
+        // flex-basis: 'auto' is implied
+
+        // Constrain the wrapper's height to 100% of its allocation in .lightbox-media-wrapper
+        wrapper.style.maxHeight = '100%';
+
+        // Video element should fill this constrained wrapper.
+        // object-fit: contain (from CSS) will handle aspect ratio.
+        videoElement.style.width = '100%';
+        videoElement.style.height = '100%';
+        // Note: .lightbox-media-wrapper video CSS provides display:block and object-fit:contain
+
         wrapper.appendChild(videoElement);
         // Add spinner overlay while loading
         const spinner = createSpinnerOverlay();
@@ -488,14 +461,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Fetch current post data if we need to create everything new
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
                     const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Video Production' : '';
-                    animWrapper = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description, currentPostData.software);
+                    animWrapper = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description);
                     wrapper.appendChild(animWrapper);
                     card = animWrapper.querySelector('.lightbox-desc-card'); 
                 } else if (!card && animWrapper) { 
                     while (animWrapper.firstChild) animWrapper.removeChild(animWrapper.firstChild);
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
                     const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Video Production' : '';
-                    const newCardElement = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description, currentPostData.software).querySelector('.lightbox-desc-card');
+                    const newCardElement = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description).querySelector('.lightbox-desc-card');
                     animWrapper.appendChild(newCardElement);
                     card = newCardElement;
                 } 
@@ -510,23 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (currentPostData.title) card.appendChild(createEl('div', 'card-title', currentPostData.title));
                     if (dynamicSubheading) card.appendChild(createEl('div', 'card-subheading', dynamicSubheading));
                     if (currentPostData.description) card.appendChild(createEl('div', 'card-body', currentPostData.description));
-
-                    // Re-add software icons if data is available (similar to createDesktopDescriptionCard)
-                    if (currentPostData.software) {
-                        const cardSoftwareSection = createEl('div', 'card-software-section');
-
-                        const softwareLabel = createEl('span', 'software-section-label', 'Software Used:');
-                        cardSoftwareSection.appendChild(softwareLabel);
-
-                        const softwareIconsList = createEl('div', 'software-icons-list');
-                        // Call the new helper function
-                        _attachSoftwareIconTooltips(card, currentPostData.software, softwareIconsList);
-                        
-                        if (softwareIconsList.hasChildNodes()) { // Check if icons were actually added
-                            cardSoftwareSection.appendChild(softwareIconsList);
-                            card.appendChild(cardSoftwareSection);
-                        }
-                    }
                 }
                 
                 if (animWrapper) {
@@ -689,7 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         void wrapper.offsetHeight; // Force reflow
                     }
 
-                    const newAnimWrapper = createDesktopDescriptionCard(title, dynamicSubheading, desktopDescription, software);
+                    const newAnimWrapper = createDesktopDescriptionCard(title, dynamicSubheading, desktopDescription);
                     wrapper.appendChild(newAnimWrapper);
                     
                     if (userPrefersDescriptionVisible) {

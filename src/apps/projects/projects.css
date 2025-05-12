@@ -4,32 +4,78 @@
  * @file projects.css
  */
 
+/* Universal Reset from example - might need adjustment if conflicting with xp.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Removed !important */
+}
+
 /* ===== Base Layout & Background ===== */
 html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
-    height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: #333;
+    color: #333; /* Original text color, example uses #f2f2f2 */
     width: 100%;
+    background-color: #111; /* Dark background for the lines effect */
+    position: relative; /* For potential pseudo-elements if needed later */
+    overflow-x: hidden; /* Good practice */
 }
 
 html {
-    background: url('../../../assets/apps/projects/projectsbg.webp') center center / cover no-repeat fixed;
+    background:
+        radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0) top left / 3px 3px repeat,
+        linear-gradient(to bottom, rgb(45,45,45) 0%, rgb(30,30,30) 35%, rgb(30,30,30) 100%);
+    min-height: 100vh;
+    /* Removed html::before and @keyframes scrollAnimatedLines */
+}
+
+/* Soft edge lighting */
+html::before,
+html::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%; /* Controls how far the light appears to spread from the edge */
+    pointer-events: none; 
+    z-index: 0; /* Above html direct background, below body content (including lines) */
+}
+
+html::before {
+    left: 0;
+    background: radial-gradient(
+        ellipse at left center, 
+        rgba(255, 255, 255, 0.2) 0%,  
+        transparent 70%  
+    );
+}
+
+html::after {
+    right: 0;
+    background: radial-gradient(
+        ellipse at right center, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        transparent 70%
+    );
 }
 
 body {
-    background: none !important;
-    background-size: 200% 200%;  
-    height: 100%;
+    /* display: table; */ /* REMOVED - was likely causing layout issues */
     width: 100%;
-    animation: background 6s ease infinite;
-    min-height: 100vh;
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background-attachment: fixed;
+    height: 100%;
+    background-color: transparent;  /* Body should be transparent over HTML's #111 bg */
+    color: #f2f2f2; /* Text color from user example - for lines, app content should override */
+    line-height: 1.6;
+    position: relative; /* For .lines positioning and .scroll-content */
+    font-family: sans-serif; /* From user example, can be overridden by app specifics */
+    /* overflow: hidden; */ /* REMOVED for now - to ensure content isn't clipped */
+    /* Removing previous body background animation and styles if any */
 }
 
+/* Original @keyframes background - Kept for body if needed, but html has main bg now */
 @keyframes background { 
   0% {
     background-position: 0% 50%;
@@ -43,11 +89,114 @@ body {
 }
 
 .scroll-content {
-    height: 100%; /* Make scroll-content fill the body */
-    overflow-y: auto; /* Enable scrolling and allow XP.css to style the scrollbar */
-    position: relative; /* Optional: for positioning context if needed by xp.css sub-elements */
+    height: 100%; 
+    overflow-y: auto; 
+    position: relative; 
+    z-index: 10; /* High z-index to be on top of lines */
+    background-color: transparent; 
+    color: #333; /* Restore original app text color for content */
 }
 
+
+/* === Animated Lines Styling (Adapted for Left-to-Right Sweep) === */
+.lines {
+  position: absolute;
+  top: 30px; /* Shifted down by 30px */
+  left: 0;
+  /* right: 0; */ /* Not needed if left:0 and width:100% */
+  height: calc(100% - 30px); /* Adjusted height to fit within viewport after top shift */
+  /* margin: auto; */ /* Not needed if left:0 and width:100% */
+  width: 100%; /* Make lines span full width */
+  display: flex;
+  flex-direction: column; /* Stack horizontal lines vertically */
+  justify-content: space-around; /* Distribute lines vertically */
+  z-index: 1; 
+  pointer-events: none; 
+}
+
+.line {
+  position: relative;
+  width: 100%; /* Line track is full width */
+  height: 1px;  /* Thin horizontal line */
+  background-color: transparent; /* Track is invisible */
+  overflow: hidden;
+}
+
+.line::after {
+  content: '';
+  display: block;
+  position: absolute;
+  height: 100%; 
+  width: 20vw;  
+  top: 0;
+  left: 0; 
+  transform: translateX(-20vw); 
+  opacity: 0; /* Initial state: invisible */
+  /* All lines are now white (slightly transparent white with faded edges) */
+  background: linear-gradient(to right, 
+              rgba(255,255,255,0) 0%,      
+              rgba(255,255,255,0.6) 30%,   
+              rgba(255,255,255,0.6) 70%,   
+              rgba(255,255,255,0) 100%
+            );
+  animation: sweepLeftToRight 7s 0s infinite;
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(0.4, 0.26, 0, 0.97);
+}
+
+/* Remove or comment out these color-setting rules for .line as they are no longer needed for color */
+/*
+.line:nth-child(1) { --line-color: #FF4500; animation-delay: 0.5s; } 
+.line:nth-child(2) { --line-color: #32CD32; animation-delay: 1s; }
+.line:nth-child(3) { --line-color: #1E90FF; animation-delay: 1.5s; }
+.line:nth-child(4) { --line-color: #FFD700; animation-delay: 2s; }
+.line:nth-child(5) { --line-color: #8A2BE2; animation-delay: 2.5s; }
+.line:nth-child(6) { --line-color: #20B2AA; animation-delay: 3s; }
+.line:nth-child(7) { --line-color: #DC143C; animation-delay: 3.5s; }
+.line:nth-child(8) { --line-color: #00FA9A; animation-delay: 4s; }
+.line:nth-child(9) { --line-color: #FF1493; animation-delay: 4.5s; }
+.line:nth-child(10) { --line-color: #00BFFF; animation-delay: 5s; }
+*/
+
+/* Updated animation-delay rules for 5 .line::after for more randomness */
+.line:nth-child(1)::after { animation-delay: 0.5s; }
+.line:nth-child(2)::after { animation-delay: 2.0s; }
+.line:nth-child(3)::after { animation-delay: 3.5s; }
+.line:nth-child(4)::after { animation-delay: 5.0s; }
+.line:nth-child(5)::after { animation-delay: 6.0s; }
+/* Rules for .line:nth-child(6) through :nth-child(10) to be removed or commented out */
+
+
+@keyframes sweepLeftToRight {
+  0% {
+    transform: translateX(-20vw); 
+    opacity: 0;
+  }
+  5% { /* Quicker to start becoming visible */
+    transform: translateX(-15vw);
+    opacity: 0;
+  }
+  15% { /* Quicker to full visibility */
+    transform: translateX(0vw);   
+    opacity: 1;
+  }
+  85% { /* Stays visible, then starts to exit */
+    transform: translateX(85vw);  
+    opacity: 1;
+  }
+  95% { /* Quicker to fade out */
+    transform: translateX(100vw); 
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(105vw); /* Ensures it's fully off screen */
+    opacity: 0;
+  }
+}
+
+/* Remove old @keyframes drop */
+
+/* ====== Feed Container & Posts ====== */
 .feed-container {
     position: relative; /* Added for absolute positioning of posts */
     padding: 10px;
@@ -178,7 +327,7 @@ body {
     left: 0;
     width: 100%;
     height: 100dvh; 
-    background-color: rgba(30, 30, 30, 0.863) !important;
+    background-color: rgba(184, 184, 184, 0.836) !important;
     z-index: 100010; 
     padding: 20px;
     box-sizing: border-box;
@@ -353,7 +502,7 @@ body {
       margin-right: auto; /* To center the 90vw block */
     }
     .lightbox-desc-card {
-      background: #ecececb6 !important;
+      background: #0f0f0fd8 !important;
       color: #222 !important;
       width: 95% !important; /* Changed from 90% */
     }
@@ -361,8 +510,8 @@ body {
     /* Styling for title, subheading, body within the description card */
     .lightbox-media-wrapper .lightbox-desc-card .card-title {
         font-size: 1.8rem; /* Slightly larger for title */
-        font-weight: 800; /* Bolder title */
-        color: inherit; /* Inherit from .lightbox-desc-card which is #222 !important */
+        font-weight: 600; /* Bolder title */
+        color: #fff !important; /* Make title white on desktop */
         margin-bottom: 4px; /* Reduced space to subheading */
         line-height: 1.2;
         text-transform: uppercase; /* Capitalize the heading */
@@ -371,7 +520,7 @@ body {
     .lightbox-media-wrapper .lightbox-desc-card .card-subheading {
         font-size: 1.1rem;
         font-weight: 600;
-        color: #555; /* More subtle, darker gray */
+        color: #a7a7a78a; /* More subtle, darker gray */
         margin-bottom: 12px;
         line-height: 1.3;
         opacity: 0.85; /* Slightly less prominent */
@@ -380,8 +529,9 @@ body {
     .lightbox-media-wrapper .lightbox-desc-card .card-body {
         font-size: 0.9rem; /* Slightly smaller body text */
         font-weight: 400;
-        color: inherit;
+        color: #fff !important; /* Make body white on desktop */
         line-height: 1.6;
+        margin-top: 18px; /* Added top margin */
     }
 
     /* Software Icons Styling */
@@ -450,27 +600,65 @@ body {
 
     .lightbox-desc-card .lightbox-close-btn {
         position: absolute;
-        top: 12px;
-        right: 12px;
+        bottom: 30px; 
+        left: 50%;   
+        transform: translateX(-50%); 
         z-index: 10;
-        width: 28px;
-        height: 28px;
-        background: #e2e2e2 linear-gradient(to bottom, #fff 0%, #e2e2e2 100%);
-        border: 1px solid #aaa;
-        border-radius: 50%;
-        font-size: 1.4rem;
-        color: #333;
+        width: 24px; 
+        height: 24px; 
+        background: #d8d8d8 linear-gradient(to bottom, #f0f0f0 0%, #d8d8d8 100%); 
+        border: 1px solid #999; 
+        border-radius: 50%; /* Initial shape */
+        color: #222; 
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: background 0.15s, box-shadow 0.15s;
+        justify-content: center; /* Center icon when text is hidden */
+        padding: 0; /* Remove padding if any, rely on flexbox for centering icon */
+        overflow: hidden; /* Important for the slide-out text effect */
+        transition: background 0.2s, box-shadow 0.2s, width 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    .lightbox-desc-card .lightbox-close-btn .close-icon {
+        font-size: 1.2rem; /* Size for the '×' */
+        line-height: 1; /* Ensure tight fit */
+        display: inline-block;
+    }
+
+    .lightbox-desc-card .lightbox-close-btn .close-text {
+        display: inline-block;
+        font-size: 0.80rem; 
+        font-weight: 500;
+        color: #222;
+        line-height: 1; 
+        max-width: 0;
+        opacity: 0;
+        margin-left: 0px;
+        /* padding-right: 5px; */ /* REMOVED from base style */
+        white-space: nowrap;
+        pointer-events: none; 
+        transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.05s, 
+                    margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     .lightbox-desc-card .lightbox-close-btn:hover {
-        background: #f8d7da linear-gradient(to bottom, #fff 0%, #f8d7da 100%);
-        color: #a00;
-        box-shadow: 0 4px 16px rgba(160,0,0,0.18);
+        background: #cacaca linear-gradient(to bottom, #e8e8e8 0%, #cacaca 100%); 
+        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        width: 67px; /* INCREASED from 62px to account for text padding */
+        border-radius: 12px; 
+        justify-content: flex-start; 
+        padding-left: 5px; 
+        /* padding-right: 5px; /* Removed from button, will be on text instead */
+    }
+
+    .lightbox-desc-card .lightbox-close-btn:hover .close-text {
+        max-width: 40px; /* INCREASED from 35px to allow for content + padding */
+        opacity: 1;
+        margin-left: 6px; 
+        padding-right: 5px; /* ADDED padding here, on hover state */
+        /* color: #111; */ 
     }
 }
 
@@ -616,23 +804,22 @@ body {
   height: 100%; 
   border-radius: 18px;
   background: linear-gradient(120deg, rgba(30,30,30,0.98) 80%, rgba(30,30,30,0.92) 100%);
-  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
   display: flex; 
   flex-direction: column;
   font-size: 1.13rem;
   font-weight: 500;
-  color: #fff; /* Default color */
+  color: #fff; 
   z-index: 1;
   box-sizing: border-box;
   opacity: 0; 
   transform: translateX(-40px); 
-  transition: opacity 0.3s, transform 0.3s; /* Keep existing animation for appearing */
-  overflow: auto; /* For scrolling text content */
-  padding: 24px 24px 18px 24px; /* Adjusted to remove bottom padding */
-  text-align: left; /* Ensure text is left-aligned */
-  white-space: normal; /* Ensure text wraps */
-  word-break: break-word; /* Ensure long words break */
-  flex-shrink: 1; /* Default, good */
+  transition: opacity 0.3s, transform 0.3s; 
+  overflow: auto; 
+  padding: 40px 30px 30px 30px; 
+  text-align: left; 
+  white-space: normal; 
+  word-break: break-word; 
+  flex-shrink: 1; 
 }
 
 /* Renamed mobileDescOverlaySlideIn to mobileBottomOverlaySlideIn */
