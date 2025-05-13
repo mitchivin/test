@@ -9,8 +9,8 @@ export const socialLinks = {
 };
 
 export const socialLinksAbout = [
-  { key: 'instagram', icon: './assets/gui/start-menu/instagram.webp', label: 'Instagram' },
-  { key: 'linkedin', icon: './assets/gui/start-menu/linkedin.webp', label: 'LinkedIn' },
-  { key: 'behance', icon: './assets/gui/start-menu/behance.webp', label: 'Behance' },
-  { key: 'github', icon: './assets/gui/start-menu/github.webp', label: 'Github' }
+  { key: 'instagram', icon: '/assets/gui/start-menu/instagram.webp', label: 'Instagram' },
+  { key: 'linkedin', icon: '/assets/gui/start-menu/linkedin.webp', label: 'LinkedIn' },
+  { key: 'behance', icon: '/assets/gui/start-menu/behance.webp', label: 'Behance' },
+  { key: 'github', icon: '/assets/gui/start-menu/github.webp', label: 'Github' }
 ]; 
