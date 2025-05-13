@@ -13,4 +13,7 @@ export const socialLinksAbout = [
   { key: 'linkedin', icon: '../../../assets/gui/start-menu/linkedin.webp', label: 'LinkedIn' },
   { key: 'behance', icon: '../../../assets/gui/start-menu/behance.webp', label: 'Behance' },
   { key: 'github', icon: '../../../assets/gui/start-menu/github.webp', label: 'Github' }
-]; 
+];
+
+export const balloonWelcomeHeader = "Welcome";
+export const balloonWelcomeText = "Hey, I'm Mitch, I'm a designer. Welcome to my portfolio.<br>It doesn't follow the usual formaet, because neither do i."; 
