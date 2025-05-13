@@ -14,6 +14,7 @@
  */
 import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
+import { wallpaperDesktop, wallpaperMobile } from '../../data/misc.js';
 
 // ===== Desktop Class =====
 /**
@@ -41,12 +42,15 @@ export default class Desktop {
     this.setupDesktopEvents();
     this.setupPointerSelectionEvents();
 
-    // Set wallpaper class based on device
-    this.desktop.classList.remove('wallpaper-default', 'wallpaper-mobile');
-    if (isMobileDevice()) {
-      this.desktop.classList.add('wallpaper-mobile');
-    } else {
-      this.desktop.classList.add('wallpaper-default');
+    // Set wallpaper image based on device from data file
+    if (this.desktop) {
+      if (isMobileDevice()) {
+        this.desktop.style.backgroundImage = `url('${wallpaperMobile}')`;
+      } else {
+        this.desktop.style.backgroundImage = `url('${wallpaperDesktop}')`;
+      }
+      this.desktop.style.backgroundPosition = 'top center';
+      this.desktop.style.backgroundSize = 'cover';
     }
 
     // Event subscriptions for selection/drag state

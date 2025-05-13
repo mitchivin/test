@@ -7,6 +7,8 @@
  * @file projects.js
  */
 
+import { projects } from '../../data/projects.js';
+
 // ===== Global State & Utility Functions =====
 // JavaScript for Projects App Lightbox
 
@@ -269,11 +271,40 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const feedContainer = document.querySelector('.feed-container');
+    if (feedContainer && projects && Array.isArray(projects)) {
+        projects.forEach(project => {
+            const post = document.createElement('div');
+            post.className = `post ${project.type}-post`;
+            post.setAttribute('data-type', project.type);
+            post.setAttribute('data-src', project.src);
+            if (project.lowres) post.setAttribute('data-lowres', project.lowres);
+            if (project.poster) post.setAttribute('data-poster', project.poster);
+            if (project.title) post.setAttribute('data-title', project.title);
+            if (project.description) post.setAttribute('data-description', project.description);
+            if (project.type === 'image') {
+                const img = document.createElement('img');
+                img.src = project.src;
+                img.alt = project.title || 'Project Image';
+                post.appendChild(img);
+            } else if (project.type === 'video') {
+                const video = document.createElement('video');
+                video.src = project.src;
+                if (project.poster) video.poster = project.poster;
+                video.autoplay = true;
+                video.muted = true;
+                video.loop = true;
+                video.playsInline = true;
+                video.alt = project.title || 'Project Video';
+                post.appendChild(video);
+            }
+            feedContainer.appendChild(post);
+        });
+    }
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
     const posts = document.querySelectorAll('.post');
-    const feedContainer = document.querySelector('.feed-container');
 
     userPrefersDescriptionVisible = isDesktop(); // Initialize based on view
 
@@ -565,7 +596,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobileDescription = post.dataset.mobileDescription;
         const linkType = post.dataset.linkType;
         const linkUrl = post.dataset.linkUrl;
-        const software = post.dataset.software;
 
         const dynamicSubheading = getSubheadingName(title);
 

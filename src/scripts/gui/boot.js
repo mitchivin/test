@@ -11,6 +11,7 @@
  */
 
 import { showNetworkBalloon } from "./taskbar.js";
+import { loginUserIcon, loginUserName, loginUserTitle, loginUserInstruction, loginUserMobileInstruction } from '../../data/login.js';
 
 // ===== Boot Sequence Initialization =====
 /**
@@ -324,5 +325,20 @@ document.addEventListener("DOMContentLoaded", () => {
       preBoot.parentNode.removeChild(preBoot);
       bootScreen.classList.add("boot-fade-in");
     }, 1000);
+  }
+
+  // Set login screen user icon, name, title, and instructions from data file
+  const loginScreen = document.getElementById('login-screen');
+  if (loginScreen) {
+    const userImg = loginScreen.querySelector('.back-gradient .user img');
+    const nameDiv = loginScreen.querySelector('.back-gradient .text-wrap .name');
+    const titleDiv = loginScreen.querySelector('.back-gradient .text-wrap .user-title');
+    const instructionSpan = loginScreen.querySelector('.desktop-login-instruction');
+    const mobileInstructionSpan = loginScreen.querySelector('.mobile-bottom-detail');
+    if (userImg && loginUserIcon) userImg.src = loginUserIcon;
+    if (nameDiv && loginUserName) nameDiv.textContent = loginUserName;
+    if (titleDiv && loginUserTitle) titleDiv.textContent = loginUserTitle;
+    if (instructionSpan && loginUserInstruction) instructionSpan.textContent = loginUserInstruction;
+    if (mobileInstructionSpan && loginUserMobileInstruction) mobileInstructionSpan.textContent = loginUserMobileInstruction;
   }
 });

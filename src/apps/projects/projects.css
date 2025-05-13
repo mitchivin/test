@@ -286,35 +286,6 @@ body {
     background-color: #2ecc71; /* Green for videos */
 }
 
-.post-caption {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
-    justify-content: flex-end; /* Push content to the bottom */
-    padding: 18px 16px 14px 16px;
-    color: #fff;
-    font-size: 1.08rem;
-    font-weight: 500;
-    line-height: 1.4;
-    background: linear-gradient(0deg, rgba(20,20,20,0.92) 70%, rgba(20,20,20,0.0) 100%);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(100%);
-    transition: opacity 0.28s cubic-bezier(0.4,0,0.2,1), transform 0.32s cubic-bezier(0.4,0,0.2,1);
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-
-.post.show-caption .post-caption {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-}
-
 /* Lightbox Styles */
 #project-lightbox {
     opacity: 0;
@@ -328,7 +299,7 @@ body {
     left: 0;
     width: 100%;
     height: 100dvh; 
-    background-color: rgba(184, 184, 184, 0.836) !important;
+    background-color: rgba(30, 30, 30, 0.9) !important; /* Inverted: Dark semi-transparent background */
     z-index: 100010; 
     padding: 20px;
     box-sizing: border-box;
@@ -503,8 +474,7 @@ body {
       margin-right: auto; /* To center the 90vw block */
     }
     .lightbox-desc-card {
-      background: #0f0f0fd8 !important;
-      color: #222 !important;
+      background: rgba(223, 223, 223, 0.877) !important; /* Inverted: Light semi-transparent background */
       width: 95% !important; /* Changed from 90% */
     }
 
@@ -512,7 +482,7 @@ body {
     .lightbox-media-wrapper .lightbox-desc-card .card-title {
         font-size: 1.8rem;
         font-weight: 600;
-        color: #fff !important;
+        color: #222 !important; /* Inverted: Dark text */
         margin-bottom: 4px;
         line-height: 1.2;
         /* text-transform: uppercase; */
@@ -521,7 +491,7 @@ body {
     .lightbox-media-wrapper .lightbox-desc-card .card-subheading {
         font-size: 1.1rem;
         font-weight: 600;
-        color: #a7a7a78a; /* More subtle, darker gray */
+        color: #555 !important; /* Inverted: Darker gray text */
         margin-bottom: 12px;
         line-height: 1.3;
         opacity: 0.85; /* Slightly less prominent */
@@ -530,7 +500,7 @@ body {
     .lightbox-media-wrapper .lightbox-desc-card .card-body {
         font-size: 0.9rem; /* Slightly smaller body text */
         font-weight: 400;
-        color: #fff !important; /* Make body white on desktop */
+        color: #333 !important; /* Inverted: Dark body text */
         line-height: 1.6;
         margin-top: 18px; /* Added top margin */
     }
@@ -608,9 +578,8 @@ body {
         width: 28px;
         height: 28px;
         background: transparent !important;
-        border: 1.5px solid #fff !important;
+        border: 1.5px solid #333 !important; /* Inverted: Dark border */
         border-radius: 50%;
-        color: #fff !important;
         cursor: pointer;
         box-shadow: 0 2px 10px rgba(0,0,0,0.16);
         display: flex;
@@ -622,11 +591,11 @@ body {
     }
     .lightbox-desc-card .lightbox-close-btn:hover {
         background: transparent !important;
-        border-color: #fff !important;
-        box-shadow: inset 0 0 6px 2px #ffffff83;
+        border-color: #777 !important; /* Softer dark grey border on hover */
+        box-shadow: inset 0 0 6px 2px rgba(119, 119, 119, 0.35); /* Soft inner glow effect */
     }
     .lightbox-desc-card .lightbox-close-btn:hover svg {
-        stroke: #fff !important;
+        stroke: #777 !important; /* Softer dark grey stroke on hover */
     }
 
     .lightbox-media-wrapper > img,
@@ -789,12 +758,12 @@ body {
   margin-right: 0; 
   height: 100%; 
   border-radius: 18px;
-  background: linear-gradient(120deg, rgba(30,30,30,0.98) 80%, rgba(30,30,30,0.92) 100%);
+  background: rgba(240, 240, 240, 0.95); /* Inverted: Ensure this also uses light background */
   display: flex; 
   flex-direction: column;
   font-size: 1.13rem;
   font-weight: 500;
-  color: #fff; 
+  color: #333; /* Inverted: Default dark text for card */
   z-index: 1;
   box-sizing: border-box;
   opacity: 0; 
@@ -974,4 +943,10 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
 /* Push text span to bottom of overlay */
 .lightbox-description-overlay > span {
     margin-top: auto;
+}
+
+/* In projects.js, the close button SVG is created with stroke="#fff" initially.
+   We need to either modify that JS or override with CSS. CSS override is simpler. */
+.lightbox-desc-card .lightbox-close-btn svg line {
+    stroke: #333 !important; /* Inverted: Dark stroke for lines */
 }
