@@ -98,7 +98,7 @@ function createLightboxCloseButton() {
     closeSvg.setAttribute('viewBox', '0 0 18 18');
     closeSvg.setAttribute('aria-hidden', 'true');
     closeSvg.style.display = 'block';
-    closeSvg.innerHTML = `<line x1="4" y1="4" x2="14" y2="14" stroke="#222" stroke-width="2.2" stroke-linecap="round"/><line x1="14" y1="4" x2="4" y2="14" stroke="#222" stroke-width="2.2" stroke-linecap="round"/>`;
+    closeSvg.innerHTML = `<line x1="4" y1="4" x2="14" y2="14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><line x1="14" y1="4" x2="4" y2="14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>`;
     btn.appendChild(closeSvg);
 
     btn.addEventListener('click', (e) => {
@@ -385,53 +385,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Lightbox Description Overlay ---
     function createLightboxOverlay(text, position = 'bottom', linkType, linkUrl) {
-        const overlay = document.createElement('div');
-        overlay.className = position === 'top' ? 'lightbox-title-overlay' : 'lightbox-description-overlay';
-        if (position === 'top') {
-            overlay.style.pointerEvents = 'auto'; // Allow interaction for links in the top overlay
-        } else {
-            overlay.style.pointerEvents = 'none'; // Non-blocking for description overlay
-        }
+        const className = position === 'top' ? 'lightbox-title-overlay' : 'lightbox-description-overlay';
+        const overlay = createEl('div', className);
 
-        if (position === 'top') {
-            const titleSpan = createEl('span', 'lightbox-overlay-title-text', text || '');
-            overlay.appendChild(titleSpan);
-        } else { // For bottom overlay, show subheading and icon (if present)
-            // Create a flex row: subheading left, icon right (if present)
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.width = '100%';
+        // Add the main text content (title or description)
+        const textSpan = createEl('span', className === 'lightbox-title-overlay' ? 'lightbox-overlay-title-text' : '');
+        textSpan.innerHTML = text || ''; // Use innerHTML to allow <br>
+        overlay.appendChild(textSpan);
 
-            const subheadingSpan = document.createElement('span');
-            subheadingSpan.textContent = text || '';
-            subheadingSpan.style.flexGrow = '1';
-            row.appendChild(subheadingSpan);
-
-            if (linkType && linkUrl) {
-                const iconLink = createEl('a', 'mobile-title-link-icon');
-                iconLink.href = linkUrl;
-                iconLink.target = '_blank'; // Open in new tab
-                iconLink.setAttribute('aria-label', `View on ${linkType}`);
-
-                const iconImg = createEl('img');
-                const lowerLinkType = linkType.toLowerCase();
-                iconImg.src = `../../../assets/gui/start-menu/${lowerLinkType}.webp`;
-                iconImg.alt = `Open project on ${linkType}`;
-                iconLink.appendChild(iconImg);
-
-                // Prevent tap/click on the icon link from toggling/hiding the overlay
-                iconLink.addEventListener('touchend', function(e) {
-                    e.stopPropagation();
-                });
-                iconLink.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-
-                row.appendChild(iconLink);
-            }
-            overlay.appendChild(row);
-        }
         return overlay;
     }
 
@@ -473,7 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Handle Bottom Description Overlay (similar logic) ---
         let descOverlay = wrapper.querySelector('.lightbox-description-overlay');
         if (!descOverlay) { // If it doesn't exist, create and show it
-            descOverlay = createLightboxOverlay(descriptionText, 'bottom', linkType, linkUrl);
+            const currentPostDataForOverlay = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
+            const actualDescriptionForOverlay = currentPostDataForOverlay.mobileDescription || currentPostDataForOverlay.description || '';
+            descOverlay = createLightboxOverlay(actualDescriptionForOverlay, 'bottom', linkType, linkUrl);
             wrapper.appendChild(descOverlay);
             void descOverlay.offsetWidth; // Reflow
             descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
@@ -492,7 +455,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, { once: true });
             } else {
                 descOverlay.remove();
-                descOverlay = createLightboxOverlay(descriptionText, 'bottom', linkType, linkUrl);
+                const currentPostDataForOverlay = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
+                const actualDescriptionForOverlay = currentPostDataForOverlay.mobileDescription || currentPostDataForOverlay.description || '';
+                descOverlay = createLightboxOverlay(actualDescriptionForOverlay, 'bottom', linkType, linkUrl);
                 wrapper.appendChild(descOverlay);
                 void descOverlay.offsetWidth;
                 descOverlay.classList.remove('hide-anim');
@@ -766,8 +731,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 titleOverlay.classList.add('show');
                                 titleOverlay.style.pointerEvents = 'auto';
 
-                                // Create and show description overlay for the new item (now subheading)
-                                const descOverlay = createLightboxOverlay(newSubheading, 'bottom', newLinkType, newLinkUrl);
+                                // Create and show description overlay for the new item (using actual description)
+                                const actualDescriptionForOpen = postData.mobileDescription || postData.description || '';
+                                const descOverlay = createLightboxOverlay(actualDescriptionForOpen, 'bottom', newLinkType, newLinkUrl);
                                 wrapper.appendChild(descOverlay);
                                 void descOverlay.offsetWidth; // Reflow
                                 descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
@@ -1429,7 +1395,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     video.play().catch(error => {
                         // Autoplay was prevented, typically on mobile if not muted or no user interaction yet.
                         // Since videos are muted, this is less likely but good to be aware of.
-                        // console.warn("Video autoplay prevented for: ", video.src, error);
                     });
                 }
             } else {
@@ -1544,13 +1509,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         // If on mobile, show subheading in the bottom overlay
                         const currentPostData = allPosts[currentLightboxIndex].dataset;
                         if (isTouchDevice()) {
-                            const title = currentPostData.title || '';
-                            // Use the same subheading logic as desktop
-                            const subheading = getSubheadingName(title);
+                            const titleForToggle = currentPostData.title || '';
+                            // The 'descriptionText' for toggleMobileOverlays will be the actual description.
+                            // The title for the top overlay is titleForToggle.
+                            // The description for the bottom overlay will be fetched inside toggleMobileOverlays itself.
+                            const subheadingForToggle = getSubheadingName(titleForToggle); // This is effectively unused by createLightboxOverlay for bottom now.
                             const linkTypeFromData = currentPostData.linkType;
                             const linkUrlFromData = currentPostData.linkUrl;
                             // Pass the wrapper to the generalized toggle function, using subheading for the bottom overlay
-                            toggleMobileOverlays(title, subheading, wrapper, linkTypeFromData, linkUrlFromData);
+                            toggleMobileOverlays(titleForToggle, subheadingForToggle, wrapper, linkTypeFromData, linkUrlFromData);
                         } else {
                             // Desktop: only toggle the description card via the existing logic
                             let descForDesktopCard = currentPostData.description || '';
@@ -1597,7 +1564,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/sua'?ali'i/i.test(title)) return "Joseph Sua'ali'i";
         if (/mahomes/i.test(title)) return "Patrick Mahomes";
         if (/flashback/i.test(title)) return "Dwayne Wade";
-        if (/minnesota/i.test(title)) return "Edwards & Justin";
+        if (/minnesota/i.test(title)) return "Edwards & Jefferson";
         if (/saquon/i.test(title)) return "Saquon Barkley";
         if (/blues/i.test(title)) return "Auckland Blues";
         if (/bryant/i.test(title)) return "Kobe Bryant";

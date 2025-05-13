@@ -332,10 +332,15 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   if (isMobile && windowId === 'contact-window') {
     // Remove disabled buttons
     buttons = buttons.filter(btn => btn.enabled !== false || btn.type === 'separator');
-    // Remove the separator immediately after New Message
+    // Remove the separator immediately after New Message (if it exists from desktop config)
     const newMsgIdx = buttons.findIndex(btn => btn.key === 'new');
-    if (newMsgIdx !== -1 && buttons[newMsgIdx + 1] && buttons[newMsgIdx + 1].type === 'separator') {
+    if (newMsgIdx !== -1 && buttons[newMsgIdx + 1] && buttons[newMsgIdx + 1].type === 'separator' && buttons[newMsgIdx + 1].desktopOnly) {
       buttons.splice(newMsgIdx + 1, 1);
+    }
+    // Add separator before Instagram
+    const instaIdx = buttons.findIndex(btn => btn.key === 'instagram');
+    if (instaIdx !== -1 && (instaIdx === 0 || buttons[instaIdx - 1].type !== 'separator')) {
+        buttons.splice(instaIdx, 0, { type: 'separator' });
     }
   }
 
@@ -408,7 +413,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
     }
 
     // --- Desktop: Render separator as a vertical line ---
-    if (!isMobile && buttonConfig.type === 'separator') {
+    if (buttonConfig.type === 'separator') {
       const divider = document.createElement('div');
       divider.className = 'vertical_line';
       toolbarRow.appendChild(divider);
@@ -429,11 +434,20 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
         buttonContent += `<img alt=\"${buttonConfig.key}\" width=\"25\" height=\"25\" src=\"${buttonConfig.icon}\" />`;
       }
       if (buttonConfig.text) {
-        buttonContent += `<span>${buttonConfig.text}</span>`;
+        // --- Mobile: Shorten "New Message" to "New" for contact-window ---
+        let buttonText = buttonConfig.text;
+        if (isMobile && windowId === 'contact-window' && buttonConfig.key === 'new') {
+            buttonText = 'New';
+        }
+        buttonContent += `<span>${buttonText}</span>`;
       }
       buttonDiv.innerHTML = buttonContent;
       if (buttonConfig.style) {
         buttonDiv.setAttribute('style', buttonConfig.style);
+      }
+      // Add data-url-to-open if the button config has a URL
+      if (buttonConfig.url) {
+        buttonDiv.dataset.urlToOpen = buttonConfig.url;
       }
       toolbarRow.appendChild(buttonDiv);
     }

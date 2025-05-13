@@ -124,8 +124,11 @@ document.addEventListener("DOMContentLoaded", () => {
           instagramMenuItem.click();
         } else if (startMenu && startMenu._handleMenuClick) {
           // Fallback: manually trigger the handler with a fake event
-          const fakeEvent = { target: { closest: () => ({ dataset: { action: 'open-url', url: 'https://www.instagram.com/mitchivin' } }) }, stopPropagation: () => {}, preventDefault: () => {} };
-          startMenu._handleMenuClick(fakeEvent);
+          // } catch (error) {
+            // console.error("Failed to open Instagram:", error);
+            // Handle error (e.g., show a fallback message or log)
+          // const fakeEvent = { target: { closest: () => ({ dataset: { action: 'open-url', url: 'https://www.instagram.com/mitchivin' } }) }, stopPropagation: () => {}, preventDefault: () => {} };
+          // startMenu._handleMenuClick(fakeEvent);
         }
       }
     });
