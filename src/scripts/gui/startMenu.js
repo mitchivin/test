@@ -476,28 +476,28 @@ export default class StartMenu {
                           id: "behance",
                           icon: "./assets/gui/start-menu/behance.webp",
                           title: "Behance",
-                          url: "https://www.behance.net/mitch_ivin",
+                          url: socialLinks.behance,
                           action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "linkedin",
                           icon: "./assets/gui/start-menu/linkedin.webp",
                           title: "LinkedIn",
-                          url: "https://www.linkedin.com/in/mitchivin",
+                          url: socialLinks.linkedin,
                           action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "github",
                           icon: "./assets/gui/start-menu/github.webp",
                           title: "GitHub",
-                          url: "https://github.com/mitchivin",
+                          url: socialLinks.github,
                           action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "instagram",
                           icon: "./assets/gui/start-menu/instagram.webp",
                           title: "Instagram",
-                          url: "https://www.instagram.com/mitchivin",
+                          url: socialLinks.instagram,
                           action: "open-url",
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>
