@@ -13,12 +13,6 @@
 // Global state for persistent description visibility
 let userPrefersDescriptionVisible = false;
 
-// --- Global mute preference for lightbox videos ---
-let userPrefersMuted = true; // Default: videos start muted
-if (isDesktop() && window.sessionStorage && sessionStorage.getItem('projectsUserPrefersMuted') !== null) {
-    userPrefersMuted = sessionStorage.getItem('projectsUserPrefersMuted') === 'true';
-}
-
 // === Constants ===
 const MIN_SWIPE_DISTANCE = 44; // Minimum px for swipe to trigger navigation
 
@@ -91,15 +85,16 @@ function createLightboxCloseButton() {
     btn.setAttribute('tabindex', '0');
     btn.setAttribute('aria-label', 'Close');
 
-    const svgNS = 'http://www.w3.org/2000/svg';
-    const closeSvg = document.createElementNS(svgNS, 'svg');
-    closeSvg.setAttribute('width', '12');
-    closeSvg.setAttribute('height', '12');
-    closeSvg.setAttribute('viewBox', '0 0 18 18');
-    closeSvg.setAttribute('aria-hidden', 'true');
-    closeSvg.style.display = 'block';
-    closeSvg.innerHTML = `<line x1="4" y1="4" x2="14" y2="14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><line x1="14" y1="4" x2="4" y2="14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>`;
-    btn.appendChild(closeSvg);
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'close-icon';
+    iconSpan.innerHTML = '&times;';
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'close-text';
+    textSpan.textContent = 'Close';
+
+    btn.appendChild(iconSpan);
+    btn.appendChild(textSpan);
 
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -135,31 +130,13 @@ function showMuteIconOverlay(videoElement, isMuted) {
     if (existing) existing.remove();
     const overlay = createMuteIconOverlay(isMuted);
     videoElement.parentElement.appendChild(overlay);
-    // Only fade in if video is ready (poster is gone)
-    if (videoElement.readyState >= 3 && !videoElement.paused) {
-        // Force reflow for animation
-        void overlay.offsetWidth;
-        overlay.classList.add('show');
-        setTimeout(() => {
-            overlay.classList.remove('show');
-            setTimeout(() => overlay.remove(), 1800);
-        }, 1800);
-    } else {
-        // Wait for 'playing' event before showing overlay
-        const onPlay = () => {
-            // Only show if overlay is still in DOM
-            if (overlay.parentNode) {
-                void overlay.offsetWidth;
-                overlay.classList.add('show');
-                setTimeout(() => {
-                    overlay.classList.remove('show');
-                    setTimeout(() => overlay.remove(), 1800);
-                }, 1800);
-            }
-            videoElement.removeEventListener('playing', onPlay);
-        };
-        videoElement.addEventListener('playing', onPlay);
-    }
+    // Force reflow for animation
+    void overlay.offsetWidth;
+    overlay.classList.add('show');
+    setTimeout(() => {
+        overlay.classList.remove('show');
+        setTimeout(() => overlay.remove(), 1800);
+    }, 1800);
 }
 
 function createLightboxMediaElement(type, src, posterUrl = null) {
@@ -175,29 +152,27 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         videoElement.autoplay = true;
         videoElement.loop = true;
         videoElement.setAttribute('playsinline', '');
-        // --- Only remember mute state on desktop. On mobile, always start muted. ---
-        if (isDesktop()) {
-            videoElement.muted = userPrefersMuted;
-            if (userPrefersMuted) {
-                videoElement.setAttribute('muted', '');
-            } else {
-                videoElement.removeAttribute('muted');
-            }
-        } else {
-            videoElement.muted = true;
-            videoElement.setAttribute('muted', '');
-        }
+        videoElement.muted = true;
+        videoElement.setAttribute('muted', '');
         videoElement.src = src;
         if (posterUrl) videoElement.poster = posterUrl;
         
         const wrapper = document.createElement('div');
         wrapper.style.position = 'relative'; // Keep for overlay positioning
+
+        // Styles for the JS-created div wrapper for video
         wrapper.style.display = 'inline-block'; // Changed from 'block' to allow shrink-to-fit
         wrapper.style.flexGrow = '0';    
         wrapper.style.flexShrink = '0';  
         wrapper.style.maxHeight = '100%'; 
         wrapper.style.maxWidth = '100%'; // Added to ensure it respects parent bounds
         wrapper.style.verticalAlign = 'middle'; // Added for better inline-block alignment
+        
+        // Video element styles: width and height are removed to let CSS handle sizing
+        // videoElement.style.width = '100%'; // REMOVED
+        // videoElement.style.height = '100%'; // REMOVED
+        // Note: .lightbox-media-wrapper video CSS provides display:block and object-fit:contain
+        // and width:auto, height:auto, max-width, max-height which will now take effect.
         
         wrapper.appendChild(videoElement);
         
@@ -226,123 +201,19 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
             } else {
                 videoElement.removeAttribute('muted');
             }
-            // Update global preference and persist ONLY on desktop
-            if (isDesktop()) {
-                userPrefersMuted = videoElement.muted;
-                if (window.sessionStorage) {
-                    sessionStorage.setItem('projectsUserPrefersMuted', userPrefersMuted);
-                }
-            }
             showMuteIfPlayed();
         });
-        // --- Desktop hover: show mute/unmute overlay on hover ---
-        if (!isTouchDevice()) {
-            let fadeOutTimeout = null;
-            wrapper.addEventListener('mouseenter', () => {
-                if (fadeOutTimeout) {
-                    clearTimeout(fadeOutTimeout);
-                    fadeOutTimeout = null;
-                }
-                showMuteIconOverlay(videoElement, videoElement.muted);
-            });
-            wrapper.addEventListener('mouseleave', () => {
-                if (fadeOutTimeout) clearTimeout(fadeOutTimeout);
-                fadeOutTimeout = setTimeout(() => {
-                    // Remove overlay after 2s delay, then fade out
-                    const overlay = wrapper.querySelector('.mute-icon-overlay');
-                    if (overlay) {
-                        overlay.classList.remove('show');
-                        setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 200);
-                    }
-                }, 2000); // 2 seconds delay before fade out
-            });
-            // Also update overlay if mute state changes while hovered
-            videoElement.addEventListener('volumechange', () => {
-                if (wrapper.matches(':hover')) {
-                    showMuteIconOverlay(videoElement, videoElement.muted);
-                }
-            });
-        }
         return wrapper;
     }
     return null;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Custom Projects Support ---
-    const LOCAL_KEY_PROJECTS = 'custom_projects';
-    const feedContainer = document.querySelector('.feed-container');
-    const defaultPosts = Array.from(feedContainer ? feedContainer.querySelectorAll('.post') : []);
-    const stored = localStorage.getItem(LOCAL_KEY_PROJECTS);
-    let customProjects = null;
-    try { customProjects = stored ? JSON.parse(stored) : null; } catch {}
-    if (Array.isArray(customProjects) && customProjects.length > 0 && feedContainer) {
-        // Remove all default posts
-        feedContainer.innerHTML = '';
-        // Add custom posts in the same structure
-        customProjects.forEach(data => {
-            const post = document.createElement('div');
-            if (data.type === 'image') {
-                post.className = 'post image-post';
-            } else if (data.type === 'video') {
-                post.className = 'post video-post';
-            } else {
-                post.className = 'post';
-            }
-            // Set all data-* attributes
-            for (const key in data) {
-                if (key.startsWith('data-')) {
-                    post.setAttribute(key, data[key]);
-                }
-            }
-            post.setAttribute('data-type', data.type);
-            post.setAttribute('data-src', data.src);
-            if (data.poster) post.setAttribute('data-poster', data.poster);
-            if (data['data-title']) post.setAttribute('data-title', data['data-title']);
-            if (data['data-description']) post.setAttribute('data-description', data['data-description']);
-            if (data['data-mobileDescription']) post.setAttribute('data-mobileDescription', data['data-mobileDescription']);
-            if (data['data-linkType']) post.setAttribute('data-linkType', data['data-linkType']);
-            if (data['data-linkUrl']) post.setAttribute('data-linkUrl', data['data-linkUrl']);
-            if (data['data-software']) post.setAttribute('data-software', data['data-software']);
-            // Add media element
-            if (data.type === 'video') {
-                const video = document.createElement('video');
-                video.src = data.src;
-                video.poster = data.poster || '';
-                video.autoplay = true;
-                video.loop = true;
-                video.muted = true;
-                video.setAttribute('playsinline', '');
-                post.appendChild(video);
-                // Add a post-caption div for consistency
-                const caption = document.createElement('div');
-                caption.className = 'post-caption';
-                caption.textContent = data['data-caption'] || '';
-                post.appendChild(caption);
-            } else if (data.type === 'image') {
-                const img = document.createElement('img');
-                img.src = data.src;
-                // Add onload handler to trigger layout after image loads
-                img.addEventListener('load', function() {
-                    if (typeof applyMasonryLayout === 'function') {
-                        applyMasonryLayout();
-                    }
-                });
-                post.appendChild(img);
-                // Add a post-caption div for consistency
-                const caption = document.createElement('div');
-                caption.className = 'post-caption';
-                caption.textContent = data['data-caption'] || '';
-                post.appendChild(caption);
-            }
-            feedContainer.appendChild(post);
-        });
-    }
-
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
     const posts = document.querySelectorAll('.post');
+    const feedContainer = document.querySelector('.feed-container');
 
     userPrefersDescriptionVisible = isDesktop(); // Initialize based on view
 
@@ -374,8 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openLightbox() {
-        // Pause all grid videos ONLY when opening the lightbox
-        document.querySelectorAll('.feed-container .video-post video').forEach(v => { v.pause(); });
+        document.querySelectorAll('.feed-container video').forEach(v => { v.pause(); });
 
         // Core content setup is now handled by openLightboxByIndex
         if (currentLightboxIndex === null) {
@@ -454,14 +324,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Lightbox Description Overlay ---
     function createLightboxOverlay(text, position = 'bottom', linkType, linkUrl) {
-        const className = position === 'top' ? 'lightbox-title-overlay' : 'lightbox-description-overlay';
-        const overlay = createEl('div', className);
+        const overlay = document.createElement('div');
+        overlay.className = position === 'top' ? 'lightbox-title-overlay' : 'lightbox-description-overlay';
+        if (position === 'top') {
+            overlay.style.pointerEvents = 'auto'; // Allow interaction for links in the top overlay
+        } else {
+            overlay.style.pointerEvents = 'none'; // Non-blocking for description overlay
+        }
 
-        // Add the main text content (title or description)
-        const textSpan = createEl('span', className === 'lightbox-title-overlay' ? 'lightbox-overlay-title-text' : '');
-        textSpan.innerHTML = text || ''; // Use innerHTML to allow <br>
-        overlay.appendChild(textSpan);
+        if (position === 'top') {
+            const titleSpan = createEl('span', 'lightbox-overlay-title-text', text || '');
+            overlay.appendChild(titleSpan);
 
+            if (linkType && linkUrl) {
+                const iconLink = createEl('a', 'mobile-title-link-icon');
+                iconLink.href = linkUrl;
+                iconLink.target = '_blank'; // Open in new tab
+                iconLink.setAttribute('aria-label', `View on ${linkType}`);
+
+                const iconImg = createEl('img');
+                const lowerLinkType = linkType.toLowerCase();
+                iconImg.src = `../../../assets/gui/start-menu/${lowerLinkType}.webp`;
+                iconImg.alt = `Open project on ${linkType}`;
+                
+                iconLink.appendChild(iconImg);
+
+                // Prevent tap/click on the icon link from toggling/hiding the overlay
+                iconLink.addEventListener('touchend', function(e) {
+                    e.stopPropagation();
+                });
+                iconLink.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+
+                overlay.appendChild(iconLink);
+            }
+        } else { // For bottom overlay, it's just text
+            overlay.textContent = text || '';
+        }
         return overlay;
     }
 
@@ -503,9 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Handle Bottom Description Overlay (similar logic) ---
         let descOverlay = wrapper.querySelector('.lightbox-description-overlay');
         if (!descOverlay) { // If it doesn't exist, create and show it
-            const currentPostDataForOverlay = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-            const actualDescriptionForOverlay = currentPostDataForOverlay.mobileDescription || currentPostDataForOverlay.description || '';
-            descOverlay = createLightboxOverlay(actualDescriptionForOverlay, 'bottom', linkType, linkUrl);
+            descOverlay = createLightboxOverlay(descriptionText, 'bottom', linkType, linkUrl);
             wrapper.appendChild(descOverlay);
             void descOverlay.offsetWidth; // Reflow
             descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
@@ -524,9 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, { once: true });
             } else {
                 descOverlay.remove();
-                const currentPostDataForOverlay = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                const actualDescriptionForOverlay = currentPostDataForOverlay.mobileDescription || currentPostDataForOverlay.description || '';
-                descOverlay = createLightboxOverlay(actualDescriptionForOverlay, 'bottom', linkType, linkUrl);
+                descOverlay = createLightboxOverlay(descriptionText, 'bottom', linkType, linkUrl);
                 wrapper.appendChild(descOverlay);
                 void descOverlay.offsetWidth;
                 descOverlay.classList.remove('hide-anim');
@@ -563,14 +459,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!animWrapper) {
                     // Fetch current post data if we need to create everything new
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = getSubheadingName(currentPostData.title);
+                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Video Production' : '';
                     animWrapper = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description);
                     wrapper.appendChild(animWrapper);
                     card = animWrapper.querySelector('.lightbox-desc-card'); 
                 } else if (!card && animWrapper) { 
                     while (animWrapper.firstChild) animWrapper.removeChild(animWrapper.firstChild);
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = getSubheadingName(currentPostData.title);
+                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Video Production' : '';
                     const newCardElement = createDesktopDescriptionCard(currentPostData.title, dynamicSubheading, currentPostData.description).querySelector('.lightbox-desc-card');
                     animWrapper.appendChild(newCardElement);
                     card = newCardElement;
@@ -581,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // If card exists, but children are missing, or text needs update (e.g. if desc could change dynamically)
                     // This part might need enhancement if card content can change without full recreation
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
-                    const dynamicSubheading = getSubheadingName(currentPostData.title);
+                    const dynamicSubheading = currentPostData.type === 'image' ? 'Social Graphics' : currentPostData.type === 'video' ? 'Video Production' : '';
                     clearChildren(card); // Clear old single text node if any
                     if (currentPostData.title) card.appendChild(createEl('div', 'card-title', currentPostData.title));
                     if (dynamicSubheading) card.appendChild(createEl('div', 'card-subheading', dynamicSubheading));
@@ -636,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const linkUrl = post.dataset.linkUrl;
         const software = post.dataset.software;
 
-        const dynamicSubheading = getSubheadingName(title);
+        const dynamicSubheading = type === 'image' ? 'Social Graphics' : type === 'video' ? 'Video Production' : '';
 
         // Always use a persistent wrapper for lightbox media and description
         const wrapper = getOrCreateWrapper();
@@ -650,23 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let descCardFadedOut = !oldDescCard; // True if no old description card to animate out
         let mobileTitleOverlayFadedOut = true; // Assume true if not mobile or no overlay
         let mobileDescOverlayFadedOut = true; // Assume true if not mobile or no overlay
-
-        // --- NEW: Fade out mute icon overlay if present ---
-        if (oldMedia && oldMedia.parentElement) {
-            const muteOverlay = oldMedia.parentElement.querySelector('.mute-icon-overlay.show');
-            if (muteOverlay) {
-                muteOverlay.classList.remove('show');
-                let removed = false;
-                const removeMuteOverlay = () => {
-                    if (removed) return;
-                    removed = true;
-                    muteOverlay.removeEventListener('transitionend', removeMuteOverlay);
-                    if (muteOverlay.parentNode) muteOverlay.parentNode.removeChild(muteOverlay);
-                };
-                muteOverlay.addEventListener('transitionend', removeMuteOverlay);
-                setTimeout(removeMuteOverlay, 250); // Fallback in case transitionend doesn't fire
-            }
-        }
 
         // --- Mobile Overlays: Trigger hide animation before content swap --- 
         if (isTouchDevice()) {
@@ -787,8 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const createAndShowOverlays = () => {
                                 const postData = allPosts[currentLightboxIndex].dataset;
                                 const newTitle = postData.title || '';
-                                // Use the same subheading logic as desktop
-                                const newSubheading = getSubheadingName(newTitle);
+                                const newDesc = postData.mobileDescription || postData.description || '';
                                 const newLinkType = postData.linkType;
                                 const newLinkUrl = postData.linkUrl;
 
@@ -800,9 +678,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 titleOverlay.classList.add('show');
                                 titleOverlay.style.pointerEvents = 'auto';
 
-                                // Create and show description overlay for the new item (using actual description)
-                                const actualDescriptionForOpen = postData.mobileDescription || postData.description || '';
-                                const descOverlay = createLightboxOverlay(actualDescriptionForOpen, 'bottom', newLinkType, newLinkUrl);
+                                // Create and show description overlay for the new item
+                                const descOverlay = createLightboxOverlay(newDesc, 'bottom');
                                 wrapper.appendChild(descOverlay);
                                 void descOverlay.offsetWidth; // Reflow
                                 descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
@@ -836,11 +713,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     linkUrl: linkUrl || null    
                 });
                 sendMessageToParent({ type: 'description-state', open: userPrefersDescriptionVisible });
-                if (linkType && linkUrl) {
-                    sendMessageToParent({ type: 'set-external-link-enabled', enabled: true, url: linkUrl });
-                } else {
-                    sendMessageToParent({ type: 'set-external-link-enabled', enabled: false });
-                }
             }
         }
 
@@ -1431,12 +1303,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     // Notify parent that projects app content is ready and visible
                     sendMessageToParent({ type: 'projects-ready' });
-
-                    // MOVED: Setup IntersectionObserver and attempt initial play
-                    // only after feed container is made visible.
-                    if (gridVideos.length > 0) { // Ensure gridVideos is populated before setup
-                        setupIntersectionObserver();
-                    }
                 }, 100); // 100ms delay, adjust if necessary
             }
         }
@@ -1450,18 +1316,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.addEventListener('error', checkAllLoaded);
                 }
             });
-        } else {
-            // No media elements, so consider content loaded immediately for observer setup
-            const feedContainer = document.querySelector('.feed-container');
-            if (feedContainer) {
-                feedContainer.classList.add('loaded');
-            }
-            // Notify parent that projects app content is ready and visible
-            sendMessageToParent({ type: 'projects-ready' });
-            // Setup observer now if no media to wait for
-            if (gridVideos.length > 0) { // Ensure gridVideos is populated
-                setupIntersectionObserver();
-            }
         }
     }
 
@@ -1479,18 +1333,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (video.__isIntersecting) {
                 // Attempt to play if intersecting
                 if (video.paused) {
-                    console.log('[ProjectsApp] Attempting to play video (intersecting & paused):', video.src);
                     video.play().catch(error => {
-                        console.error('[ProjectsApp] Autoplay attempt failed for video:', video.src, 'Error:', error);
-                        console.log('[ProjectsApp] Video details: muted=', video.muted, 'playsinline=', video.hasAttribute('playsinline'), 'readyState=', video.readyState, 'networkState=', video.networkState, 'videoError=', video.error);
                         // Autoplay was prevented, typically on mobile if not muted or no user interaction yet.
                         // Since videos are muted, this is less likely but good to be aware of.
+                        // console.warn("Video autoplay prevented for: ", video.src, error);
                     });
                 }
             } else {
                 // Pause if not intersecting
                 if (!video.paused) {
-                    console.log('[ProjectsApp] Pausing video (not intersecting & playing):', video.src);
                     video.pause();
                 }
             }
@@ -1519,12 +1370,6 @@ document.addEventListener('DOMContentLoaded', () => {
         gridVideos.forEach(video => { delete video.__isIntersecting; });
     }
 
-    // Helper to check if the lightbox is open
-    function isLightboxOpen() {
-        const lightbox = document.getElementById('project-lightbox');
-        return lightbox && lightbox.style.display === 'flex';
-    }
-
     function setMaximizedState(maximized) {
         isMaximized = maximized;
         const bodyEl = document.body;
@@ -1540,38 +1385,30 @@ document.addEventListener('DOMContentLoaded', () => {
         // try to force a re-evaluation of its width by toggling a class that affects layout/sizing,
         // or directly re-applying its width based on the new state.
         // This is a more direct attempt to ensure the CSS takes hold.
-        const lightboxIsOpen = isLightboxOpen();
+        const lightboxIsOpen = lightbox && lightbox.style.display === 'flex';
         if (lightboxIsOpen) {
-            gridVideos.forEach(video => video.pause());
-        } else {
-            // Only play grid videos if lightbox is closed
-            if (isMaximized) {
-                cleanupIntersectionObserver();
-                gridVideos.forEach(video => video.play());
-            } else {
-                gridVideos.forEach(video => video.pause());
-                setupIntersectionObserver();
-            }
-        }
-
-        // ... existing code for resizing description card ...
-        const lightbox = document.getElementById('project-lightbox');
-        const lightboxContent = document.getElementById('lightbox-content');
-        const lightboxIsOpenForCard = lightbox && lightbox.style.display === 'flex';
-        if (lightboxIsOpenForCard) {
             const mediaWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
             if (mediaWrapper && mediaWrapper.classList.contains('desc-visible')) {
                 const animWrapper = mediaWrapper.querySelector('.desc-card-anim-wrapper');
                 if (animWrapper) {
+                    // Option C: Simpler - just ensure the transition property is there so it re-evaluates on next CSS match
                     animWrapper.style.transition = 'width 0.4s cubic-bezier(0.4,0,0.2,1)';
                 }
             }
         }
 
+        // Existing video grid logic based on the global isMaximized flag
         document.querySelectorAll('.video-post').forEach(post => {
             if (isMaximized) post.classList.add('maximized');
             else post.classList.remove('maximized');
         });
+        if (isMaximized) {
+            cleanupIntersectionObserver();
+            gridVideos.forEach(video => video.play());
+        } else {
+            gridVideos.forEach(video => video.pause());
+            setupIntersectionObserver();
+        }
     }
 
     // Listen for maximize/unmaximize messages from parent
@@ -1597,18 +1434,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
                     let description = '';
                     if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
-                        // If on mobile, show subheading in the bottom overlay
+                        // If on mobile, prefer mobileDescription, fallback to desktopDescription
+                        // If on desktop, always use desktopDescription for the animated card
+                        const currentPostType = allPosts[currentLightboxIndex].dataset.type;
                         const currentPostData = allPosts[currentLightboxIndex].dataset;
+                        
                         if (isTouchDevice()) {
-                            const titleForToggle = currentPostData.title || '';
-                            // The 'descriptionText' for toggleMobileOverlays will be the actual description.
-                            // The title for the top overlay is titleForToggle.
-                            // The description for the bottom overlay will be fetched inside toggleMobileOverlays itself.
-                            const subheadingForToggle = getSubheadingName(titleForToggle); // This is effectively unused by createLightboxOverlay for bottom now.
-                            const linkTypeFromData = currentPostData.linkType;
-                            const linkUrlFromData = currentPostData.linkUrl;
-                            // Pass the wrapper to the generalized toggle function, using subheading for the bottom overlay
-                            toggleMobileOverlays(titleForToggle, subheadingForToggle, wrapper, linkTypeFromData, linkUrlFromData);
+                            // For mobile, we need to toggle both title and description overlays
+                            const title = currentPostData.title || '';
+                            let descText = '';
+                            if (currentPostData.mobileDescription) {
+                                descText = currentPostData.mobileDescription;
+                            } else {
+                                descText = currentPostData.description;
+                            }
+                            const linkTypeFromData = currentPostData.linkType; // Get linkType
+                            const linkUrlFromData = currentPostData.linkUrl;   // Get linkUrl
+                            
+                            // Pass the wrapper to the generalized toggle function
+                            toggleMobileOverlays(title, descText, wrapper, linkTypeFromData, linkUrlFromData); // Pass linkType, linkUrl
                         } else {
                             // Desktop: only toggle the description card via the existing logic
                             let descForDesktopCard = currentPostData.description || '';
@@ -1634,6 +1478,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Initialize for default (unmaximized) state
+    setupIntersectionObserver();
+
     // Expose closeLightbox globally for message handler
     window.closeLightbox = closeLightbox;
 
@@ -1643,21 +1490,4 @@ document.addEventListener('DOMContentLoaded', () => {
             window.parent.postMessage({ type: 'iframe-interaction' }, '*');
         }
     });
-
-    // Helper to extract person/team name for subheading
-    function getSubheadingName(title) {
-        // Add custom mappings for all projects
-        if (/mavs win/i.test(title)) return "Dallas Mavericks";
-        if (/all blacks/i.test(title)) return "New Zealand All Blacks";
-        if (/sua'?ali'i/i.test(title)) return "Joseph Sua'ali'i";
-        if (/mahomes/i.test(title)) return "Patrick Mahomes";
-        if (/flashback/i.test(title)) return "Dwayne Wade";
-        if (/minnesota/i.test(title)) return "Edwards & Jefferson";
-        if (/saquon/i.test(title)) return "Saquon Barkley";
-        if (/blues/i.test(title)) return "Auckland Blues";
-        if (/bryant/i.test(title)) return "Kobe Bryant";
-        if (/barkley big head/i.test(title)) return "Saquon Barkley";
-        // Fallback: use first 2 words
-        return title.split(/\s+/).slice(0,2).join(' ');
-    }
 });

@@ -62,8 +62,8 @@
 
 /* New XP Loading Bar Styles */
 .container {
-  width: 180px; /* Changed from 200px */
-  height: 22px; /* Changed from 26px */
+  width: 180px; /* Increased width */
+  height: 22px; /* Slimmer height for XP look */
   border: 2px solid #b2b2b2;
   border-radius: 7px;
   margin: 0 auto; /* Centered horizontally */
@@ -135,7 +135,7 @@
 
 .boot-bottom-right img {
   display: block;
-  height: 32px; /* Changed from 35px */
+  height: 35px; /* Fixed height */
   width: auto; /* Maintain aspect ratio */
 }
 
@@ -147,20 +147,9 @@
 
 /* Media query to hide bottom elements and adjust logo/loader on mobile */
 @media (max-width: 768px) {
-  .boot-bottom-left {
-    display: none;
-  }
-
-  /* Center and resize wordmark on mobile */
+  .boot-bottom-left,
   .boot-bottom-right {
-    right: auto; /* Remove right positioning */
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 30px; /* Adjust vertical position slightly */
-  }
-
-  .boot-bottom-right img {
-    height: 28px; /* Make image smaller */
+    display: none;
   }
 
   #boot-logo {
@@ -172,11 +161,11 @@
   }
 
   .container {
-    width: 180px;  /* Changed from 200px */
-    height: 22px; /* Changed from 26px */
+    width: 200px;
+    height: 26px;
     padding-top: 1px;
     padding-bottom: 1px;
-    border-width: 2px; /* Changed from 3px */
+    border-width: 3px;
   }
 
   .box {
@@ -188,7 +177,7 @@
       transform: translate(-30px);
     }
     100% {
-      transform: translate(180px); /* Changed from 200px */
+      transform: translate(200px);
     }
   }
 
@@ -579,7 +568,7 @@
 
 .login-screen .turn-off {
   position: absolute;
-  bottom: 35px; /* Changed from 45px */
+  bottom: 45px;
   left: 50px;
   display: flex;
   align-items: center;
@@ -607,7 +596,7 @@
 
 .login-screen .right-bottom {
   position: absolute;
-  bottom: 30px; /* Changed from 38px */
+  bottom: 38px;
   right: 50px;
   display: flex;
   flex-direction: column;

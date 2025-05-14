@@ -95,7 +95,6 @@ a {
    END Modern CSS Reset
    ================================================== */
 
-/* Z-Index Variables */
 :root {
   --z-base: 1;
   --z-window: 100;

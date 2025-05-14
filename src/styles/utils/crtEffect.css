@@ -467,3 +467,14 @@
 body {
     filter: brightness(1.15);
 }
+
+/*
+body {
+    background-color: #000;
+    animation: crt-flicker 10s infinite;
+    transform-origin: center center;
+    filter: brightness(1.15);
+}
+*/
+
+/* ===== Responsive: Mobile Adjustments ===== */ 

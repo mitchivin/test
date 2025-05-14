@@ -14,15 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const resumeImage = document.getElementById('resumeImage');
   const scroller = document.getElementById('appRoot');
 
-  // Customization: Load custom resume.webp if present
-  const LOCAL_KEY = 'custom_resume_webp';
-  const customResume = localStorage.getItem(LOCAL_KEY);
-  if (customResume) {
-    resumeImage.src = customResume;
-  } else {
-    resumeImage.src = '../../../assets/apps/resume/resume.webp';
-  }
-
   if (!resumeImage || !scroller) {
     console.error("Resume image or scroller element not found.");
     return;

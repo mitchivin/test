@@ -293,8 +293,7 @@ body {
     bottom: 0;
     z-index: 2;
     display: flex;
-    flex-direction: column; /* Stack items vertically */
-    justify-content: flex-end; /* Push content to the bottom */
+    align-items: flex-end;
     padding: 18px 16px 14px 16px;
     color: #fff;
     font-size: 1.08rem;
@@ -328,11 +327,12 @@ body {
     left: 0;
     width: 100%;
     height: 100dvh; 
-    background-color: rgba(30, 30, 30, 0.9) !important; /* Inverted: Dark semi-transparent background */
+    background-color: rgba(184, 184, 184, 0.836) !important;
     z-index: 100010; 
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
+    border: 3px solid red !important; /* DIAGNOSTIC */
 }
 
 #project-lightbox.fade-in {
@@ -353,6 +353,7 @@ body {
     height: 100%;
     box-sizing: border-box;
     overflow: visible !important;
+    border: 3px solid blue !important; /* DIAGNOSTIC */
 }
 
 #lightbox-content {
@@ -360,6 +361,7 @@ body {
     display: flex;
     align-items: flex-end;
     justify-content: center;
+    border: 3px solid green !important; /* DIAGNOSTIC */
 }
 
 #lightbox-content img,
@@ -372,6 +374,7 @@ body {
     margin: 0;
     padding: 0;
     border-radius: 20px;
+    border: 2px solid lime !important; /* DIAGNOSTIC for general media */
 }
 
 #project-lightbox.fade-in #lightbox-content img,
@@ -442,17 +445,18 @@ body {
   padding: 0;
   margin: 0;
 }
-#project-lightbox #lightbox-content { 
-  height: 100vh;
-  min-height: 100vh;
-  max-height: 100vh;
+#project-lightbox #lightbox-content { /* GREEN */
+  /* height: 100vh; */ /* REMOVED */
+  /* min-height: 100vh; */ /* REMOVED */
+  /* max-height: 100vh; */ /* REMOVED */
   width: 100vw;
   max-width: 100vw;
   display: flex;
-  align-items: center;
+  align-items: center; /* This centers its children (the .lightbox-media-wrapper) */
   justify-content: center;
   padding: 0;
   margin: 0;
+  /* border: 3px solid green !important; */ /* DIAGNOSTIC - Kept for now */
 }
 
 #project-lightbox #lightbox-title, 
@@ -501,26 +505,28 @@ body {
       max-width: 100%; /* Ensures it doesn't exceed its parent's width constraints */
       margin-left: auto; /* To center the 90vw block */
       margin-right: auto; /* To center the 90vw block */
+      border: 3px solid yellow !important; /* DIAGNOSTIC */
     }
     .lightbox-desc-card {
-      background: rgba(223, 223, 223, 0.877) !important; /* Inverted: Light semi-transparent background */
+      background: #0f0f0fd8 !important;
+      color: #222 !important;
       width: 95% !important; /* Changed from 90% */
     }
 
     /* Styling for title, subheading, body within the description card */
     .lightbox-media-wrapper .lightbox-desc-card .card-title {
-        font-size: 1.8rem;
-        font-weight: 600;
-        color: #222 !important; /* Inverted: Dark text */
-        margin-bottom: 4px;
+        font-size: 1.8rem; /* Slightly larger for title */
+        font-weight: 600; /* Bolder title */
+        color: #fff !important; /* Make title white on desktop */
+        margin-bottom: 4px; /* Reduced space to subheading */
         line-height: 1.2;
-        /* text-transform: uppercase; */
+        text-transform: uppercase; /* Capitalize the heading */
     }
 
     .lightbox-media-wrapper .lightbox-desc-card .card-subheading {
         font-size: 1.1rem;
         font-weight: 600;
-        color: #555 !important; /* Inverted: Darker gray text */
+        color: #a7a7a78a; /* More subtle, darker gray */
         margin-bottom: 12px;
         line-height: 1.3;
         opacity: 0.85; /* Slightly less prominent */
@@ -529,7 +535,7 @@ body {
     .lightbox-media-wrapper .lightbox-desc-card .card-body {
         font-size: 0.9rem; /* Slightly smaller body text */
         font-weight: 400;
-        color: #333 !important; /* Inverted: Dark body text */
+        color: #fff !important; /* Make body white on desktop */
         line-height: 1.6;
         margin-top: 18px; /* Added top margin */
     }
@@ -600,54 +606,65 @@ body {
 
     .lightbox-desc-card .lightbox-close-btn {
         position: absolute;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
+        bottom: 30px; 
+        left: 50%;   
+        transform: translateX(-50%); 
         z-index: 10;
-        width: 28px;
-        height: 28px;
-        background: transparent !important;
-        border: 1.5px solid #333 !important; /* Inverted: Dark border */
-        border-radius: 50%;
+        width: 24px; 
+        height: 24px; 
+        background: #d8d8d8 linear-gradient(to bottom, #f0f0f0 0%, #d8d8d8 100%); 
+        border: 1px solid #999; 
+        border-radius: 50%; /* Initial shape */
+        color: #222; 
         cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.16);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         display: flex;
         align-items: center;
-        justify-content: center;
-        padding: 0;
-        overflow: hidden;
-        transition: none !important;
-    }
-    .lightbox-desc-card .lightbox-close-btn:hover {
-        background: transparent !important;
-        border-color: #777 !important; /* Softer dark grey border on hover */
-        box-shadow: inset 0 0 6px 2px rgba(119, 119, 119, 0.35); /* Soft inner glow effect */
-    }
-    .lightbox-desc-card .lightbox-close-btn:hover svg {
-        stroke: #777 !important; /* Softer dark grey stroke on hover */
+        justify-content: center; /* Center icon when text is hidden */
+        padding: 0; /* Remove padding if any, rely on flexbox for centering icon */
+        overflow: hidden; /* Important for the slide-out text effect */
+        transition: background 0.2s, box-shadow 0.2s, width 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .lightbox-media-wrapper > img,
-    .lightbox-media-wrapper > div, /* for video wrapper */
-    .lightbox-media-wrapper > video {
-      height: 100% !important;
-      max-height: 100% !important;
-      object-fit: contain !important;
-    }
-    .lightbox-media-wrapper > div > video {
-      height: 100% !important;
-      max-height: 100% !important;
-      object-fit: contain !important;
+    .lightbox-desc-card .lightbox-close-btn .close-icon {
+        font-size: 1.2rem; /* Size for the '×' */
+        line-height: 1; /* Ensure tight fit */
+        display: inline-block;
     }
 
-    .lightbox-desc-card .lightbox-close-btn,
-    .lightbox-desc-card .lightbox-close-btn:hover {
-      align-items: center !important;
-    }
-    .lightbox-desc-card .lightbox-close-btn .close-icon,
     .lightbox-desc-card .lightbox-close-btn .close-text {
-      line-height: 1;
-      vertical-align: middle;
+        display: inline-block;
+        font-size: 0.80rem; 
+        font-weight: 500;
+        color: #222;
+        line-height: 1; 
+        max-width: 0;
+        opacity: 0;
+        margin-left: 0px;
+        /* padding-right: 5px; */ /* REMOVED from base style */
+        white-space: nowrap;
+        pointer-events: none; 
+        transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.05s, 
+                    margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .lightbox-desc-card .lightbox-close-btn:hover {
+        background: #cacaca linear-gradient(to bottom, #e8e8e8 0%, #cacaca 100%); 
+        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        width: 67px; /* INCREASED from 62px to account for text padding */
+        border-radius: 12px; 
+        justify-content: flex-start; 
+        padding-left: 5px; 
+        /* padding-right: 5px; /* Removed from button, will be on text instead */
+    }
+
+    .lightbox-desc-card .lightbox-close-btn:hover .close-text {
+        max-width: 40px; /* INCREASED from 35px to allow for content + padding */
+        opacity: 1;
+        margin-left: 6px; 
+        padding-right: 5px; /* ADDED padding here, on hover state */
+        /* color: #111; */ 
     }
 }
 
@@ -679,26 +696,8 @@ body {
 
   /* Specific for bottom description overlay */
   .lightbox-description-overlay {
-    position: absolute;
-    left: 0;
-    right: 0;
     bottom: 0;
-    z-index: 2;
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
-    padding: 40px 24px 18px 24px; /* Matched bottom padding to left padding */
-    color: #fff; /* Changed to white */
-    font-size: 0.95rem;
-    font-weight: 500;
-    line-height: 1.4;
-    background: linear-gradient(0deg, rgba(20,20,20,0.95) 70%, rgba(20,20,20,0.78) 80%, rgba(20,20,20,0.60) 85%, rgba(20,20,20,0.35) 90%, rgba(20,20,20,0.0) 100%); /* Higher dark area, very smooth fade */
-    pointer-events: none;
     transform: translateY(16px);
-    transition: none !important;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-    max-width: 100%;
-    box-sizing: border-box;
   }
   .lightbox-description-overlay.show {
     transform: translateY(0);
@@ -722,10 +721,10 @@ body {
     border-top-right-radius: 20px; /* Match media radius */
     /* Text styling to match bottom overlay */
     color: #fff;
-    font-size: 1.6rem;
+    font-size: 1.5rem; 
     font-weight: 700;
-    line-height: 1.3;
-    /* text-transform: uppercase; */
+    line-height: 1.3; /* Explicitly add for consistency */
+    text-transform: uppercase; /* Capitalize the title */
   }
 
   .lightbox-overlay-title-text { /* New class for the title span */
@@ -762,7 +761,29 @@ body {
   }
 }
 
-
+.lightbox-description-overlay { /* Renamed from lightbox-caption-overlay */
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  padding: 60px 24px 24px 24px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.3;
+  background: linear-gradient(0deg, rgba(20,20,20,0.95) 0%, rgba(20,20,20,0.90) 20%, rgba(20,20,20,0.78) 40%, rgba(20,20,20,0.60) 60%, rgba(20,20,20,0.35) 80%, rgba(20,20,20,0.0) 100%); /* Smoother gradient with more stops */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(100%);
+  transition: none !important;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 .lightbox-description-overlay.show { /* Renamed */
   opacity: 1;
   pointer-events: auto;
@@ -780,6 +801,7 @@ body {
   display: block; 
   object-fit: contain; 
   z-index: 2;
+  border: 2px solid hotpink !important; /* DIAGNOSTIC for specific media in wrapper */
 }
 
 .lightbox-media-wrapper .lightbox-desc-card {
@@ -787,12 +809,12 @@ body {
   margin-right: 0; 
   height: 100%; 
   border-radius: 18px;
-  background: rgba(240, 240, 240, 0.95); /* Inverted: Ensure this also uses light background */
+  background: linear-gradient(120deg, rgba(30,30,30,0.98) 80%, rgba(30,30,30,0.92) 100%);
   display: flex; 
   flex-direction: column;
   font-size: 1.13rem;
   font-weight: 500;
-  color: #333; /* Inverted: Default dark text for card */
+  color: #fff; 
   z-index: 1;
   box-sizing: border-box;
   opacity: 0; 
@@ -904,8 +926,8 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
-  width: 28px;
-  height: 28px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -967,15 +989,4 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
 .mute-icon-overlay img {
   box-shadow: none !important;
   background: none !important;
-}
-
-/* Push text span to bottom of overlay */
-.lightbox-description-overlay > span {
-    margin-top: auto;
-}
-
-/* In projects.js, the close button SVG is created with stroke="#fff" initially.
-   We need to either modify that JS or override with CSS. CSS override is simpler. */
-.lightbox-desc-card .lightbox-close-btn svg line {
-    stroke: #333 !important; /* Inverted: Dark stroke for lines */
 }
