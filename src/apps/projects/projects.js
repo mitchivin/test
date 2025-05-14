@@ -9,7 +9,10 @@
 
 import { projects } from '../../data/projects.js';
 
-// ===== Global State & Utility Functions =====
+let gridVideos = [];
+let intersectionObserver = null;
+let isMaximized = false;
+
 // JavaScript for Projects App Lightbox
 
 // Global state for persistent description visibility
@@ -315,6 +318,9 @@ function renderProjectsGrid() {
 
 document.addEventListener('DOMContentLoaded', () => {
     renderProjectsGrid();
+    // Update gridVideos and re-setup observer after grid render
+    gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
+    if (typeof setupIntersectionObserver === 'function') setupIntersectionObserver();
     const feedContainer = document.querySelector('.feed-container');
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
@@ -1424,10 +1430,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Video Grid Play/Pause Logic for Maximized/Unmaximized States ---
-    const gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
-    let isMaximized = false;
-    let intersectionObserver = null;
-
     function playVisibleVideos() {
         if (!intersectionObserver) return;
         // Find all visible videos
