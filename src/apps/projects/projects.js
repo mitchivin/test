@@ -274,6 +274,65 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
     return null;
 }
 
+// === Add: Render Projects Grid Function ===
+function renderProjectsGrid() {
+    const feedContainer = document.querySelector('.feed-container');
+    if (!feedContainer) return;
+    feedContainer.innerHTML = '';
+    projects.forEach(project => {
+        const post = document.createElement('div');
+        post.className = `post ${project.type}-post`;
+        post.setAttribute('data-type', project.type);
+        post.setAttribute('data-src', project.src);
+        if (project.lowres) post.setAttribute('data-lowres', project.lowres);
+        if (project.poster) post.setAttribute('data-poster', project.poster);
+        if (project.title) post.setAttribute('data-title', project.title);
+        if (project.description) post.setAttribute('data-description', project.description);
+        if (project.type === 'image') {
+            const img = document.createElement('img');
+            img.src = project.src;
+            img.alt = project.title || 'Project Image';
+            post.appendChild(img);
+        } else if (project.type === 'video') {
+            const video = document.createElement('video');
+            video.src = project.src;
+            if (project.poster) video.poster = project.poster;
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.setAttribute('autoplay', '');
+            video.setAttribute('muted', '');
+            video.setAttribute('playsinline', '');
+            video.removeAttribute('controls');
+            video.alt = project.title || 'Project Video';
+            // Add spinner overlay
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.appendChild(video);
+            const spinner = createSpinnerOverlay();
+            wrapper.appendChild(spinner);
+            let hasPlayed = false;
+            function hideSpinner() {
+                if (spinner.parentNode) spinner.parentNode.removeChild(spinner);
+            }
+            video.addEventListener('playing', () => {
+                hasPlayed = true;
+                hideSpinner();
+            });
+            setTimeout(() => { if (!hasPlayed) hideSpinner(); }, 8000);
+            // Fallback: try to play programmatically if not playing after a short delay
+            setTimeout(() => {
+                if (!hasPlayed && video.paused) {
+                    video.play().catch(() => {});
+                }
+            }, 500);
+            post.appendChild(wrapper);
+        }
+        feedContainer.appendChild(post);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     renderProjectsGrid();
     const feedContainer = document.querySelector('.feed-container');
