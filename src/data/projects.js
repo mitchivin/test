@@ -1,4 +1,20 @@
+// projects.js — Data for the Projects app
+// This file contains all the projects shown in the Projects window.
+// Each project is an object in the array below. You can add, remove, or edit projects here.
+
+// PROJECTS ARRAY
+// Each object represents a project. The 'type' can be 'image' or 'video'.
+// 'src' is the main image or video file. 'lowres' is a lower-quality image for loading (optional).
+// 'poster' is a preview image for videos. 'title' is the project title. 'description' is the text shown for the project.
 export const projects = [
+  // Example image project:
+  // {
+  //   type: "image", // 'image' or 'video'
+  //   src: "../../../assets/apps/projects/image1.webp", // Main image or video file
+  //   lowres: "../../../assets/apps/projects/image1_low.webp", // (Optional) Low-res image for loading
+  //   title: "Project Title", // Title of the project
+  //   description: "Description of the project." // Main text shown for the project
+  // },
   {
     type: "image",
     src: "../../../assets/apps/projects/image1.webp",

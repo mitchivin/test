@@ -1,4 +1,16 @@
+// about.js — Data for the About Me app
+// This file contains the text and icons for the About Me window in the portfolio.
+// You can edit the paragraphs, skills, and software lists below to update your About Me content.
+
+// ABOUT ME PARAGRAPHS
+// Each object in this array is a paragraph that appears in the About Me section.
+// 'icon' is the image shown next to the paragraph. 'text' is the paragraph itself.
 export const aboutParagraphs = [
+  // Example paragraph:
+  // {
+  //   icon: "../../../assets/apps/about/p1.webp", // Path to the icon image
+  //   text: "This is the text that will appear in the About Me section."
+  // },
   {
     icon: "../../../assets/apps/about/p1.webp",
     text: "I'm Mitch, a graphic designer based in Brisbane, Australia, driven by a genuine love for creating. Building ideas from the ground up and bringing them to life through design is what motivates me. Every project is an opportunity to sharpen my skills, solve meaningful problems, and create visuals with impact."
@@ -21,7 +33,11 @@ export const aboutParagraphs = [
   }
 ];
 
+// SKILLS
+// This array lists your main skills. Each skill has an icon and a label.
 export const skills = [
+  // Example skill:
+  // { icon: "../../../assets/apps/about/skill1.webp", label: "Skill Name" },
   {
     icon: "../../../assets/apps/about/skill1.webp",
     label: "Social Graphics"
@@ -44,7 +60,11 @@ export const skills = [
   }
 ];
 
+// SOFTWARE
+// This array lists the main software/tools you use. Each has an icon and a label.
 export const software = [
+  // Example software:
+  // { icon: "../../../assets/apps/about/software1.webp", label: "Software Name" },
   {
     icon: "../../../assets/apps/about/software1.webp",
     label: "Adobe Creative Cloud"
