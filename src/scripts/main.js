@@ -19,12 +19,135 @@ import { eventBus, EVENTS } from "./utils/eventBus.js";
 import { initBootSequence } from "./gui/boot.js";
 import { setupTooltips } from "./gui/tooltip.js";
 import { initRandomScanline } from "./utils/crtEffect.js";
+import { projects } from '../data/projects.js';
+import { aboutParagraphs, skills, software } from '../data/about.js';
+import { contactName, contactEmail } from '../data/contact.js';
+import { loginUserIcon, loginLoadingImage } from '../data/login.js';
+import { wallpaperDesktop, wallpaperMobile, socialLinks, socialLinksAbout } from '../data/misc.js';
+import { resumeImage, resumePDF } from '../data/resume.js';
 
 let lastTouchStartTime = 0;
 let globalTaskbarInstance = null;
 
 // ===== App Initialization =====
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Dynamic Data Asset Preloading ---
+  const head = document.head || document.getElementsByTagName('head')[0];
+  const seen = new Set();
+  // Preload all project assets
+  projects.forEach(project => {
+    ['src', 'lowres', 'poster'].forEach(key => {
+      if (project[key] && !seen.has(project[key])) {
+        seen.add(project[key]);
+        const ext = project[key].split('.').pop().toLowerCase();
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        // Remove leading ../../../ for correct path relative to index.html
+        let href = project[key].replace(/^\.\.\/\.\.\/\.\//, '');
+        link.href = href;
+        if (ext === 'webp' || ext === 'jpg' || ext === 'jpeg' || ext === 'png') {
+          link.as = 'image';
+        } else if (ext === 'mp4' || ext === 'webm' || ext === 'mov') {
+          link.as = 'video';
+        } else {
+          link.as = 'fetch';
+        }
+        head.appendChild(link);
+      }
+    });
+  });
+  // Preload About app icons and images
+  aboutParagraphs.forEach(p => {
+    if (p.icon && !seen.has(p.icon)) {
+      seen.add(p.icon);
+      const ext = p.icon.split('.').pop().toLowerCase();
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      let href = p.icon.replace(/^\.\.\/\.\.\/\.\//, '');
+      link.href = href;
+      link.as = (ext === 'webp' || ext === 'jpg' || ext === 'jpeg' || ext === 'png') ? 'image' : 'fetch';
+      head.appendChild(link);
+    }
+  });
+  skills.forEach(s => {
+    if (s.icon && !seen.has(s.icon)) {
+      seen.add(s.icon);
+      const ext = s.icon.split('.').pop().toLowerCase();
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      let href = s.icon.replace(/^\.\.\/\.\.\/\.\//, '');
+      link.href = href;
+      link.as = (ext === 'webp' || ext === 'jpg' || ext === 'jpeg' || ext === 'png') ? 'image' : 'fetch';
+      head.appendChild(link);
+    }
+  });
+  software.forEach(s => {
+    if (s.icon && !seen.has(s.icon)) {
+      seen.add(s.icon);
+      const ext = s.icon.split('.').pop().toLowerCase();
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      let href = s.icon.replace(/^\.\.\/\.\.\/\.\//, '');
+      link.href = href;
+      link.as = (ext === 'webp' || ext === 'jpg' || ext === 'jpeg' || ext === 'png') ? 'image' : 'fetch';
+      head.appendChild(link);
+    }
+  });
+  // Preload Resume image and PDF
+  [resumeImage, resumePDF].forEach(asset => {
+    if (asset && !seen.has(asset)) {
+      seen.add(asset);
+      const ext = asset.split('.').pop().toLowerCase();
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      let href = asset.replace(/^\.\.\/\.\.\/\.\//, '');
+      link.href = href;
+      link.as = (ext === 'webp' || ext === 'jpg' || ext === 'jpeg' || ext === 'png') ? 'image' : (ext === 'pdf' ? 'document' : 'fetch');
+      head.appendChild(link);
+    }
+  });
+  // Preload Login screen user icon and loading image
+  [loginUserIcon, loginLoadingImage].forEach(asset => {
+    if (asset && !seen.has(asset)) {
+      seen.add(asset);
+      const ext = asset.split('.').pop().toLowerCase();
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      let href = asset.replace(/^\.\.\/\.\.\/\.\//, '');
+      link.href = href;
+      link.as = (ext === 'webp' || ext === 'jpg' || ext === 'jpeg' || ext === 'png') ? 'image' : 'fetch';
+      head.appendChild(link);
+    }
+  });
+  // Preload wallpapers
+  [wallpaperDesktop, wallpaperMobile].forEach(asset => {
+    if (asset && !seen.has(asset)) {
+      seen.add(asset);
+      const ext = asset.split('.').pop().toLowerCase();
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      let href = asset.replace(/^\.\/|^\.\.\/\.\/|^\.\.\/\.\.\/\.\//, '');
+      link.href = href;
+      link.as = (ext === 'webp' || ext === 'jpg' || ext === 'jpeg' || ext === 'png') ? 'image' : 'fetch';
+      head.appendChild(link);
+    }
+  });
+  // Preload About social link icons
+  if (Array.isArray(socialLinksAbout)) {
+    socialLinksAbout.forEach(s => {
+      if (s.icon && !seen.has(s.icon)) {
+        seen.add(s.icon);
+        const ext = s.icon.split('.').pop().toLowerCase();
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        let href = s.icon.replace(/^\.\.\/\.\.\/\.\//, '');
+        link.href = href;
+        link.as = (ext === 'webp' || ext === 'jpg' || ext === 'jpeg' || ext === 'png') ? 'image' : 'fetch';
+        head.appendChild(link);
+      }
+    });
+  }
+
   // Preload app iframes before showing desktop
   const preloadApps = [
     { id: "about-window", src: "src/apps/about/about.html" },
@@ -32,47 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
     { id: "internet-window", src: "src/apps/projects/projects.html" },
     { id: "contact-window", src: "src/apps/contact/contact.html" },
   ];
-
-  // Preload all assets in assets/apps/projects
-  const projectAssets = [
-    "left.webp",
-    "right.webp",
-    "close.webp",
-    "projectsbg.webp",
-    "videoposter3.webp",
-    "videoposter2.webp",
-    "videoposter1.webp",
-    "videothumb1.mp4",
-    "videothumb2.mp4",
-    "videothumb3.mp4",
-    "video1.mp4",
-    "video2.mp4",
-    "video3.mp4",
-    "carousel1.webp",
-    "carousel2.webp",
-    "carousel3.webp",
-    "image1.webp",
-    "image2.webp",
-    "image3.webp",
-    "image4.webp",
-    "image5.webp",
-    "image6.webp"
-  ];
-  const head = document.head || document.getElementsByTagName('head')[0];
-  projectAssets.forEach(filename => {
-    const ext = filename.split('.').pop();
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.href = `assets/apps/projects/${filename}`;
-    if (ext === 'webp') {
-      link.as = 'image';
-    } else if (ext === 'mp4') {
-      link.as = 'video';
-    } else {
-      link.as = 'fetch';
-    }
-    head.appendChild(link);
-  });
 
   const preloadContainer = document.createElement("div");
   preloadContainer.style.display = "none";
