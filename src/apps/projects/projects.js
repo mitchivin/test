@@ -320,6 +320,14 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProjectsGrid();
     // Update gridVideos and re-setup observer after grid render
     gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
+    gridVideos.forEach(video => {
+        video.muted = true;
+        video.setAttribute('muted', '');
+        video.setAttribute('autoplay', '');
+        video.setAttribute('playsinline', '');
+        video.removeAttribute('controls');
+        video.play().catch(() => {});
+    });
     if (typeof setupIntersectionObserver === 'function') setupIntersectionObserver();
     const feedContainer = document.querySelector('.feed-container');
     const lightbox = document.getElementById('project-lightbox');
