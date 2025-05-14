@@ -369,13 +369,13 @@ function showStep(stepName) {
   // Show current step's form and its relevant buttons
   switch (stepName) {
     case 'resume':
-      if(resumeForm) resumeForm.style.display = 'block';
+      if(resumeForm) resumeForm.style.display = 'flex';
       if(resumeNextBtn) resumeNextBtn.style.display = '';
       loadResumeImage();
       currentStepTitle = 'Setup Wizard - Resume';
       break;
     case 'aboutme':
-      if(aboutMeForm) aboutMeForm.style.display = 'block';
+      if(aboutMeForm) aboutMeForm.style.display = 'flex';
       if(aboutMeBackBtn) aboutMeBackBtn.style.display = '';
       if(aboutMeNextBtn) aboutMeNextBtn.style.display = '';
       if(aboutMeSaveBtn) aboutMeSaveBtn.style.display = '';
@@ -383,7 +383,7 @@ function showStep(stepName) {
       currentStepTitle = 'Setup Wizard - About Me';
       break;
     case 'leftpanel':
-      if(leftPanelForm) leftPanelForm.style.display = 'block';
+      if(leftPanelForm) leftPanelForm.style.display = 'flex';
       if(leftPanelBackBtn) leftPanelBackBtn.style.display = '';
       if(leftPanelNextBtn) leftPanelNextBtn.style.display = '';
       if(leftPanelSaveBtn) leftPanelSaveBtn.style.display = '';
@@ -391,7 +391,7 @@ function showStep(stepName) {
       currentStepTitle = 'Setup Wizard - Skills/Software';
       break;
     case 'contact':
-      if(contactForm) contactForm.style.display = 'block';
+      if(contactForm) contactForm.style.display = 'flex';
       if(contactBackBtn) contactBackBtn.style.display = '';
       if(contactNextBtn) contactNextBtn.style.display = '';
       if(contactSaveBtn) contactSaveBtn.style.display = '';
@@ -399,7 +399,7 @@ function showStep(stepName) {
       currentStepTitle = 'Setup Wizard - Contact';
       break;
     case 'projects':
-      if(projectsForm) projectsForm.style.display = 'block';
+      if(projectsForm) projectsForm.style.display = 'flex';
       if(projectsBackBtn) projectsBackBtn.style.display = '';
       if(projectsSaveBtn) projectsSaveBtn.style.display = '';
       loadProjectsData();

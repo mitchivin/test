@@ -54,7 +54,7 @@ button:disabled {
   width: 100vw;
   height: 100vh;
   margin: 0;
-  padding: 20px 20px 96px 20px; /* Generous padding, bottom for footer */
+  padding: 20px 20px 75px 20px; /* Generous padding, bottom for footer */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -77,22 +77,27 @@ button:disabled {
 fieldset {
   border: 1px solid #ACA899; /* Standard XP control border */
   padding: 15px; /* Padding inside the white box */
-  margin-bottom: 10px; /* Reduced gap if multiple forms/fieldsets were stacked */
   width: 100%;
-  max-width: 600px; 
   box-sizing: border-box;
   background-color: #FFFFFF; /* White background for the content area */
-  /* To make it try to fill vertical space towards footer */
-  /* flex-grow: 1; /* This might be too much if content is short, apply to form instead? */
+  margin-bottom: 0; /* Or a suitable value if needed, for now 0 */
+  display: flex;
+  flex-direction: row; /* Changed to row for side-by-side images */
+  gap: 10px; /* Add some space between the images */
+  flex-grow: 1; /* Make fieldset take available vertical space in form */
+  flex-shrink: 1;
+  min-height: 0; /* Allow fieldset to shrink */
+  overflow: hidden; /* Fieldset hides its own overflow, images must fit */
 }
 
 /* Styling for form elements if they are the ones needing to grow */
 .setup-container > form {
     width: 100%;
-    max-width: 600px;
-    display: flex; /* To allow fieldset inside to grow if needed */
+    display: flex;
     flex-direction: column;
-    /* flex-grow: 1; /* Allow form to take available vertical space */
+    flex-grow: 1;
+    box-sizing: border-box;
+    overflow: hidden; /* Form itself should not scroll, fieldset will */
 }
 
 legend {
@@ -148,12 +153,42 @@ input[type="file"] {
 }
 
 /* Image previews */
-img#resume-preview,
+img#resume-preview {
+  display: block;
+  max-width: 100%; 
+  width: auto;     
+  height: auto;    
+  max-height: 50vh; /* Responsive max height, adjust as needed */
+  object-fit: contain; 
+  margin: 10px auto; 
+  border: 1px solid #ACA899; 
+  padding: 2px;
+  background-color: #FFF; 
+  flex-shrink: 1; /* Allow shrinking */
+  min-height: 0; /* Important for shrinkable flex images */
+}
+
+img#resume-image-1,
+img#resume-image-2 {
+  max-width: 100%; 
+  max-height: 100%; 
+  object-fit: contain;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0; 
+  min-height: 0; 
+  width: 0; /* For horizontal space distribution */
+  height: auto; /* Let max-height and aspect ratio determine height */
+  border: 1px solid #ACA899; 
+  padding: 2px;
+  background-color: #FFF;
+}
+
 img.paragraph-icon-preview,
 img.item-icon-preview {
   display: block;
   max-width: 100%; /* Max width for previews */
-  max-height: 400px; /* Increased max height */
+  max-height: 280px; /* Reduced max height - or other suitable default */
   width: auto; /* Maintain aspect ratio */
   height: auto; /* Maintain aspect ratio */
   margin: 10px auto;
@@ -239,4 +274,43 @@ img.item-icon-preview {
 .project-edit-row button {
   align-self: flex-start; /* Align remove button to left */
   /* XP.css default button styling */
-} 
+}
+
+/* ===== TEMPORARY DEBUG BORDERS ===== */
+body {
+  border: 1px solid red !important;
+}
+.setup-container {
+  border: 2px solid blue !important;
+}
+form {
+  border: 2px solid green !important;
+  /* margin-top: 5px !important; /* Add some margin to see separate form borders */
+  /* margin-bottom: 5px !important; */
+}
+fieldset {
+  border: 2px solid orange !important;
+}
+.field-row {
+  border: 1px dashed purple !important;
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
+  padding: 2px !important;
+}
+.project-edit-row {
+  border: 1px dashed teal !important;
+  padding: 5px !important;
+  margin-top: 5px !important;
+}
+.setup-footer-buttons {
+  border: 2px solid magenta !important;
+}
+.footer-buttons-left {
+  border: 1px dotted brown !important;
+  padding: 2px !important;
+}
+.footer-buttons-right {
+  border: 1px dotted sienna !important;
+  padding: 2px !important;
+}
+/* ===== END TEMPORARY DEBUG BORDERS ===== */ 
