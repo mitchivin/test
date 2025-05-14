@@ -319,7 +319,8 @@ function renderProjectsGrid() {
 
 document.addEventListener('DOMContentLoaded', () => {
     renderProjectsGrid();
-    if (typeof setupIntersectionObserver === 'function') setupIntersectionObserver();
+    // gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
+    // if (typeof setupIntersectionObserver === 'function') setupIntersectionObserver();
     const feedContainer = document.querySelector('.feed-container');
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
