@@ -19,31 +19,30 @@
  */
 import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
-import { socialLinks } from '../../data/misc.js';
 
 const ALL_PROGRAMS_ITEMS = [
   // Socials first
   {
     type: "url",
-    url: socialLinks.instagram,
+    url: "https://www.instagram.com/mitchivin",
     icon: "./assets/gui/start-menu/instagram.webp",
     label: "Instagram",
   },
   {
     type: "url",
-    url: socialLinks.github,
+    url: "https://github.com/mitchivin",
     icon: "./assets/gui/start-menu/github.webp",
     label: "GitHub",
   },
   {
     type: "url",
-    url: socialLinks.linkedin,
+    url: "https://www.linkedin.com/in/mitchivin",
     icon: "./assets/gui/start-menu/linkedin.webp",
     label: "LinkedIn",
   },
   {
     type: "url",
-    url: socialLinks.behance,
+    url: "https://www.behance.net/mitch_ivin",
     icon: "./assets/gui/start-menu/behance.webp",
     label: "Behance",
   },
@@ -476,28 +475,28 @@ export default class StartMenu {
                           id: "behance",
                           icon: "./assets/gui/start-menu/behance.webp",
                           title: "Behance",
-                          url: socialLinks.behance,
+                          url: "https://www.behance.net/mitch_ivin",
                           action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "linkedin",
                           icon: "./assets/gui/start-menu/linkedin.webp",
                           title: "LinkedIn",
-                          url: socialLinks.linkedin,
+                          url: "https://www.linkedin.com/in/mitchivin",
                           action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "github",
                           icon: "./assets/gui/start-menu/github.webp",
                           title: "GitHub",
-                          url: socialLinks.github,
+                          url: "https://github.com/mitchivin",
                           action: "open-url",
                         })}
                         ${renderMenuItem({
                           id: "instagram",
                           icon: "./assets/gui/start-menu/instagram.webp",
                           title: "Instagram",
-                          url: socialLinks.instagram,
+                          url: "https://www.instagram.com/mitchivin",
                           action: "open-url",
                         })}
                         <li class="menu-divider divider-darkblue"><hr class="divider"></li>

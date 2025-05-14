@@ -7,12 +7,7 @@
  * @file projects.js
  */
 
-import { projects } from '../../data/projects.js';
-
-let gridVideos = [];
-let intersectionObserver = null;
-let isMaximized = false;
-
+// ===== Global State & Utility Functions =====
 // JavaScript for Projects App Lightbox
 
 // Global state for persistent description visibility
@@ -180,7 +175,6 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         videoElement.autoplay = true;
         videoElement.loop = true;
         videoElement.setAttribute('playsinline', '');
-        videoElement.setAttribute('autoplay', '');
         // --- Only remember mute state on desktop. On mobile, always start muted. ---
         if (isDesktop()) {
             videoElement.muted = userPrefersMuted;
@@ -195,15 +189,18 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         }
         videoElement.src = src;
         if (posterUrl) videoElement.poster = posterUrl;
+        
         const wrapper = document.createElement('div');
-        wrapper.style.position = 'relative';
-        wrapper.style.display = 'inline-block';
+        wrapper.style.position = 'relative'; // Keep for overlay positioning
+        wrapper.style.display = 'inline-block'; // Changed from 'block' to allow shrink-to-fit
         wrapper.style.flexGrow = '0';    
         wrapper.style.flexShrink = '0';  
         wrapper.style.maxHeight = '100%'; 
-        wrapper.style.maxWidth = '100%';
-        wrapper.style.verticalAlign = 'middle';
+        wrapper.style.maxWidth = '100%'; // Added to ensure it respects parent bounds
+        wrapper.style.verticalAlign = 'middle'; // Added for better inline-block alignment
+        
         wrapper.appendChild(videoElement);
+        
         const spinner = createSpinnerOverlay();
         wrapper.appendChild(spinner);
         let hasPlayed = false;
@@ -221,12 +218,6 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         });
         // Fallback: hide spinner after 8s if video never plays
         setTimeout(() => { if (!hasPlayed) hideSpinner(); }, 8000);
-        // Fallback: try to play programmatically if not playing after a short delay
-        setTimeout(() => {
-            if (!hasPlayed && videoElement.paused) {
-                videoElement.play().catch(() => {});
-            }
-        }, 500);
         videoElement.addEventListener('click', (e) => {
             e.stopPropagation();
             videoElement.muted = !videoElement.muted;
@@ -277,55 +268,12 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
     return null;
 }
 
-// === Add: Render Projects Grid Function ===
-function renderProjectsGrid() {
-    const feedContainer = document.querySelector('.feed-container');
-    if (!feedContainer) return;
-    feedContainer.innerHTML = '';
-    projects.forEach(project => {
-        const post = document.createElement('div');
-        post.className = `post ${project.type}-post`;
-        post.setAttribute('data-type', project.type);
-        post.setAttribute('data-src', project.src);
-        if (project.lowres) post.setAttribute('data-lowres', project.lowres);
-        if (project.poster) post.setAttribute('data-poster', project.poster);
-        if (project.title) post.setAttribute('data-title', project.title);
-        if (project.description) post.setAttribute('data-description', project.description);
-        if (project.type === 'image') {
-            const img = document.createElement('img');
-            img.src = project.src;
-            img.alt = project.title || 'Project Image';
-            post.appendChild(img);
-        } else if (project.type === 'video') {
-            const video = document.createElement('video');
-            video.src = project.src;
-            if (project.poster) video.poster = project.poster;
-            video.autoplay = true;
-            video.muted = true;
-            video.loop = true;
-            video.playsInline = true;
-            video.setAttribute('autoplay', '');
-            video.setAttribute('muted', '');
-            video.setAttribute('playsinline', '');
-            video.removeAttribute('controls');
-            video.alt = project.title || 'Project Video';
-            post.appendChild(video);
-            video.play().catch(() => {});
-        }
-        feedContainer.appendChild(post);
-    });
-    gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    renderProjectsGrid();
-    // gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
-    // if (typeof setupIntersectionObserver === 'function') setupIntersectionObserver();
-    const feedContainer = document.querySelector('.feed-container');
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
     const posts = document.querySelectorAll('.post');
+    const feedContainer = document.querySelector('.feed-container');
 
     userPrefersDescriptionVisible = isDesktop(); // Initialize based on view
 
@@ -617,6 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobileDescription = post.dataset.mobileDescription;
         const linkType = post.dataset.linkType;
         const linkUrl = post.dataset.linkUrl;
+        const software = post.dataset.software;
 
         const dynamicSubheading = getSubheadingName(title);
 
@@ -1430,6 +1379,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Video Grid Play/Pause Logic for Maximized/Unmaximized States ---
+    const gridVideos = Array.from(document.querySelectorAll('.feed-container .video-post video'));
+    let isMaximized = false;
+    let intersectionObserver = null;
+
     function playVisibleVideos() {
         if (!intersectionObserver) return;
         // Find all visible videos

@@ -15,7 +15,6 @@
 // Handles creation and initialization of menubar and toolbar for windows in the XP simulation
 
 import { isMobileDevice } from "../utils/device.js";
-import { socialLinks } from '../../data/misc.js';
 
 // ===== Address Bar Utility =====
 /**
@@ -328,17 +327,6 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   if (isBottom) toolbarRow.classList.add("toolbar-bottom");
   const isMobile = isMobileDevice();
   let buttons = toolbarConfig.buttons;
-
-  // Patch social URLs for Contact Me toolbar
-  if (windowId === 'contact-window') {
-    buttons = buttons.map(btn => {
-      if (btn.key === 'instagram') return { ...btn, url: socialLinks.instagram };
-      if (btn.key === 'behance') return { ...btn, url: socialLinks.behance };
-      if (btn.key === 'github') return { ...btn, url: socialLinks.github };
-      if (btn.key === 'linkedin') return { ...btn, url: socialLinks.linkedin };
-      return btn;
-    });
-  }
 
   // On mobile, for Contact Me only, filter out disabled buttons
   if (isMobile && windowId === 'contact-window') {

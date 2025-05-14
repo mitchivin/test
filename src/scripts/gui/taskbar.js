@@ -20,7 +20,6 @@ import StartMenu from "./startMenu.js";
 import { EVENTS } from "../utils/eventBus.js";
 import { setupTooltips } from "./tooltip.js"; // Corrected path from utils
 import { isMobileDevice } from "../utils/device.js";
-import { balloonWelcomeHeader, balloonWelcomeText } from '../../data/misc.js';
 
 /**
  * Clock class for managing the system clock display and time updates.
@@ -279,8 +278,8 @@ export function showNetworkBalloon() {
   balloonRoot.style.zIndex = "1400";
   document.body.appendChild(balloonRoot);
 
-  const headerText = balloonWelcomeHeader;
-  const mainText = balloonWelcomeText;
+  const headerText = "Welcome to my Portfolio";
+  const mainText = "Hey, I'm Mitch, a graphic designer shaped by sports and big moments.<br>I craft visuals driven by the energy and emotion of the game.";
 
   balloonRoot.innerHTML = `
     <div class="balloon">

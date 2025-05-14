@@ -286,6 +286,35 @@ body {
     background-color: #2ecc71; /* Green for videos */
 }
 
+.post-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    justify-content: flex-end; /* Push content to the bottom */
+    padding: 18px 16px 14px 16px;
+    color: #fff;
+    font-size: 1.08rem;
+    font-weight: 500;
+    line-height: 1.4;
+    background: linear-gradient(0deg, rgba(20,20,20,0.92) 70%, rgba(20,20,20,0.0) 100%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(100%);
+    transition: opacity 0.28s cubic-bezier(0.4,0,0.2,1), transform 0.32s cubic-bezier(0.4,0,0.2,1);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.post.show-caption .post-caption {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
 /* Lightbox Styles */
 #project-lightbox {
     opacity: 0;
