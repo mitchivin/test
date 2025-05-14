@@ -1431,6 +1431,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     // Notify parent that projects app content is ready and visible
                     sendMessageToParent({ type: 'projects-ready' });
+
+                    // MOVED: Setup IntersectionObserver and attempt initial play
+                    // only after feed container is made visible.
+                    if (gridVideos.length > 0) { // Ensure gridVideos is populated before setup
+                        setupIntersectionObserver();
+                    }
                 }, 100); // 100ms delay, adjust if necessary
             }
         }
@@ -1444,6 +1450,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.addEventListener('error', checkAllLoaded);
                 }
             });
+        } else {
+            // No media elements, so consider content loaded immediately for observer setup
+            const feedContainer = document.querySelector('.feed-container');
+            if (feedContainer) {
+                feedContainer.classList.add('loaded');
+            }
+            // Notify parent that projects app content is ready and visible
+            sendMessageToParent({ type: 'projects-ready' });
+            // Setup observer now if no media to wait for
+            if (gridVideos.length > 0) { // Ensure gridVideos is populated
+                setupIntersectionObserver();
+            }
         }
     }
 
@@ -1461,7 +1479,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (video.__isIntersecting) {
                 // Attempt to play if intersecting
                 if (video.paused) {
+                    console.log('[ProjectsApp] Attempting to play video (intersecting & paused):', video.src);
                     video.play().catch(error => {
+                        console.error('[ProjectsApp] Autoplay attempt failed for video:', video.src, 'Error:', error);
+                        console.log('[ProjectsApp] Video details: muted=', video.muted, 'playsinline=', video.hasAttribute('playsinline'), 'readyState=', video.readyState, 'networkState=', video.networkState, 'videoError=', video.error);
                         // Autoplay was prevented, typically on mobile if not muted or no user interaction yet.
                         // Since videos are muted, this is less likely but good to be aware of.
                     });
@@ -1469,6 +1490,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Pause if not intersecting
                 if (!video.paused) {
+                    console.log('[ProjectsApp] Pausing video (not intersecting & playing):', video.src);
                     video.pause();
                 }
             }
@@ -1611,9 +1633,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    // Initialize for default (unmaximized) state
-    setupIntersectionObserver();
 
     // Expose closeLightbox globally for message handler
     window.closeLightbox = closeLightbox;

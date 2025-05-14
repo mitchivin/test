@@ -152,8 +152,10 @@ img#resume-preview,
 img.paragraph-icon-preview,
 img.item-icon-preview {
   display: block;
-  max-width: 200px; /* Max width for previews */
-  max-height: 150px;
+  max-width: 100%; /* Max width for previews */
+  max-height: 400px; /* Increased max height */
+  width: auto; /* Maintain aspect ratio */
+  height: auto; /* Maintain aspect ratio */
   margin: 10px auto;
   border: 1px solid #ACA899; /* XP default border for this kind of element */
   padding: 2px;
