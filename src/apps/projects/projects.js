@@ -306,28 +306,8 @@ function renderProjectsGrid() {
             video.setAttribute('playsinline', '');
             video.removeAttribute('controls');
             video.alt = project.title || 'Project Video';
-            // Add spinner overlay
-            const wrapper = document.createElement('div');
-            wrapper.style.position = 'relative';
-            wrapper.appendChild(video);
-            const spinner = createSpinnerOverlay();
-            wrapper.appendChild(spinner);
-            let hasPlayed = false;
-            function hideSpinner() {
-                if (spinner.parentNode) spinner.parentNode.removeChild(spinner);
-            }
-            video.addEventListener('playing', () => {
-                hasPlayed = true;
-                hideSpinner();
-            });
-            setTimeout(() => { if (!hasPlayed) hideSpinner(); }, 8000);
-            // Fallback: try to play programmatically if not playing after a short delay
-            setTimeout(() => {
-                if (!hasPlayed && video.paused) {
-                    video.play().catch(() => {});
-                }
-            }, 500);
-            post.appendChild(wrapper);
+            // NO WRAPPER, NO SPINNER, NO TIMEOUTS, NO FALLBACK .play()
+            post.appendChild(video);
         }
         feedContainer.appendChild(post);
     });
