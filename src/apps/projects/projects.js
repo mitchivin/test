@@ -269,11 +269,80 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Custom Projects Support ---
+    const LOCAL_KEY_PROJECTS = 'custom_projects';
+    const feedContainer = document.querySelector('.feed-container');
+    const defaultPosts = Array.from(feedContainer ? feedContainer.querySelectorAll('.post') : []);
+    const stored = localStorage.getItem(LOCAL_KEY_PROJECTS);
+    let customProjects = null;
+    try { customProjects = stored ? JSON.parse(stored) : null; } catch {}
+    if (Array.isArray(customProjects) && customProjects.length > 0 && feedContainer) {
+        // Remove all default posts
+        feedContainer.innerHTML = '';
+        // Add custom posts in the same structure
+        customProjects.forEach(data => {
+            const post = document.createElement('div');
+            if (data.type === 'image') {
+                post.className = 'post image-post';
+            } else if (data.type === 'video') {
+                post.className = 'post video-post';
+            } else {
+                post.className = 'post';
+            }
+            // Set all data-* attributes
+            for (const key in data) {
+                if (key.startsWith('data-')) {
+                    post.setAttribute(key, data[key]);
+                }
+            }
+            post.setAttribute('data-type', data.type);
+            post.setAttribute('data-src', data.src);
+            if (data.poster) post.setAttribute('data-poster', data.poster);
+            if (data['data-title']) post.setAttribute('data-title', data['data-title']);
+            if (data['data-description']) post.setAttribute('data-description', data['data-description']);
+            if (data['data-mobileDescription']) post.setAttribute('data-mobileDescription', data['data-mobileDescription']);
+            if (data['data-linkType']) post.setAttribute('data-linkType', data['data-linkType']);
+            if (data['data-linkUrl']) post.setAttribute('data-linkUrl', data['data-linkUrl']);
+            if (data['data-software']) post.setAttribute('data-software', data['data-software']);
+            // Add media element
+            if (data.type === 'video') {
+                const video = document.createElement('video');
+                video.src = data.src;
+                video.poster = data.poster || '';
+                video.autoplay = true;
+                video.loop = true;
+                video.muted = true;
+                video.setAttribute('playsinline', '');
+                post.appendChild(video);
+                // Add a post-caption div for consistency
+                const caption = document.createElement('div');
+                caption.className = 'post-caption';
+                caption.textContent = data['data-caption'] || '';
+                post.appendChild(caption);
+            } else if (data.type === 'image') {
+                const img = document.createElement('img');
+                img.src = data.src;
+                // Add onload handler to trigger layout after image loads
+                img.addEventListener('load', function() {
+                    if (typeof applyMasonryLayout === 'function') {
+                        applyMasonryLayout();
+                    }
+                });
+                post.appendChild(img);
+                // Add a post-caption div for consistency
+                const caption = document.createElement('div');
+                caption.className = 'post-caption';
+                caption.textContent = data['data-caption'] || '';
+                post.appendChild(caption);
+            }
+            feedContainer.appendChild(post);
+        });
+    }
+
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
     const posts = document.querySelectorAll('.post');
-    const feedContainer = document.querySelector('.feed-container');
 
     userPrefersDescriptionVisible = isDesktop(); // Initialize based on view
 
