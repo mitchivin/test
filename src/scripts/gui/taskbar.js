@@ -278,8 +278,8 @@ export function showNetworkBalloon() {
   balloonRoot.style.zIndex = "1400";
   document.body.appendChild(balloonRoot);
 
-  const headerText = "Welcome to my Portfolio";
-  const mainText = "Hey, I'm Mitch, a graphic designer shaped by sports and big moments.<br>I craft visuals driven by the energy and emotion of the game.";
+  const headerText = "Welcome";
+  const mainText = "Hey, my name's Mitch. Welcome to my portfolio.<br>It doesn't follow the usual format, neither do i.";
 
   balloonRoot.innerHTML = `
     <div class="balloon">
