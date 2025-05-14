@@ -115,6 +115,22 @@ document.addEventListener("DOMContentLoaded", () => {
           startMenu.closeStartMenu();
         }
       }
+      // Listen for Instagram open request from About iframe
+      if (event?.data?.type === 'open-instagram-from-about' && globalTaskbarInstance) {
+        // Find the Instagram menu item and simulate a click without opening the Start Menu
+        const startMenu = globalTaskbarInstance.startMenuComponent;
+        const instagramMenuItem = document.querySelector('.menu-item#menu-instagram');
+        if (instagramMenuItem) {
+          instagramMenuItem.click();
+        } else if (startMenu && startMenu._handleMenuClick) {
+          // Fallback: manually trigger the handler with a fake event
+          // } catch (error) {
+            // console.error("Failed to open Instagram:", error);
+            // Handle error (e.g., show a fallback message or log)
+          // const fakeEvent = { target: { closest: () => ({ dataset: { action: 'open-url', url: 'https://www.instagram.com/mitchivin' } }) }, stopPropagation: () => {}, preventDefault: () => {} };
+          // startMenu._handleMenuClick(fakeEvent);
+        }
+      }
     });
   }
   preloadApps.forEach(app => {

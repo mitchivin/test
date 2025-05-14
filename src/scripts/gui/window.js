@@ -226,6 +226,7 @@ export default class WindowManager {
 
                 if (event.data.open && event.data.linkType && event.data.linkUrl) {
                     externalLinkBtn.classList.remove('disabled');
+                    externalLinkBtn.style.display = '';
                     externalLinkBtn.dataset.urlToOpen = event.data.linkUrl; 
 
                     switch (event.data.linkType) {
@@ -248,6 +249,7 @@ export default class WindowManager {
                     }
                 } else {
                     externalLinkBtn.classList.add('disabled');
+                    externalLinkBtn.style.display = 'none';
                     delete externalLinkBtn.dataset.urlToOpen; 
                     // Reset to default (Instagram) appearance when no link or lightbox closed
                     if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
@@ -295,6 +297,29 @@ export default class WindowManager {
                 setTimeout(() => {
                     viewDescBtn.classList.remove('disabled');
                 }, 500);
+            }
+        }
+
+        if (event.data && event.data.type === 'set-external-link-enabled') {
+            const projectsWindow = this.windows && this.windows['internet-window'];
+            let externalLinkBtn;
+            if (projectsWindow) {
+                externalLinkBtn = projectsWindow.querySelector('.toolbar-button.viewExternalLink');
+            } else {
+                externalLinkBtn = document.querySelector('.toolbar-button.viewExternalLink');
+            }
+            if (externalLinkBtn) {
+                if (event.data.enabled) {
+                    externalLinkBtn.classList.remove('disabled');
+                    externalLinkBtn.style.display = '';
+                    if (event.data.url) {
+                        externalLinkBtn.dataset.urlToOpen = event.data.url;
+                    }
+                } else {
+                    externalLinkBtn.classList.add('disabled');
+                    externalLinkBtn.style.display = 'none';
+                    delete externalLinkBtn.dataset.urlToOpen;
+                }
             }
         }
 
@@ -842,7 +867,7 @@ export default class WindowManager {
         this._bindControl(newButton, 'click', () => {
             if (newButton.classList.contains('disabled')) return;
             const action = newButton.getAttribute('data-action');
-            this._handleToolbarAction(action, windowElement);
+            this._handleToolbarAction(action, windowElement, newButton);
         });
     });
   }
@@ -852,9 +877,10 @@ export default class WindowManager {
    * @private
    * @param {string} action - The action to perform.
    * @param {HTMLElement} windowElement - The window element a Mcting as context.
+   * @param {HTMLElement} button - The clicked button element.
    * @returns {void}
    */
-  _handleToolbarAction(action, windowElement) {
+  _handleToolbarAction(action, windowElement, button) {
     const windowId = windowElement.id; // Get the window ID for specific throttling
 
     // Throttle 'viewDescription' action for 'internet-window' (My Projects)
@@ -906,11 +932,10 @@ export default class WindowManager {
             this.openProgram('internet');
             break;
         case 'openExternalLink': 
-            const buttonElement = windowElement.querySelector('.toolbar-button.viewExternalLink');
-            if (buttonElement && buttonElement.dataset.urlToOpen && !buttonElement.classList.contains('disabled')) {
-                window.open(buttonElement.dataset.urlToOpen, '_blank');
+            if (button && button.dataset.urlToOpen && !button.classList.contains('disabled')) {
+                window.open(button.dataset.urlToOpen, '_blank');
             } else {
-                // External link not found or button was clicked when disabled.
+                console.warn('Could not open external link. Button or URL missing, or button disabled.', button);
             }
             break;
         case 'openResume':   

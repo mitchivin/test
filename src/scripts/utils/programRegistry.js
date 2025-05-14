@@ -176,13 +176,12 @@ const programData = {
   // Portfolio Content
   about: createProgram("about", "About Me", "desktop/about.webp", {
     dimensions: { width: 800, height: 600 },
-    statusBarText: "Getting to know the designer",
+    statusBarText: "Viewing background, skills and story",
     appPath: "src/apps/about/about.html",
     toolbarConfig: {
       buttons: [
         { key: "previous", enabled: false, icon: "./assets/gui/toolbar/back.webp", text: "Previous", action: "navigatePrevious" },
         { key: "next", enabled: false, icon: "./assets/gui/toolbar/forward.webp", text: "Next", action: "navigateNext" },
-        { key: "up", enabled: false, icon: "./assets/gui/toolbar/up.webp", text: null, action: "navigateUp" },
         { type: "separator" },
         { key: "projects", enabled: true, icon: "./assets/gui/desktop/internet.webp", text: "My Projects", action: "openProjects" },
         { key: "resume", enabled: true, icon: "./assets/gui/desktop/resume.webp", text: "My Resume", action: "openResume" },
@@ -216,7 +215,7 @@ const programData = {
   }),
   resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
     dimensions: { width: 600, height: 725 },
-    statusBarText: "Reviewing professional background",
+    statusBarText: "Displaying experience, education and credentials",
     appPath: "src/apps/resume/resume.html",
     menuBarConfig: {
       items: [
@@ -233,6 +232,15 @@ const programData = {
     toolbarConfig: {
       buttons: [
         {
+          key: "print",
+          enabled: false,
+          icon: "./assets/gui/toolbar/print.webp",
+          text: "Print",
+          desktopOnly: true,
+          tooltip: "Print (Disabled)"
+        },
+        { type: "separator", desktopOnly: true },
+        {
           key: "email",
           enabled: true,
           icon: "./assets/gui/desktop/contact.webp",
@@ -243,9 +251,18 @@ const programData = {
           key: "save",
           enabled: true,
           icon: "./assets/gui/toolbar/save.webp",
-          text: "Download",
+          text: "Save",
           action: "saveResume",
         },
+        { type: "separator", desktopOnly: true },
+        {
+          key: "up",
+          enabled: false,
+          icon: "./assets/gui/toolbar/up.webp",
+          text: null,
+          desktopOnly: true,
+          tooltip: "Up (Disabled)"
+        }
       ],
     },
   }),
@@ -319,7 +336,7 @@ const programData = {
   // Project Showcase Programs
   internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
     dimensions: { width: 900, height: 650 },
-    statusBarText: "Exploring the portfolio",
+    statusBarText: "Exploring completed design work",
     appPath: "src/apps/projects/projects.html",
     addressBarConfig: {
       enabled: true,
@@ -379,13 +396,40 @@ const programData = {
           action: "openExternalLink",
           enabled: false,
           desktopOnly: true,
+          style: 'display: none;',
         },
+        { type: "separator", desktopOnly: true },
+        {
+          key: "search",
+          enabled: false,
+          icon: "./assets/gui/toolbar/search.webp",
+          text: null,
+          desktopOnly: true,
+          tooltip: "Search (Disabled)"
+        },
+        {
+          key: "favorites",
+          enabled: false,
+          icon: "./assets/gui/toolbar/favorites.webp",
+          text: "Favorites",
+          desktopOnly: true,
+          tooltip: "Favorites (Disabled)"
+        },
+        { type: "separator", desktopOnly: true },
+        {
+          key: "print",
+          enabled: false,
+          icon: "./assets/gui/toolbar/print.webp",
+          text: "Print",
+          desktopOnly: true,
+          tooltip: "Print (Disabled)"
+        }
       ],
     },
   }),
   contact: createProgram("contact", "Contact Me", "desktop/contact.webp", {
     dimensions: { width: 600, height: 450 },
-    statusBarText: "Let's start a conversation",
+    statusBarText: "Ways to connect and get in touch",
     appPath: "src/apps/contact/contact.html",
     toolbarConfig: {
       buttons: [
@@ -396,7 +440,14 @@ const programData = {
           text: "Send Message",
           action: "sendMessage",
         },
-        { type: "separator" },
+        {
+          key: "new",
+          enabled: true,
+          icon: "./assets/gui/toolbar/new.webp",
+          text: "New Message",
+          action: "newMessage",
+        },
+        { type: "separator", desktopOnly: true },
         {
           key: "cut",
           enabled: false,
@@ -415,25 +466,24 @@ const programData = {
           icon: "./assets/gui/toolbar/paste.webp",
           text: null,
         },
-        {
-          key: "new",
-          enabled: true,
-          icon: "./assets/gui/toolbar/new.webp",
-          text: "New Message",
-          action: "newMessage",
-        },
         { type: "separator" },
         {
-          key: "attach",
-          enabled: false,
-          icon: "./assets/gui/toolbar/attach.webp",
+          key: "instagram",
+          action: "openExternalLink",
+          icon: "./assets/gui/start-menu/instagram.webp",
           text: null,
+          tooltip: "View on Instagram",
+          url: "https://www.instagram.com/mitchivin",
+          enabled: true,
         },
         {
-          key: "sign",
-          enabled: false,
-          icon: "./assets/gui/toolbar/sign.webp",
+          key: "linkedin",
+          action: "openExternalLink",
+          icon: "./assets/gui/start-menu/linkedin.webp",
           text: null,
+          tooltip: "View on LinkedIn",
+          url: "https://www.linkedin.com/in/mitchivin/",
+          enabled: true,
         },
       ],
     },
@@ -454,6 +504,12 @@ const programData = {
   }),
 
   // Special format entries with custom properties
+  setup: createProgram("setup", "Setup Wizard", "desktop/setup.webp", {
+    dimensions: { width: 600, height: 500 },
+    appPath: "src/apps/setup/setup.html",
+    statusBarText: "Customize your portfolio template",
+    showOnDesktop: true,
+  }),
 };
 
 export default programData;

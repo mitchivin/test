@@ -102,7 +102,7 @@ export default class Taskbar {
 
     // Call the new utility function for system tray icons
     setupTooltips(
-      ".tray-status-icon, .tray-network-icon, .tray-volume-icon",
+      ".tray-status-icon, .tray-network-icon, .tray-volume-icon, .tray-fullscreen-icon",
       undefined,
       100,
       // Prevent tooltip if balloon is active
@@ -117,7 +117,8 @@ export default class Taskbar {
     // Listen for fullscreen changes to reset the network balloon
     document.addEventListener('fullscreenchange', () => {
       localStorage.removeItem("networkBalloonShown");
-      // Optional: If you want to re-evaluate showing the balloon immediately after fullscreen change:
+      // Adjust based on final requirements
+      // Ensure it doesn't conflict with other UI elements
       // showNetworkBalloon(); // This might be too intrusive, depends on desired UX
     });
   }
@@ -276,11 +277,10 @@ export function showNetworkBalloon() {
   balloonRoot.style.position = "absolute";
   balloonRoot.style.zIndex = "1400";
   document.body.appendChild(balloonRoot);
-  const isMobile = isMobileDevice();
-  const headerText = "Welcome to my Portfolio";
-  const mainText = isMobile
-    ? "Hey, I'm Mitch - I thought I'd mix things up a bit.<br>For the best experience, view this site on desktop."
-    : "Hey, I'm Mitch - I thought i'd mix things up a bit.<br>Deliberately different. Meant to be explored.";
+
+  const headerText = "Welcome";
+  const mainText = "Hey, my name's Mitch. Welcome to my portfolio.<br>It doesn't follow the usual format, neither do i.";
+
   balloonRoot.innerHTML = `
     <div class="balloon">
       <button class="balloon__close" aria-label="Close"></button>
@@ -308,7 +308,7 @@ export function showNetworkBalloon() {
     const scale = 0.93;
     const deltaX = (balloonRect.width * (scale - 1)) / 2;
     // Set the balloon position so the pointer aligns with the icon center
-    balloonRoot.style.left = balloonRect.left + offsetX - deltaX - 18 + "px";
+    balloonRoot.style.left = balloonRect.left + offsetX - deltaX - 24 + "px";
     balloonRoot.style.top =
       iconRect.top - balloonRect.height - 22 + window.scrollY + "px";
   }, 0);
