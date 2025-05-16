@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const scroller = document.getElementById('appRoot');
 
   // Customization: Load custom resume.webp if present
-  const LOCAL_KEY = 'custom_resume_webp';
+  const LOCAL_KEY = 'custom_resume_webp_data';
   const customResume = localStorage.getItem(LOCAL_KEY);
   if (customResume) {
     resumeImage.src = customResume;

@@ -172,209 +172,6 @@ export default class WindowManager {
     this._setupGlobalHandlers();
     this._subscribeToEvents();
 
-    // Listen for messages from iframes
-    window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'set-home-enabled') {
-            const homeButton = document.querySelector('.toolbar-button.home');
-            if (homeButton) {
-                if (event.data.enabled) {
-                    homeButton.classList.remove('disabled');
-                } else {
-                    homeButton.classList.add('disabled');
-                }
-            }
-        }
-        
-        if (event.data && event.data.type === 'lightbox-state') {
-            const projectsWindow = this.windows['internet-window'];
-            let viewDescBtn, backBtn, forwardBtn, externalLinkBtn;
-
-            if (projectsWindow) {
-                 viewDescBtn = projectsWindow.querySelector('.toolbar-button.view-description');
-                 backBtn = projectsWindow.querySelector('.toolbar-button.previous');
-                 forwardBtn = projectsWindow.querySelector('.toolbar-button.next');
-                 externalLinkBtn = projectsWindow.querySelector('.toolbar-button.viewExternalLink'); 
-            } else { 
-                viewDescBtn = document.querySelector('.toolbar-button.view-description');
-                backBtn = document.querySelector('.toolbar-button.previous');
-                forwardBtn = document.querySelector('.toolbar-button.next');
-                externalLinkBtn = document.querySelector('.toolbar-button.viewExternalLink');
-            }
-
-            if (viewDescBtn) {
-                viewDescBtn.classList.toggle('disabled', !event.data.open);
-                const textSpan = viewDescBtn.querySelector('span');
-                // Always set initial text to 'Show more' if not open
-                if (event.data.open) {
-                    if (textSpan) textSpan.textContent = 'Show less';
-                    viewDescBtn.setAttribute('aria-label', 'Show less');
-                } else {
-                    if (textSpan) textSpan.textContent = 'Show more';
-                    viewDescBtn.setAttribute('aria-label', 'Show more');
-                }
-            }
-            if (backBtn) {
-                backBtn.classList.toggle('disabled', !event.data.open);
-            }
-            if (forwardBtn) {
-                forwardBtn.classList.toggle('disabled', !event.data.open);
-            }
-            
-            if (externalLinkBtn) {
-                const iconImg = externalLinkBtn.querySelector('img');
-                const textSpan = externalLinkBtn.querySelector('span');
-
-                if (event.data.open && event.data.linkType && event.data.linkUrl) {
-                    externalLinkBtn.classList.remove('disabled');
-                    externalLinkBtn.style.display = '';
-                    externalLinkBtn.dataset.urlToOpen = event.data.linkUrl; 
-
-                    switch (event.data.linkType) {
-                        case 'instagram':
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
-                            if (textSpan) textSpan.textContent = 'View on Instagram';
-                            break;
-                        case 'behance':
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/behance.webp';
-                            if (textSpan) textSpan.textContent = 'View on Behance';
-                            break;
-                        case 'github':
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/github.webp';
-                            if (textSpan) textSpan.textContent = 'View on GitHub';
-                            break;
-                        default: // Fallback to Instagram or a generic state if linkType is unknown
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
-                            if (textSpan) textSpan.textContent = 'View Link'; 
-                            break;
-                    }
-                } else {
-                    externalLinkBtn.classList.add('disabled');
-                    externalLinkBtn.style.display = 'none';
-                    delete externalLinkBtn.dataset.urlToOpen; 
-                    // Reset to default (Instagram) appearance when no link or lightbox closed
-                    if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
-                    if (textSpan) textSpan.textContent = 'View on Instagram';
-                }
-            }
-        }
-
-        if (event.data && event.data.type === 'description-state') {
-            let sourceWindowElement = null;
-            for (const windowId in this.windows) {
-                const winElement = this.windows[windowId];
-                const iframe = winElement.querySelector('iframe');
-                if (iframe && iframe.contentWindow === event.source) {
-                    sourceWindowElement = winElement;
-                    break;
-                }
-            }
-
-            if (sourceWindowElement && sourceWindowElement.id === 'internet-window') {
-                const viewDescButton = sourceWindowElement.querySelector('.toolbar-button.view-description');
-                if (viewDescButton) {
-                    const textSpan = viewDescButton.querySelector('span');
-                    if (event.data.open) {
-                        if (textSpan) textSpan.textContent = 'Show less';
-                        viewDescButton.setAttribute('aria-label', 'Show less');
-                    } else {
-                        if (textSpan) textSpan.textContent = 'Show more';
-                        viewDescButton.setAttribute('aria-label', 'Show more');
-                    }
-                }
-            }
-        }
-
-        if (event.data && event.data.type === 'throttle-toolbar' && event.data.key === 'view-description') {
-            const projectsWindow = this.windows['internet-window'];
-            let viewDescBtn;
-            if (projectsWindow) {
-                viewDescBtn = projectsWindow.querySelector('.toolbar-button.view-description');
-            } else {
-                viewDescBtn = document.querySelector('.toolbar-button.view-description');
-            }
-            if (viewDescBtn && !viewDescBtn.classList.contains('disabled')) {
-                viewDescBtn.classList.add('disabled');
-                setTimeout(() => {
-                    viewDescBtn.classList.remove('disabled');
-                }, 500);
-            }
-        }
-
-        if (event.data && event.data.type === 'set-external-link-enabled') {
-            const projectsWindow = this.windows && this.windows['internet-window'];
-            let externalLinkBtn;
-            if (projectsWindow) {
-                externalLinkBtn = projectsWindow.querySelector('.toolbar-button.viewExternalLink');
-            } else {
-                externalLinkBtn = document.querySelector('.toolbar-button.viewExternalLink');
-            }
-            if (externalLinkBtn) {
-                if (event.data.enabled) {
-                    externalLinkBtn.classList.remove('disabled');
-                    externalLinkBtn.style.display = '';
-                    if (event.data.url) {
-                        externalLinkBtn.dataset.urlToOpen = event.data.url;
-                    }
-                } else {
-                    externalLinkBtn.classList.add('disabled');
-                    externalLinkBtn.style.display = 'none';
-                    delete externalLinkBtn.dataset.urlToOpen;
-                }
-            }
-        }
-
-        // Accept messages from same-origin or file protocol (local dev)
-        if (
-          !(
-            window.location.protocol === "file:" ||
-            event.origin === window.origin
-          )
-        )
-          return;
-
-        // Find the .app-window containing the iframe with this contentWindow
-        let windowElement = null;
-        if (event.data?.type === 'iframe-interaction' && event.data.windowId) {
-          windowElement = document.getElementById(event.data.windowId);
-        }
-        if (!windowElement) {
-          windowElement = Array.from(
-            document.querySelectorAll(".app-window"),
-          ).find((win) => {
-            const iframe = win.querySelector("iframe");
-            return iframe && iframe.contentWindow === event.source;
-          });
-        }
-        // Fallback: if not found, try to match by src for contact app
-        if (!windowElement && event.data?.type === 'iframe-interaction') {
-          windowElement = Array.from(document.querySelectorAll('.app-window')).find(win => {
-            const iframe = win.querySelector('iframe');
-            return iframe && iframe.src.includes('contact.html');
-          });
-        }
-        if (!windowElement) return;
-
-        // Handle iframe-interaction message to close menubar popouts
-        if (event.data?.type === 'iframe-interaction') {
-          windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
-          return;
-        }
-
-        if (event.data?.type === "minimize-window") {
-          this.minimizeWindow(windowElement);
-        } else if (event.data?.type === "close-window") {
-          this.closeWindow(windowElement);
-        } else if (
-          event.data?.type === "updateStatusBar" &&
-          typeof event.data.text === "string"
-        ) {
-          // Handle status bar updates from specific apps (like Notepad)
-          if (windowElement.statusBarField) {
-            windowElement.statusBarField.textContent = event.data.text;
-          }
-        }
-    });
-
     // Add click handler to Home button to send close-lightbox message to Projects app iframe only
     const homeButton = document.querySelector('.toolbar-button.home');
     if (homeButton) {
@@ -395,16 +192,18 @@ export default class WindowManager {
     document.addEventListener(
       "mousedown",
       (e) => {
-        const clickedOnDesktopSpace =
-          e.target.classList.contains("desktop") ||
-          e.target.classList.contains("selection-overlay");
-        if (clickedOnDesktopSpace && !e.target.closest(".window")) {
-          if (this.activeWindow) {
-            this.deactivateAllWindows();
-          }
+        // If a mousedown occurs outside any active window's content AND not on taskbar/start menu,
+        // then deactivate all windows.
+        const clickedOnWindowContent = e.target.closest(".app-window .window-content");
+        const clickedOnWindowChrome = e.target.closest(".app-window .title-bar, .app-window .status-bar, .app-window .menu-bar-container, .app-window .toolbar-container");
+        const clickedOnTaskbar = e.target.closest(".taskbar");
+        const clickedOnStartMenu = e.target.closest(".startmenu, .all-programs-menu, .recently-used-menu"); // Include submenus
+
+        if (!clickedOnWindowContent && !clickedOnWindowChrome && !clickedOnTaskbar && !clickedOnStartMenu) {
+          this.deactivateAllWindows();
         }
       },
-      true,
+      true, // Use capture phase
     );
 
     window.addEventListener(
@@ -419,49 +218,145 @@ export default class WindowManager {
         )
           return;
 
+        // console.log('[WindowManager] Received message (in _setupGlobalHandlers):', event.data); // LOG 1 (REMOVED)
+
         // Find the .app-window containing the iframe with this contentWindow
         let windowElement = null;
-        if (event.data?.type === 'iframe-interaction' && event.data.windowId) {
-          windowElement = document.getElementById(event.data.windowId);
-        }
-        if (!windowElement) {
+        // For 'iframe-interaction', 'minimize-window', 'closeWindow', 'maximize-window', 'restore-window' events coming *from an iframe*,
+        // event.source will be the iframe's contentWindow.
+        // We can identify the parent .app-window by matching this event.source.
+        if (event.source && event.source !== window) { // Message is from an iframe
           windowElement = Array.from(
             document.querySelectorAll(".app-window"),
           ).find((win) => {
             const iframe = win.querySelector("iframe");
             return iframe && iframe.contentWindow === event.source;
           });
+        } else if (event.data?.windowId && event.source === window) {
+          // Message is from the main window itself (e.g., taskbar click) or a trusted source with a windowId
+          windowElement = document.getElementById(event.data.windowId);
         }
-        // Fallback: if not found, try to match by src for contact app
-        if (!windowElement && event.data?.type === 'iframe-interaction') {
-          windowElement = Array.from(document.querySelectorAll('.app-window')).find(win => {
-            const iframe = win.querySelector('iframe');
-            return iframe && iframe.src.includes('contact.html');
-          });
-        }
-        if (!windowElement) return;
 
-        // Handle iframe-interaction message to close menubar popouts
+
+        if (windowElement) {
+          // console.log('[WindowManager] Identified windowElement (in _setupGlobalHandlers):', windowElement.id); // LOG 4 (REMOVED)
+        } else {
+          // If no windowElement could be resolved based on event.source (for iframe messages)
+          // or event.data.windowId (for parent messages), we might not be able to proceed for some event types.
+          // For 'closeWindow', if it's from the parent and has windowId, it's already handled above.
+          // If it's from an iframe and find() failed, then there's an issue.
+          if (event.data?.type === 'closeWindow' || event.data?.type === 'minimize-window' || event.data?.type === 'maximize-window' || event.data?.type === 'restore-window') {
+            // console.error('[WindowManager] Could not identify windowElement for an action message. Event data:', event.data); // LOG C (REMOVED)
+            return; // Cannot proceed with window actions if no windowElement
+          }
+          // For other message types that don't strictly need a windowElement, allow them to pass
+        }
+
+        // Handle iframe-interaction message (typically to close menubar popouts within an app window)
+        // This type of message should always originate from an iframe and be associated with its parent windowElement.
         if (event.data?.type === 'iframe-interaction') {
-          windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
+          if (windowElement && event.source && event.source !== window) { // Ensure it's from an iframe and windowElement is its parent
+            windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
+          }
+          // Do not return here if the type could potentially also be closeWindow, etc.
+          // However, 'iframe-interaction' should be exclusive. Adding a specific return for clarity and safety.
+          if (event.data?.type === 'iframe-interaction') return;
+        }
+
+
+        if (event.data?.type === "minimize-window") {
+          if (windowElement) this.minimizeWindow(windowElement);
+          return;
+        }
+        
+        // console.log(`[WindowManager] LOG PRE-CLOSE-CHECK: About to check for type 'closeWindow'. event.data.type is: '${event.data?.type}', windowId from data: '${event.data?.windowId}'`); // LOG PRE-CLOSE-CHECK (REMOVED)
+
+        if (event.data?.type === "closeWindow") {
+          // console.log('[WindowManager] LOG A: Inside closeWindow type check for event:', event.data); // LOG A (REMOVED)
+          if (windowElement) {
+            // console.log('[WindowManager] LOG B: Calling this.closeWindow for windowId:', windowElement.id); // LOG B (REMOVED)
+            this.closeWindow(windowElement);
+          } else {
+            // This case should ideally be caught by the windowElement check earlier for 'closeWindow' type.
+            // console.error('[WindowManager] LOG C: windowElement not found for closeWindow message, though it should have been identified or errored earlier. Event data:', event.data); // LOG C (REMOVED)
+          }
           return;
         }
 
-        if (event.data?.type === "minimize-window") {
-          this.minimizeWindow(windowElement);
-        } else if (event.data?.type === "close-window") {
-          this.closeWindow(windowElement);
-        } else if (
-          event.data?.type === "updateStatusBar" &&
-          typeof event.data.text === "string"
-        ) {
-          // Handle status bar updates from specific apps (like Notepad)
-          if (windowElement.statusBarField) {
-            windowElement.statusBarField.textContent = event.data.text;
-          }
+        if (event.data?.type === "maximize-window") {
+          if (windowElement) this.toggleMaximize(windowElement);
+          return;
+        }
+
+        if (event.data?.type === "restore-window") {
+          // This might be triggered if a window is already maximized and maximize is called again
+          // or if restoring from a minimized state via a custom message.
+          if (windowElement) this.toggleMaximize(windowElement); // toggleMaximize handles both
+          return;
+        }
+
+        if (event.data?.type === 'requestCloseConfirmation') {
+          // Example: Show a confirmation dialog
+          // For simplicity, we'll just close it directly for now
+          if (windowElement) this.closeWindow(windowElement);
+          return;
+        }
+        
+        if (event.data?.type === 'context-menu-command') {
+            // Handle context menu commands if any are sent via postMessage
+            // console.log('Context menu command received by parent:', event.data.command, 'on windowId:', event.data.windowId);
+            return;
+        }
+
+        // Handle messages for toolbar button states
+        if (event.data?.type === 'set-home-enabled') {
+            const homeButton = document.querySelector(`#${event.data.windowId} .toolbar-button.home`);
+            if (homeButton) homeButton.disabled = !event.data.enabled;
+            return;
+        }
+        if (event.data?.type === 'set-description-enabled') {
+            const descButton = document.querySelector(`#${event.data.windowId} .toolbar-button.view-description`);
+            if (descButton) descButton.disabled = !event.data.enabled;
+            return;
+        }
+        if (event.data?.type === 'set-navigation-enabled') {
+            const prevButton = document.querySelector(`#${event.data.windowId} .toolbar-button.navigate-previous`);
+            const nextButton = document.querySelector(`#${event.data.windowId} .toolbar-button.navigate-next`);
+            if (prevButton) prevButton.disabled = !event.data.enabled;
+            if (nextButton) nextButton.disabled = !event.data.enabled;
+            return;
+        }
+         if (event.data?.type === 'set-external-link-enabled') {
+            const linkButton = document.querySelector(`#${event.data.windowId} .toolbar-button.external-link`);
+            if (linkButton) {
+                linkButton.disabled = !event.data.enabled;
+                if (event.data.enabled && event.data.url) {
+                    linkButton.dataset.url = event.data.url;
+                } else {
+                    delete linkButton.dataset.url;
+                }
+            }
+            return;
+        }
+        
+        if (event.data?.type === 'projects-ready') {
+            // console.log('Projects app content is ready and visible.');
+            // Potentially hide a global loading spinner for projects if one existed
+        }
+        
+        if (event.data?.type === 'contactFormDataResponse') {
+            const data = event.data.data;
+            const mailtoLink = `mailto:${data.to}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(data.message + '\n\nFrom: ' + data.from)}`;
+            window.open(mailtoLink, '_blank');
+        }
+
+        if (event.data?.type === 'request-active-window-id') {
+            const activeWin = this._findTopWindow();
+            if (event.source.postMessage) {
+                 event.source.postMessage({ type: 'active-window-id-response', windowId: activeWin ? activeWin.id : null }, event.origin);
+            }
         }
       },
-      true,
     );
   }
 
@@ -1224,6 +1119,7 @@ export default class WindowManager {
    * @returns {void}
    */
   closeWindow(windowElement) {
+    // console.log('[WindowManager] LOG 5: closeWindow METHOD CALLED for windowElement:', windowElement ? windowElement.id : 'null'); // LOG 5 (REMOVED)
     if (!windowElement) return;
     const windowId = windowElement.id;
     // Prevent double-close

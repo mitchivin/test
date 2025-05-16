@@ -1,0 +1,48 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Structure and Conventions
+
+This document outlines the standard project structure and naming conventions to be followed for consistency and maintainability.
+
+## Directory Structure
+
+The project is organized as follows:
+
+*   **`src/`**: Contains all source code.
+    *   **`apps/`**: Houses individual applications. Each application resides in its own subdirectory (e.g., `about/`, `contact/`).
+        *   Typically, each app subdirectory includes:
+            *   `appname.html` (e.g., `[about.html](mdc:src/apps/about/about.html)`)
+            *   `appname.css` (e.g., `[about.css](mdc:src/apps/about/about.css)`)
+            *   `appname.js` (e.g., `[about.js](mdc:src/apps/about/about.js)`)
+    *   **`scripts/`**: Contains core JavaScript modules.
+        *   **`gui/`**: For UI-related JavaScript components like `[desktop.js](mdc:src/scripts/gui/desktop.js)`, `[taskbar.js](mdc:src/scripts/gui/taskbar.js)`, `[window.js](mdc:src/scripts/gui/window.js)`, `[startMenu.js](mdc:src/scripts/gui/startMenu.js)`, etc.
+        *   **`utils/`**: For utility JavaScript modules such as `[eventBus.js](mdc:src/scripts/utils/eventBus.js)` and `[programRegistry.js](mdc:src/scripts/utils/programRegistry.js)`.
+    *   **`styles/`**: Contains CSS files.
+        *   **`gui/`**: For CSS related to core UI components (e.g., `[desktop.css](mdc:src/styles/gui/desktop.css)`, `[taskbar.css](mdc:src/styles/gui/taskbar.css)`, `[startMenu.css](mdc:src/styles/gui/startMenu.css)`).
+        *   **`utils/`**: For CSS related to utilities, such as `[crtEffect.css](mdc:src/styles/utils/crtEffect.css)`.
+        *   Global stylesheets: `[main.css](mdc:src/styles/main.css)`, `[reset.css](mdc:src/styles/reset.css)`, and `[fonts.css](mdc:src/styles/fonts.css)`.
+*   **`assets/`**: Contains all static assets (images, fonts, etc.).
+    *   **`gui/`**: Subdivided by GUI component for assets related to boot, desktop, start-menu, taskbar.
+    *   **`apps/`**: Subdivided by application name (e.g., `projects/`) for app-specific assets.
+    *   **`fonts/`**: Contains font files (e.g., `[tahoma.woff2](mdc:assets/fonts/tahoma.woff2)`).
+*   **`[index.html](mdc:index.html)`**: The main HTML entry point for the application, located at the workspace root.
+
+## Naming Conventions
+
+Adhere to the following naming conventions:
+
+*   **Application Files**: For HTML, CSS, and JS files specific to an application, use the application's name as a prefix (e.g., `about.html`, `contact.css`, `projects.js`).
+*   **JavaScript Modules/Files**: Use camelCase (e.g., `startMenu.js`, `eventBus.js`).
+*   **CSS Classes**: Use kebab-case (e.g., `desktop-icon`, `start-menu-middle`, `window-body`).
+*   **HTML IDs**: Use kebab-case (e.g., `boot-screen`, `start-button`, `windows-container`).
+*   **JavaScript Variables & Functions**: Use camelCase (e.g., `myVariable`, `calculateValue()`).
+*   **JavaScript Constants**: Use `UPPER_SNAKE_CASE` (e.g., `MAX_USERS`, `API_ENDPOINT`).
+
+## Entry Point
+
+*   The main HTML entry point for the simulation is `[index.html](mdc:index.html)`.
+*   The primary JavaScript entry point, loaded as a module by `index.html`, is `[src/scripts/main.js](mdc:src/scripts/main.js)`.
+

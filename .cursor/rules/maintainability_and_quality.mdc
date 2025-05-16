@@ -1,0 +1,70 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Maintainability and Code Quality Guidelines
+
+These guidelines aim to ensure the codebase remains understandable, manageable, and of high quality as it evolves.
+
+## Code Comments
+
+*   **JSDoc for JavaScript**: Most JavaScript files, especially modules in `src/scripts/gui/` and `src/scripts/utils/`, utilize JSDoc-style comments for:
+    *   Module/file overview (e.g., `@file`, `@module`, description).
+    *   Class definitions.
+    *   Functions/methods, including `@param` for parameters and `@returns` for return values.
+    *   Continue this practice for all new JavaScript modules, classes, and non-trivial functions to maintain good documentation within the code.
+    *   Example: See top of `[src/scripts/main.js](mdc:src/scripts/main.js)` or `[src/scripts/gui/window.js](mdc:src/scripts/gui/window.js)`.
+*   **CSS Comments**: CSS files (`[src/styles/**/*.css](mdc:src/styles)`) generally start with a header comment block explaining their purpose and scope. Use comments within the CSS to delineate major sections or explain complex selectors or non-obvious styling decisions.
+*   **HTML Comments**: Use HTML comments (`<!-- ... -->`) in `[index.html](mdc:index.html)` and application HTML files (`[src/apps/**/*.html](mdc:src/apps)`) to clarify complex structures or logical sections.
+*   **Avoid Obvious Comments**: Do not comment code that is self-explanatory. Focus on the "why" rather than the "what" if the "what" is clear from the code itself.
+*   **TODO/FIXME**: Use `// TODO:` or `// FIXME:` comments to mark areas that require future attention or known issues. Regularly review and address these.
+*   **No Dead Code**: Commented-out code blocks **must be deleted**. Version control (Git) is the sole repository for historical code. Keeping commented-out code clutters files, reduces readability, and can lead to confusion or accidental re-introduction of outdated logic.
+
+## Readability and Formatting
+
+*   **Consistent Formatting**: Adhere to the existing code formatting style regarding indentation (typically 2 spaces for JS/CSS/HTML), spacing, and bracket placement.
+*   **Descriptive Naming**: Use clear, descriptive names for variables, functions, classes, and CSS selectors that indicate their purpose or the data they hold.
+*   **Line Length**: Keep lines of code to a reasonable length to improve readability. Break long lines where appropriate.
+
+## Modification and Implementation Principles
+
+*   **Prefer Direct Modification**: When the behavior of existing components (styled by `xp.css` or custom CSS/JS) needs to be altered, the primary approach should be direct and clean modification of the component's own source code (HTML structure, CSS rules, or JavaScript logic).
+    *   **CSS**: Avoid writing extensive CSS override rules that counteract `xp.css` specificity or create complex cascades. If `xp.css` provides a base, work with it or make targeted adjustments. For entirely custom components, write clean, self-contained CSS. An over-reliance on `!important` or deeply nested selectors to force changes is a sign that a more direct approach is needed.
+    *   **JavaScript**: Prefer modifying a component's internal logic directly or extending it through clearly defined internal mechanisms. Avoid external scripts that monkey-patch or apply complex conditional overrides after instantiation, especially for fundamental behavioral changes.
+*   **Embrace Simplicity and Strategic Hardcoding**: 
+    *   Given this project emulates a specific, well-defined interface (Windows XP), prioritize directness and simplicity. If a value, behavior, or configuration is fixed and specific to the XP emulation and unlikely to change, **hardcode it directly** rather than introducing layers of abstraction or configuration options that add unnecessary complexity and may not be fully utilized.
+    *   This principle encourages choosing the simplest, most straightforward solution that clearly meets the requirement, rather than over-engineering. This does not mean abandoning good design, but rather valuing clarity and directness for this particular project context.
+
+## DRY (Don't Repeat Yourself)
+
+*   **Reusable Functions/Modules**: Identify and extract repetitive code into reusable functions or modules, especially within JavaScript. The `src/scripts/utils/` directory is intended for such general-purpose utilities (e.g., `[eventBus.js](mdc:src/scripts/utils/eventBus.js)`).
+*   **CSS Utility Classes**: While not extensively used globally, consider creating utility classes for very common styling patterns if they simplify HTML and reduce CSS duplication. However, prioritize semantic class names related to components.
+*   **Configuration**: Centralize true configuration where it provides clear benefits (e.g., application definitions in `[programRegistry.js](mdc:src/scripts/utils/programRegistry.js)` or global CSS variables for theming). Do not confuse this with the principle of strategic hardcoding for fixed, specific emulation details.
+
+## Testing (Manual & Conceptual)
+
+*   **Thorough Manual Testing**: While a formal automated testing framework is not currently part of the project, all new features or significant changes must be thoroughly manually tested.
+    *   Test across different states of the application (e.g., window active/inactive, maximized/minimized, different Start Menu states).
+    *   Verify behavior on different screen sizes if responsive design is involved.
+    *   Check for console errors.
+*   **Edge Cases**: Consider and test potential edge cases or unusual user interactions.
+
+## Dependency Management
+
+*   **`xp.css`**: The primary external dependency is `xp.css`, loaded via CDN from `unpkg.com` in `[index.html](mdc:index.html)`. Be mindful of its version.
+*   **Minimize New Dependencies**: Avoid introducing new external JavaScript libraries or CSS frameworks unless absolutely essential and they provide significant benefits that cannot be easily achieved with existing code or `xp.css`.
+
+## Refactoring
+
+*   **Continuous Improvement**: Periodically review sections of the code for potential refactoring opportunities to improve clarity, performance, or maintainability, adhering to the principles outlined above.
+*   **Address Technical Debt**: Proactively address any `// TODO:` or `// FIXME:` comments or known areas of technical debt.
+
+## Version Control (Assumed)
+
+*   (Although not explicitly reviewed, it's assumed a version control system like Git is used.)
+*   Write clear, concise commit messages that explain the purpose of the changes.
+*   Commit frequently with logical units of work.
+
+
+

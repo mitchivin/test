@@ -1,0 +1,53 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# HTML Guidelines
+
+These guidelines apply to all HTML files within the project, including the main `[index.html](mdc:index.html)` and individual application HTML files (e.g., `[src/apps/about/about.html](mdc:src/apps/about/about.html)`).
+
+## Structure & Semantics
+
+*   **Main Page Structure**: The overall page structure, including boot screens, desktop, taskbar, and global containers, is defined in `[index.html](mdc:index.html)`.
+*   **Application Structure**: HTML files for individual applications (located in `src/apps/appname/`) should define their own self-contained content structure. These are typically loaded into iframes managed by the `WindowManager`.
+*   **Semantic HTML**: Utilize HTML5 semantic elements (e.g., `<main>`, `<article>`, `<nav>`, `<aside>`, `<footer>`) where appropriate to improve document structure and accessibility.
+*   **DOCTYPE**: Ensure `<!doctype html>` is used for all HTML documents.
+*   **Language**: Specify the document language using `<html lang="en">`.
+
+## Asset Linking
+
+*   **CSS**:
+    *   The external `xp.css` library is linked via CDN in `[index.html](mdc:index.html)`.
+    *   The project's main stylesheet, `[src/styles/main.css](mdc:src/styles/main.css)`, is linked in `[index.html](mdc:index.html)` after `xp.css`.
+    *   App-specific CSS files (e.g., `[src/apps/about/about.css](mdc:src/apps/about/about.css)`) should be linked from within their respective app HTML files.
+*   **JavaScript**:
+    *   The main application script, `[src/scripts/main.js](mdc:src/scripts/main.js)`, is loaded as a module (`type="module"`) in `[index.html](mdc:index.html)`.
+    *   App-specific JavaScript files (e.g., `[src/apps/about/about.js](mdc:src/apps/about/about.js)`) should be linked from within their respective app HTML files, typically also as modules if they use ES6 module syntax.
+
+## Accessibility (A11y)
+
+*   **Image Alternatives**: All `<img>` elements must have a descriptive `alt` attribute. For purely decorative images, use `alt=""`.
+*   **Keyboard Navigation**: Ensure all interactive elements (buttons, links, form controls) are navigable and operable using the keyboard.
+*   **ARIA Attributes**: Use ARIA (Accessible Rich Internet Applications) attributes when creating custom interactive components that don't have native HTML semantics, to provide necessary information to assistive technologies.
+*   **Focus Management**: Pay attention to focus management, especially in dynamic UIs like modal windows or menus.
+
+## Data Attributes
+
+Custom `data-*` attributes are used for specific functionalities:
+
+*   **`data-program-name`**: Applied to desktop icons in `[index.html](mdc:index.html)` to identify the application to be launched by the `Desktop` module (`[src/scripts/gui/desktop.js](mdc:src/scripts/gui/desktop.js)`).
+    *   Example: `<div class="desktop-icon" data-program-name="about">...</div>`
+*   **`data-tooltip`**: Used on elements that require a dynamic tooltip. These tooltips are initialized and managed by the `setupTooltips` function in `[src/scripts/gui/tooltip.js](mdc:src/scripts/gui/tooltip.js)`.
+    *   Example: `<img src="..." data-tooltip="Click to view 'Welcome'">`
+
+## Performance
+
+*   **Preloading**: Critical assets (CSS, images, fonts) necessary for the initial paint and core functionality are preloaded using `<link rel="preload">` in the `<head>` of `[index.html](mdc:index.html)`. Consider adding new assets to this list if they are critical for above-the-fold content or essential interactions.
+*   **Loading Attributes**: Use `loading="lazy"` for images that are off-screen to improve initial page load time, unless they are critical for the initial view (which should be `loading="eager"` or preloaded).
+
+## Comments
+
+*   Use HTML comments (`<!-- ... -->`) to explain complex structures or provide context where necessary.
+*   The top of `[index.html](mdc:index.html)` includes a comment block describing its purpose and key sections.
+

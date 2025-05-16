@@ -1,316 +1,818 @@
-/* setup.css - Focused styles for Setup Wizard, relying on XP.css via main.css */
-
-/* XP Standard Button Styling for Setup Wizard */
-button {
-  /* Dimensions and Padding */
-  min-width: 75px; /* Standard XP button width */
-  height: 23px;    /* Standard XP button height */
-  padding: 0 12px; /* Horizontal padding */
+/* src/apps/setup/setup.css */
+/* Styles for the Setup Wizard application */
   
-  /* Font */
-  font-family: Tahoma, "Segoe UI", Geneva, Verdana, sans-serif;
-  font-size: 11px; /* Standard XP font size */
-  line-height: 21px; /* To vertically center text in 23px height */
-  text-align: center;
-  color: #000;
-
-  /* Borders and Background */
-  background-color: #ECE9D8; /* Standard XP button background */
-  border: 1px solid #000; /* Outer black border */
-  box-shadow: inset 1px 1px 0px #FFF, /* Inner top-left highlight */
-              inset -1px -1px 0px #ACA899; /* Inner bottom-right shadow */
-  border-radius: 3px;
-  cursor: default; /* XP typically uses default cursor for buttons */
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
+/* Apply a basic reset and box-sizing */
+* {
+  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-button:not(:disabled):hover {
-  border-color: #000; /* Keep outer border black on hover */
-  /* Slight highlight/change - typical XP hover involves subtle border/gradient change if any */
-  /* XP.css library often uses a very subtle gradient or border emphasis */
-  /* For simplicity, we can ensure the borders remain crisp */
+html,
+body {
+    height: 100%;
+    overflow: hidden; /* Prevent scrollbars on the body itself */
+    font-family: 'Tahoma', sans-serif;
+    background-color: #ECE9D8; /* XP-like background color */
 }
 
-button:not(:disabled):active {
-  background-color: #D4D0C8; /* Slightly darker on press */
-  box-shadow: inset 1px 1px 0px #ACA899, /* Inner top-left shadow (reversed) */
-              inset -1px -1px 0px #FFF;   /* Inner bottom-right highlight (reversed) */
-  padding: 1px 11px 0 13px; /* Simulate button press movement */
-}
-
-button:disabled {
-  color: #ACA899; /* Disabled text color */
-  /* Borders might look flatter or use system disabled color */
-  box-shadow: inset 1px 1px 0px #FFF,
-              inset -1px -1px 0px #E0E0E0; /* Lighter shadow for disabled */
-  /* cursor: not-allowed; /* Already set by most browsers */
-}
-
-/* Let XP.css handle body background and font */
-
-.setup-container {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 20px 20px 75px 20px; /* Generous padding, bottom for footer */
-  overflow-y: auto;
+.setup-wizard {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center content (fieldsets) */
-  box-sizing: border-box;
-  /* background-color: #ECE9D8; /* XP.css should provide this via .window or body */
+    height: 100%;
+    padding: 10px;
+    border: 2px solid red;
 }
 
-.setup-container h1 {
-  /* Rely on XP.css default h1 or style if needed for XP look */
-  font-size: 1.5em; /* A common default, adjust if XP.css has specific */
-  margin-bottom: 10px; /* Reduced gap */
-  text-align: left; /* Align title to the left */
-  width: 100%;
-  max-width: 600px; /* Consistent with fieldset max-width */
-  /* If .setup-container centers this block, text-align:left will work as expected */
-}
-
-/* XP GroupBox style for fieldsets - now acting as the white content area */
-fieldset {
-  border: 1px solid #ACA899; /* Standard XP control border */
-  padding: 15px; /* Padding inside the white box */
-  width: 100%;
-  box-sizing: border-box;
-  background-color: #FFFFFF; /* White background for the content area */
-  margin-bottom: 0; /* Or a suitable value if needed, for now 0 */
+.wizard-header {
   display: flex;
-  flex-direction: row; /* Changed to row for side-by-side images */
-  gap: 10px; /* Add some space between the images */
-  flex-grow: 1; /* Make fieldset take available vertical space in form */
-  flex-shrink: 1;
-  min-height: 0; /* Allow fieldset to shrink */
-  overflow: hidden; /* Fieldset hides its own overflow, images must fit */
+  justify-content: space-between;
+  align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ACA899; /* XP-style border */
+    border: 2px solid blue;
 }
 
-/* Styling for form elements if they are the ones needing to grow */
-.setup-container > form {
-    width: 100%;
+.wizard-header h1 {
+    font-size: 1.5em;
+    font-weight: bold;
+    border: 2px solid cyan;
+}
+
+/* Ensure xp.css button styles are used for #reset-btn.
+   No custom button styling here other than margin if needed for layout. */
+#reset-btn {
+    margin-left: 10px; /* Optional: if spacing is needed */
+    padding-left: 12px;
+    padding-right: 12px;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.1); /* Smoother inset shadow */
+    /* border property is managed by xp.css or base styles */
+}
+
+#reset-btn:hover {
+    /* border: 1px solid #FFB92F; */ /* Removed */
+    outline: 1px solid #FFB92F; /* XP orange outline on hover, inside border */
+    outline-offset: -3px; /* Adjust to bring outline inside the main border */
+}
+
+#reset-btn:active {
+    /* border: 1px dotted black; */ /* Removed */
+    outline: 1px dotted black; /* Dotted outline on click, inside border */
+    outline-offset: -3px; /* Adjust to bring outline inside the main border */
+}
+
+.wizard-content {
+    flex-grow: 1;
+    overflow: visible;
+    padding: 15px;
+    background-color: #ECE9D8;
+    border: 1px solid #85827a;
+    border: 2px solid green;
+}
+
+.wizard-content form {
+    display: none; /* Initially hide all forms */
+  flex-direction: column;
+    gap: 10px; /* Spacing between form elements */
+}
+
+.wizard-content form.active {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
-    box-sizing: border-box;
-    overflow: hidden; /* Form itself should not scroll, fieldset will */
+    height: 100%;
+    flex: 1 1 0;
 }
 
-legend {
-  padding: 0 5px;
-  margin-left: 10px; /* XP legend indent */
-  /* font-family: Tahoma, sans-serif; /* XP.css should handle */
-  /* font-size: 11px; /* XP.css should handle */
-  display: none; /* Hide all legends */
+/* Style for form sections/groups if needed, e.g., fieldset from xp.css */
+.wizard-content fieldset {
+    margin-bottom: 15px;
+    padding: 10px;
 }
 
-/* Sub-headings within fieldsets (e.g., Customize Skills) */
-fieldset h2 {
-  font-size: 1em; /* Match legend or be slightly larger if distinct */
-  font-weight: bold;
-  margin-top: 5px; /* Space if after another element */
-  margin-bottom: 10px;
+/* Applying styles similar to contact.css .field */
+.wizard-content .field-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    margin-bottom: 5px; /* Add some space between field groups */
 }
 
-.field-row {
+/* Styles for the new containers in the contact form */
+.contact-details-main {
+    margin-bottom: 0; /* Space below the main contact fields - REMOVED */
+}
+
+.additional-info-panels {
   display: flex;
-  align-items: baseline; /* Align text baselines */
-  margin-bottom: 10px;
-  flex-wrap: wrap; /* Allow wrapping on small screens */
+    gap: 10px; /* Space between the left and right panels */
+    flex-grow: 1; /* Allow this section to take available vertical space */
+    min-height: 0; /* Important for flex children to shrink/grow properly within a scrolling parent */
 }
 
-.field-row label {
-  margin-right: 10px;
-  min-width: 130px; /* Adjust for alignment */
-  /* font-family: Tahoma, sans-serif; /* XP.css should handle */
-  /* font-size: 11px; /* XP.css should handle */
-  flex-shrink: 0;
-}
-
-.field-row input[type="text"],
-.field-row input[type="email"],
-.field-row input[type="file"],
-.field-row textarea {
-  flex-grow: 1;
-  min-width: 200px; /* Prevent excessive shrinking */
-  /* XP.css should style borders, padding, font */
-}
-
-/* Textarea specific */
-textarea {
-  min-height: 60px; /* Default min height */
-  /* XP.css should style borders, padding, font */
-}
-
-/* File inputs might need specific width if not full in field-row */
-input[type="file"] {
-  /* XP.css handles styling */
-  /* Consider width if it's not part of a .field-row with flex-grow */
-}
-
-/* Image previews */
-img#resume-preview {
-  display: block;
-  max-width: 100%; 
-  width: auto;     
-  height: auto;    
-  max-height: 50vh; /* Responsive max height, adjust as needed */
-  object-fit: contain; 
-  margin: 10px auto; 
-  border: 1px solid #ACA899; 
-  padding: 2px;
-  background-color: #FFF; 
-  flex-shrink: 1; /* Allow shrinking */
-  min-height: 0; /* Important for shrinkable flex images */
-}
-
-img#resume-image-1,
-img#resume-image-2 {
-  max-width: 100%; 
-  max-height: 100%; 
-  object-fit: contain;
-  flex-grow: 1;
-  flex-shrink: 1;
-  min-width: 0; 
-  min-height: 0; 
-  width: 0; /* For horizontal space distribution */
-  height: auto; /* Let max-height and aspect ratio determine height */
-  border: 1px solid #ACA899; 
-  padding: 2px;
-  background-color: #FFF;
-}
-
-img.paragraph-icon-preview,
-img.item-icon-preview {
-  display: block;
-  max-width: 100%; /* Max width for previews */
-  max-height: 280px; /* Reduced max height - or other suitable default */
-  width: auto; /* Maintain aspect ratio */
-  height: auto; /* Maintain aspect ratio */
-  margin: 10px auto;
-  border: 1px solid #ACA899; /* XP default border for this kind of element */
-  padding: 2px;
-  background-color: #FFF; /* White background for the image itself */
-}
-
-/* Buttons: Rely on XP.css for base. These are for layout/specifics. */
-#add-paragraph-btn,
-#add-skill-btn,
-#add-software-btn,
-#add-project-btn {
-  display: block;
-  margin: 15px auto;
-  /* min-width from XP.css button default (approx 75px) */
-}
-
-/* Footer buttons container */
-.setup-footer-buttons {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  background: #ECE9D8; /* XP panel background */
-  border-top: 1px solid #ACA899; /* XP panel border */
-  padding: 10px 15px;
-  display: flex;
-  justify-content: space-between; /* Pushes left and right groups apart */
-  align-items: center; /* Vertically align items if heights differ */
-  gap: 8px; /* This gap will be between left and right groups if they are close */
-  z-index: 10;
-  box-sizing: border-box;
-}
-
-.footer-buttons-left,
-.footer-buttons-right {
-  display: flex;
-  gap: 8px; /* Spacing between buttons within each group */
+.panel-left,
+.panel-right {
+    border: 2px dashed #a0a0a0; /* Dashed border like a drop zone */
+    background-color: #FFFFFF; /* White background for the drop zone */
+    background-size: cover; /* Ensure image covers the area */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Do not repeat the image */
+    text-align: center; /* Center text elements */
+    color: #555; /* Muted text color */
+    /* Inherit flex properties from the rule above for .panel-left, .panel-right */
+    flex: 1; /* Ensure they still take equal width */
+    padding: 10px; /* Re-affirm padding if needed, though already in shared rule */
+    display: flex; /* Ensure display:flex is maintained for content centering */
+    flex-direction: column;
+    justify-content: center;
   align-items: center;
+    position: relative; /* For positioning the remove icon overlay */
 }
 
-/* Reset button override - XP.css handles shape, border, font */
-#reset-btn {
-  background-color: #CC0000 !important; /* Distinctive red, !important to ensure override */
-  color: white !important;
-}
-#reset-btn:hover {
-  background-color: #AA0000 !important;
+.remove-image-overlay {
+  position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+  border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9em; /* Increased font size for '×' */
+    font-weight: bold; /* Make '×' bolder */
+    line-height: 1; /* Helps with vertical centering of the character */
+    padding: 4px; /* Adds padding inside the circle, around the icon */
+  cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    z-index: 10; /* Ensure it's above the background image */
 }
 
-.status {
-  margin-top: 15px;
-  /* color: #000; /* Standard text color, or keep blue if preferred */
-  font-weight: normal; /* Not usually bold in XP status areas */
-  text-align: center;
-  width: 100%;
-  font-size: 0.9em;
+.panel-left:hover .remove-image-overlay,
+.panel-right:hover .remove-image-overlay,
+.resume-upload-panel:hover .remove-image-overlay,
+.pdf-upload-panel:hover .remove-image-overlay {
+    opacity: 1;
+    visibility: visible;
 }
 
-/* Styling for dynamically added project edit rows in setup.js */
-.project-edit-row {
-  border: 1px dashed #B0B0B0; /* Lighter dash for separation */
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 0; /* No border radius in XP */
+/* Only show hover effect if an image is actually loaded (placeholder is hidden) */
+.panel-left .file-upload-placeholder[style*="display: none"] + .remove-image-overlay,
+.panel-right .file-upload-placeholder[style*="display: none"] + .remove-image-overlay,
+.resume-upload-panel .file-upload-placeholder[style*="display: none"] + .remove-image-overlay,
+.pdf-upload-panel .file-upload-placeholder[style*="display: none"] + .remove-image-overlay {
+    /* This rule ensures the hover logic above only applies when placeholder is gone */
+}
+
+/* Hide the overlay by default if the placeholder is visible */
+.panel-left .file-upload-placeholder:not([style*="display: none"]) ~ .remove-image-overlay,
+.panel-right .file-upload-placeholder:not([style*="display: none"]) ~ .remove-image-overlay,
+.resume-upload-panel .file-upload-placeholder:not([style*="display: none"]) ~ .remove-image-overlay,
+.pdf-upload-panel .file-upload-placeholder:not([style*="display: none"]) ~ .remove-image-overlay {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.file-upload-placeholder {
+  display: flex;
+    flex-direction: column;
+  align-items: center;
+  gap: 8px;
+    color: #777;
+}
+
+.file-upload-icon {
+    font-size: 2.5em; /* Smaller icon */
+    color: #777;
+}
+
+.panel-left p,
+.panel-right p {
+  margin: 0;
+    font-size: 0.8em; /* Smaller text */
+}
+
+.file-select-btn {
+    /* Basic styling, relies on xp.css for button chrome */
+    padding: 3px 8px; /* Smaller padding */
+    margin-top: 4px; /* Adjusted margin */
+    font-size: 0.8em; /* Smaller font size for button text */
+    /* Ensure default button styles from xp.css apply */
+    /* Remove custom setup wizard button shadows/outlines if they interfere */
+    box-shadow: none !important; 
+    outline: none !important; 
+    border: 1px solid #7b9ebd !important; /* Example default border */
+}
+
+.file-select-btn:hover {
+    border-color: #FFB92F !important; /* Example hover border */
+}
+
+.file-select-btn:active {
+    border-style: inset !important; /* Example active state */
+}
+
+.wizard-content label {
+    /* display: block; */ /* Changed to inline-block */
+    display: inline-block;
+    /* min-width: 80px; */ /* Adjusted for potentially longer labels in setup - Now fixed width */
+    width: 80px; /* Adjusted fixed width for smaller font */
+    text-align: right;
+    padding-right: 5px; /* Slightly reduced padding */
+    /* margin-bottom: 5px; */ /* Margin now on .field-group */
+    flex-shrink: 0;
+    font-size: 0.9em; /* Reduced label font size */
+    white-space: nowrap; /* Prevent label text from wrapping */
+}
+
+/* Rely on xp.css for input, textarea, select styling - now overriding with contact.css styles */
+.wizard-content input[type="text"],
+.wizard-content input[type="email"],
+.wizard-content input[type="tel"],
+.wizard-content textarea,
+.wizard-content select {
+    /* width: 100%; */ /* flex: 1 will handle width within .field-group */
+    padding: 3px 6px; /* Reduced padding */
+    background-color: #FFFFFF; /* Ensure white background for input fields */
+    border: 1px solid #7b9ebd; /* From contact.css .input */
+    border-radius: 2px; /* From contact.css .input */
+    box-shadow: 
+        inset 1px 1px 0 #888, /* Reduced top-left darker shadow */
+        inset -1.75px -1.75px 0 #fff, /* Bottom-right lighter highlight (kept same for balance) */
+        inset 0 0 3px 1px #d6d6d6; /* General inner softer shadow (kept same) */
+    color: #000; /* From contact.css .input */
+    font-family: inherit; /* Ensure font consistency */
+    font-size: 0.9em; /* Reduced input font size */
+    flex: 1; /* Allow input to grow */
+    min-width: 0; /* Allow input to shrink */
+    box-sizing: border-box; /* Ensure padding/border included in width/height */
+}
+
+.wizard-content textarea {
+    min-height: 80px;
+    resize: vertical;
+    /* Textarea in contact.css has flex:1 and specific shadow, handled by above generic rule now */
+}
+
+.wizard-content select {
+    /* Ensure select also gets some of these styles if not fully covered by xp.css */
+    /* Specific select styling might be needed if it looks off */
+}
+
+/* Styling for resume file upload elements */
+.file-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+    flex-grow: 1; /* Allow it to take space in the field-group */
+}
+
+.file-name-display {
+    flex-grow: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 3px 6px; /* Adjusted vertical padding, removed min-height and line-height */
+    border: 1px solid #ccc; /* Simple border to look like a disabled field */
+    background-color: #f8f8f8;
+    font-size: 0.9em;
+    /* min-height: 26px; */ /* REMOVED */
+    /* line-height: 1.5; */ /* REMOVED */
+}
+
+.file-select-btn-inline,
+.remove-file-btn {
+    /* Basic styling, relies on xp.css for button chrome */
+    padding: 3px 8px;
+    font-size: 0.9em;
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+}
+
+/* Buttons within forms (e.g., "Add Skill") should also use xp.css styles */
+.wizard-content form button {
+   align-self: flex-start; /* Align small buttons to the left */
+   padding-left: 12px;
+   padding-right: 12px;
+   box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.1); /* Smoother inset shadow */
+   /* border property is managed by xp.css or base styles */
+}
+
+.wizard-content form button:hover {
+    /* border: 1px solid #FFB92F; */ /* Removed */
+    outline: 1px solid #FFB92F; /* XP orange outline on hover, inside border */
+    outline-offset: -3px;
+}
+
+.wizard-content form button:active {
+    /* border: 1px dotted black; */ /* Removed */
+    outline: 1px dotted black; /* Dotted outline on click, inside border */
+    outline-offset: -3px;
+}
+
+.wizard-footer {
+  display: flex;
+    justify-content: space-between; /* Keeps Back on left, group on right */
+    align-items: center; /* Vertically align items */
+    margin-top: 10px;
+    border-top: 1px solid #ACA899; /* XP-style border */
+    border: 2px solid purple;
+}
+
+.wizard-footer div { /* Style for the spacer div */
+    flex-grow: 1; /* Allows the spacer to take up available space */
+}
+
+/* Rely on xp.css for #wizard-back-btn and #wizard-next-btn styling */
+.wizard-footer button {
+    padding-left: 12px;
+    padding-right: 12px;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.1); /* Smoother inset shadow */
+    /* border property is managed by xp.css or base styles */
+    margin-left: 8px; /* Add some space between grouped buttons on the right */
+}
+
+.wizard-footer button:disabled {
+    opacity: 0.6;
+    /* cursor: not-allowed; */ /* REMOVED */
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05); /* Subtler shadow when disabled */
+}
+
+.wizard-footer button:first-child {
+    margin-left: 0; /* Remove margin from the very first button (Back) */
+}
+
+.wizard-footer button:hover {
+    /* border: 1px solid #FFB92F; */ /* Removed */
+    outline: 1px solid #FFB92F; /* XP orange outline on hover, inside border */
+    outline-offset: -3px;
+}
+
+.wizard-footer button:disabled:hover,
+.wizard-footer button:disabled:active {
+    outline: none; /* Remove outline effects if disabled */
+    /* Retain disabled opacity and cursor */
+}
+
+.wizard-footer button:active {
+    /* border: 1px dotted black; */ /* Removed */
+    outline: 1px dotted black; /* Dotted outline on click, inside border */
+    outline-offset: -3px;
+}
+
+/* ===== Test Borders (Temporary) ===== */
+.setup-wizard {
+    border: 2px solid red;
+}
+
+.wizard-header {
+    border: 2px solid blue;
+}
+
+.wizard-content {
+    border: 2px solid green;
+}
+
+.wizard-content form.active {
+    /* border: 2px solid orange; */ /* Border for the currently active form - REMOVED */
+    /* padding: 5px; */ /* Add some padding so the border isn't flush with content - REMOVED */
+}
+
+.wizard-footer {
+    border: 2px solid purple;
+}
+/* ================================= */
+
+/* Styling for the resume upload panel */
+.resume-upload-panel {
+    border: 2px dashed #a0a0a0;
+    background-color: #FFFFFF;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    text-align: center;
+    color: #555;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 50px;
+}
+
+/* New container for side-by-side resume uploads */
+.resume-uploads-container {
+    display: flex;
+    gap: 10px;
+    flex-grow: 1;
+    min-height: 0;
+    height: 100%; /* Allow children to stretch */
+    align-items: stretch;
+}
+
+/* Styling for the new PDF upload panel */
+.pdf-upload-panel {
+    border: 2px dashed #a0a0a0;
+    background-color: #FFFFFF;
+    text-align: center;
+    color: #555;
+    padding: 10px;
   display: flex;
   flex-direction: column;
+    justify-content: center;
+  align-items: center;
+    position: relative; /* For positioning the remove icon overlay */
+    flex: 1; /* Share space equally by default, or adjust as needed */
+    min-height: 0; /* Allow shrinking */
+}
+
+.pdf-upload-panel .file-upload-placeholder,
+.pdf-upload-panel .upload-success-message {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.upload-success-message {
+    font-size: 1.1em;
+    color: green;
+    font-weight: bold;
+}
+
+.upload-success-message .success-tick {
+    color: green; /* Ensure tick is green */
+    font-size: 1.5em; /* Make tick a bit larger */
+    margin-bottom: 5px; /* Space between tick and text */
+}
+
+/* Ensure the .resume-upload-panel (for .webp) also flexes correctly */
+.resume-uploads-container > .resume-upload-panel {
+    flex: 1; /* Let it take space, its aspect-ratio will constrain it */
+    /* max-width will be handled by its own aspect-ratio logic if height is constrained by flex-grow */
+}
+
+/* Ensure placeholder text and icon within resume panel are styled like others */
+.resume-upload-panel .file-upload-placeholder p,
+.resume-upload-panel .file-upload-placeholder .file-upload-icon {
+    /* These will inherit from .panel-left p, .panel-right p and .file-upload-icon 
+       but we can be explicit if needed or add specific overrides here. 
+       For now, relying on existing shared styles. */
+}
+
+/* Extend overlay hover logic for PDF panel when success message is visible */
+/* .pdf-upload-panel .upload-success-message[style*="display: flex"] ~ .remove-image-overlay, */
+/* .pdf-upload-panel .upload-success-message[style*="display: block"] ~ .remove-image-overlay { */
+    /* This selector is a bit complex, might need JS to add a class to pdf-upload-panel when PDF is loaded */
+    /* REMOVING these complex CSS-only attempts to show overlay, JS handles display:flex/none */
+/* } */
+
+/* .pdf-upload-panel:hover .remove-image-overlay { */
+    /* This will show on hover regardless of placeholder/success, JS will manage initial display:none/flex */
+    /* Let JS handle making it visible based on upload state, then CSS for hover */
+    /* This specific rule is now merged into the general panel hover rule above. */
+/* } */
+
+/* Ensure placeholder text and icon within resume panel are styled like others */
+.resume-upload-panel .file-upload-placeholder p,
+.resume-upload-panel .file-upload-placeholder .file-upload-icon {
+    /* These will inherit from .panel-left p, .panel-right p and .file-upload-icon 
+       but we can be explicit if needed or add specific overrides here. 
+       For now, relying on existing shared styles. */
+}
+
+/* Buttons within forms (e.g., "Add Skill") should also use xp.css styles */
+.wizard-content form button {
+    align-self: flex-start; /* Align small buttons to the left */
+    padding-left: 12px;
+    padding-right: 12px;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.1); /* Smoother inset shadow */
+    /* border property is managed by xp.css or base styles */
+}
+
+.wizard-content form button:hover {
+    /* border: 1px solid #FFB92F; */ /* Removed */
+    outline: 1px solid #FFB92F; /* XP orange outline on hover, inside border */
+    outline-offset: -3px;
+}
+
+.wizard-content form button:active {
+    /* border: 1px dotted black; */ /* Removed */
+    outline: 1px dotted black; /* Dotted outline on click, inside border */
+    outline-offset: -3px;
+}
+
+/* Style for dynamically added textareas in About Me step */
+#aboutme-paragraphs-container .field-group textarea {
+    resize: none; /* Disable manual resizing by the user */
+    overflow-y: hidden; /* Hide scrollbar, JS will handle height */
+    /* Other textarea styles are inherited from the general .wizard-content textarea rule */
+}
+
+#aboutme-paragraphs-container {
+    flex-grow: 1; /* Add this back to make the paragraph container take space */
+    display: flex; /* Added */
+    flex-direction: column; /* Added */
+    /* overflow-y: auto; REMOVED - Let .wizard-content handle scrolling */
+    /* Consider adding some padding-bottom here if you want space between last textarea and Add/Remove buttons */
+}
+
+/* Styling for About Me paragraph rows */
+#form-aboutme.active .field-group {
+    display: flex;
+    align-items: flex-start; /* Align icon area and textarea to the top */
+    gap: 10px; /* Space between icon area and textarea */
+    margin-bottom: 10px; /* Space between paragraph rows */
+}
+
+#form-aboutme.active .paragraph-icon-upload-area {
+    width: 64px; /* Slightly larger to accommodate padding/border */
+    height: 64px;
+    border: 1px dashed #a0a0a0;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column; /* Stack icon/placeholder and later, input */
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Prevent shrinking */
+    position: relative; /* For potential remove button later */
+    padding: 4px;
+    cursor: pointer; /* Indicate it's clickable */
+}
+
+#form-aboutme.active .paragraph-icon-upload-area .icon-placeholder-content {
+    font-size: 24px; /* For a '+' or icon font */
+    color: #a0a0a0;
+}
+
+#form-aboutme.active .paragraph-icon-upload-area img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#form-aboutme.active .field-group textarea {
+    flex-grow: 1; /* Textarea takes remaining space */
+    /* Existing styles for resize:none and overflow-y:hidden are still good */
+}
+
+/* ===== Debug Borders for About Me Step ===== */
+/* #form-aboutme.active {
+    border: 3px dashed hotpink;
+} REMOVED */
+
+#form-aboutme.active #aboutme-paragraphs-container {
+    border: 2px solid gold;
+}
+
+/* #form-aboutme.active .aboutme-button-container-debug {
+    border: 2px solid sienna;
+} REMOVED */
+/* ========================================= */
+
+#form-aboutme.active .paragraph-icon-upload-area .remove-paragraph-icon-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border-radius: 50%;
+    display: flex; /* To use align-items and justify-content */
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: bold;
+    cursor: pointer;
+    /* display: none; is set by JS initially and on removal */
+}
+
+#form-aboutme.active .paragraph-icon-upload-area .remove-paragraph-icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+#aboutme-button-controls {
+  display: flex;
   gap: 10px;
+  margin-top: 10px;
+  justify-content: flex-end; /* Align buttons to the right */
 }
 
-.project-edit-row label {
-  font-weight: normal;
-  margin-bottom: 3px;
+/* --- Skills & Software Step: Simple Layout --- */
+.skills-software-row {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+}
+.skills-col, .software-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 2px dashed #a0a0a0;
+  background: #fff;
+  padding: 12px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.skills-col h4, .software-col h4 {
+  margin: 0 0 10px 0;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.skills-btn-row, .software-btn-row {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0 0 10px 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+#skills-list, #software-list {
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.project-edit-row input[type="text"],
-.project-edit-row textarea {
-  width: 100%; /* Full width within the project row */
+.skills-col li, .software-col li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  width: 100%;
   box-sizing: border-box;
 }
-
-.project-edit-row button {
-  align-self: flex-start; /* Align remove button to left */
-  /* XP.css default button styling */
+.icon-upload-area {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  max-width: 36px;
+  max-height: 36px;
+  border: 2px dashed #b0c4de;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  font-size: 22px;
+  color: #b0c4de;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.icon-upload-area img {
+  max-width: 90%;
+  max-height: 90%;
+  display: block;
+}
+.icon-upload-area .icon-placeholder-content {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #b0c4de;
+  user-select: none;
+  line-height: 36px;
+  text-align: center;
+}
+.skills-col input[type="text"], .software-col input[type="text"] {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
 }
 
-/* ===== TEMPORARY DEBUG BORDERS ===== */
-body {
-  border: 1px solid red !important;
+/* --- Projects Step Styles --- */
+#form-projectsconfig {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
-.setup-container {
-  border: 2px solid blue !important;
+
+#projects-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 5px; /* Small padding for scrollbar */
+    border: 1px solid #ACA899; /* XP-style border for the list area */
+    background-color: #FFFFFF; /* White background for list area */
+    margin-bottom: 10px; /* Space before Add button */
 }
-form {
-  border: 2px solid green !important;
-  /* margin-top: 5px !important; /* Add some margin to see separate form borders */
-  /* margin-bottom: 5px !important; */
+
+.project-entry {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+    border-bottom: 1px solid #DDD; /* Separator for project entries */
+    background-color: #F8F8F8; /* Slightly off-white for each entry */
+    margin-bottom: 8px; /* Space between entries */
+    border-radius: 3px;
 }
-fieldset {
-  border: 2px solid orange !important;
+
+.project-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
-.field-row {
-  border: 1px dashed purple !important;
-  margin-top: 2px !important;
-  margin-bottom: 2px !important;
-  padding: 2px !important;
+
+.project-image-column {
+    flex-basis: 150px; /* Fixed width for image column */
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
 }
-.project-edit-row {
-  border: 1px dashed teal !important;
-  padding: 5px !important;
-  margin-top: 5px !important;
+
+.project-image-upload-area {
+    width: 140px;
+    height: 100px;
+    border: 2px dashed #b0c4de;
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    font-size: 1.5em;
+    color: #b0c4de;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }
-.setup-footer-buttons {
-  border: 2px solid magenta !important;
+
+.project-image-upload-area img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    object-fit: contain;
 }
-.footer-buttons-left {
-  border: 1px dotted brown !important;
-  padding: 2px !important;
+
+.project-image-upload-area .icon-placeholder-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.6em; /* Smaller text for placeholder */
 }
-.footer-buttons-right {
-  border: 1px dotted sienna !important;
-  padding: 2px !important;
+
+.project-image-upload-area .icon-placeholder-content span {
+    font-size: 2em; /* Larger plus icon */
+    line-height: 1;
 }
-/* ===== END TEMPORARY DEBUG BORDERS ===== */ 
+
+.project-details-column {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-details-column label {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.project-details-column input[type="text"],
+.project-details-column textarea {
+    width: 100%;
+    /* Inherit general input/textarea styles from earlier in setup.css */
+}
+
+.project-details-column textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.project-entry-remove-btn {
+    /* Styles for remove button, can leverage .window-button from xp.css */
+    align-self: center; /* In image column */
+    font-size: 0.8em;
+    padding: 2px 6px;
+}
+
+#form-projectsconfig #add-project-btn {
+    align-self: flex-start; /* Align to the left under the list */
+}

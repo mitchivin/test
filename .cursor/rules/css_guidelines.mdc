@@ -1,0 +1,71 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# CSS Guidelines
+
+These guidelines cover the styling approach, conventions, and best practices for CSS in the project.
+
+## Core Styling Library (`xp.css`)
+
+*   The project heavily relies on the external `xp.css` library (linked via CDN in `[index.html](mdc:index.html)`) for the base Windows XP look and feel. This includes styling for common UI elements like buttons, windows, title bars, scrollbars (though custom scrollbars are also implemented), etc.
+*   **Leverage First**: When styling new components or application elements, always try to utilize existing `xp.css` classes and styles first.
+*   **Overrides**: Custom styles in local stylesheets (e.g., `[src/styles/gui/window.css](mdc:src/styles/gui/window.css)`, `[src/apps/appname/appname.css](mdc:src/apps/appname/appname.css)`) are used to supplement, customize, or sometimes override `xp.css` to achieve specific project requirements or fix inconsistencies.
+
+## Local Stylesheets Organization
+
+*   **Global Styles**: `[src/styles/main.css](mdc:src/styles/main.css)` imports all other CSS files and contains global overrides or styles applicable project-wide.
+*   **Reset**: `[src/styles/reset.css](mdc:src/styles/reset.css)` provides a modern CSS reset and defines global CSS variables for z-index.
+*   **Fonts**: `[src/styles/fonts.css](mdc:src/styles/fonts.css)` defines `@font-face` rules for Tahoma.
+*   **Core GUI Components**: Styles for shared GUI elements like the desktop, taskbar, start menu, and general window chrome are located in `src/styles/gui/` (e.g., `[desktop.css](mdc:src/styles/gui/desktop.css)`, `[taskbar.css](mdc:src/styles/gui/taskbar.css)`, `[startMenu.css](mdc:src/styles/gui/startMenu.css)`, `[window.css](mdc:src/styles/gui/window.css)`, `[windowBars.css](mdc:src/styles/gui/windowBars.css)`).
+*   **Utility Styles**: Styles for global utilities like the CRT effect are in `src/styles/utils/` (e.g., `[crtEffect.css](mdc:src/styles/utils/crtEffect.css)`).
+*   **Application-Specific Styles**: Each application in `src/apps/` should have its own CSS file (e.g., `[src/apps/about/about.css](mdc:src/apps/about/about.css)`) for styles unique to that application.
+
+## Styling Conventions
+
+*   **Selectors**: Primarily use class selectors. Use ID selectors sparingly, mainly for unique page elements referenced by JavaScript (e.g., `#start-button`, `#windows-container`).
+*   **Naming**: Use kebab-case for CSS class names (e.g., `desktop-icon`, `menu-item`, `window-body`).
+*   **`!important`**: Avoid using `!important` unless absolutely necessary to override highly specific styles from `xp.css` or other libraries. Its use in `[src/styles/reset.css](mdc:src/styles/reset.css)` for `user-select` is a deliberate global choice.
+*   **CSS Variables (Custom Properties)**:
+    *   Utilize CSS variables for theming and consistency. Several are defined in `:root` within files like `[src/styles/gui/desktop.css](mdc:src/styles/gui/desktop.css)` (e.g., `--desktop-selection-color`), `[src/styles/gui/taskbar.css](mdc:src/styles/gui/taskbar.css)` (e.g., `--taskbar-height`), and `[src/styles/reset.css](mdc:src/styles/reset.css)` (for z-index values like `--z-window`).
+    *   When adding new themeable properties (colors, common sizes), consider defining them as CSS variables.
+
+## Layout Techniques
+
+*   **Flexbox**: Extensively used for component layout (e.g., taskbar items, start menu sections, window toolbars, page structure within apps).
+*   **CSS Grid**: Used for the main desktop icon layout in `[src/styles/gui/desktop.css](mdc:src/styles/gui/desktop.css)`.
+*   **Positioning**: `position: absolute` and `position: fixed` are used for overlays, windows, taskbar, and start menu. Manage `z-index` carefully.
+
+## User Select Behavior
+
+*   A global rule `* { user-select: none !important; }` is set in `[src/styles/reset.css](mdc:src/styles/reset.css)` to prevent text selection on most UI elements, enhancing the application-like feel.
+*   Crucially, `[src/styles/reset.css](mdc:src/styles/reset.css)` also re-enables text selection for form elements: `button, input, select, textarea { user-select: text !important; }`.
+*   Individual components (like some buttons in `setup.css` previously, or general button rules in app-specific CSS) may also apply `user-select: none;`. If relying on `xp.css` for button styling, ensure local overrides do not conflict with desired selection behavior.
+
+## Responsive Design
+
+*   **Media Queries**: Most responsive adjustments are handled within `@media (max-width: 768px) { ... }` blocks in individual component stylesheets.
+*   **Mobile Viewport Height**: Use the `--real-vh` CSS variable (set by `[src/scripts/main.js](mdc:src/scripts/main.js)`) for height calculations on mobile devices to correctly account for browser UI elements (e.g., `height: calc(var(--real-vh, 1vh) * 100);`).
+*   **Landscape on Mobile**: A global landscape block (`#landscape-block` styled in `[src/styles/gui/desktop.css](mdc:src/styles/gui/desktop.css)`) is shown to encourage portrait mode on mobile, often blurring and disabling interaction with the main UI when in landscape.
+
+## Z-Index Management
+
+*   A z-index hierarchy is defined using CSS variables in `[src/styles/reset.css](mdc:src/styles/reset.css)`:
+    *   `--z-base: 1;`
+    *   `--z-window: 100;` (used for `#windows-container` and individual `.app-window`)
+    *   `--z-taskbar: 500;`
+    *   `--z-tooltip: 1000;` (also used by dynamic tooltips from `tooltip.js`)
+    *   `--z-startmenu: 1500;`
+*   CRT effect overlays (`[src/styles/utils/crtEffect.css](mdc:src/styles/utils/crtEffect.css)`) use very high z-index values (e.g., `100000+`) to ensure they are on top of all other UI.
+*   Adhere to this hierarchy and use these variables when assigning z-index to new elements to prevent conflicts.
+
+## Scrollbars
+
+*   Custom XP-themed scrollbars are implemented in `[src/styles/main.css](mdc:src/styles/main.css)` for WebKit browsers (Chrome, Edge, Safari) and Firefox. These styles apply to `.window-body`, `.recently-used-items`, and `.menu-items` (Start Menu scrollable areas).
+
+## Comments
+
+*   Each CSS file starts with a header comment block explaining its purpose and scope.
+*   Use comments to delineate major sections within CSS files or explain complex selectors/rules.
+

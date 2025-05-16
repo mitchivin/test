@@ -505,7 +505,7 @@ const programData = {
 
   // Special format entries with custom properties
   setup: createProgram("setup", "Setup Wizard", "desktop/setup.webp", {
-    dimensions: { width: 600, height: 500 },
+    dimensions: { width: 600, height: 550 },
     appPath: "src/apps/setup/setup.html",
     statusBarText: "Customize your portfolio template",
     showOnDesktop: true,

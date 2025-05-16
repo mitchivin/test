@@ -1,90 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Setup Wizard</title>
-  <link rel="stylesheet" href="../../styles/main.css">
-  <link rel="stylesheet" href="../../styles/gui/window.css">
-  <link rel="stylesheet" href="../../styles/gui/windowBars.css">
-  <link rel="stylesheet" href="../../styles/gui/desktop.css">
-  <link rel="stylesheet" href="../../styles/gui/taskbar.css">
-  <link rel="stylesheet" href="../../styles/gui/startMenu.css">
-  <link rel="stylesheet" href="../../styles/utils/crtEffect.css">
-  <link rel="stylesheet" href="setup.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Wizard</title>
+    <!-- xp.css is linked globally in index.html, but can be linked here for standalone dev/testing -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/xp.css@0.2.3/dist/XP.css"> -->
+    <link rel="stylesheet" href="setup.css">
 </head>
 <body>
-  <div class="setup-container">
-    <h1>Setup Wizard</h1>
-    <form id="resume-form" style="display: block;">
-      <fieldset>
-        <legend>Resume Customization</legend>
-        <img id="resume-image-1" src="../../../assets/apps/setup/upload.webp" alt="Resume Image 1">
-        <img id="resume-image-2" src="../../../assets/apps/setup/upload.webp" alt="Resume Image 2">
-      </fieldset>
-    </form>
-    <form id="aboutme-form" style="display: none;">
-      <fieldset>
-        <legend>About Me Paragraphs</legend>
-        <div id="aboutme-paragraphs-list"></div>
-        <button type="button" id="add-paragraph-btn">Add Paragraph</button>
-        <div class="status" id="aboutme-status"></div>
-      </fieldset>
-    </form>
-    <form id="leftpanel-form" style="display: none;">
-      <fieldset>
-        <legend>Left Panel Customization</legend>
-        <h2>Customize Skills</h2>
-        <div id="skills-list"></div>
-        <button type="button" id="add-skill-btn">Add Skill</button>
-        <h2>Customize Software</h2>
-        <div id="software-list"></div>
-        <button type="button" id="add-software-btn">Add Software</button>
-        <div class="status" id="leftpanel-status"></div>
-      </fieldset>
-    </form>
-    <form id="contact-form" style="display: none;">
-      <fieldset>
-        <legend>Contact Me Customization</legend>
-        <div class="field-row">
-          <label for="contact-to-name">To Name:</label>
-          <input type="text" id="contact-to-name" placeholder="Name" />
+    <div class="setup-wizard">
+        <div class="wizard-header window-title-bar"> <!-- Using .window-title-bar for xp.css styling -->
+            <h1></h1>
         </div>
-        <div class="field-row">
-          <label for="contact-to-email">To Email:</label>
-          <input type="email" id="contact-to-email" placeholder="Email address" />
-        </div>
-        <div class="status" id="contact-status"></div>
-      </fieldset>
-    </form>
-    <form id="projects-form" style="display: none;">
-      <fieldset>
-        <legend>Projects Customization</legend>
-        <div id="projects-list"></div>
-        <button type="button" id="add-project-btn">Add Project</button>
-        <div class="status" id="projects-status"></div>
-      </fieldset>
-    </form>
-    <div class="setup-footer-buttons">
-      <div class="footer-buttons-left">
-        <button type="button" id="reset-btn">Reset to Default</button>
-        <button type="submit" id="aboutme-save-btn" form="aboutme-form">Save</button>
-        <button type="submit" id="leftpanel-save-btn" form="leftpanel-form">Save</button>
-        <button type="submit" id="contact-save-btn" form="contact-form">Save</button>
-        <button type="submit" id="projects-save-btn" form="projects-form">Save</button>
-      </div>
-      <div class="footer-buttons-right">
-        <button type="button" id="aboutme-back-btn">Back</button>
-        <button type="button" id="leftpanel-back-btn">Back</button>
-        <button type="button" id="contact-back-btn">Back</button>
-        <button type="button" id="projects-back-btn">Back</button>
 
-        <button type="button" id="resume-next-btn">Next</button>
-        <button type="button" id="aboutme-next-btn">Next</button>
-        <button type="button" id="leftpanel-next-btn">Next</button>
-        <button type="button" id="contact-next-btn">Next</button>
-      </div>
+        <div class="wizard-content">
+            <form id="form-contact" class="wizard-step">
+                <div class="contact-details-main">
+                    <div class="field-group">
+                        <label for="contact-name">Name:</label>
+                        <input type="text" id="contact-name" name="contact-name">
+                    </div>
+                    <div class="field-group">
+                        <label for="contact-profession">Profession:</label>
+                        <input type="text" id="contact-profession" name="contact-profession">
+                    </div>
+                    <div class="field-group">
+                        <label for="contact-email">Email:</label>
+                        <input type="email" id="contact-email" name="contact-email">
+                    </div>
+                </div>
+
+                <div class="additional-info-panels">
+                    <div class="panel-left" id="user-icon-panel">
+                        <div class="file-upload-placeholder" id="user-icon-placeholder">
+                            <div class="file-upload-icon">🖼️</div>
+                            <p>Upload user icon</p>
+                            <p>
+                                <button type="button" class="file-select-btn" data-for="user-icon-input">select file</button>
+                                <input type="file" id="user-icon-input" accept="image/*" style="display: none;">
+                            </p>
+                        </div>
+                        <div class="remove-image-overlay" id="remove-user-icon-overlay" title="Remove image">
+                            ×
+                        </div>
+                    </div>
+                    <div class="panel-right" id="boot-logo-panel">
+                        <div class="file-upload-placeholder" id="boot-logo-placeholder">
+                            <div class="file-upload-icon">🖼️</div>
+                            <p>Upload boot logo</p>
+                            <p>
+                                <button type="button" class="file-select-btn" data-for="boot-logo-input">select file</button>
+                                <input type="file" id="boot-logo-input" accept="image/*" style="display: none;">
+                            </p>
+                        </div>
+                        <div class="remove-image-overlay" id="remove-boot-logo-overlay" title="Remove image">
+                            ×
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <form id="form-resume" class="wizard-step">
+                <div class="resume-uploads-container">
+                    <div class="resume-upload-panel" id="resume-upload-panel">
+                        <div class="file-upload-placeholder" id="resume-upload-placeholder">
+                            <div class="file-upload-icon">🖼️</div>
+                            <p>Upload .webp</p>
+                            <p>
+                                <button type="button" class="file-select-btn" data-for="resume-file-input">select file</button>
+                                <input type="file" id="resume-file-input" name="resume-file" accept="image/webp" style="display: none;">
+                            </p>
+                        </div>
+                        <div class="remove-image-overlay" id="remove-resume-overlay" title="Remove image">
+                            ×
+                        </div>
+                    </div>
+
+                    <div class="pdf-upload-panel" id="pdf-upload-panel">
+                        <div class="file-upload-placeholder" id="pdf-upload-placeholder">
+                            <div class="file-upload-icon">📄</div>
+                            <p>Upload Resume PDF</p>
+                            <p>
+                                <button type="button" class="file-select-btn" data-for="resume-pdf-input">select file</button>
+                            </p>
+                        </div>
+                        <div class="upload-success-message" id="pdf-upload-success" style="display: none;">
+                            <span class="success-tick">✔️</span>
+                            <div>PDF Uploaded!</div>
+                        </div>
+                        <input type="file" id="resume-pdf-input" name="resume-pdf-file" accept=".pdf" style="display: none;">
+                        <div class="remove-image-overlay" id="remove-resume-pdf-overlay" title="Remove PDF" style="display: none;">
+                            ×
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <form id="form-aboutme" class="wizard-step">
+                <div id="aboutme-paragraphs-container">
+                    <!-- Paragraph textareas will be dynamically inserted here -->
+                    <!-- Ensure any dynamically added paragraphs appear BEFORE this button div -->
+                    <div style="display: flex; gap: 10px; margin-top: 10px;" id="aboutme-button-controls">
+                        <button type="button" id="add-aboutme-paragraph-btn" class="window-button" style="align-self: flex-start;">Add</button>
+                        <button type="button" id="remove-aboutme-paragraph-btn" class="window-button" style="align-self: flex-start;">Remove</button>
+                    </div>
+                </div>
+            </form>
+
+            <form id="form-skills-software" class="wizard-step">
+              <div class="skills-software-row">
+                <div class="skills-col">
+                  <h4>Skills</h4>
+                  <ul id="skills-list"></ul>
+                </div>
+                <div class="software-col">
+                  <h4>Software</h4>
+                  <ul id="software-list"></ul>
+                </div>
+              </div>
+            </form>
+
+            <form id="form-projectsconfig" class="wizard-step">
+                <div id="projects-list-container"></div>
+                <button type="button" id="add-project-btn" class="window-button" style="margin-top: 10px;">Add New Project</button>
+            </form>
+        </div>
+
+        <div class="wizard-footer">
+            <button type="button" id="reset-btn">Reset to Default</button>
+            <button type="button" id="wizard-update-close-btn" disabled>Update & Close</button>
+            <div> <!-- Flex spacer --> </div>
+            <button type="button" id="wizard-back-btn">Back</button>
+            <button type="button" id="wizard-next-btn">Next</button>
+        </div>
     </div>
-  </div>
-  <script src="setup.js"></script>
+    <script type="module" src="setup.js"></script>
 </body>
 </html> 
