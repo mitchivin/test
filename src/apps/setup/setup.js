@@ -408,20 +408,26 @@ const resetBtn = document.getElementById('reset-btn');
     function handleReset() {
         // eslint-disable-next-line no-restricted-globals
         if (confirm('Are you sure you want to reset all setup data to default? This action cannot be undone.')) {
-            // Remove specific localStorage items for Contact Me app
+            // Remove specific localStorage items
             localStorage.removeItem('custom_contact_to_name');
             localStorage.removeItem('custom_contact_to_email');
-            // If profession was stored for other uses, remove it too, otherwise it will be cleared by form.reset() or loadSettings()
-            // localStorage.removeItem('custom_contact_profession'); 
+            localStorage.removeItem('custom_contact_profession'); // Profession is an input, will be cleared by form.reset()
             localStorage.removeItem('custom_user_icon');
             localStorage.removeItem('custom_boot_logo');
             localStorage.removeItem('custom_resume_webp_data');
-            localStorage.removeItem('custom_resume_pdf_name'); // Added for PDF
-            localStorage.removeItem('custom_resume_visibility');
+            localStorage.removeItem('custom_resume_pdf_name');
+            // localStorage.removeItem('custom_resume_visibility'); // OBSOLETE
             localStorage.removeItem('custom_about_paragraphs');
             localStorage.removeItem('custom_startmenu_items');
+            localStorage.removeItem(LOCAL_KEY_SKILLS);
+            localStorage.removeItem(LOCAL_KEY_SOFTWARE);
 
-            // Manually trigger UI update for panels after removing from localStorage
+            // Reset all forms to their default state (clears inputs, textareas, file inputs, etc.)
+            document.querySelectorAll('.wizard-content form').forEach(form => {
+                form.reset();
+            });
+
+            // Manually update UI for image panels to placeholder state (after form.reset() clears file inputs)
             if (userIconPanel && userIconPlaceholder && removeUserIconOverlay) {
                 userIconPanel.style.backgroundImage = '';
                 userIconPlaceholder.style.display = 'flex';
@@ -440,60 +446,27 @@ const resetBtn = document.getElementById('reset-btn');
                 resumeUploadPanel.style.borderStyle = 'dashed';
                 removeResumeOverlay.style.display = 'none';
             }
-            // Manually trigger UI update for PDF resume section
-            if (pdfUploadPanel && pdfUploadPlaceholder && pdfUploadSuccessMessage && removeResumePdfOverlay && resumePdfInput) {
+            if (pdfUploadPanel && pdfUploadPlaceholder && pdfUploadSuccessMessage && removeResumePdfOverlay) {
                 pdfUploadPlaceholder.style.display = 'flex';
                 pdfUploadSuccessMessage.style.display = 'none';
                 pdfUploadPanel.style.borderStyle = 'dashed';
                 removeResumePdfOverlay.style.display = 'none';
-                resumePdfInput.value = ''; // Clear the file input
+                // resumePdfInput.value = ''; // Covered by form.reset()
             }
 
-            // Reset paragraph icons
-            if (aboutMeParagraphsContainer) {
-                aboutMeParagraphsContainer.querySelectorAll('.paragraph-icon-upload-area').forEach(area => {
-                    const img = area.querySelector('img');
-                    const placeholder = area.querySelector('.icon-placeholder-content');
-                    const removeBtn = area.querySelector('.remove-paragraph-icon-btn');
-                    if (img) {
-                        img.src = '';
-                        delete img.dataset.iconData;
-                        img.style.display = 'none';
-                    }
-                    if (placeholder) placeholder.style.display = 'block';
-                    if (removeBtn) removeBtn.style.display = 'none';
-                });
-            }
-
-            // TODO: Remove other localStorage items as more customizable features are added
-            // e.g., localStorage.removeItem('custom_about_paragraphs');
+            // Reload/re-render settings, which will now use defaults
+            loadSettings(); // This handles About Me paragraphs, contact info to their defaults
+            loadSkillsSoftware(); // This handles skills and software to their defaults (4 empty rows)
+            
+            // Note: renderAboutMeParagraphs is called within loadSettings if no paragraphs are found in localStorage.
+            // Note: Clearing specific lists like #skills-list, #projects-list is now redundant 
+            // as renderSkills/renderSoftware (called by loadSkillsSoftware) and form.reset() cover this.
 
             alert('Setup data reset to default!');
             
-            // Reload settings into the Setup Wizard UI - this will now pick up the defaults
-            loadSettings();
-
-            // Clear other form fields that are not directly loaded from these specific localStorage keys
-            // This ensures any other typed-in data (not yet saved to specific keys) is cleared.
-            document.querySelectorAll('.wizard-content form').forEach(form => {
-                form.reset(); // This will clear file inputs as well
-            });
-            
-            // Re-render About Me paragraphs with defaults (empty)
-            const defaultEmptyParagraphs = [];
-            for (let i = 0; i < DEFAULT_ABOUT_PARAGRAPH_COUNT; i++) {
-                defaultEmptyParagraphs.push({ text: '', icon: '' });
-            }
-            renderAboutMeParagraphs(defaultEmptyParagraphs);
-            
-            // After resetting and loading defaults, capture the new initial state
+            // After resetting and loading defaults, capture the new initial state for change detection
             captureInitialState();
             checkIfChanged(); // Update button state (should be disabled)
-
-            // Reset dynamic lists (skills, projects, experiences, links)
-            document.querySelectorAll('#skills-list, #projects-list, #experience-list, #links-list').forEach(list => {
-                list.innerHTML = ''; // Clear the content of these lists
-            });
 
             // Go back to the first step
             showStep(0);
