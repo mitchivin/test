@@ -63,7 +63,7 @@ body {
 
 .wizard-content {
     flex-grow: 1;
-    overflow: visible;
+    overflow-y: auto; /* CHANGED from visible to auto */
     padding: 15px;
     background-color: #ECE9D8;
     border: 1px solid #85827a;
@@ -700,4 +700,111 @@ body {
   flex: 1 1 0;
   min-width: 0;
   margin: 0;
+}
+
+/* --- Projects Step Styles --- */
+#form-projectsconfig.active {
+    /* Ensure the form itself allows its children to fill height and scroll */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#projects-list-area {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px 0; /* Space before Add New Project button */
+    /* flex-grow: 1; // Keep or remove depending on desired button push behavior */ 
+    /* overflow-y: auto; // REMOVED - Parent .wizard-content will scroll */
+    min-height: 0; /* Important for flex children in a scrollable container */
+}
+
+.project-entry {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.project-icon-upload-area {
+    width: 120px;
+    height: 120px;
+    min-width: 120px; /* Prevent shrinking */
+    border: 2px dashed #b0c4de;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    font-size: 2em; /* For the '+' placeholder */
+    color: #b0c4de;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.project-icon-upload-area img {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Cover the area, might crop */
+    display: block;
+    border-radius: 4px; /* Match parent's rounding slightly */
+}
+
+.project-icon-upload-area .icon-placeholder-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: inherit; /* Inherit from .project-icon-upload-area */
+    color: inherit;
+    user-select: none;
+    line-height: 1; /* Adjust for vertical centering of '+' */
+    text-align: center;
+}
+
+.project-inputs-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0; /* Allow shrinking if necessary */
+}
+
+.project-title-input,
+.project-subheading-input,
+.project-description-input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 0.9em;
+    border: 1px solid #7b9ebd; /* Match other wizard inputs */
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.project-description-input {
+    min-height: 60px; /* Decent starting height for description */
+    resize: vertical;
+}
+
+.remove-project-btn {
+    align-self: flex-start; /* Align with the image upload area side */
+    margin-top: 10px; /* Space it from the inputs if flex-direction changes */
+    /* Standard XP button styling should apply via .window-button */
+}
+
+/* Ensure add project button is at the bottom and doesn't scroll with the list */
+#form-projectsconfig.active #add-project-btn {
+    flex-shrink: 0; /* Prevent button from shrinking */
+    margin-top: auto; /* Pushes to bottom if list has space, or after scrollable list */
+    /* If #projects-list-area is set to flex-grow:1, this might not be needed 
+       or might need to be outside the scrollable area. 
+       Current setup puts button *after* the scrollable ul, which is fine. */
 }

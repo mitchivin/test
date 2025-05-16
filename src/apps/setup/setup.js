@@ -60,11 +60,15 @@ const resetBtn = document.getElementById('reset-btn');
     // --- Skills & Software Management ---
     const skillsList = document.getElementById('skills-list');
     const softwareList = document.getElementById('software-list');
-    const addSkillBtn = document.getElementById('add-skill-btn');
-    const addSoftwareBtn = document.getElementById('add-software-btn');
 
     const LOCAL_KEY_SKILLS = 'custom_about_skills';
     const LOCAL_KEY_SOFTWARE = 'custom_about_software';
+
+    // --- Projects Management ---
+    const projectsListArea = document.getElementById('projects-list-area');
+    const addProjectBtnGlobal = document.getElementById('add-project-btn'); // Renamed to avoid conflict if any
+    const LOCAL_KEY_PROJECTS = 'custom_projects';
+    const DEFAULT_PROJECT_COUNT = 1; // Start with one empty project entry
 
     /**
      * Collects the current state of all relevant settings.
@@ -118,6 +122,9 @@ const resetBtn = document.getElementById('reset-btn');
         // --- Add Skills & Software to state ---
         state.custom_about_skills = JSON.stringify(getSkillsFromDOM());
         state.custom_about_software = JSON.stringify(getSoftwareFromDOM());
+
+        // --- Add Projects to state ---
+        state.custom_projects = JSON.stringify(getProjectsFromDOM());
 
         // Start Menu
         state.startMenuItems = Array.from(document.querySelectorAll('#form-startmenu input[type="checkbox"]'))
@@ -421,6 +428,7 @@ const resetBtn = document.getElementById('reset-btn');
             localStorage.removeItem('custom_startmenu_items');
             localStorage.removeItem(LOCAL_KEY_SKILLS);
             localStorage.removeItem(LOCAL_KEY_SOFTWARE);
+            localStorage.removeItem(LOCAL_KEY_PROJECTS);
 
             // Reset all forms to their default state (clears inputs, textareas, file inputs, etc.)
             document.querySelectorAll('.wizard-content form').forEach(form => {
@@ -457,6 +465,7 @@ const resetBtn = document.getElementById('reset-btn');
             // Reload/re-render settings, which will now use defaults
             loadSettings(); // This handles About Me paragraphs, contact info to their defaults
             loadSkillsSoftware(); // This handles skills and software to their defaults (4 empty rows)
+            loadProjects(); // This handles projects to their defaults
             
             // Note: renderAboutMeParagraphs is called within loadSettings if no paragraphs are found in localStorage.
             // Note: Clearing specific lists like #skills-list, #projects-list is now redundant 
@@ -1120,55 +1129,169 @@ const resetBtn = document.getElementById('reset-btn');
         renderSoftware(software);
     }
 
-    if (addSkillBtn) {
-        addSkillBtn.addEventListener('click', () => {
-            const skills = getSkillsFromDOM();
-            skills.push({ text: '', icon: '' });
-            renderSkills(skills);
-            saveSkillsSoftware();
-            checkIfChanged();
-        });
-    }
-    if (addSoftwareBtn) {
-        addSoftwareBtn.addEventListener('click', () => {
-            const software = getSoftwareFromDOM();
-            software.push({ text: '', icon: '' });
-            renderSoftware(software);
-            saveSkillsSoftware();
-            checkIfChanged();
-        });
-    }
-
     // Load on wizard init
     loadSkillsSoftware();
 
-    // Add event listeners for Remove Skills and Remove Software buttons
-    const removeSkillBtn = document.getElementById('remove-skill-btn');
-    const removeSoftwareBtn = document.getElementById('remove-software-btn');
-    if (removeSkillBtn) {
-      removeSkillBtn.addEventListener('click', () => {
-        const skills = getSkillsFromDOM();
-        if (skills.length > 0) {
-          skills.pop();
-          renderSkills(skills);
-          saveSkillsSoftware();
-          checkIfChanged();
-        } else {
-          checkIfChanged();
-        }
-      });
+    // --- Projects Management Functions ---
+    function getProjectsFromDOM() {
+        const items = [];
+        if (!projectsListArea) return items;
+        projectsListArea.querySelectorAll('li.project-entry').forEach((li) => {
+            const titleInput = li.querySelector('.project-title-input');
+            const subheadingInput = li.querySelector('.project-subheading-input');
+            const descriptionInput = li.querySelector('.project-description-input');
+            const iconImg = li.querySelector('.project-icon-upload-area img');
+            
+            items.push({
+                title: titleInput?.value || '',
+                subheading: subheadingInput?.value || '',
+                description: descriptionInput?.value || '',
+                image: iconImg?.dataset.imageData || '' // Using imageData to avoid conflict with other icons
+            });
+        });
+        return items;
     }
-    if (removeSoftwareBtn) {
-      removeSoftwareBtn.addEventListener('click', () => {
-        const software = getSoftwareFromDOM();
-        if (software.length > 0) {
-          software.pop();
-          renderSoftware(software);
-          saveSkillsSoftware();
-          checkIfChanged();
-        } else {
-          checkIfChanged();
-        }
-      });
+
+    function saveProjects() {
+        const projects = getProjectsFromDOM();
+        localStorage.setItem(LOCAL_KEY_PROJECTS, JSON.stringify(projects));
+        checkIfChanged(); // Important to call after any save that might alter the initial state comparison base
     }
+
+    function renderProjects(projectsData) {
+        if (!projectsListArea) return;
+        projectsListArea.innerHTML = ''; // Clear existing entries
+
+        projectsData.forEach((project, index) => {
+            const li = document.createElement('li');
+            li.className = 'project-entry'; // For styling and selection
+
+            // 1. Image Upload Area
+            const imageUploadArea = document.createElement('div');
+            imageUploadArea.className = 'project-icon-upload-area'; // Can reuse some styling if similar enough
+            
+            const placeholderContent = document.createElement('span');
+            placeholderContent.className = 'icon-placeholder-content'; // Reusing class
+            placeholderContent.textContent = '+';
+            imageUploadArea.appendChild(placeholderContent);
+
+            const iconImg = document.createElement('img');
+            iconImg.style.display = project.image ? 'block' : 'none';
+            if (project.image) {
+                iconImg.src = project.image;
+                placeholderContent.style.display = 'none';
+                iconImg.dataset.imageData = project.image;
+            }
+            imageUploadArea.appendChild(iconImg);
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            imageUploadArea.appendChild(fileInput);
+
+            imageUploadArea.addEventListener('click', (e) => {
+                if (e.target === imageUploadArea || e.target === placeholderContent) fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e_reader) => {
+                        iconImg.src = e_reader.target.result;
+                        iconImg.style.display = 'block';
+                        placeholderContent.style.display = 'none';
+                        iconImg.dataset.imageData = e_reader.target.result;
+                        saveProjects(); // Save after image change
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            li.appendChild(imageUploadArea);
+
+            // 2. Inputs Container (for title, subheading, description)
+            const inputsContainer = document.createElement('div');
+            inputsContainer.className = 'project-inputs-container';
+
+            // Title
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.className = 'project-title-input window-input'; // Added window-input for styling
+            titleInput.value = project.title || '';
+            titleInput.placeholder = 'Project Title';
+            titleInput.addEventListener('input', saveProjects);
+            inputsContainer.appendChild(titleInput);
+
+            // Subheading
+            const subheadingInput = document.createElement('input');
+            subheadingInput.type = 'text';
+            subheadingInput.className = 'project-subheading-input window-input';
+            subheadingInput.value = project.subheading || '';
+            subheadingInput.placeholder = 'Project Subheading (e.g., Tech Stack)';
+            subheadingInput.addEventListener('input', saveProjects);
+            inputsContainer.appendChild(subheadingInput);
+
+            // Description
+            const descriptionInput = document.createElement('textarea');
+            descriptionInput.className = 'project-description-input window-input';
+            descriptionInput.value = project.description || '';
+            descriptionInput.placeholder = 'Project Description';
+            descriptionInput.rows = 3;
+            descriptionInput.addEventListener('input', saveProjects);
+            inputsContainer.appendChild(descriptionInput);
+            
+            li.appendChild(inputsContainer);
+
+            // 3. Remove Button
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.textContent = 'Remove Project';
+            removeBtn.className = 'remove-project-btn window-button';
+            removeBtn.addEventListener('click', () => {
+                projectsData.splice(index, 1); // Remove current project from array
+                renderProjects(projectsData); // Re-render
+                saveProjects(); // Save updated list
+            });
+            li.appendChild(removeBtn);
+
+            projectsListArea.appendChild(li);
+        });
+        checkIfChanged(); // Check after rendering all projects
+    }
+
+    function loadProjects() {
+        let projects = [];
+        try {
+            const storedProjects = localStorage.getItem(LOCAL_KEY_PROJECTS);
+            if (storedProjects) projects = JSON.parse(storedProjects);
+        } catch (e) {
+            console.error("Error loading projects from localStorage:", e);
+            projects = [];
+        }
+
+        if (!projects || projects.length === 0) {
+            projects = Array.from({ length: DEFAULT_PROJECT_COUNT }, () => ({ 
+                title: '', 
+                subheading: '', 
+                description: '', 
+                image: '' 
+            }));
+        }
+        renderProjects(projects);
+    }
+
+    // Event Listener for Add New Project Button
+    if (addProjectBtnGlobal) {
+        addProjectBtnGlobal.addEventListener('click', () => {
+            const projects = getProjectsFromDOM();
+            projects.push({ title: '', subheading: '', description: '', image: '' });
+            renderProjects(projects);
+            saveProjects(); // Save immediately after adding
+        });
+    }
+
+    // Initial load calls
+    loadSkillsSoftware();
+    loadProjects();
 }); 
