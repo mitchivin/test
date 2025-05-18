@@ -110,6 +110,11 @@ function createDesktopDescriptionCard(titleText, descriptionText, bulletPointsTe
     // Add TOOLS USED section (will be wrapped and positioned at the bottom by CSS)
     if (toolsUsedText && toolsUsedText.trim() !== "") {
         const toolsUsedContainer = createEl('div', 'card-tools-section');
+
+        // NEW: Add a divider INSIDE and AT THE TOP of the "TOOLS USED" section
+        const toolsDivider = createEl('hr', 'card-title-divider');
+        toolsUsedContainer.appendChild(toolsDivider); // Divider is now first child of toolsUsedContainer
+
         const toolsLabelEl = createEl('div', 'card-tools-label', 'TOOLS USED');
         toolsUsedContainer.appendChild(toolsLabelEl);
 
@@ -396,9 +401,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Lightbox Description Overlay ---
-    function createLightboxOverlay(text, position = 'bottom', linkType, linkUrl) {
+    function createLightboxOverlay(text, position = 'bottom') {
         const className = position === 'top' ? 'lightbox-title-overlay' : 'lightbox-description-overlay';
         const overlay = createEl('div', className);
+
+        if (position === 'top') {
+            // Add the "PERSONAL PROJECT" label for top overlays (mobile title)
+            const projectLabelEl = createEl('div', 'mobile-overlay-project-label', 'PERSONAL PROJECT');
+            overlay.appendChild(projectLabelEl);
+        }
 
         // Add the main text content (title or description)
         const textSpan = createEl('span', className === 'lightbox-title-overlay' ? 'lightbox-overlay-title-text' : '');
@@ -409,21 +420,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // NEW function to handle toggling of BOTH mobile overlays (top title, bottom description)
-    function toggleMobileOverlays(titleText, descriptionText, wrapper, linkType, linkUrl) {
-        if (!wrapper || isDesktop()) return;
+    function toggleMobileOverlays(titleText, descriptionText, _mediaWrapper) { // wrapper param renamed
+        const overlayParent = document.getElementById('lightbox-inner-wrapper');
+        if (!overlayParent || isDesktop()) return;
+
+        // REVISED click handler for tapping on overlays to hide them
+        const handleOverlayTap = function(event) { // Use `function` to get `this` as the tapped element
+            event.stopPropagation(); // Prevent tap from bubbling up
+
+            // Get both overlays, whether tapped or not, if they are currently shown
+            const titleToHide = overlayParent.querySelector('.lightbox-title-overlay.show');
+            const descToHide = overlayParent.querySelector('.lightbox-description-overlay.show');
+
+            if (titleToHide) {
+                titleToHide.style.animation = ''; // Clear inline animation
+                titleToHide.style.transition = '';
+                titleToHide.classList.remove('show');
+                titleToHide.classList.add('hide-anim');
+                titleToHide.style.pointerEvents = 'none';
+                titleToHide.addEventListener('animationend', function onHide() {
+                    this.removeEventListener('animationend', onHide);
+                    if (this.parentNode) this.parentNode.removeChild(this);
+                }, { once: true });
+            }
+
+            if (descToHide) {
+                descToHide.style.animation = ''; // Clear inline animation
+                descToHide.style.transition = '';
+                descToHide.classList.remove('show');
+                descToHide.classList.add('hide-anim');
+                descToHide.style.pointerEvents = 'none';
+                descToHide.addEventListener('animationend', function onHide() {
+                    this.removeEventListener('animationend', onHide);
+                    if (this.parentNode) this.parentNode.removeChild(this);
+                }, { once: true });
+            }
+
+            // If at least one was hidden, update state
+            if (titleToHide || descToHide) {
+                userPrefersDescriptionVisible = false;
+                sendMessageToParent({ type: 'description-state', open: false });
+                sendMessageToParent({ type: 'throttle-toolbar', key: 'view-description' });
+            }
+        };
 
         // --- Handle Top Title Overlay ---
-        let titleOverlay = wrapper.querySelector('.lightbox-title-overlay');
+        let titleOverlay = overlayParent.querySelector('.lightbox-title-overlay');
         if (!titleOverlay) { // If it doesn't exist, create and show it
-            titleOverlay = createLightboxOverlay(titleText, 'top', linkType, linkUrl);
-            wrapper.appendChild(titleOverlay);
+            titleOverlay = createLightboxOverlay(titleText, 'top');
+            overlayParent.appendChild(titleOverlay);
             void titleOverlay.offsetWidth; // Reflow
-            titleOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
+            titleOverlay.classList.remove('hide-anim');
             titleOverlay.classList.add('show');
             titleOverlay.style.pointerEvents = 'auto';
+            titleOverlay.removeEventListener('click', handleOverlayTap); // Remove if somehow present
+            titleOverlay.addEventListener('click', handleOverlayTap);   // Add tap listener
         } else { // If it exists, toggle its visibility
             if (titleOverlay.classList.contains('show')) {
-                titleOverlay.style.animation = ''; // Clear inline animation before applying new class animation
+                titleOverlay.style.animation = '';
                 titleOverlay.style.transition = '';
                 titleOverlay.classList.remove('show');
                 titleOverlay.classList.add('hide-anim');
@@ -432,31 +486,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.removeEventListener('animationend', onHide);
                     if (this.parentNode) this.parentNode.removeChild(this);
                 }, { once: true });
+                // Listener remains, but pointer-events: none will prevent clicks when hidden
             } else {
-                titleOverlay.remove(); // Clean up any remnants
-                titleOverlay = createLightboxOverlay(titleText, 'top', linkType, linkUrl);
-                wrapper.appendChild(titleOverlay);
+                titleOverlay.remove(); // Clean up any remnants if we are re-creating it to show
+                titleOverlay = createLightboxOverlay(titleText, 'top');
+                overlayParent.appendChild(titleOverlay); 
                 void titleOverlay.offsetWidth; 
                 titleOverlay.classList.remove('hide-anim');
                 titleOverlay.classList.add('show');
                 titleOverlay.style.pointerEvents = 'auto';
+                titleOverlay.removeEventListener('click', handleOverlayTap);
+                titleOverlay.addEventListener('click', handleOverlayTap); // Add tap listener
             }
         }
 
         // --- Handle Bottom Description Overlay (similar logic) ---
-        let descOverlay = wrapper.querySelector('.lightbox-description-overlay');
+        let descOverlay = overlayParent.querySelector('.lightbox-description-overlay'); 
         if (!descOverlay) { // If it doesn't exist, create and show it
             const currentPostDataForOverlay = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
             const actualDescriptionForOverlay = currentPostDataForOverlay.mobileDescription || currentPostDataForOverlay.description || '';
-            descOverlay = createLightboxOverlay(actualDescriptionForOverlay, 'bottom', linkType, linkUrl);
-            wrapper.appendChild(descOverlay);
-            void descOverlay.offsetWidth; // Reflow
-            descOverlay.classList.remove('hide-anim'); // Ensure no hide animation is running
+            descOverlay = createLightboxOverlay(actualDescriptionForOverlay, 'bottom');
+            overlayParent.appendChild(descOverlay); 
+            void descOverlay.offsetWidth; 
+            descOverlay.classList.remove('hide-anim');
             descOverlay.classList.add('show');
             descOverlay.style.pointerEvents = 'auto';
+            descOverlay.removeEventListener('click', handleOverlayTap);
+            descOverlay.addEventListener('click', handleOverlayTap); // Add tap listener
         } else { // If it exists, toggle its visibility
             if (descOverlay.classList.contains('show')) {
-                descOverlay.style.animation = ''; // Clear inline animation before applying new class animation
+                descOverlay.style.animation = '';
                 descOverlay.style.transition = '';
                 descOverlay.classList.remove('show');
                 descOverlay.classList.add('hide-anim');
@@ -466,21 +525,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (this.parentNode) this.parentNode.removeChild(this);
                 }, { once: true });
             } else {
-                descOverlay.remove();
+                descOverlay.remove(); // Clean up any remnants if we are re-creating it to show
                 const currentPostDataForOverlay = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
                 const actualDescriptionForOverlay = currentPostDataForOverlay.mobileDescription || currentPostDataForOverlay.description || '';
-                descOverlay = createLightboxOverlay(actualDescriptionForOverlay, 'bottom', linkType, linkUrl);
-                wrapper.appendChild(descOverlay);
+                descOverlay = createLightboxOverlay(actualDescriptionForOverlay, 'bottom');
+                overlayParent.appendChild(descOverlay);
                 void descOverlay.offsetWidth;
                 descOverlay.classList.remove('hide-anim');
                 descOverlay.classList.add('show');
                 descOverlay.style.pointerEvents = 'auto';
+                descOverlay.removeEventListener('click', handleOverlayTap);
+                descOverlay.addEventListener('click', handleOverlayTap); // Add tap listener
             }
         }
 
         // After handling both overlays, update the persistent state based on their visibility
-        userPrefersDescriptionVisible = (titleOverlay && titleOverlay.classList.contains('show')) || 
-                                (descOverlay && descOverlay.classList.contains('show'));
+        // This part is crucial: if this function was called to SHOW overlays, this sets userPrefersDescriptionVisible = true
+        // If it was called to HIDE them (e.g. by toolbar button), this should correctly reflect they are no longer .show
+        const currentlyVisibleTitle = overlayParent.querySelector('.lightbox-title-overlay.show');
+        const currentlyVisibleDesc = overlayParent.querySelector('.lightbox-description-overlay.show');
+        userPrefersDescriptionVisible = (currentlyVisibleTitle || currentlyVisibleDesc) ? true : false;
+        
         sendMessageToParent({ type: 'description-state', open: userPrefersDescriptionVisible });
         // Throttle the toolbar button in the parent shell (for visual feedback)
         sendMessageToParent({ type: 'throttle-toolbar', key: 'view-description' });
@@ -560,8 +625,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobileDescription = post.dataset.mobileDescription;
         const bulletPoints = post.dataset.bulletPoints; // Get bullet points
         const toolsUsed = post.dataset.toolsUsed; // Get tools used
-        const linkType = post.dataset.linkType;
-        const linkUrl = post.dataset.linkUrl;
 
         // Always use a persistent wrapper for lightbox media and description
         const wrapper = getOrCreateWrapper();
@@ -606,60 +669,76 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // --- Mobile Overlays: Trigger hide animation before content swap --- 
+        // --- Mobile Overlays: Cleanup after swipe OR Trigger hide animation for non-swipe ---
         if (isTouchDevice()) {
-            const activeTitleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
-            if (activeTitleOverlay) {
-                mobileTitleOverlayFadedOut = false; // Mark as needing to fade
-                activeTitleOverlay.style.animation = ''; // Clear inline style before adding .hide-anim
-                activeTitleOverlay.style.transition = '';
-                activeTitleOverlay.classList.remove('show'); 
-                activeTitleOverlay.classList.add('hide-anim');
-                activeTitleOverlay.style.pointerEvents = 'none';
-                let titleOverlayHandled = false;
-                const onTitleHide = () => {
-                    if (titleOverlayHandled) return;
-                    titleOverlayHandled = true;
-                    activeTitleOverlay.removeEventListener('animationend', onTitleHide);
-                    if (activeTitleOverlay.parentNode) activeTitleOverlay.parentNode.removeChild(activeTitleOverlay);
-                    mobileTitleOverlayFadedOut = true;
-                    trySwapInNewContent(); 
-                };
-                activeTitleOverlay.addEventListener('animationend', onTitleHide, { once: true });
-                setTimeout(() => { // Fallback
-                    if (!titleOverlayHandled) {
-                        if (activeTitleOverlay && activeTitleOverlay.parentNode) activeTitleOverlay.remove();
-                        mobileTitleOverlayFadedOut = true;
-                        trySwapInNewContent();
-                    }
-                }, 300); // Reduced from 450ms to 300ms to match faster CSS animation
-            }
+            const overlayParentForQuery = document.getElementById('lightbox-inner-wrapper'); 
+            if (overlayParentForQuery) {
+                if (direction !== 0) { // It's a swipe that navigated
+                    // Overlays were already faded by setSwipeContentTransform during the swipe.
+                    // Just remove them directly to prevent animation conflicts.
+                    const titleToRemove = overlayParentForQuery.querySelector('.lightbox-title-overlay');
+                    if (titleToRemove) titleToRemove.remove();
+                    mobileTitleOverlayFadedOut = true; // Mark as done immediately
 
-            const activeDescOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
-            if (activeDescOverlay) {
-                mobileDescOverlayFadedOut = false; // Mark as needing to fade
-                activeDescOverlay.style.animation = ''; // Clear inline style before adding .hide-anim
-                activeDescOverlay.style.transition = '';
-                activeDescOverlay.classList.remove('show');
-                activeDescOverlay.classList.add('hide-anim');
-                activeDescOverlay.style.pointerEvents = 'none';
-                let descOverlayHandled = false;
-                const onDescHide = () => {
-                    if (descOverlayHandled) return;
-                    descOverlayHandled = true;
-                    activeDescOverlay.removeEventListener('animationend', onDescHide);
-                    if (activeDescOverlay.parentNode) activeDescOverlay.parentNode.removeChild(activeDescOverlay);
-                    mobileDescOverlayFadedOut = true;
-                    trySwapInNewContent();
-                };
-                activeDescOverlay.addEventListener('animationend', onDescHide, { once: true });
-                setTimeout(() => { // Fallback
-                    if (!descOverlayHandled) {
-                        if (activeDescOverlay && activeDescOverlay.parentNode) activeDescOverlay.remove();
-                        mobileDescOverlayFadedOut = true;
-                        trySwapInNewContent();
+                    const descToRemove = overlayParentForQuery.querySelector('.lightbox-description-overlay');
+                    if (descToRemove) descToRemove.remove();
+                    mobileDescOverlayFadedOut = true; // Mark as done immediately
+                } else { 
+                    // Not a swipe: Use original logic for CSS animation hide (e.g., for initial open if applicable)
+                    const activeTitleOverlay = overlayParentForQuery.querySelector('.lightbox-title-overlay.show');
+                    if (activeTitleOverlay) {
+                        mobileTitleOverlayFadedOut = false; // Mark as needing to fade via CSS
+                        activeTitleOverlay.style.animation = ''; 
+                        activeTitleOverlay.style.transition = '';
+                        activeTitleOverlay.classList.remove('show'); 
+                        activeTitleOverlay.classList.add('hide-anim');
+                        activeTitleOverlay.style.pointerEvents = 'none';
+                        let titleOverlayHandled = false;
+                        const onTitleHide = () => {
+                            if (titleOverlayHandled) return;
+                            titleOverlayHandled = true;
+                            activeTitleOverlay.removeEventListener('animationend', onTitleHide);
+                            if (activeTitleOverlay.parentNode) activeTitleOverlay.parentNode.removeChild(activeTitleOverlay);
+                            mobileTitleOverlayFadedOut = true;
+                            trySwapInNewContent(); 
+                        };
+                        activeTitleOverlay.addEventListener('animationend', onTitleHide, { once: true });
+                        setTimeout(() => { 
+                            if (!titleOverlayHandled) {
+                                if (activeTitleOverlay && activeTitleOverlay.parentNode) activeTitleOverlay.remove();
+                                mobileTitleOverlayFadedOut = true;
+                                trySwapInNewContent();
+                            }
+                        }, 300); 
                     }
-                }, 300); // Reduced from 450ms to 300ms to match faster CSS animation
+
+                    const activeDescOverlay = overlayParentForQuery.querySelector('.lightbox-description-overlay.show');
+                    if (activeDescOverlay) {
+                        mobileDescOverlayFadedOut = false; // Mark as needing to fade via CSS
+                        activeDescOverlay.style.animation = ''; 
+                        activeDescOverlay.style.transition = '';
+                        activeDescOverlay.classList.remove('show');
+                        activeDescOverlay.classList.add('hide-anim');
+                        activeDescOverlay.style.pointerEvents = 'none';
+                        let descOverlayHandled = false;
+                        const onDescHide = () => {
+                            if (descOverlayHandled) return;
+                            descOverlayHandled = true;
+                            activeDescOverlay.removeEventListener('animationend', onDescHide);
+                            if (activeDescOverlay.parentNode) activeDescOverlay.parentNode.removeChild(activeDescOverlay);
+                            mobileDescOverlayFadedOut = true;
+                            trySwapInNewContent();
+                        };
+                        activeDescOverlay.addEventListener('animationend', onDescHide, { once: true });
+                        setTimeout(() => { 
+                            if (!descOverlayHandled) {
+                                if (activeDescOverlay && activeDescOverlay.parentNode) activeDescOverlay.remove();
+                                mobileDescOverlayFadedOut = true;
+                                trySwapInNewContent();
+                            }
+                        }, 300); 
+                    }
+                }
             }
         }
 
@@ -732,42 +811,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         wrapper.classList.remove('desc-visible'); 
                     }
                 } else { 
-                    // ... (mobile overlay logic remains the same) ...
-                    // Ensure mobile overlay logic does not try to use bulletPoints directly for its simple text display
-                    const existingTitleOverlay = wrapper.querySelector('.lightbox-title-overlay.show');
-                    const existingDescOverlay = wrapper.querySelector('.lightbox-description-overlay.show');
-                    if (userPrefersDescriptionVisible) {
-                        if (!existingTitleOverlay || !existingDescOverlay) {
-                            wrapper.querySelectorAll('.lightbox-title-overlay, .lightbox-description-overlay').forEach(o => o.remove());
-                            const createAndShowOverlays = () => {
-                                const postData = allPosts[currentLightboxIndex].dataset;
-                                const newTitle = postData.title || '';
-                                const newLinkType = postData.linkType;
-                                const newLinkUrl = postData.linkUrl;
+                    const overlayParentForManage = document.getElementById('lightbox-inner-wrapper'); 
+                    if (overlayParentForManage) {
+                        // Always remove any existing overlays from the new parent before potentially showing new ones
+                        overlayParentForManage.querySelectorAll('.lightbox-title-overlay, .lightbox-description-overlay').forEach(o => o.remove());
 
-                                const titleOverlay = createLightboxOverlay(newTitle, 'top', newLinkType, newLinkUrl);
-                                wrapper.appendChild(titleOverlay);
-                                void titleOverlay.offsetWidth; 
-                                titleOverlay.classList.remove('hide-anim'); 
-                                titleOverlay.classList.add('show');
-                                titleOverlay.style.pointerEvents = 'auto';
-
-                                const actualDescriptionForOpen = postData.mobileDescription || postData.description || '';
-                                const descOverlay = createLightboxOverlay(actualDescriptionForOpen, 'bottom', newLinkType, newLinkUrl);
-                                wrapper.appendChild(descOverlay);
-                                void descOverlay.offsetWidth; 
-                                descOverlay.classList.remove('hide-anim'); 
-                                descOverlay.classList.add('show');
-                                descOverlay.style.pointerEvents = 'auto';
-                            };
+                        if (userPrefersDescriptionVisible) {
+                            // Call toggleMobileOverlays to create/show new overlays for the current item.
+                            // This ensures the tap listeners are correctly attached by toggleMobileOverlays.
+                            const postData = allPosts[currentLightboxIndex].dataset;
+                            const newTitle = postData.title || '';
+                            // The description will be fetched by toggleMobileOverlays itself based on currentLightboxIndex.
+                            // The `wrapper` here refers to the `.lightbox-media-wrapper` which is `_mediaWrapper` in toggleMobileOverlays.
                             if (skipFadeIn) {
-                                setTimeout(createAndShowOverlays, 600);
+                                setTimeout(() => {
+                                    toggleMobileOverlays(newTitle, "", wrapper); 
+                                }, 600);
                             } else {
-                                createAndShowOverlays();
+                                toggleMobileOverlays(newTitle, "", wrapper);
                             }
+                        } else {
+                            // If overlays are not supposed to be visible, ensure state reflects that (already handled by toggleMobileOverlays if it were called to hide)
+                             userPrefersDescriptionVisible = false;
+                             sendMessageToParent({ type: 'description-state', open: false });
                         }
-                    } else {
-                        wrapper.querySelectorAll('.lightbox-title-overlay, .lightbox-description-overlay').forEach(o => o.remove());
                     }
                 }
                 
@@ -776,16 +843,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendMessageToParent({ type: 'description-state', open: isDesktop() });
                 sendMessageToParent({ 
                     type: 'lightbox-state', 
-                    open: true, 
-                    linkType: linkType || null, 
-                    linkUrl: linkUrl || null    
+                    open: true
                 });
                 sendMessageToParent({ type: 'description-state', open: userPrefersDescriptionVisible });
-                if (linkType && linkUrl) {
-                    sendMessageToParent({ type: 'set-external-link-enabled', enabled: true, url: linkUrl });
-                } else {
-                    sendMessageToParent({ type: 'set-external-link-enabled', enabled: false });
-                }
             }
         }
         trySwapInNewContent(); // Initial check in case there was nothing to animate out
@@ -816,41 +876,64 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {number} dy - Vertical translation in px.
      * @param {number} scale - Content scaling (used for vertical swipe-to-close).
      */
-    function setSwipeContentTransform(dx, dy, scale = 1) {
+    function setSwipeContentTransform(dx, dy, scale = 1, isDownwardHintSwipe = false) {
         if (lightboxContent) {
-            lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scale})`;
             const media = lightboxContent.querySelector('img, video');
-            const titleOverlay = lightboxContent.querySelector('.lightbox-title-overlay.show');
-            const descOverlay = lightboxContent.querySelector('.lightbox-description-overlay.show');
+            const overlayHost = document.getElementById('lightbox-inner-wrapper');
+            const titleOverlay = overlayHost?.querySelector('.lightbox-title-overlay.show');
+            const descOverlay = overlayHost?.querySelector('.lightbox-description-overlay.show');
 
-            if (media && dragIsVertical) { // Vertical drag for closing
-                const fadeEnd = 0.95;
-                const dragRatio = Math.min(1, Math.abs(dy) / (window.innerHeight * fadeEnd));
-                const fade = 1 - Math.pow(dragRatio, 2);
-                media.style.opacity = fade;
-                lightbox.style.opacity = fade;
-                if (titleOverlay) titleOverlay.style.opacity = fade;
-                if (descOverlay) descOverlay.style.opacity = fade;
-                
-                const minScale = 0.25;
-                const scaleVal = 1 - (1 - minScale) * dragRatio;
-                lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${scaleVal})`;
-            } else if (media) { // Horizontal drag for navigation
-                media.style.opacity = '';
-                lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(1)`;
-                lightbox.style.opacity = '';
+            let finalScale = scale; // Default to scale from handleTouchMove
 
-                // Fade overlays during horizontal swipe
-                const horizontalFadeThreshold = window.innerWidth / 1.8; // Changed from / 3 to / 1.8
+            // Determine if overlays exist and are currently shown (for opacity manipulation)
+            const titleOverlayIsVisible = titleOverlay && titleOverlay.classList.contains('show');
+            const descOverlayIsVisible = descOverlay && descOverlay.classList.contains('show');
+
+            // Opacity defaults (full opacity)
+            if (media) media.style.opacity = '';
+            lightbox.style.opacity = '';
+            // Default overlay opacity will be handled based on conditions below or by CSS if not touched.
+            // Clear any prior JS transitions on overlays before applying new opacity directly for drag.
+            if (titleOverlayIsVisible) titleOverlay.style.transition = 'none';
+            if (descOverlayIsVisible) descOverlay.style.transition = 'none';
+
+            if (media && dragIsVertical) {
+                if (!isDownwardHintSwipe && dy < 0) { // Upward swipe for closing (dy is negative)
+                    const fadeEnd = 0.95;
+                    const dragRatio = Math.min(1, Math.abs(dy) / (window.innerHeight * fadeEnd));
+                    const fade = 1 - Math.pow(dragRatio, 2);
+                    
+                    media.style.opacity = fade;
+                    lightbox.style.opacity = fade;
+                    if (titleOverlayIsVisible) titleOverlay.style.opacity = fade;
+                    if (descOverlayIsVisible) descOverlay.style.opacity = fade;
+                    
+                    const minScaleForCloseVisual = 0.25;
+                    finalScale = 1 - (1 - minScaleForCloseVisual) * dragRatio;
+                } else if (isDownwardHintSwipe && dy > 0) { // Downward hint swipe
+                    // Media and lightbox main frame remain full opacity (handled by defaults above)
+                    const hintDragRatio = Math.min(1, dy / 40); // dy is capped at 40 for hint in handleTouchMove
+                    const hintOverlayOpacity = 1 - (hintDragRatio * 0.5); // Fades to 0.5 at max hint drag
+
+                    if (titleOverlayIsVisible) titleOverlay.style.opacity = hintOverlayOpacity;
+                    if (descOverlayIsVisible) descOverlay.style.opacity = hintOverlayOpacity;
+                    // finalScale remains `scale` (which is 1 for hint swipe, set in handleTouchMove)
+                }
+                // For upward swipe with dy=0 or non-hint downward swipe (if that case existed),
+                // opacities remain full (reset above), finalScale remains `scale`
+            } else if (media && !dragIsVertical) { // Horizontal drag
+                // Media and lightbox opacities are already reset to full above.
+                // Fade overlays horizontally
+                const horizontalFadeThreshold = window.innerWidth / 1.8;
                 const horizontalDragRatio = Math.min(1, Math.abs(dx) / horizontalFadeThreshold);
                 const horizontalFade = 1 - horizontalDragRatio;
-                if (titleOverlay) titleOverlay.style.opacity = horizontalFade;
-                if (descOverlay) descOverlay.style.opacity = horizontalFade;
-            } else {
-                 // Reset overlay opacity if no media or not dragging (e.g., initial state before any drag)
-                if (titleOverlay) titleOverlay.style.opacity = '';
-                if (descOverlay) descOverlay.style.opacity = '';
+                if (titleOverlayIsVisible) titleOverlay.style.opacity = horizontalFade;
+                if (descOverlayIsVisible) descOverlay.style.opacity = horizontalFade;
+                // finalScale remains `scale` (which is 1 for horizontal drag)
             }
+            // If no media, opacities are already reset to full above. finalScale remains `scale`.
+
+            lightboxContent.style.transform = `translateX(${dx}px) translateY(${dy}px) scale(${finalScale})`;
         }
     }
 
@@ -885,16 +968,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 lightboxContent.classList.add('swiping');
                 lightboxContent.classList.remove('animate');
 
-                // Temporarily disable animations on active overlays during swipe
-                const titleOverlay = lightboxContent.querySelector('.lightbox-title-overlay.show');
-                const descOverlay = lightboxContent.querySelector('.lightbox-description-overlay.show');
-                if (titleOverlay) {
-                    titleOverlay.style.animation = 'none';
-                    titleOverlay.style.transition = 'none';
+                const overlayHostForTouchStart = document.getElementById('lightbox-inner-wrapper');
+                const titleOverlayForTouchStart = overlayHostForTouchStart?.querySelector('.lightbox-title-overlay.show');
+                const descOverlayForTouchStart = overlayHostForTouchStart?.querySelector('.lightbox-description-overlay.show');
+                
+                if (titleOverlayForTouchStart) {
+                    titleOverlayForTouchStart.style.animation = 'none';
+                    titleOverlayForTouchStart.style.transition = 'none';
                 }
-                if (descOverlay) {
-                    descOverlay.style.animation = 'none';
-                    descOverlay.style.transition = 'none';
+                if (descOverlayForTouchStart) {
+                    descOverlayForTouchStart.style.animation = 'none';
+                    descOverlayForTouchStart.style.transition = 'none';
                 }
             }
         }
@@ -920,20 +1004,41 @@ document.addEventListener('DOMContentLoaded', () => {
             dragIsVertical = false;
         }
 
-        if (lightboxContent && !dragIsVertical) { // Horizontal drag
-            setSwipeContentTransform(dx, 0, 1);
-        }
-        if (lightboxContent && dragIsVertical) { // Vertical drag
-            const limitedDy = Math.min(0, dy); // Only allow upward swipe for closing effect
-            const minScale = 0.85; // Initial slight scale down on vertical drag start
-            const scaleVal = 1 + (minScale - 1) * Math.min(1, Math.abs(limitedDy) / (window.innerHeight / 2));
-            lastDragDx = 0;
-            lastDragDy = limitedDy;
-            if (dragRAF) cancelAnimationFrame(dragRAF);
-            // Use requestAnimationFrame for smoother transform updates
-            dragRAF = requestAnimationFrame(() => {
-                setSwipeContentTransform(0, limitedDy, scaleVal);
-            });
+        if (dragRAF) cancelAnimationFrame(dragRAF); // Cancel previous RAF
+
+        if (lightboxContent) {
+            if (!dragIsVertical) { // Horizontal drag
+                lastDragDx = dx;
+                lastDragDy = 0;
+                dragRAF = requestAnimationFrame(() => {
+                    setSwipeContentTransform(dx, 0, 1, false); // Pass false for isDownwardHintSwipe
+                });
+            } else { // Vertical drag
+                let effectiveDy = dy; 
+                let scaleToApply = 1;
+                let isHintSwipe = false;
+
+                if (dy < 0) { // Upward swipe (potential close)
+                    // effectiveDy is already dy (negative for upward movement)
+                    const minScale = 0.85; // Initial slight scale down
+                    scaleToApply = 1 + (minScale - 1) * Math.min(1, Math.abs(effectiveDy) / (window.innerHeight / 2));
+                    // isHintSwipe remains false
+                } else if (dy > 0) { // Downward swipe (hint)
+                    effectiveDy = Math.min(dy, 40); // Cap dy for the transform
+                    // scaleToApply remains 1 (no scaling for hint)
+                    isHintSwipe = true;
+                } else { // dy === 0 (no vertical movement)
+                    effectiveDy = 0; // Ensure it's exactly 0 for transform
+                    // scaleToApply remains 1
+                    // isHintSwipe remains false (or could be context-dependent, but false is safe)
+                }
+                
+                lastDragDx = 0;
+                lastDragDy = effectiveDy; // Store the (potentially capped) dy
+                dragRAF = requestAnimationFrame(() => {
+                    setSwipeContentTransform(0, effectiveDy, scaleToApply, isHintSwipe);
+                });
+            }
         }
     }
 
@@ -1058,6 +1163,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const baseDuration = 450;
                 const duration = Math.min(Math.max(180, baseDuration * (remaining / total)), 350);
                 
+                // Fade out overlays if they are visible
+                const overlayHost = document.getElementById('lightbox-inner-wrapper');
+                if (overlayHost) {
+                    overlayHost.querySelectorAll('.lightbox-title-overlay.show, .lightbox-description-overlay.show').forEach(overlay => {
+                        overlay.style.transition = `opacity ${duration * 0.8}ms ease-out`; // Fade slightly faster than slide
+                        overlay.style.opacity = '0';
+                        overlay.style.pointerEvents = 'none'; // Disable interaction during fade
+                    });
+                }
+
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateX(${targetX}px)`;
@@ -1088,6 +1203,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const baseDuration = 450;
                 const duration = Math.min(Math.max(180, baseDuration * (remaining / total)), 350);
 
+                // Fade out overlays if they are visible
+                const overlayHost = document.getElementById('lightbox-inner-wrapper');
+                if (overlayHost) {
+                    overlayHost.querySelectorAll('.lightbox-title-overlay.show, .lightbox-description-overlay.show').forEach(overlay => {
+                        overlay.style.transition = `opacity ${duration * 0.8}ms ease-out`; // Fade slightly faster than slide
+                        overlay.style.opacity = '0';
+                        overlay.style.pointerEvents = 'none'; // Disable interaction during fade
+                    });
+                }
+
                 lightboxContent.classList.add('animate');
                 lightboxContent.style.transition = `transform ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
                 lightboxContent.style.transform = `translateX(${targetX}px)`;
@@ -1110,35 +1235,84 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- No Action: Snap Back ---
         // If no swipe threshold was met, animate content back to its original position.
         if (lightboxContent) {
-            lightboxContent.classList.add('animate'); // Enable CSS transition for snap back
+            lightboxContent.classList.remove('swiping'); // Ensure swiping class is removed
+            lightboxContent.classList.add('animate');    // Add .animate class, consistent with other swipe end actions
+
+            // Apply rubber band snap-back for the lightboxContent itself
+            const snapDuration = '500ms'; // Duration for the snap
+            const rubberBandEasing = 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // Easing with overshoot
+
+            lightboxContent.style.transition = `transform ${snapDuration} ${rubberBandEasing}`;
             lightboxContent.style.transform = 'translateX(0) translateY(0) scale(1)';
-            lightboxContent.style.transition = ''; // Use default transition from .animate or specific snap-back
-            if (media) media.style.opacity = ''; // Reset media opacity
+
+            // Reset opacity for media and the main lightbox frame
+            if (media) {
+                media.style.transition = ''; // Clear its specific transition if set during close attempt
+                media.style.opacity = '';    // Reset to full
+            }
             lightbox.style.transition = ''; // Reset lightbox opacity
             lightbox.style.opacity = '';
 
             // Reset overlay opacity and animations on snap back
-            const titleOverlay = lightboxContent.querySelector('.lightbox-title-overlay'); 
-            const descOverlay = lightboxContent.querySelector('.lightbox-description-overlay');
-            
-            if (titleOverlay) {
-                titleOverlay.style.animation = ''; // Restore CSS animations capability
-                titleOverlay.style.transition = ''; // Restore CSS transitions capability
-            }
-            if (descOverlay) {
-                descOverlay.style.animation = '';
-                descOverlay.style.transition = '';
+            const overlayHost = document.getElementById('lightbox-inner-wrapper');
+            if (overlayHost) {
+                const titleOverlay = overlayHost.querySelector('.lightbox-title-overlay');
+                const descOverlay = overlayHost.querySelector('.lightbox-description-overlay');
+
+                const resetOverlay = (overlay) => {
+                    if (overlay) {
+                        overlay.style.animation = '';   // Clear any JS-set animation styles
+                        // overlay.style.transition = ''; // Will be cleared specifically after potential fade-in
+                        if (overlay.classList.contains('show')) {
+                            // === Crucial fix for snap-back without re-sliding ===
+                            // 1. Explicitly stop any CSS @keyframe animations.
+                            overlay.style.animation = 'none';
+                            // 2. Force transform to the final "open" state before opacity transition.
+                            //    The .show class and its (now disabled) animation would normally achieve translateY(0).
+                            overlay.style.transform = 'translateY(0)';
+
+                            // If opacity was reduced (e.g., during hint swipe), smoothly fade it back.
+                            const currentOpacity = parseFloat(overlay.style.opacity);
+                            if (!isNaN(currentOpacity) && currentOpacity < 1) {
+                                overlay.style.transition = 'opacity 300ms ease-out';
+                                overlay.style.opacity = '1';
+
+                                const onOverlayFadeInEnd = (ev) => {
+                                    if (ev.target === overlay && ev.propertyName === 'opacity') {
+                                        overlay.removeEventListener('transitionend', onOverlayFadeInEnd);
+                                        overlay.style.transition = ''; // Clear our inline transition
+                                    }
+                                };
+                                overlay.addEventListener('transitionend', onOverlayFadeInEnd);
+                                // Fallback timeout for cleanup
+                                setTimeout(() => {
+                                    if (overlay.style.transition.includes('opacity')) {
+                                        overlay.style.transition = '';
+                                    }
+                                }, 350); // A bit longer than the transition
+                            } else {
+                                overlay.style.opacity = '1'; // Ensure full opacity if it wasn't changed or is already 1
+                                overlay.style.transition = ''; // Clear any stray transitions
+                            }
+                        } else {
+                            overlay.style.opacity = '0';
+                            overlay.style.transition = ''; // Clear any stray transitions
+                        }
+                    }
+                };
+                resetOverlay(titleOverlay);
+                resetOverlay(descOverlay);
             }
 
-            if (userPrefersDescriptionVisible) {
-                // Ensure overlays are visible and have .show class if they should be seen
-                // The .show class should already be there if they were visible before drag started
-                if (titleOverlay && titleOverlay.classList.contains('show')) titleOverlay.style.opacity = '1';
-                if (descOverlay && descOverlay.classList.contains('show')) descOverlay.style.opacity = '1';
-            } else {
-                if (titleOverlay) titleOverlay.style.opacity = '0';
-                if (descOverlay) descOverlay.style.opacity = '0';
-            }
+            // Clean up the inline transition on lightboxContent after it finishes
+            const onSnapBackEnd = (event) => {
+                if (event.target === lightboxContent && event.propertyName === 'transform') {
+                    lightboxContent.removeEventListener('transitionend', onSnapBackEnd);
+                    lightboxContent.style.transition = ''; // Clear the inline transform transition
+                    lightboxContent.classList.remove('animate'); // Remove .animate, consistent with swipe-left/right
+                }
+            };
+            lightboxContent.addEventListener('transitionend', onSnapBackEnd);
         }
     }
 
@@ -1443,7 +1617,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Keep existing toolbar-action handling
             if (event.data.type === 'toolbar-action') {
-                console.log('[ProjectsApp] Received toolbar-action:', event.data.action, 'Current Index:', currentLightboxIndex, 'Posts:', allPosts.length); // DEBUG LOG
                 if (event.data.action === 'viewDescription') {
                     const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
                     let description = '';
@@ -1455,11 +1628,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             // The 'descriptionText' for toggleMobileOverlays will be the actual description.
                             // The title for the top overlay is titleForToggle.
                             // The description for the bottom overlay will be fetched inside toggleMobileOverlays itself.
-                            const subheadingForToggle = getSubheadingName(titleForToggle); // This is effectively unused by createLightboxOverlay for bottom now.
                             const linkTypeFromData = currentPostData.linkType;
                             const linkUrlFromData = currentPostData.linkUrl;
                             // Pass the wrapper to the generalized toggle function, using subheading for the bottom overlay
-                            toggleMobileOverlays(titleForToggle, subheadingForToggle, wrapper, linkTypeFromData, linkUrlFromData);
+                            toggleMobileOverlays(titleForToggle, "", wrapper);
                         } else {
                             // Desktop: only toggle the description card via the existing logic
                             let descForDesktopCard = currentPostData.description || '';
@@ -1471,17 +1643,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         closeLightbox();
                     }
                 } else if (event.data.action === 'navigatePrevious') {
-                    console.log('[ProjectsApp] navigatePrevious: Lightbox open?', lightbox && lightbox.style.display === 'flex', 'Posts available?', allPosts.length > 0); // DEBUG LOG
                     if (lightbox && lightbox.style.display === 'flex' && allPosts.length > 0) {
                         let newIndex = (currentLightboxIndex - 1 + allPosts.length) % allPosts.length;
-                        console.log('[ProjectsApp] navigatePrevious: New index:', newIndex); // DEBUG LOG
                         openLightboxByIndex(newIndex, -1);
                     }
                 } else if (event.data.action === 'navigateNext') {
-                    console.log('[ProjectsApp] navigateNext: Lightbox open?', lightbox && lightbox.style.display === 'flex', 'Posts available?', allPosts.length > 0); // DEBUG LOG
                     if (lightbox && lightbox.style.display === 'flex' && allPosts.length > 0) {
                         let newIndex = (currentLightboxIndex + 1) % allPosts.length;
-                        console.log('[ProjectsApp] navigateNext: New index:', newIndex); // DEBUG LOG
                         openLightboxByIndex(newIndex, 1);
                     }
                 }
@@ -1501,21 +1669,4 @@ document.addEventListener('DOMContentLoaded', () => {
             window.parent.postMessage({ type: 'iframe-interaction' }, '*');
         }
     });
-
-    // Helper to extract person/team name for subheading
-    function getSubheadingName(title) {
-        // Add custom mappings for all projects
-        if (/mavs win/i.test(title)) return "Dallas Mavericks";
-        if (/all blacks/i.test(title)) return "New Zealand All Blacks";
-        if (/sua'?ali'i/i.test(title)) return "Joseph Sua'ali'i";
-        if (/mahomes/i.test(title)) return "Patrick Mahomes";
-        if (/flashback/i.test(title)) return "Dwayne Wade";
-        if (/minnesota/i.test(title)) return "Edwards & Jefferson";
-        if (/saquon/i.test(title)) return "Saquon Barkley";
-        if (/blues/i.test(title)) return "Auckland Blues";
-        if (/bryant/i.test(title)) return "Kobe Bryant";
-        if (/barkley big head/i.test(title)) return "Saquon Barkley";
-        // Fallback: use first 2 words
-        return title.split(/\s+/).slice(0,2).join(' ');
-    }
 });

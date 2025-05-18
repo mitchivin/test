@@ -119,7 +119,7 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
     menuItemDiv.setAttribute("data-menu", itemConfig.key);
     menuBar.appendChild(menuItemDiv);
     // Dropdown
-    if (itemConfig.dropdown && itemConfig.dropdown.length > 0) {
+    if (itemConfig.dropdown && itemConfig.dropdown.length > 0 && !['edit', 'tools', 'help'].includes(itemConfig.key)) {
       const dropdownMenu = document.createElement("div");
       dropdownMenu.id = `${itemConfig.key}-menu-${windowId}`;
       dropdownMenu.className = "dropdown-menu";

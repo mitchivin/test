@@ -26,8 +26,9 @@ html, body {
 
 html {
     background:
+        radial-gradient(ellipse at top center, rgba(200, 200, 220, 0.15) 0%, transparent 60%), /* New subtle top light */
         radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0) top left / 3px 3px repeat,
-        linear-gradient(to bottom, rgb(45,45,45) 0%, rgb(30,30,30) 35%, rgb(30,30,30) 100%);
+        linear-gradient(to bottom, rgb(55,55,55) 0%, rgb(40,40,40) 35%, rgb(40,40,40) 100%); /* Main gradient (lightened) */
     min-height: 100vh;
     /* Removed html::before and @keyframes scrollAnimatedLines */
 }
@@ -48,8 +49,8 @@ html::before {
     left: 0;
     background: radial-gradient(
         ellipse at left center, 
-        rgba(255, 255, 255, 0.2) 0%,  
-        transparent 70%  
+        rgba(255, 255, 255, 0.25) 0%,  /* Increased opacity */
+        transparent 65%  /* Increased spread */
     );
 }
 
@@ -57,8 +58,8 @@ html::after {
     right: 0;
     background: radial-gradient(
         ellipse at right center, 
-        rgba(255, 255, 255, 0.2) 0%, 
-        transparent 70%
+        rgba(255, 255, 255, 0.25) 0%, /* Increased opacity */
+        transparent 65% /* Increased spread */
     );
 }
 
@@ -150,7 +151,6 @@ body {
 .line:nth-child(3)::after { animation-delay: 3.5s; }
 .line:nth-child(4)::after { animation-delay: 5.0s; }
 .line:nth-child(5)::after { animation-delay: 6.0s; }
-/* Rules for .line:nth-child(6) through :nth-child(10) to be removed or commented out */
 
 
 @keyframes sweepLeftToRight {
@@ -179,8 +179,6 @@ body {
     opacity: 0;
   }
 }
-
-/* Remove old @keyframes drop */
 
 /* ====== Feed Container & Posts ====== */
 .feed-container {
@@ -628,54 +626,85 @@ body {
     z-index: 2;
     display: flex;
     flex-direction: column; /* Stack items vertically */
-    padding: 40px 24px 18px 24px; /* Matched bottom padding to left padding */
+    padding: 40px 24px 20px 24px; /* MODIFIED: Bottom padding from 18px to 20px for consistent total vertical padding */
     color: #fff; /* Changed to white */
     font-size: 0.95rem;
     font-weight: 500;
     line-height: 1.4;
-    background: linear-gradient(0deg, rgba(20,20,20,0.95) 70%, rgba(20,20,20,0.78) 80%, rgba(20,20,20,0.60) 85%, rgba(20,20,20,0.35) 90%, rgba(20,20,20,0.0) 100%); /* Higher dark area, very smooth fade */
+    /* MODIFIED: Smoother gradient with more steps */
+    background: linear-gradient(0deg, 
+                rgba(20,20,20,0.95) 0%, 
+                rgba(20,20,20,0.95) 40%, 
+                rgba(20,20,20,0.9) 50%, 
+                rgba(20,20,20,0.8) 60%, 
+                rgba(20,20,20,0.65) 70%, 
+                rgba(20,20,20,0.45) 80%, 
+                rgba(20,20,20,0.25) 90%, 
+                rgba(20,20,20,0.0) 100%);
     pointer-events: none;
-    transform: translateY(16px);
+    transform: translateY(100%); /* MODIFIED: Was 16px. Start off-screen below. */
     transition: none !important;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
     max-width: 100%;
     box-sizing: border-box;
+    margin-top: 24px; /* Added as per request */
   }
   .lightbox-description-overlay.show {
     transform: translateY(0);
     animation: mobileBottomOverlaySlideIn 400ms cubic-bezier(0.4,0,0.2,1) forwards;
   }
   .lightbox-description-overlay.hide-anim {
-    transform: translateY(16px);
+    transform: translateY(100%); /* MODIFIED: Was 16px */
     animation: mobileBottomOverlaySlideOut 250ms cubic-bezier(0.4,0,0.2,1) forwards; /* Duration 250ms */
   }
 
   /* Specific for top title overlay */
   .lightbox-title-overlay {
     top: 0;
-    transform: translateY(-24px); /* Start hidden above with a fixed offset */
-    display: flex; /* Ensure it is a flex container for alignment */
-    align-items: center; /* Vertically center text */
-    justify-content: space-between; /* Title left, icon right */
-    padding: 24px 24px 36px 24px; /* Bottom padding set to 36px */
-    background: linear-gradient(180deg, rgba(20,20,20,0.95) 0%, rgba(20,20,20,0.90) 20%, rgba(20,20,20,0.78) 40%, rgba(20,20,20,0.60) 60%, rgba(20,20,20,0.35) 80%, rgba(20,20,20,0.0) 100%); /* Mirrored bottom overlay's smooth gradient */
-    border-top-left-radius: 20px; /* Match media radius */
-    border-top-right-radius: 20px; /* Match media radius */
-    /* Text styling to match bottom overlay */
+    transform: translateY(-100%); 
+    display: flex; 
+    flex-direction: column; /* MODIFIED: Stack project label and title vertically */
+    align-items: flex-start; /* MODIFIED: Align items to the start (left) */
+    justify-content: center; /* MODIFIED: Center content vertically within available padding */
+    padding: 18px 24px 20px 24px; /* MODIFIED: Adjusted padding for new label */
+    /* MODIFIED: Smoother gradient with more steps */
+    background: linear-gradient(180deg, 
+                rgba(20,20,20,0.95) 0%, 
+                rgba(20,20,20,0.95) 40%, 
+                rgba(20,20,20,0.9) 50%, 
+                rgba(20,20,20,0.8) 60%, 
+                rgba(20,20,20,0.65) 70%, 
+                rgba(20,20,20,0.45) 80%, 
+                rgba(20,20,20,0.25) 90%, 
+                rgba(20,20,20,0.0) 100%);
     color: #fff;
-    font-size: 1.6rem;
-    font-weight: 700;
-    line-height: 1.3;
+    /* font-size, font-weight, line-height removed as they are now on child elements */
   }
 
-  .lightbox-overlay-title-text { /* New class for the title span */
-      flex-grow: 1; /* Allow title to take available space */
-      margin-right: 10px; /* Space between title and icon */
-      text-align: left; /* Ensure title text is left-aligned */
+  /* NEW: Styling for the "PERSONAL PROJECT" label in mobile top overlay */
+  .mobile-overlay-project-label {
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-size: rem; /* MODIFIED: Was 0.75rem */
+    font-weight: 700;
+    color: #5f5f5fc7;
+    opacity: 0.75; /* MODIFIED: Was 0.5 */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    width: 100%;
+  }
+
+  .lightbox-overlay-title-text { 
+      flex-grow: 0; /* Do not grow, allow natural size */
+      text-align: left; 
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap; /* Keep title on one line, ellipsis if too long */
+      white-space: normal; /* Allow title to wrap if needed */
+      max-width: 100%; /* Ensure it doesn't overflow its parent */
+      font-size: 2rem; /* MODIFIED: Was 1.6rem */
+      font-weight: 700;
+      line-height: 1.5; /* MODIFIED: Was 1.3 */
+      color: #fff; /* Ensure title text is white */
+      margin-bottom: 24px;
   }
 
   .mobile-title-link-icon {
@@ -685,20 +714,12 @@ body {
     flex-shrink: 0; /* Prevent icon from shrinking */
   }
 
-  .mobile-title-link-icon img {
-    width: 34px !important;  /* Increased by 2px */
-    height: 34px !important; /* Increased by 2px */
-    display: block;
-    object-fit: contain; /* Added for better scaling */
-    border-radius: 0 !important; /* Ensure icons are square */
-  }
-
   .lightbox-title-overlay.show {
     transform: translateY(0);
     animation: mobileTopOverlaySlideIn 400ms cubic-bezier(0.4,0,0.2,1) forwards;
   }
   .lightbox-title-overlay.hide-anim {
-    transform: translateY(-24px); /* Match initial hidden state */
+    transform: translateY(-100%); /* MODIFIED: Was -24px */
     animation: mobileTopOverlaySlideOut 250ms cubic-bezier(0.4,0,0.2,1) forwards; /* Duration 250ms */
   }
 }
@@ -762,7 +783,7 @@ body {
 @keyframes mobileBottomOverlaySlideIn {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(100%); /* MODIFIED: Was 16px */
   }
   to {
     opacity: 1;
@@ -778,7 +799,7 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(100%); /* MODIFIED: Was 16px */
   }
 }
 
@@ -786,7 +807,7 @@ body {
 @keyframes mobileTopOverlaySlideIn {
   from {
     opacity: 0;
-    transform: translateY(-24px); /* Match initial state */
+    transform: translateY(-100%); /* MODIFIED: Was -24px */
   }
   to {
     opacity: 1;
@@ -801,7 +822,7 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateY(-24px); /* Match initial hidden state */
+    transform: translateY(-100%); /* MODIFIED: Was -24px */
   }
 }
 
@@ -926,24 +947,65 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
     margin-top: auto;
 }
 
-/* Ensure this is OUTSIDE the @media (min-width: 768px) block if it was previously inside, 
-   or make it more specific if it needs to be inside. 
-   For now, let's assume it should be a general rule for the lightbox media wrapper content. */
+/* DESKTOP ONLY BORDERS for lightbox media */
+@media (min-width: 768px) {
+  .lightbox-media-wrapper > img {
+      border: 2px solid rgb(240, 240, 240) !important;
+      border-radius: 20px !important; 
+      box-sizing: border-box;
+  }
 
-.lightbox-media-wrapper > img {
-    border: 2px solid rgb(240, 240, 240) !important; /* Changed from white */
-    border-radius: 20px !important; 
-    box-sizing: border-box; /* Ensure border is included in element's total width/height */
+  .lightbox-media-wrapper > div:has(> video) {
+      border: 2px solid rgb(240, 240, 240);
+      border-radius: 20px;
+      box-sizing: border-box;
+  }
+
+  /* This rule ensures video element itself doesn't get a double border if its wrapper has one */
+  .lightbox-media-wrapper > div:has(> video) > video {
+      border: none !important; /* Keep this to remove any direct border on video */
+      /* Desktop videos can inherit radius from their wrapper if needed, or have their own.
+         If the wrapper gets border-radius: 20px, video itself might not need it.
+         Let's assume wrapper's radius is sufficient. */
+  }
 }
 
-.lightbox-media-wrapper > div:has(> video) {
-    border: 2px solid rgb(240, 240, 240); /* Changed from white */
-    border-radius: 20px;
-    box-sizing: border-box;
-}
+/* MOBILE: Explicitly set dark borders and radius for lightbox media, and light background for lightbox */
+@media (max-width: 767px) {
+  #project-lightbox {
+    background-color: rgba(184, 184, 184, 0.747) !important; /* Light semi-transparent background */
+  }
 
-/* If the video element itself still gets a border from a more general rule, 
-   and we only want the wrapper to have it, we can do: */
-.lightbox-media-wrapper > div:has(> video) > video {
-    border: none !important; /* Remove border from video if wrapper has it */
+  .lightbox-media-wrapper > img {
+      border: 2px solid rgb(240, 240, 240) !important; /* MODIFIED: Was dark grey #1d1d1dab, now light like desktop */
+      border-radius: 20px !important; /* Rounded corners */
+      box-sizing: border-box;
+  }
+
+  .lightbox-media-wrapper > div:has(> video) {
+      border: 2px solid rgb(240, 240, 240) !important; /* MODIFIED: Was dark grey #505050, now light like desktop */
+      border-radius: 20px !important; /* Rounded corners */
+      box-sizing: border-box;
+  }
+
+  .lightbox-media-wrapper > div:has(> video) > video {
+      border: none !important; /* Video element itself should not have a border */
+      border-radius: 20px !important; /* Match wrapper's radius if displayed directly */
+  }
+
+  /* For mobile, the main #lightbox-content might need overflow hidden and radius if media touches edges */
+  /* This was already in the mobile specific rules further up, which is good:
+    #project-lightbox #lightbox-content img, 
+    #project-lightbox #lightbox-content video { 
+        ...
+        border: none; // This might be overridden by the more specific rules above, hence the need for !important there
+    }
+    We need to ensure that #lightbox-content on mobile does not clip rounded corners IF the media itself had them.
+    Since we're removing media radius on mobile, this is less of a concern, but good to keep in mind.
+    The existing mobile rules for #lightbox-content img/video set max-width/height to fit within padding,
+    and object-fit: contain. The border-radius: 20px on .lightbox-media-wrapper at line 596 might be the source
+    of rounded corners on mobile if not overridden for the media elements themselves.
+    The #project-lightbox #lightbox-content img, video rule at line 391 already has border: none;
+    My new rules above with !important will ensure this.
+  */
 }

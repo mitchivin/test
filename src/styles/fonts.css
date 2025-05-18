@@ -1,3 +1,8 @@
+/*
+ * fonts.css — Font Definitions for Windows XP Simulation
+ * @file fonts.css
+ */
+
 @font-face {
   font-family: 'Tahoma';
   src: url('../../assets/fonts/tahoma.woff2') format('woff2'),
@@ -14,4 +19,11 @@
   font-weight: bold;
   font-style: normal;
   font-display: swap;
-} 
+}
+
+/* @font-face {
+    font-family: 'Tahoma';
+    src: url('../../assets/fonts/tahomabd.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+} */ 

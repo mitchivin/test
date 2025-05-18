@@ -214,10 +214,8 @@ export function initBootSequence(eventBus, EVENTS) {
       const img = new Image();
       img.src = asset.path;
       img.onload = () => {
-        // Asset loaded successfully
       };
       img.onerror = () => {
-        console.error(`Failed to load asset: ${asset.path}`);
       };
     });
   }

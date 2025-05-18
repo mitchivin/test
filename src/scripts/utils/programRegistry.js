@@ -390,16 +390,6 @@ const programData = {
           action: "viewDescription",
         },
         {
-          key: "viewExternalLink",
-          text: "View on Instagram",
-          icon: "./assets/gui/start-menu/instagram.webp",
-          action: "openExternalLink",
-          enabled: false,
-          desktopOnly: true,
-          style: 'display: none;',
-        },
-        { type: "separator", desktopOnly: true },
-        {
           key: "search",
           enabled: false,
           icon: "./assets/gui/toolbar/search.webp",

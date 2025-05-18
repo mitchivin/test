@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const scroller = document.getElementById('appRoot');
 
   if (!resumeImage || !scroller) {
-    console.error("Resume image or scroller element not found.");
     return;
   }
 
@@ -39,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalHeight = resumeImage.clientHeight;
 
         if (originalWidth === 0 || originalHeight === 0) {
-            console.warn("Resume image dimensions are zero. Zoom may not work correctly yet.");
             return; 
         }
 
@@ -111,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Otherwise, wait for the load event
     resumeImage.addEventListener('load', initializeZoomPan);
     resumeImage.addEventListener('error', () => {
-        console.error("Resume image failed to load.");
     });
   }
 });
