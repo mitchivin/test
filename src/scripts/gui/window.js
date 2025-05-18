@@ -1256,6 +1256,8 @@ export default class WindowManager {
   minimizeWindow(windowElement) {
     if (!windowElement || windowElement.windowState.isMinimized) return;
 
+    const wasActiveWindow = (this.activeWindow === windowElement); // Capture state before animation
+
     const taskbarItem = this.taskbarItems[windowElement.id];
     const minimizeTransform = this._calculateWindowToTaskbarTransform(windowElement, taskbarItem);
 
@@ -1277,11 +1279,15 @@ export default class WindowManager {
           this._updateTaskbarItemState(windowElement.id, false);
           this._updateStackOrder(windowElement.id, "remove");
           this._updateZIndices();
-          if (this.activeWindow === windowElement) {
-            this.activeWindow = null;
+
+          if (wasActiveWindow) { // Use captured state
+            this.activeWindow = null; // Explicitly nullify if the minimized window was active
             const topWindow = this._findTopWindow();
             if (topWindow) {
               this.bringToFront(topWindow);
+            } else {
+              // If no other window to focus, ensure all taskbar items are visually inactive
+              this._clearAllTaskbarItemStates();
             }
           }
           this.eventBus.publish(EVENTS.WINDOW_MINIMIZED, {
