@@ -8,7 +8,7 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* Removed !important */
+  box-sizing: border-box;
 }
 
 /* ===== Base Layout & Background ===== */
@@ -26,11 +26,10 @@ html, body {
 
 html {
     background:
-        radial-gradient(ellipse at top center, rgba(200, 200, 220, 0.15) 0%, transparent 60%), /* New subtle top light */
+        radial-gradient(ellipse at top center, rgba(200, 200, 220, 0.15) 0%, transparent 60%),
         radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0) top left / 3px 3px repeat,
-        linear-gradient(to bottom, rgb(55,55,55) 0%, rgb(40,40,40) 35%, rgb(40,40,40) 100%); /* Main gradient (lightened) */
+        linear-gradient(to bottom, rgb(55,55,55) 0%, rgb(40,40,40) 35%, rgb(40,40,40) 100%);
     min-height: 100vh;
-    /* Removed html::before and @keyframes scrollAnimatedLines */
 }
 
 /* Soft edge lighting */
@@ -64,7 +63,6 @@ html::after {
 }
 
 body {
-    /* display: table; */ /* REMOVED - was likely causing layout issues */
     width: 100%;
     height: 100%;
     background-color: transparent;  /* Body should be transparent over HTML's #111 bg */
@@ -72,8 +70,6 @@ body {
     line-height: 1.6;
     position: relative; /* For .lines positioning and .scroll-content */
     font-family: sans-serif; /* From user example, can be overridden by app specifics */
-    /* overflow: hidden; */ /* REMOVED for now - to ensure content isn't clipped */
-    /* Removing previous body background animation and styles if any */
 }
 
 /* Original @keyframes background - Kept for body if needed, but html has main bg now */
@@ -95,7 +91,7 @@ body {
     position: relative; 
     z-index: 10; /* High z-index to be on top of lines */
     background-color: transparent; 
-    color: #333; /* Restore original app text color for content */
+    color: #333; /* Restore app text color for content */
 }
 
 
@@ -424,14 +420,14 @@ body {
       margin-right: auto; /* To center the 90vw block */
     }
     .lightbox-desc-card {
-      background: rgba(223, 223, 223, 0.877) !important; /* Inverted: Light semi-transparent background */
-      width: 95% !important; /* Changed from 90% */
+      background: rgba(223, 223, 223, 0.877) !important;
+      width: 95% !important;
     }
 
-    /* Styling for the new PROJECT label */
+    /* Styling for the PROJECT label */
     .lightbox-media-wrapper .lightbox-desc-card .card-project-label {
         font-family: 'Wix Madefor Display', sans-serif;
-        font-size: 1rem; /* Adjusted from 1.3rem */
+        font-size: 1rem;
         font-weight: 700;
         color: #3d3d3d; /* Example color, will be faint due to opacity */
         opacity: 0.25;
@@ -457,33 +453,34 @@ body {
         width: 100%; /* Full width of its container */
     }
 
-    /* Styling for the new DESCRIPTION label */
+    /* Styling for the DESCRIPTION label */
     .lightbox-media-wrapper .lightbox-desc-card .card-description-label {
         font-family: 'Wix Madefor Display', sans-serif;
-        font-size: 1rem; /* Adjusted from 1.3rem */
+        font-size: 1rem;
         font-weight: 700;
         color: #3d3d3d;
         opacity: 0.25;
         text-transform: uppercase;
-        margin-bottom: 0px; /* Space before body */    }
+        margin-bottom: 0px; /* Space before body */
+    }
 
     .lightbox-media-wrapper .lightbox-desc-card .card-body {
         font-family: 'Work Sans', sans-serif;
-        font-size: 0.9rem; /* Slightly smaller body text */
+        font-size: 0.9rem;
         font-weight: 500;
-        color: #333 !important; /* Inverted: Dark body text */
+        color: #333 !important;
         line-height: 1.4;
-        margin-top: 0; /* Adjusted from 18px */
+        margin-top: 0;
     }
 
-    /* Styling for the new Bullet Points section */
+    /* Styling for the Bullet Points section */
     .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points {
         font-family: 'Work Sans', sans-serif;
-        font-size: 0.85rem; /* Reduced from 0.9rem */
+        font-size: 0.85rem;
         font-weight: 500; /* Same as body */
         color: #333; /* Same as body */
         line-height: 1.4; /* Match .card-body */
-        margin-top: 12px; /* Space above the bullet points - changed back from 6px */
+        margin-top: 12px;
         padding-left: 0; /* Remove default ul padding */
         text-align: left; /* Ensure text is left-aligned */
     }
@@ -498,7 +495,7 @@ body {
         margin-bottom: 6px; /* Space between bullet points */
     }
 
-    /* Styling for the new TOOLS USED label */
+    /* Styling for the TOOLS USED label */
     .lightbox-media-wrapper .lightbox-desc-card .card-tools-label {
         font-family: 'Wix Madefor Display', sans-serif;
         font-size: 1rem; /* Match other labels */
@@ -570,9 +567,6 @@ body {
         box-sizing: border-box;
     }
 
-    /* Remove the overly broad rule that might have caused issues */
-    /* .lightbox-media-wrapper > div { border-radius: 20px; } */ /* Commented out or removed */
-
     /* This rule should be fine as is, as videos already have border-radius from above */
     .lightbox-media-wrapper > div > video {
       height: 100% !important;
@@ -626,12 +620,11 @@ body {
     z-index: 2;
     display: flex;
     flex-direction: column; /* Stack items vertically */
-    padding: 40px 24px 20px 24px; /* MODIFIED: Bottom padding from 18px to 20px for consistent total vertical padding */
-    color: #fff; /* Changed to white */
+    padding: 40px 24px 20px 24px;
+    color: #fff;
     font-size: 0.95rem;
     font-weight: 500;
     line-height: 1.4;
-    /* MODIFIED: Smoother gradient with more steps */
     background: linear-gradient(0deg, 
                 rgba(20,20,20,0.95) 0%, 
                 rgba(20,20,20,0.95) 40%, 
@@ -642,18 +635,18 @@ body {
                 rgba(20,20,20,0.25) 90%, 
                 rgba(20,20,20,0.0) 100%);
     pointer-events: none;
-    transform: translateY(100%); /* MODIFIED: Was 16px. Start off-screen below. */
+    transform: translateY(100%);
     transition: none !important;
     max-width: 100%;
     box-sizing: border-box;
-    margin-top: 24px; /* Added as per request */
+    margin-top: 24px;
   }
   .lightbox-description-overlay.show {
     transform: translateY(0);
     animation: mobileBottomOverlaySlideIn 400ms cubic-bezier(0.4,0,0.2,1) forwards;
   }
   .lightbox-description-overlay.hide-anim {
-    transform: translateY(100%); /* MODIFIED: Was 16px */
+    transform: translateY(100%);
     animation: mobileBottomOverlaySlideOut 250ms cubic-bezier(0.4,0,0.2,1) forwards; /* Duration 250ms */
   }
 
@@ -662,11 +655,10 @@ body {
     top: 0;
     transform: translateY(-100%); 
     display: flex; 
-    flex-direction: column; /* MODIFIED: Stack project label and title vertically */
-    align-items: flex-start; /* MODIFIED: Align items to the start (left) */
-    justify-content: center; /* MODIFIED: Center content vertically within available padding */
-    padding: 18px 24px 20px 24px; /* MODIFIED: Adjusted padding for new label */
-    /* MODIFIED: Smoother gradient with more steps */
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 18px 24px 20px 24px;
     background: linear-gradient(180deg, 
                 rgba(20,20,20,0.95) 0%, 
                 rgba(20,20,20,0.95) 40%, 
@@ -677,16 +669,15 @@ body {
                 rgba(20,20,20,0.25) 90%, 
                 rgba(20,20,20,0.0) 100%);
     color: #fff;
-    /* font-size, font-weight, line-height removed as they are now on child elements */
   }
 
-  /* NEW: Styling for the "PERSONAL PROJECT" label in mobile top overlay */
+  /* Styling for the "PERSONAL PROJECT" label in mobile top overlay */
   .mobile-overlay-project-label {
     font-family: 'Wix Madefor Display', sans-serif;
-    font-size: rem; /* MODIFIED: Was 0.75rem */
+    font-size: rem;
     font-weight: 700;
     color: #5f5f5fc7;
-    opacity: 0.75; /* MODIFIED: Was 0.5 */
+    opacity: 0.75;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: left;
@@ -700,9 +691,9 @@ body {
       text-overflow: ellipsis;
       white-space: normal; /* Allow title to wrap if needed */
       max-width: 100%; /* Ensure it doesn't overflow its parent */
-      font-size: 2rem; /* MODIFIED: Was 1.6rem */
+      font-size: 2rem;
       font-weight: 700;
-      line-height: 1.5; /* MODIFIED: Was 1.3 */
+      line-height: 1.5;
       color: #fff; /* Ensure title text is white */
       margin-bottom: 24px;
   }
@@ -719,17 +710,16 @@ body {
     animation: mobileTopOverlaySlideIn 400ms cubic-bezier(0.4,0,0.2,1) forwards;
   }
   .lightbox-title-overlay.hide-anim {
-    transform: translateY(-100%); /* MODIFIED: Was -24px */
+    transform: translateY(-100%);
     animation: mobileTopOverlaySlideOut 250ms cubic-bezier(0.4,0,0.2,1) forwards; /* Duration 250ms */
   }
 }
 
 
-.lightbox-description-overlay.show { /* Renamed */
+.lightbox-description-overlay.show {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
-  transition: none !important;
 }
 
 .lightbox-media-wrapper img,
@@ -776,14 +766,13 @@ body {
 .lightbox-media-wrapper .lightbox-desc-card .card-tools-section {
     flex-shrink: 0; /* Prevents this section from shrinking */
     margin-top: auto; /* This can also help push to bottom if parent has height */
-                    /* We are primarily relying on flex-grow of the main content though */
+    /* We are primarily relying on flex-grow of the main content though */
 }
 
-/* Renamed mobileDescOverlaySlideIn to mobileBottomOverlaySlideIn */
 @keyframes mobileBottomOverlaySlideIn {
   from {
     opacity: 0;
-    transform: translateY(100%); /* MODIFIED: Was 16px */
+    transform: translateY(100%);
   }
   to {
     opacity: 1;
@@ -791,7 +780,6 @@ body {
   }
 }
 
-/* Renamed mobileDescOverlaySlideOut to mobileBottomOverlaySlideOut */
 @keyframes mobileBottomOverlaySlideOut {
   from {
     opacity: 1;
@@ -799,7 +787,7 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateY(100%); /* MODIFIED: Was 16px */
+    transform: translateY(100%);
   }
 }
 
@@ -807,7 +795,7 @@ body {
 @keyframes mobileTopOverlaySlideIn {
   from {
     opacity: 0;
-    transform: translateY(-100%); /* MODIFIED: Was -24px */
+    transform: translateY(-100%);
   }
   to {
     opacity: 1;
@@ -822,7 +810,7 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateY(-100%); /* MODIFIED: Was -24px */
+    transform: translateY(-100%);
   }
 }
 
@@ -977,19 +965,19 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
   }
 
   .lightbox-media-wrapper > img {
-      border: 2px solid rgb(240, 240, 240) !important; /* MODIFIED: Was dark grey #1d1d1dab, now light like desktop */
+      border: 2px solid rgb(240, 240, 240) !important;
       border-radius: 20px !important; /* Rounded corners */
       box-sizing: border-box;
   }
 
   .lightbox-media-wrapper > div:has(> video) {
-      border: 2px solid rgb(240, 240, 240) !important; /* MODIFIED: Was dark grey #505050, now light like desktop */
+      border: 2px solid rgb(240, 240, 240) !important;
       border-radius: 20px !important; /* Rounded corners */
       box-sizing: border-box;
   }
 
   .lightbox-media-wrapper > div:has(> video) > video {
-      border: none !important; /* Video element itself should not have a border */
+      border: none !important;
       border-radius: 20px !important; /* Match wrapper's radius if displayed directly */
   }
 

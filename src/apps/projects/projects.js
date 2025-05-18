@@ -8,8 +8,6 @@
  */
 
 // ===== Global State & Utility Functions =====
-// JavaScript for Projects App Lightbox
-
 // Global state for persistent description visibility
 let userPrefersDescriptionVisible = false;
 
@@ -196,7 +194,6 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
         videoElement.autoplay = true;
         videoElement.loop = true;
         videoElement.setAttribute('playsinline', '');
-        // --- Only remember mute state on desktop. On mobile, always start muted. ---
         if (isDesktop()) {
             videoElement.muted = userPrefersMuted;
             if (userPrefersMuted) {
@@ -256,7 +253,6 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
             }
             showMuteIfPlayed();
         });
-        // --- Desktop hover: show mute/unmute overlay on hover ---
         if (!isTouchDevice()) {
             let fadeOutTimeout = null;
             wrapper.addEventListener('mouseenter', () => {
@@ -336,7 +332,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         openLightboxByIndex(currentLightboxIndex, 0); // Direction 0 for initial open
 
-        // General lightbox display logic (already present, keep)
         lightbox.style.display = 'flex';
         lightbox.classList.remove('fade-out');
         void lightbox.offsetWidth; // reflow
@@ -385,8 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
         setHomeButtonEnabledInParent(false);
 
-        // Also explicitly remove any overlays that might be direct children of lightboxContent or lightbox
-        // This is a safety measure, though they should be inside the wrapper cleared by clearChildren(lightboxContent)
         lightbox.querySelectorAll('.lightbox-title-overlay, .lightbox-description-overlay').forEach(o => o.remove());
 
         // Notify parent that lightbox is closed (disable back/forward/desc)
@@ -419,13 +412,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return overlay;
     }
 
-    // NEW function to handle toggling of BOTH mobile overlays (top title, bottom description)
+    // function to handle toggling of BOTH mobile overlays (top title, bottom description)
     function toggleMobileOverlays(titleText, descriptionText, _mediaWrapper) { // wrapper param renamed
         const overlayParent = document.getElementById('lightbox-inner-wrapper');
         if (!overlayParent || isDesktop()) return;
 
-        // REVISED click handler for tapping on overlays to hide them
-        const handleOverlayTap = function(event) { // Use `function` to get `this` as the tapped element
+        // click handler for tapping on overlays to hide them
+        const handleOverlayTap = function(event) { 
             event.stopPropagation(); // Prevent tap from bubbling up
 
             // Get both overlays, whether tapped or not, if they are currently shown
@@ -540,8 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // After handling both overlays, update the persistent state based on their visibility
-        // This part is crucial: if this function was called to SHOW overlays, this sets userPrefersDescriptionVisible = true
-        // If it was called to HIDE them (e.g. by toolbar button), this should correctly reflect they are no longer .show
         const currentlyVisibleTitle = overlayParent.querySelector('.lightbox-title-overlay.show');
         const currentlyVisibleDesc = overlayParent.querySelector('.lightbox-description-overlay.show');
         userPrefersDescriptionVisible = (currentlyVisibleTitle || currentlyVisibleDesc) ? true : false;
@@ -561,14 +552,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 userPrefersDescriptionVisible = false; 
                 sendMessageToParent({ type: 'description-state', open: false });
             } else { // SHOWING LOGIC
-                // The card and its content (including bullet points) should already be correctly populated 
-                // by openLightboxByIndex / trySwapInNewContent.
-                // This function now only ensures the animWrapper exists and toggles visibility.
                 let animWrapper = wrapper.querySelector('.desc-card-anim-wrapper');
                 
                 if (!animWrapper) {
-                    // This case should be rare if openLightboxByIndex runs correctly.
-                    // If it happens, recreate the card with current data.
                     const currentPostData = allPosts[currentLightboxIndex] ? allPosts[currentLightboxIndex].dataset : {};
                     animWrapper = createDesktopDescriptionCard(
                         currentPostData.title, 
@@ -868,8 +854,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Smooth Drag/Swipe Logic for Mobile Lightbox ---
-
     /**
      * Applies transform to the lightbox content for swipe effect.
      * @param {number} dx - Horizontal translation in px.
@@ -937,7 +921,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Touch Event State Variables ---
     let dragStartX = 0;       // Initial X position of touch
     let dragCurrentX = 0;     // Current X position of touch
     let dragStartY = 0;       // Initial Y position of touch
@@ -1072,7 +1055,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // --- Swiping Logic (if dragHasMoved is true) ---
         let triggerSwipeUp = false;
         let triggerSwipeLeft = false;
         let triggerSwipeRight = false;
@@ -1115,7 +1097,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // --- Action: Swipe Up to Close ---
         if (triggerSwipeUp) {
             if (lightboxContent) {
                 lightboxContent.classList.remove('swiping');
@@ -1152,7 +1133,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Action handled
         }
 
-        // --- Action: Swipe Left (Next) ---
         if (triggerSwipeLeft) {
             if (currentLightboxIndex !== null) {
                 const targetX = -window.innerWidth; // Target position off-screen left
@@ -1192,7 +1172,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Action handled
         }
 
-        // --- Action: Swipe Right (Previous) ---
         if (triggerSwipeRight) {
             if (currentLightboxIndex !== null) {
                 const targetX = window.innerWidth; // Target position off-screen right
@@ -1232,8 +1211,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return; // Action handled
         }
 
-        // --- No Action: Snap Back ---
-        // If no swipe threshold was met, animate content back to its original position.
         if (lightboxContent) {
             lightboxContent.classList.remove('swiping'); // Ensure swiping class is removed
             lightboxContent.classList.add('animate');    // Add .animate class, consistent with other swipe end actions
@@ -1264,11 +1241,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         overlay.style.animation = '';   // Clear any JS-set animation styles
                         // overlay.style.transition = ''; // Will be cleared specifically after potential fade-in
                         if (overlay.classList.contains('show')) {
-                            // === Crucial fix for snap-back without re-sliding ===
                             // 1. Explicitly stop any CSS @keyframe animations.
                             overlay.style.animation = 'none';
                             // 2. Force transform to the final "open" state before opacity transition.
-                            //    The .show class and its (now disabled) animation would normally achieve translateY(0).
                             overlay.style.transform = 'translateY(0)';
 
                             // If opacity was reduced (e.g., during hint swipe), smoothly fade it back.
@@ -1606,7 +1581,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (event.data.type === 'window:unmaximized') {
                 setMaximizedState(false);
             } else if (event.data.type === 'window:restored') {
-                console.log('[ProjectsApp] Received window:restored event. Re-applying Masonry layout.');
                 // Re-apply the Masonry layout. Using requestAnimationFrame to ensure it runs
                 // after the browser has had a chance to update dimensions from the restore.
                 requestAnimationFrame(() => {
@@ -1615,7 +1589,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
-            // Keep existing toolbar-action handling
             if (event.data.type === 'toolbar-action') {
                 if (event.data.action === 'viewDescription') {
                     const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');

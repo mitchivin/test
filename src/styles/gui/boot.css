@@ -843,3 +843,42 @@
 .welcome-message-initial-hidden {
   display:none;
 }
+
+/* Additional styles for very short screens */
+@media (max-height: 599px) and (max-width: 768px) { /* Apply only on mobile portrait */
+  /* Ensure the .left container (which held the logo and its text) doesn't take up space */
+  .login-screen .login-screen-center .left {
+    margin-bottom: 0 !important; 
+    padding-bottom: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    display: none !important; /* Hide the whole .left container, including the XP logo */
+  }
+
+  /* HIDE THE CORRECT TEXT ELEMENT (Tap on user icon to begin) */
+  .login-screen .right-bottom .mobile-bottom-detail {
+    display: none !important;
+  }
+  
+  hr.login-separator.mobile-only {
+    display: none !important; /* Hide the separator as well */
+  }
+
+  /* Adjust the main center container to better utilize space */
+  .login-screen .login-screen-center {
+    justify-content: center !important; /* Center the remaining content (user profile) */
+    gap: 0 !important; /* Remove gap if logo is hidden */
+  }
+
+  /* Ensure the user profile section (.right) is well-centered */
+  .login-screen .login-screen-center .right {
+    margin-top: 0 !important; 
+    margin-bottom: 0 !important; 
+    /* It's already flex and centered by parent, so this should be enough */
+  }
+  
+  /* Potentially reduce padding on the login screen inner container if needed */
+  .login-screen .login-screen-inner {
+    inset: 40px 0 !important; /* Reduce top/bottom insets to give more space */
+  }
+}

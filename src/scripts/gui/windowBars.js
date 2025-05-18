@@ -11,8 +11,6 @@
  *
  * @module windowBars
  */
-// windowBars.js
-// Handles creation and initialization of menubar and toolbar for windows in the XP simulation
 
 import { isMobileDevice } from "../utils/device.js";
 
@@ -28,11 +26,9 @@ export function createAddressBar({
   icon = "./assets/gui/toolbar/aboutme.webp",
   title = "About Me",
 } = {}) {
-  // Create container
   const container = document.createElement("div");
   container.className = "addressbar-container";
 
-  // Address bar row
   container.innerHTML = `
     <div class="addressbar-row">
       <div class="address-label-container">
@@ -62,7 +58,6 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
   let _parentWindowElement = parentWindowElement;
   let _closeActiveMenu = null;
   menuBarContainer.setParentWindowElement = function (newParent) {
-    // Remove old listeners if any
     if (_parentWindowElement && _closeActiveMenu) {
       _parentWindowElement.removeEventListener(
         "window-drag-start",
@@ -87,7 +82,6 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
   };
   const menuBar = document.createElement("div");
   menuBar.className = "menu-bar";
-  // Build menu items
   menuBarConfig.items.forEach((itemConfig) => {
     // Special handling for Resume app's File menu
     if (windowId === 'resume-window' && itemConfig.key === 'file' && Array.isArray(itemConfig.dropdown)) {
@@ -118,7 +112,6 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
     menuItemDiv.textContent = itemConfig.text;
     menuItemDiv.setAttribute("data-menu", itemConfig.key);
     menuBar.appendChild(menuItemDiv);
-    // Dropdown
     if (itemConfig.dropdown && itemConfig.dropdown.length > 0 && !['edit', 'tools', 'help'].includes(itemConfig.key)) {
       const dropdownMenu = document.createElement("div");
       dropdownMenu.id = `${itemConfig.key}-menu-${windowId}`;

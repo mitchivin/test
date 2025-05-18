@@ -141,11 +141,15 @@
   border-color: transparent;
   box-shadow: none;
 }
-.toolbar-button:not(.disabled):hover {
-  background: #ecebe2;
-  border: 1.5px solid #b9b6aa;
-  box-shadow: none;
+
+@media (hover: hover) {
+  .toolbar-button:not(.disabled):hover {
+    background: #ecebe2;
+    border: 1.5px solid #b9b6aa;
+    box-shadow: none;
+  }
 }
+
 .toolbar-button:not(.disabled):active {
   border: 1.5px solid #888;
   box-shadow: inset 2px 2px 5px #b9b6aa, inset -1.5px -1.5px 3px #fff;
