@@ -217,12 +217,13 @@ body {
     overflow: hidden;
     cursor: pointer;
     position: relative;
+    border: 2px solid transparent; /* Added for hover effect */
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), 
+                box-shadow 0.25s cubic-bezier(0.4,0,0.2,1),
+                border-color 0.25s cubic-bezier(0.4,0,0.2,1), /* Added for border fade */
+                z-index 0s 0.25s; /* Delay z-index change until transition starts to prevent flicker */
 }
 
-.post:last-child {
-    margin-bottom: 0;
-    background-color: #2ecc71; /* Green for videos */
-}
 
 .post.image-post img {
     display: block; /* Remove potential bottom space */
@@ -1081,4 +1082,15 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
     The #project-lightbox #lightbox-content img, video rule at line 391 already has border: none;
     My new rules above with !important will ensure this.
   */
+}
+
+/* Desktop Hover Effect for Posts */
+@media (hover: hover) and (pointer: fine) {
+    .feed-container .post:hover {
+        transform: scale(1.03);
+        z-index: 20; /* Ensure hovered item is above others */
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); /* More pronounced shadow */
+        border-color: #fff; /* Fade in white border */
+        transition-delay: 0s, 0s, 0s, 0s; /* Ensure z-index and border change immediately on hover */
+    }
 }
