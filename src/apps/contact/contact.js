@@ -2,12 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fromInput = document.getElementById('contact-from');
     const subjectInput = document.getElementById('contact-subject');
     const messageTextarea = document.getElementById('contact-message');
-    const toInput = document.getElementById('contact-to');
-
-    // Load custom To field from localStorage
-    const name = localStorage.getItem('custom_contact_to_name') || 'Mitch Ivin';
-    const email = localStorage.getItem('custom_contact_to_email') || 'mitchellivin@gmail.com';
-    toInput.value = `${name} <${email}>`;
 
     function clearForm() {
         if (fromInput) fromInput.value = '';
@@ -17,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getFormData() {
         return {
-            to: toInput.value,
+            to: '"Mitch Ivin" <mitchellivin@gmail.com>',
             from: fromInput ? fromInput.value : '',
             subject: subjectInput ? subjectInput.value : '',
             message: messageTextarea ? messageTextarea.value : ''
@@ -66,7 +60,7 @@ function sendMessage() {
         window.parent.postMessage({
             type: 'contactFormDataResponse',
             data: {
-                to: document.getElementById('contact-to').value,
+                to: '"Mitch Ivin" <mitchellivin@gmail.com>',
                 from: document.getElementById('contact-from').value,
                 subject: document.getElementById('contact-subject').value,
                 message: document.getElementById('contact-message').value

@@ -144,20 +144,6 @@ body {
   animation-timing-function: cubic-bezier(0.4, 0.26, 0, 0.97);
 }
 
-/* Remove or comment out these color-setting rules for .line as they are no longer needed for color */
-/*
-.line:nth-child(1) { --line-color: #FF4500; animation-delay: 0.5s; } 
-.line:nth-child(2) { --line-color: #32CD32; animation-delay: 1s; }
-.line:nth-child(3) { --line-color: #1E90FF; animation-delay: 1.5s; }
-.line:nth-child(4) { --line-color: #FFD700; animation-delay: 2s; }
-.line:nth-child(5) { --line-color: #8A2BE2; animation-delay: 2.5s; }
-.line:nth-child(6) { --line-color: #20B2AA; animation-delay: 3s; }
-.line:nth-child(7) { --line-color: #DC143C; animation-delay: 3.5s; }
-.line:nth-child(8) { --line-color: #00FA9A; animation-delay: 4s; }
-.line:nth-child(9) { --line-color: #FF1493; animation-delay: 4.5s; }
-.line:nth-child(10) { --line-color: #00BFFF; animation-delay: 5s; }
-*/
-
 /* Updated animation-delay rules for 5 .line::after for more randomness */
 .line:nth-child(1)::after { animation-delay: 0.5s; }
 .line:nth-child(2)::after { animation-delay: 2.0s; }
@@ -232,7 +218,6 @@ body {
 
 .post {
     border-radius: 8px;
-    margin: 0 0 12px 0; /* Keep bottom margin for spacing */
     width: 100%; /* JS will set specific width for items in columns */
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.692);
     overflow: hidden;
@@ -260,59 +245,6 @@ body {
     min-width: 100%;
     object-fit: fill;
     box-sizing: border-box;
-}
-
-.placeholder-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-weight: bold;
-    text-align: center;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-.image-placeholder {
-    width: 100%;
-    aspect-ratio: 1080 / 1350;
-    background-color: #3498db; /* Blue for images */
-}
-
-.video-placeholder {
-    width: 100%;
-    aspect-ratio: 1080 / 1920;
-    background-color: #2ecc71; /* Green for videos */
-}
-
-.post-caption {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
-    justify-content: flex-end; /* Push content to the bottom */
-    padding: 18px 16px 14px 16px;
-    color: #fff;
-    font-size: 1.08rem;
-    font-weight: 500;
-    line-height: 1.4;
-    background: linear-gradient(0deg, rgba(20,20,20,0.92) 70%, rgba(20,20,20,0.0) 100%);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(100%);
-    transition: opacity 0.28s cubic-bezier(0.4,0,0.2,1), transform 0.32s cubic-bezier(0.4,0,0.2,1);
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-
-.post.show-caption .post-caption {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
 }
 
 /* Lightbox Styles */
@@ -406,14 +338,6 @@ body {
     margin-top: 10px; /* Base margin, can be overridden by desktop */
 }
 
-#lightbox-subheading {
-    color: #cccccc; 
-    font-size: 1.2rem; 
-    font-weight: 600; 
-    line-height: 1.4;
-    margin-top: 4px; /* Base margin */
-}
-
 #lightbox-description {
     color: #f1f1f1;
     font-size: 0.9rem;
@@ -456,7 +380,6 @@ body {
 }
 
 #project-lightbox #lightbox-title, 
-#project-lightbox #lightbox-subheading, 
 #project-lightbox #lightbox-description { 
     display: none;
 }
@@ -507,91 +430,96 @@ body {
       width: 95% !important; /* Changed from 90% */
     }
 
+    /* Styling for the new PROJECT label */
+    .lightbox-media-wrapper .lightbox-desc-card .card-project-label {
+        font-family: 'Wix Madefor Display', sans-serif;
+        font-size: 1rem; /* Adjusted from 1.3rem */
+        font-weight: 700;
+        color: #3d3d3d; /* Example color, will be faint due to opacity */
+        opacity: 0.25;
+        text-transform: uppercase;
+    }
+
     /* Styling for title, subheading, body within the description card */
     .lightbox-media-wrapper .lightbox-desc-card .card-title {
+        font-family: 'Work Sans', sans-serif;
         font-size: 1.8rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #222 !important; /* Inverted: Dark text */
-        margin-bottom: 4px;
+        margin-bottom: 12px;
         line-height: 1.2;
-        /* text-transform: uppercase; */
     }
 
-    .lightbox-media-wrapper .lightbox-desc-card .card-subheading {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #555 !important; /* Inverted: Darker gray text */
-        margin-bottom: 12px;
-        line-height: 1.3;
-        opacity: 0.85; /* Slightly less prominent */
+    /* Styling for the HR divider below the title */
+    .lightbox-media-wrapper .lightbox-desc-card .card-title-divider {
+        border: none; /* Remove default HR border */
+        border-top: 1px solid rgba(0, 0, 0, 0.1); /* Light, subtle top border */
+        height: 1px;
+        margin: 12px 0; /* Space above and below the divider */
+        width: 100%; /* Full width of its container */
     }
+
+    /* Styling for the new DESCRIPTION label */
+    .lightbox-media-wrapper .lightbox-desc-card .card-description-label {
+        font-family: 'Wix Madefor Display', sans-serif;
+        font-size: 1rem; /* Adjusted from 1.3rem */
+        font-weight: 700;
+        color: #3d3d3d;
+        opacity: 0.25;
+        text-transform: uppercase;
+        margin-bottom: 0px; /* Space before body */    }
 
     .lightbox-media-wrapper .lightbox-desc-card .card-body {
+        font-family: 'Work Sans', sans-serif;
         font-size: 0.9rem; /* Slightly smaller body text */
-        font-weight: 400;
+        font-weight: 500;
         color: #333 !important; /* Inverted: Dark body text */
-        line-height: 1.6;
-        margin-top: 18px; /* Added top margin */
+        line-height: 1.4;
+        margin-top: 0; /* Adjusted from 18px */
     }
 
-    /* Software Icons Styling */
-    .lightbox-media-wrapper .lightbox-desc-card .card-software-section {
-        display: flex;
-        flex-wrap: wrap; /* Allow section to wrap if needed, though unlikely here */
-        justify-content: space-between; /* Label left, icons right */
-        align-items: center;
-        margin-top: auto; /* Push to the bottom of the card */
-        padding-top: 16px; /* Reduced top padding */
-        border-top: 1px solid rgba(0, 0, 0, 0.1); /* Subtle separator line */
+    /* Styling for the new Bullet Points section */
+    .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points {
+        font-family: 'Work Sans', sans-serif;
+        font-size: 0.85rem; /* Reduced from 0.9rem */
+        font-weight: 500; /* Same as body */
+        color: #333; /* Same as body */
+        line-height: 1.4; /* Match .card-body */
+        margin-top: 12px; /* Space above the bullet points - changed back from 6px */
+        padding-left: 0; /* Remove default ul padding */
+        text-align: left; /* Ensure text is left-aligned */
     }
 
-    .lightbox-media-wrapper .lightbox-desc-card .software-section-label {
-        font-size: 1rem; /* Match main subheading */
-        font-weight: 600;
-        color: #555; /* Match main subheading */
-        margin-right: 16px; /* Space between label and icon group */
-        opacity: 0.85; /* Match main subheading */
+    .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points ul {
+        list-style-type: disc; /* Standard disc bullets */
+        margin-left: 20px; /* Indent bullets */
+        padding-left: 0; /* Reset padding if any inherited */
     }
 
-    .lightbox-media-wrapper .lightbox-desc-card .software-icons-list {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 24px; /* Space between individual icons */
+    .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points li {
+        margin-bottom: 6px; /* Space between bullet points */
     }
 
-    .lightbox-media-wrapper .lightbox-desc-card .software-icon {
-        width: 30px !important; /* Icons smaller by 2px */
-        height: 30px !important; /* Icons smaller by 2px */
-        margin-bottom: 6px; /* Reduced bottom margin for wrapped icons */
-        object-fit: contain;
-        border: none !important; /* Force remove any borders */
-        border-radius: 0 !important; /* Ensure icons are square */
+    /* Styling for the new TOOLS USED label */
+    .lightbox-media-wrapper .lightbox-desc-card .card-tools-label {
+        font-family: 'Wix Madefor Display', sans-serif;
+        font-size: 1rem; /* Match other labels */
+        font-weight: 700;
+        color: #3d3d3d;
+        opacity: 0.25;
+        text-transform: uppercase;
+        margin-top: 12px; /* Space above this label */
+        margin-bottom: 4px; /* Space before the tools list */
     }
 
-    /* Software Tooltip Styling */
-    .lightbox-desc-card .software-tooltip {
-        position: absolute;
-        background-color: transparent; /* Removed background */
-        color: #222; /* Text color to match card body text */
-        padding: 0; /* Removed padding */
-        border-radius: 0; /* Removed border-radius */
-        font-size: 0.85rem; /* Adjusted for potentially better readability without bg */
-        font-weight: 600; /* Adjusted for potentially better readability */
-        z-index: 10;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(5px); /* Start slightly lower */
-        transition: opacity 0.2s ease-out, visibility 0.2s ease-out, transform 0.2s ease-out;
-        pointer-events: none; /* Tooltip itself should not capture mouse events */
-        white-space: nowrap; /* Prevent name from wrapping */
-        text-shadow: 0px 0px 1px rgba(255, 255, 255, 0.6); /* Subtle shadow for readability */
-    }
-
-    .lightbox-desc-card .software-tooltip.visible {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
+    /* Styling for the TOOLS USED list */
+    .lightbox-media-wrapper .lightbox-desc-card .card-tools-list {
+        font-family: 'Work Sans', sans-serif; /* Match body/bullets */
+        font-size: 0.9rem; /* Match .card-body */
+        font-weight: 500;
+        color: #333;
+        line-height: 1.4;
+        text-align: left; /* Ensure text is left-aligned */
     }
 
     body.projects-window-maximized .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
@@ -628,12 +556,26 @@ body {
     }
 
     .lightbox-media-wrapper > img,
-    .lightbox-media-wrapper > div, /* for video wrapper */
-    .lightbox-media-wrapper > video {
+    .lightbox-media-wrapper > div > video { /* Target video element directly for its own border */
       height: 100% !important;
       max-height: 100% !important;
       object-fit: contain !important;
+      border: 2px solid rgb(240, 240, 240);
+      border-radius: 20px;
+      box-sizing: border-box; 
     }
+
+    /* Specific styling for the div that WRAPS a video, if one exists */
+    .lightbox-media-wrapper > div:has(> video) {
+        border: 2px solid rgb(240, 240, 240);
+        border-radius: 20px;
+        box-sizing: border-box;
+    }
+
+    /* Remove the overly broad rule that might have caused issues */
+    /* .lightbox-media-wrapper > div { border-radius: 20px; } */ /* Commented out or removed */
+
+    /* This rule should be fine as is, as videos already have border-radius from above */
     .lightbox-media-wrapper > div > video {
       height: 100% !important;
       max-height: 100% !important;
@@ -725,7 +667,6 @@ body {
     font-size: 1.6rem;
     font-weight: 700;
     line-height: 1.3;
-    /* text-transform: uppercase; */
   }
 
   .lightbox-overlay-title-text { /* New class for the title span */
@@ -797,13 +738,24 @@ body {
   box-sizing: border-box;
   opacity: 0; 
   transform: translateX(-40px); 
-  transition: opacity 0.3s, transform 0.3s; 
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; 
   overflow: auto; 
-  padding: 40px 30px 30px 30px; 
+  padding: 30px 30px 30px 30px; 
   text-align: left; 
   white-space: normal; 
   word-break: break-word; 
   flex-shrink: 1; 
+}
+
+.lightbox-media-wrapper .lightbox-desc-card .card-main-content {
+    flex-grow: 1; /* Allows this section to take up available space */
+    /* Add min-height: 0; if content within this might overflow strangely with flex-grow */
+}
+
+.lightbox-media-wrapper .lightbox-desc-card .card-tools-section {
+    flex-shrink: 0; /* Prevents this section from shrinking */
+    margin-top: auto; /* This can also help push to bottom if parent has height */
+                    /* We are primarily relying on flex-grow of the main content though */
 }
 
 /* Renamed mobileDescOverlaySlideIn to mobileBottomOverlaySlideIn */
@@ -974,8 +926,24 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
     margin-top: auto;
 }
 
-/* In projects.js, the close button SVG is created with stroke="#fff" initially.
-   We need to either modify that JS or override with CSS. CSS override is simpler. */
-.lightbox-desc-card .lightbox-close-btn svg line {
-    stroke: #333 !important; /* Inverted: Dark stroke for lines */
+/* Ensure this is OUTSIDE the @media (min-width: 768px) block if it was previously inside, 
+   or make it more specific if it needs to be inside. 
+   For now, let's assume it should be a general rule for the lightbox media wrapper content. */
+
+.lightbox-media-wrapper > img {
+    border: 2px solid rgb(240, 240, 240) !important; /* Changed from white */
+    border-radius: 20px !important; 
+    box-sizing: border-box; /* Ensure border is included in element's total width/height */
+}
+
+.lightbox-media-wrapper > div:has(> video) {
+    border: 2px solid rgb(240, 240, 240); /* Changed from white */
+    border-radius: 20px;
+    box-sizing: border-box;
+}
+
+/* If the video element itself still gets a border from a more general rule, 
+   and we only want the wrapper to have it, we can do: */
+.lightbox-media-wrapper > div:has(> video) > video {
+    border: none !important; /* Remove border from video if wrapper has it */
 }

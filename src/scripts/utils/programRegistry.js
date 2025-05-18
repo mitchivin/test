@@ -182,7 +182,7 @@ const programData = {
       buttons: [
         { key: "previous", enabled: false, icon: "./assets/gui/toolbar/back.webp", text: "Previous", action: "navigatePrevious" },
         { key: "next", enabled: false, icon: "./assets/gui/toolbar/forward.webp", text: "Next", action: "navigateNext" },
-        { type: "separator" },
+        { type: "separator", desktopOnly: true },
         { key: "projects", enabled: true, icon: "./assets/gui/desktop/internet.webp", text: "My Projects", action: "openProjects" },
         { key: "resume", enabled: true, icon: "./assets/gui/desktop/resume.webp", text: "My Resume", action: "openResume" },
         { type: "separator" },
@@ -366,7 +366,7 @@ const programData = {
           text: "Home",
           action: "navigateHome",
         },
-        { type: "separator" },
+        { type: "separator", desktopOnly: true },
         {
           key: "previous",
           enabled: false,
@@ -504,12 +504,6 @@ const programData = {
   }),
 
   // Special format entries with custom properties
-  setup: createProgram("setup", "Setup Wizard", "desktop/setup.webp", {
-    dimensions: { width: 600, height: 550 },
-    appPath: "src/apps/setup/setup.html",
-    statusBarText: "Customize your portfolio template",
-    showOnDesktop: true,
-  }),
 };
 
 export default programData;
