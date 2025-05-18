@@ -402,6 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add the "PERSONAL PROJECT" label for top overlays (mobile title)
             const projectLabelEl = createEl('div', 'mobile-overlay-project-label', 'PERSONAL PROJECT');
             overlay.appendChild(projectLabelEl);
+        } else if (position === 'bottom') {
+            // Add the "DESCRIPTION" label for bottom overlays (mobile description)
+            const descriptionLabelEl = createEl('div', 'mobile-overlay-description-label', 'DESCRIPTION');
+            overlay.appendChild(descriptionLabelEl); // Prepend by convention of adding before textSpan
         }
 
         // Add the main text content (title or description)

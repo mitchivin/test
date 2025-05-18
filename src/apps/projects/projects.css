@@ -674,12 +674,26 @@ body {
   /* Styling for the "PERSONAL PROJECT" label in mobile top overlay */
   .mobile-overlay-project-label {
     font-family: 'Wix Madefor Display', sans-serif;
-    font-size: rem;
+    font-size: 1rem;
     font-weight: 700;
-    color: #5f5f5fc7;
+    color: #9c9b9bc7;
     opacity: 0.75;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-bottom: -6px; /* Pulls title closer */
+    text-align: left;
+    width: 100%;
+  }
+
+  /* Styling for the "DESCRIPTION" label in mobile bottom overlay */
+  .mobile-overlay-description-label {
+    font-family: 'Wix Madefor Display', sans-serif;
+    font-size: 1rem; /* Consistent with project label */
+    font-weight: 700; /* Consistent with project label */
+    color: #9c9b9bc7; /* Consistent with project label */
+    opacity: 0.75; /* Consistent with project label */
+    text-transform: uppercase;
+    margin-top: 12px;
+    margin-bottom: 8px; /* Space before the actual description text */
     text-align: left;
     width: 100%;
   }
