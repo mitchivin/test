@@ -137,6 +137,7 @@
     1px 1px 1px rgb(0 0 0 / 90%),
     0 0 3px rgb(0 0 0 / 80%);
   font-weight: 400;
+  letter-spacing: 0.3px;
   white-space: normal;
   overflow: visible;
   max-width: 100%;
@@ -166,7 +167,7 @@
     display: flex;
     justify-content: stretch;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     padding: 0;
     margin: 0;
     margin-bottom: clamp(30px, 16vh, calc(120px + var(--taskbar-height, 30px)));
@@ -185,10 +186,10 @@
     height: auto;
     margin-bottom: 40px;
   }
-  .desktop-icons .desktop-icon[data-program-name="contact"] { order: 1; }
-  .desktop-icons .desktop-icon[data-program-name="resume"] { order: 2; }
+  .desktop-icons .desktop-icon[data-program-name="resume"] { order: 1; }
+  .desktop-icons .desktop-icon[data-program-name="about"] { order: 2; }
   .desktop-icons .desktop-icon[data-program-name="internet"] { order: 3; }
-  .desktop-icons .desktop-icon[data-program-name="about"] { order: 4; }
+  .desktop-icons .desktop-icon[data-program-name="contact"] { order: 4; }
   .desktop-icon {
     flex: 1 1 0;
     min-width: 0;
@@ -205,14 +206,15 @@
     transition: transform 0.2s;
   }
   .desktop-icon img {
-    width: 54px;
-    height: 54px;
+    width: 52px;
+    height: 52px;
     margin-bottom: 8px;
   }
   .desktop-icon span {
     font-size: 14.5px;
     line-height: 17px;
     max-width: 100%;
+    letter-spacing: 0.5px;
   }
 }
 
