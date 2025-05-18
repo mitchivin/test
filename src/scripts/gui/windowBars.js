@@ -23,11 +23,13 @@ import { isMobileDevice } from "../utils/device.js";
  * @returns {HTMLElement} The address bar container element.
  */
 export function createAddressBar({
-  icon = "./assets/gui/toolbar/aboutme.webp",
+  icon,
   title = "About Me",
 } = {}) {
   const container = document.createElement("div");
   container.className = "addressbar-container";
+
+  const icon_img_html = icon ? `<img style="margin: 0 3px 0 0" alt="icon" width="14" height="14" src="${icon}" />` : '';
 
   container.innerHTML = `
     <div class="addressbar-row">
@@ -36,7 +38,7 @@ export function createAddressBar({
       </div>
       <div class="addressbar">
         <div style="display: flex; align-items: center;">
-          <img style="margin: 0 3px 0 0" alt="icon" width="14" height="14" src="${icon}" />
+          ${icon_img_html}
           <span class="addressbar-title">${title}</span>
         </div>
         <img alt="dropdown" class="dropdownIcon" width="16" height="18" src="./assets/gui/toolbar/tooldropdown.webp" style="filter: grayscale(100%); opacity: 0.6;" />
@@ -255,39 +257,8 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
           closeActiveMenu();
           return;
         }
-        // Special handling for Contact Me app's File > New/Send Message
-        if (win && win.id === 'contact-window') {
-          const iframe = win.querySelector('iframe');
-          if (action === 'newMessage') {
-            if (iframe && iframe.contentWindow) {
-              iframe.contentWindow.postMessage({ type: 'toolbar-action', action }, '*');
-            }
-            closeActiveMenu();
-            return;
-          } else if (action === 'sendMessage') {
-            if (iframe && iframe.contentWindow) {
-              // Send getFormData to iframe
-              iframe.contentWindow.postMessage({ command: 'getFormData' }, '*');
-              // Listen for the response and open mailto
-              const mailtoListener = (event) => {
-                if (event.source === iframe.contentWindow && event.data && event.data.type === 'contactFormData') {
-                  const formData = event.data.data;
-                  const to = encodeURIComponent(formData.to || '');
-                  const subject = encodeURIComponent(formData.subject || '');
-                  const body = encodeURIComponent(formData.message || '');
-                  let mailtoLink = `mailto:${to}`;
-                  mailtoLink += `?subject=${subject}`;
-                  mailtoLink += `&body=${body}`;
-                  window.open(mailtoLink, '_blank');
-                  window.removeEventListener('message', mailtoListener);
-                }
-              };
-              window.addEventListener('message', mailtoListener);
-            }
-            closeActiveMenu();
-            return;
-          }
-        }
+        // Special handling for Contact Me app's File > New/Send Message -- REMOVED AS MENU ITEMS ARE GONE
+
         if (action) {
           if (action === "exitProgram" && _parentWindowElement) {
             _parentWindowElement.dispatchEvent(

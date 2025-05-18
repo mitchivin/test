@@ -35,10 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Preload all assets in assets/apps/projects
   const projectAssets = [
-    "left.webp",
-    "right.webp",
-    "close.webp",
-    "projectsbg.webp",
     "videoposter3.webp",
     "videoposter2.webp",
     "videoposter1.webp",
@@ -48,15 +44,13 @@ document.addEventListener("DOMContentLoaded", () => {
     "video1.mp4",
     "video2.mp4",
     "video3.mp4",
-    "carousel1.webp",
-    "carousel2.webp",
-    "carousel3.webp",
     "image1.webp",
     "image2.webp",
     "image3.webp",
     "image4.webp",
     "image5.webp",
-    "image6.webp"
+    "image6.webp",
+    "image7.webp"
   ];
   const head = document.head || document.getElementsByTagName('head')[0];
   projectAssets.forEach(filename => {

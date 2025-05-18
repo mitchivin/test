@@ -91,8 +91,8 @@ const FILE_DROPDOWN_NOTEPAD = [
 
 // Custom File dropdown for Contact App
 const FILE_DROPDOWN_CONTACT = [
-  { key: "newMessage", text: "New Message", enabled: true, action: "newMessage" },
-  { key: "sendMessage", text: "Send Message", enabled: true, action: "sendMessage" },
+  { key: "newMessage", text: "New Message", enabled: false, action: "newMessage" },
+  { key: "sendMessage", text: "Send Message", enabled: false, action: "sendMessage" },
   { type: "separator" },
   { key: "print", text: "Print", enabled: false, action: "filePrint" },
   { key: "pageSetup", text: "Print Setup", enabled: false, action: "pageSetup" },
@@ -280,18 +280,11 @@ const programData = {
             key: "previous",
             enabled: true,
             icon: "./assets/gui/toolbar/back.webp",
-            text: null,
-            action: "previousImage",
+            text: "Back",
+            action: (win) => win.contentView.contentWindow.history.back(),
           },
           {
-            key: "slideshow",
-            enabled: true,
-            icon: "./assets/gui/toolbar/slideshow.webp",
-            text: null,
-            action: "toggleSlideshow",
-          },
-          {
-            key: "next",
+            key: "forward",
             enabled: true,
             icon: "./assets/gui/toolbar/forward.webp",
             text: "Next",

@@ -1,6 +1,135 @@
-# Project Asset List
+## Project Assets
 
-This document lists all identified static assets used in the project, categorized for clarity. For each asset, the original path (relative to where it's referenced), the required filename, and its typical maximum display dimensions are provided.
+This document lists all assets currently used in the Windows XP Clone project.
+
+### App Specific Assets
+
+#### About App (`assets/apps/about/`)
+- `aboutbg.webp`
+- `p1.webp`
+- `p2.webp`
+- `p3.webp`
+- `p4.webp`
+- `p5.webp`
+- `pulldown-alt.webp`
+- `pulldown.webp`
+- `pullup-alt.webp`
+- `pullup.webp`
+- `skill1.webp`
+- `skill2.webp`
+- `skill3.webp`
+- `skill4.webp`
+- `skill5.webp`
+- `software1.webp`
+- `software2.webp`
+- `software3.webp`
+- `software4.webp`
+
+#### Projects App (`assets/apps/projects/`)
+- `image1.webp`
+- `image2.webp`
+- `image3.webp`
+- `image4.webp`
+- `image5.webp`
+- `image6.webp`
+- `image7.webp`
+- `video1.mp4`
+- `video2.mp4`
+- `video3.mp4`
+- `videoposter1.webp`
+- `videoposter2.webp`
+- `videoposter3.webp`
+- `videothumb1.mp4`
+- `videothumb2.mp4`
+- `videothumb3.mp4`
+- `voldown.webp`
+- `volup.webp`
+
+#### Resume App (`assets/apps/resume/`)
+- `resume.webp`
+- `resumeMitchIvin.pdf`
+
+### GUI Assets
+
+#### Boot (`assets/gui/boot/`)
+- `boot-wordmark.webp`
+- `favicon.png`
+- `loading.webp`
+- `userlogin.webp`
+
+#### Desktop (`assets/gui/desktop/`)
+- `about.webp`
+- `bliss.jpg`
+- `blissMobile.jpg`
+- `contact.webp`
+- `internet.webp`
+- `resume.webp`
+
+#### Start Menu (`assets/gui/start-menu/`)
+- `arrow.webp`
+- `behance.webp`
+- `cmd.webp`
+- `github.webp`
+- `instagram.webp`
+- `linkedin.webp`
+- `logoff.webp`
+- `mediaPlayer.webp`
+- `music.webp`
+- `notepad.webp`
+- `photos.webp`
+- `recently-used.webp`
+- `shutdown.webp`
+
+##### Vanity Apps (`assets/gui/start-menu/vanity-apps/`)
+- `after-effects.webp`
+- `blender.webp`
+- `chatgpt.webp`
+- `cursor.webp`
+- `figma.webp`
+- `illustrator.webp`
+- `indesign.webp`
+- `lightroom.webp`
+- `photoshop.webp`
+- `premiere.webp`
+- `vscode.webp`
+
+#### Taskbar (`assets/gui/taskbar/`)
+- `fullscreen.webp`
+- `start-button.webp`
+- `system-tray.webp`
+- `taskbar-bg.webp`
+- `welcome.webp`
+
+#### Toolbar (`assets/gui/toolbar/`)
+- `back.webp`
+- `barlogo.webp`
+- `copy.webp`
+- `cut.webp`
+- `delete.webp`
+- `desc.webp`
+- `favorites.webp`
+- `forward.webp`
+- `go.webp`
+- `home.webp`
+- `new.webp`
+- `paste.webp`
+- `print.webp`
+- `save.webp`
+- `search.webp`
+- `send.webp`
+- `tooldropdown.webp`
+- `up.webp`
+- `views.webp`
+
+### Fonts (`assets/fonts/`)
+- `tahoma.woff`
+- `tahoma.woff2`
+- `tahomabd.woff`
+- `tahomabd.woff2`
+
+### Sounds (`assets/sounds/`)
+- `logoff.wav`
+- `login.wav`
 
 ## Branding
 
@@ -156,12 +285,12 @@ This document lists all identified static assets used in the project, categorize
 ### Projects App Media
 
 29. **Project Images (Grid & Lightbox)**
-    *   Paths: `../../../assets/apps/projects/image1.webp` to `image6.webp`, `carousel1.webp` (from `projects.html` `data-src` and `<img> src`)
-    *   Required Names: `image1.webp`, `image2.webp`, `image3.webp`, `image4.webp`, `image5.webp`, `image6.webp`, `carousel1.webp`
+    *   Paths: `../../../assets/apps/projects/image1.webp` to `image6.webp`, `image7.webp` (from `projects.html` `data-src` and `<img> src`)
+    *   Required Names: `image1.webp`, `image2.webp`, `image3.webp`, `image4.webp`, `image5.webp`, `image6.webp`, `image7.webp`
     *   Size: Grid: Responsive width (max 320px), auto height. Lightbox: Responsive, contained within viewport (e.g., `90vw/90vh`).
 30. **Project Image Low-Res Placeholders (Optional/Unused)**
-    *   Paths: `../../../assets/apps/projects/image1_low.webp`, `carousel1_low.webp` (from `projects.html` `data-lowres`)
-    *   Required Names: `image1_low.webp`, `carousel1_low.webp`
+    *   Paths: `../../../assets/apps/projects/image1_low.webp`, `image7_low.webp` (from `projects.html` `data-lowres`)
+    *   Required Names: `image1_low.webp`, `image7_low.webp`
     *   Size: Intended smaller versions, not directly rendered by default.
 31. **Project Video Thumbnails (Grid Display)**
     *   Paths: `../../../assets/apps/projects/videothumb1.mp4` to `videothumb3.mp4` (from `projects.html` `<video src>`)
