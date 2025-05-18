@@ -155,16 +155,16 @@ const RECENTLY_USED_ITEMS = [
   },
   {
     type: "program",
-    programName: "vscode",
-    icon: "./assets/gui/start-menu/vanity-apps/vscode.webp",
-    label: "VS Code",
+    programName: "chatgpt",
+    icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
+    label: "ChatGPT",
     disabled: true,
   },
   {
     type: "program",
-    programName: "chatgpt",
-    icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
-    label: "ChatGPT",
+    programName: "vscode",
+    icon: "./assets/gui/start-menu/vanity-apps/vscode.webp",
+    label: "VS Code",
     disabled: true,
   },
   {
