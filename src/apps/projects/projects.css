@@ -432,16 +432,19 @@ body {
         color: #3d3d3d; /* Example color, will be faint due to opacity */
         opacity: 0.25;
         text-transform: uppercase;
+        margin-bottom: 4px; /* Default spacing */
+        transition: font-size 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
     }
 
     /* Styling for title, subheading, body within the description card */
     .lightbox-media-wrapper .lightbox-desc-card .card-title {
         font-family: 'Work Sans', sans-serif;
-        font-size: 1.8rem;
+        font-size: 1.8rem; /* Default size */
         font-weight: 700;
         color: #222 !important; /* Inverted: Dark text */
-        margin-bottom: 12px;
+        margin-bottom: 12px; /* Default spacing */
         line-height: 1.2;
+        transition: font-size 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
     }
 
     /* Styling for the HR divider below the title */
@@ -449,8 +452,9 @@ body {
         border: none; /* Remove default HR border */
         border-top: 1px solid rgba(0, 0, 0, 0.1); /* Light, subtle top border */
         height: 1px;
-        margin: 12px 0; /* Space above and below the divider */
+        margin: 12px 0; /* Default Space above and below the divider */
         width: 100%; /* Full width of its container */
+        transition: margin 0.15s ease-out; /* Faster transition */
     }
 
     /* Styling for the DESCRIPTION label */
@@ -461,60 +465,68 @@ body {
         color: #3d3d3d;
         opacity: 0.25;
         text-transform: uppercase;
-        margin-bottom: 0px; /* Space before body */
+        margin-bottom: 0px; /* Default Space before body */
+        transition: font-size 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
     }
 
     .lightbox-media-wrapper .lightbox-desc-card .card-body {
         font-family: 'Work Sans', sans-serif;
-        font-size: 0.9rem;
+        font-size: 0.9rem; /* Default size */
         font-weight: 500;
         color: #333 !important;
-        line-height: 1.4;
+        line-height: 1.4; /* Default line-height */
         margin-top: 0;
+        margin-bottom: 18px; /* Default spacing */
+        transition: font-size 0.15s ease-out, line-height 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
     }
 
     /* Styling for the Bullet Points section */
     .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points {
         font-family: 'Work Sans', sans-serif;
-        font-size: 0.85rem;
-        font-weight: 500; /* Same as body */
-        color: #333; /* Same as body */
-        line-height: 1.4; /* Match .card-body */
+        /* font-size, line-height, color are on li */
         margin-top: 12px;
-        padding-left: 0; /* Remove default ul padding */
-        text-align: left; /* Ensure text is left-aligned */
+        margin-bottom: 18px; /* Default spacing */
+        padding-left: 0; 
+        text-align: left; 
+        transition: margin-bottom 0.15s ease-out; /* Faster transition */
     }
 
     .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points ul {
-        list-style-type: disc; /* Standard disc bullets */
-        margin-left: 20px; /* Indent bullets */
-        padding-left: 0; /* Reset padding if any inherited */
+        list-style-type: disc; 
+        margin-left: 20px; 
+        padding-left: 0; 
     }
 
     .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points li {
-        margin-bottom: 6px; /* Space between bullet points */
+        font-size: 0.85rem; /* Default size */
+        font-weight: 500; 
+        color: #333; 
+        line-height: 1.4; /* Default line-height */
+        margin-bottom: 6px; /* Default spacing */
+        transition: font-size 0.15s ease-out, line-height 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
     }
 
     /* Styling for the TOOLS USED label */
     .lightbox-media-wrapper .lightbox-desc-card .card-tools-label {
         font-family: 'Wix Madefor Display', sans-serif;
-        font-size: 1rem; /* Match other labels */
+        font-size: 1rem; /* Default size */
         font-weight: 700;
         color: #3d3d3d;
         opacity: 0.25;
         text-transform: uppercase;
-        margin-top: 12px; /* Space above this label */
-        margin-bottom: 4px; /* Space before the tools list */
+        margin-top: 12px; 
+        margin-bottom: 4px; /* Default spacing */
+        transition: font-size 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
     }
 
     /* Styling for the TOOLS USED list */
     .lightbox-media-wrapper .lightbox-desc-card .card-tools-list {
-        font-family: 'Work Sans', sans-serif; /* Match body/bullets */
-        font-size: 0.9rem; /* Match .card-body */
-        font-weight: 500;
-        color: #333;
-        line-height: 1.4;
-        text-align: left; /* Ensure text is left-aligned */
+        font-family: 'Work Sans', sans-serif;
+        font-size: 0.9rem; /* Default size */
+        line-height: 1.5; /* Default line-height */
+        color: #333; /* Consistent dark color */
+        padding-left: 4px; 
+        transition: font-size 0.15s ease-out, line-height 0.15s ease-out; /* Faster transition */
     }
 
     body.projects-window-maximized .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
@@ -748,23 +760,24 @@ body {
   z-index: 2;
 }
 
+/* Base style for the description card in desktop view */
 .lightbox-media-wrapper .lightbox-desc-card {
   margin-left: auto; 
   margin-right: 0; 
   height: 100%; 
   border-radius: 18px;
-  background: rgba(240, 240, 240, 0.95); /* Inverted: Ensure this also uses light background */
+  background: rgba(240, 240, 240, 0.95);
   display: flex; 
   flex-direction: column;
   font-size: 1.13rem;
   font-weight: 500;
-  color: #333; /* Inverted: Default dark text for card */
+  color: #333;
   z-index: 1;
   box-sizing: border-box;
   opacity: 0; 
   transform: translateX(-40px); 
-  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; 
-  overflow: auto; 
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out, overflow 0s 0.3s; /* Delay overflow change */
+  overflow: hidden; /* Changed from auto */
   padding: 30px 30px 30px 30px; 
   text-align: left; 
   white-space: normal; 
@@ -772,9 +785,67 @@ body {
   flex-shrink: 1; 
 }
 
-.lightbox-media-wrapper .lightbox-desc-card .card-main-content {
-    flex-grow: 1; /* Allows this section to take up available space */
-    /* Add min-height: 0; if content within this might overflow strangely with flex-grow */
+/* Styles for Maximized Window State */
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card {
+  /* This rule block should already exist with padding-right for video-media-active */
+  /* Add overflow: auto here, keeping existing styles like padding-right */
+  overflow: auto; /* Allow scrollbars if content overflows in maximized state */
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-project-label {
+  font-size: 1.05rem; 
+  margin-bottom: 6px;   
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-title {
+  font-size: 2.2rem;   
+  margin-bottom: 12px;  
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-title-divider {
+  margin: 16px 0; /* Increased top and bottom margin */
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-description-label {
+  font-size: 1.05rem; 
+  margin-bottom: 8px;   
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-body {
+  font-size: 1rem;     
+  line-height: 1.65;   
+  margin-bottom: 20px;  
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points {
+  margin-bottom: 20px; 
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points ul li {
+  font-size: 1rem;     
+  line-height: 1.65;   
+  margin-bottom: 7px;   
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-tools-section .card-title-divider {
+  /* This rule was targeting the specific divider in tools, ensure its base style also has transition */
+  /* Base style for .card-title-divider already has transition: margin 0.3s ease-out; */
+  margin: 16px 0; /* Increased top and bottom margin */
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-tools-label {
+  font-size: 1.05rem; 
+  margin-bottom: 8px;   
+}
+
+body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-tools-list {
+  font-size: 1rem;     
+  line-height: 1.55;   
+  color: #333; 
+}
+
+body.projects-window-maximized .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
+  padding-right: 64px; /* Apply extra right padding for videos only when maximized */
 }
 
 .lightbox-media-wrapper .lightbox-desc-card .card-tools-section {

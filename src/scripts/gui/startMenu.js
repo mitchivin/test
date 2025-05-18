@@ -113,13 +113,6 @@ const ALL_PROGRAMS_ITEMS = [
 const RECENTLY_USED_ITEMS = [
   {
     type: "program",
-    programName: "chatgpt",
-    icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
-    label: "ChatGPT",
-    disabled: true,
-  },
-  {
-    type: "program",
     programName: "program1",
     icon: "./assets/gui/start-menu/vanity-apps/photoshop.webp",
     label: "Adobe Photoshop",
@@ -148,9 +141,30 @@ const RECENTLY_USED_ITEMS = [
   },
   {
     type: "program",
+    programName: "indesign",
+    icon: "./assets/gui/start-menu/vanity-apps/indesign.webp",
+    label: "Adobe InDesign",
+    disabled: true,
+  },
+  {
+    type: "program",
     programName: "program6",
     icon: "./assets/gui/start-menu/vanity-apps/blender.webp",
     label: "Blender",
+    disabled: true,
+  },
+  {
+    type: "program",
+    programName: "vscode",
+    icon: "./assets/gui/start-menu/vanity-apps/vscode.webp",
+    label: "VS Code",
+    disabled: true,
+  },
+  {
+    type: "program",
+    programName: "chatgpt",
+    icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
+    label: "ChatGPT",
     disabled: true,
   },
   {
@@ -401,142 +415,142 @@ export default class StartMenu {
       </li>`;
     }
     return `
-            <div class="menutopbar">
-                <img src="./assets/gui/start-menu/user.webp" alt="User" class="userpicture">
-                <span class="username">Mitch Ivin</span>
+      <div class="menutopbar">
+        <img src="./assets/gui/boot/userlogin.webp" alt="User" class="userpicture">
+        <span class="username">Mitch Ivin</span>
+      </div>
+      <div class="start-menu-middle">
+        <div class="middle-section middle-left">
+          <ul class="menu-items">
+            ${renderMenuItem({
+              id: "internet",
+              icon: "./assets/gui/desktop/internet.webp",
+              title: "My Projects",
+              description: "View my work",
+              programName: "internet",
+              action: "open-program",
+            })}
+            ${renderMenuItem({
+              id: "contact",
+              icon: "./assets/gui/desktop/contact.webp",
+              title: "Contact Me",
+              description: "Send me a message",
+              programName: "contact",
+              action: "open-program",
+            })}
+            <li class="menu-divider"><hr class="divider"></li>
+            ${renderMenuItem({
+              id: "about",
+              icon: "./assets/gui/desktop/about.webp",
+              title: "About Me",
+              programName: "about",
+              action: "open-program",
+            })}
+            ${renderMenuItem({
+              id: "resume",
+              icon: "./assets/gui/desktop/resume.webp",
+              title: "My Resume",
+              programName: "resume",
+              action: "open-program",
+            })}
+            ${renderMenuItem({
+              id: "mediaPlayer",
+              icon: "./assets/gui/start-menu/mediaPlayer.webp",
+              title: "Media Player",
+              programName: "mediaPlayer",
+              action: "open-program",
+            })}
+            ${renderMenuItem({
+              id: "my-pictures",
+              icon: "./assets/gui/start-menu/photos.webp",
+              title: "My Photos",
+              programName: "my-pictures",
+              action: "open-program",
+            })}
+            ${renderMenuItem({
+              id: "musicPlayer",
+              icon: "./assets/gui/start-menu/music.webp",
+              title: "Music Player",
+              programName: "musicPlayer",
+              action: "open-program",
+            })}
+            <li class="menu-divider"><hr class="divider"></li>
+          </ul>
+          <div class="all-programs-container">
+            <div class="all-programs-button" id="menu-all-programs" data-action="toggle-all-programs">
+              <span>All Programs</span>
+              <img src="./assets/gui/start-menu/arrow.webp" alt="All Programs">
             </div>
-            <div class="start-menu-middle">
-                <div class="middle-section middle-left">
-                    <ul class="menu-items">
-                        ${renderMenuItem({
-                          id: "internet",
-                          icon: "./assets/gui/desktop/internet.webp",
-                          title: "My Projects",
-                          description: "View my work",
-                          programName: "internet",
-                          action: "open-program",
-                        })}
-                        ${renderMenuItem({
-                          id: "contact",
-                          icon: "./assets/gui/desktop/contact.webp",
-                          title: "Contact Me",
-                          description: "Send me a message",
-                          programName: "contact",
-                          action: "open-program",
-                        })}
-                        <li class="menu-divider"><hr class="divider"></li>
-                        ${renderMenuItem({
-                          id: "about",
-                          icon: "./assets/gui/desktop/about.webp",
-                          title: "About Me",
-                          programName: "about",
-                          action: "open-program",
-                        })}
-                        ${renderMenuItem({
-                          id: "resume",
-                          icon: "./assets/gui/desktop/resume.webp",
-                          title: "My Resume",
-                          programName: "resume",
-                          action: "open-program",
-                        })}
-                        ${renderMenuItem({
-                          id: "mediaPlayer",
-                          icon: "./assets/gui/start-menu/mediaPlayer.webp",
-                          title: "Media Player",
-                          programName: "mediaPlayer",
-                          action: "open-program",
-                        })}
-                        ${renderMenuItem({
-                          id: "my-pictures",
-                          icon: "./assets/gui/start-menu/photos.webp",
-                          title: "My Photos",
-                          programName: "my-pictures",
-                          action: "open-program",
-                        })}
-                        ${renderMenuItem({
-                          id: "musicPlayer",
-                          icon: "./assets/gui/start-menu/music.webp",
-                          title: "Music Player",
-                          programName: "musicPlayer",
-                          action: "open-program",
-                        })}
-                        <li class="menu-divider"><hr class="divider"></li>
-                    </ul>
-                    <div class="all-programs-container">
-                        <div class="all-programs-button" id="menu-all-programs" data-action="toggle-all-programs">
-                            <span>All Programs</span>
-                            <img src="./assets/gui/start-menu/arrow.webp" alt="All Programs">
-                        </div>
-                    </div>
-                </div>
-                <div class="middle-section middle-right">
-                    <ul class="menu-items">
-                        ${renderMenuItem({
-                          id: "behance",
-                          icon: "./assets/gui/start-menu/behance.webp",
-                          title: "Behance",
-                          url: "https://www.behance.net/mitch_ivin",
-                          action: "open-url",
-                        })}
-                        ${renderMenuItem({
-                          id: "linkedin",
-                          icon: "./assets/gui/start-menu/linkedin.webp",
-                          title: "LinkedIn",
-                          url: "https://www.linkedin.com/in/mitchivin",
-                          action: "open-url",
-                        })}
-                        ${renderMenuItem({
-                          id: "github",
-                          icon: "./assets/gui/start-menu/github.webp",
-                          title: "GitHub",
-                          url: "https://github.com/mitchivin",
-                          action: "open-url",
-                        })}
-                        ${renderMenuItem({
-                          id: "instagram",
-                          icon: "./assets/gui/start-menu/instagram.webp",
-                          title: "Instagram",
-                          url: "https://www.instagram.com/mitchivin",
-                          action: "open-url",
-                        })}
-                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-                        ${renderMenuItem({
-                          id: "notepad",
-                          icon: "./assets/gui/start-menu/notepad.webp",
-                          title: "Notepad",
-                          programName: "notepad",
-                          action: "open-program",
-                        })}
-                        ${renderMenuItem({
-                          id: "cmd",
-                          icon: "./assets/gui/start-menu/cmd.webp",
-                          title: "Command Prompt",
-                          programName: "cmd",
-                          action: "open-program",
-                        })}
-                        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-                        <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
-                            <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
-                            <div class="item-content">
-                                <span class="item-title">Recently Used</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="start-menu-footer">
-                <div class="footer-buttons">
-                    <div class="footer-button" id="btn-log-off" data-action="log-off">
-                        <img src="./assets/gui/start-menu/logoff.webp" alt="Log Off">
-                        <span>Log Off</span>
-                    </div>
-                    <div class="footer-button" id="btn-shut-down" data-action="shut-down">
-                        <img src="./assets/gui/start-menu/shutdown.webp" alt="Shut Down">
-                        <span>Shut Down</span>
-                    </div>
-                </div>
-            </div>
-        `;
+          </div>
+        </div>
+        <div class="middle-section middle-right">
+          <ul class="menu-items">
+            ${renderMenuItem({
+              id: "behance",
+              icon: "./assets/gui/start-menu/behance.webp",
+              title: "Behance",
+              url: "https://www.behance.net/mitch_ivin",
+              action: "open-url",
+            })}
+            ${renderMenuItem({
+              id: "linkedin",
+              icon: "./assets/gui/start-menu/linkedin.webp",
+              title: "LinkedIn",
+              url: "https://www.linkedin.com/in/mitchivin",
+              action: "open-url",
+            })}
+            ${renderMenuItem({
+              id: "github",
+              icon: "./assets/gui/start-menu/github.webp",
+              title: "GitHub",
+              url: "https://github.com/mitchivin",
+              action: "open-url",
+            })}
+            ${renderMenuItem({
+              id: "instagram",
+              icon: "./assets/gui/start-menu/instagram.webp",
+              title: "Instagram",
+              url: "https://www.instagram.com/mitchivin",
+              action: "open-url",
+            })}
+            <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+            ${renderMenuItem({
+              id: "notepad",
+              icon: "./assets/gui/start-menu/notepad.webp",
+              title: "Notepad",
+              programName: "notepad",
+              action: "open-program",
+            })}
+            ${renderMenuItem({
+              id: "cmd",
+              icon: "./assets/gui/start-menu/cmd.webp",
+              title: "Command Prompt",
+              programName: "cmd",
+              action: "open-program",
+            })}
+            <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+            <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
+              <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
+              <div class="item-content">
+                <span class="item-title">Recently Used</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="start-menu-footer">
+        <div class="footer-buttons">
+          <div class="footer-button" id="btn-log-off" data-action="log-off">
+            <img src="./assets/gui/start-menu/logoff.webp" alt="Log Off">
+            <span>Log Off</span>
+          </div>
+          <div class="footer-button" id="btn-shut-down" data-action="shut-down">
+            <img src="./assets/gui/start-menu/shutdown.webp" alt="Shut Down">
+            <span>Shut Down</span>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   /**
