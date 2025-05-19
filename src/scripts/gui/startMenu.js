@@ -21,33 +21,7 @@ import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
 
 const ALL_PROGRAMS_ITEMS = [
-  // Socials first
-  {
-    type: "url",
-    url: "https://www.instagram.com/mitchivin",
-    icon: "./assets/gui/start-menu/instagram.webp",
-    label: "Instagram",
-  },
-  {
-    type: "url",
-    url: "https://github.com/mitchivin",
-    icon: "./assets/gui/start-menu/github.webp",
-    label: "GitHub",
-  },
-  {
-    type: "url",
-    url: "https://www.linkedin.com/in/mitchivin",
-    icon: "./assets/gui/start-menu/linkedin.webp",
-    label: "LinkedIn",
-  },
-  {
-    type: "url",
-    url: "https://www.behance.net/mitch_ivin",
-    icon: "./assets/gui/start-menu/behance.webp",
-    label: "Behance",
-  },
-  { type: "separator" }, // Separator after socials
-  // Then the rest of the programs
+  // Main apps first
   {
     type: "program",
     programName: "about",
@@ -72,6 +46,7 @@ const ALL_PROGRAMS_ITEMS = [
     icon: "./assets/gui/desktop/contact.webp",
     label: "Contact Me",
   },
+  { type: "separator" }, // Divider before disabled apps
   {
     type: "program",
     programName: "my-pictures",
@@ -106,11 +81,38 @@ const ALL_PROGRAMS_ITEMS = [
     icon: "./assets/gui/start-menu/cmd.webp",
     label: "Command Prompt",
     disabled: true, // Always disabled
-  }
+  },
+  { type: "separator" }, // Divider before socials
+  // Socials
+  {
+    type: "url",
+    url: "https://www.instagram.com/mitchivin",
+    icon: "./assets/gui/start-menu/instagram.webp",
+    label: "Instagram",
+  },
+  {
+    type: "url",
+    url: "https://github.com/mitchivin",
+    icon: "./assets/gui/start-menu/github.webp",
+    label: "GitHub",
+  },
+  {
+    type: "url",
+    url: "https://www.linkedin.com/in/mitchivin",
+    icon: "./assets/gui/start-menu/linkedin.webp",
+    label: "LinkedIn",
+  },
 ];
 
 // Add menu item arrays for abstraction
 const RECENTLY_USED_ITEMS = [
+  {
+    type: "program",
+    programName: "creative-cloud",
+    icon: "./assets/gui/start-menu/vanity-apps/creative-cloud.webp",
+    label: "Adobe Creative Cloud",
+    disabled: true,
+  },
   {
     type: "program",
     programName: "program1",
@@ -148,9 +150,23 @@ const RECENTLY_USED_ITEMS = [
   },
   {
     type: "program",
+    programName: "wordpress",
+    icon: "./assets/gui/start-menu/vanity-apps/wordpress.webp",
+    label: "Wordpress",
+    disabled: true,
+  },
+  {
+    type: "program",
+    programName: "htmlcssjs",
+    icon: "./assets/gui/start-menu/vanity-apps/htmlcssjs.webp",
+    label: "HTML/CSS/JS",
+    disabled: true,
+  },
+  {
+    type: "program",
     programName: "program6",
     icon: "./assets/gui/start-menu/vanity-apps/blender.webp",
-    label: "Blender",
+    label: "Blender 3D",
     disabled: true,
   },
   {
@@ -158,20 +174,6 @@ const RECENTLY_USED_ITEMS = [
     programName: "chatgpt",
     icon: "./assets/gui/start-menu/vanity-apps/chatgpt.webp",
     label: "ChatGPT",
-    disabled: true,
-  },
-  {
-    type: "program",
-    programName: "vscode",
-    icon: "./assets/gui/start-menu/vanity-apps/vscode.webp",
-    label: "VS Code",
-    disabled: true,
-  },
-  {
-    type: "program",
-    programName: "cursor",
-    icon: "./assets/gui/start-menu/vanity-apps/cursor.webp",
-    label: "Cursor",
     disabled: true,
   },
 ];
@@ -486,17 +488,10 @@ export default class StartMenu {
         <div class="middle-section middle-right">
           <ul class="menu-items">
             ${renderMenuItem({
-              id: "behance",
-              icon: "./assets/gui/start-menu/behance.webp",
-              title: "Behance",
-              url: "https://www.behance.net/mitch_ivin",
-              action: "open-url",
-            })}
-            ${renderMenuItem({
-              id: "linkedin",
-              icon: "./assets/gui/start-menu/linkedin.webp",
-              title: "LinkedIn",
-              url: "https://www.linkedin.com/in/mitchivin",
+              id: "instagram",
+              icon: "./assets/gui/start-menu/instagram.webp",
+              title: "Instagram",
+              url: "https://www.instagram.com/mitchivin",
               action: "open-url",
             })}
             ${renderMenuItem({
@@ -507,10 +502,10 @@ export default class StartMenu {
               action: "open-url",
             })}
             ${renderMenuItem({
-              id: "instagram",
-              icon: "./assets/gui/start-menu/instagram.webp",
-              title: "Instagram",
-              url: "https://www.instagram.com/mitchivin",
+              id: "linkedin",
+              icon: "./assets/gui/start-menu/linkedin.webp",
+              title: "LinkedIn",
+              url: "https://www.linkedin.com/in/mitchivin",
               action: "open-url",
             })}
             <li class="menu-divider divider-darkblue"><hr class="divider"></li>

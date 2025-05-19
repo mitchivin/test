@@ -101,12 +101,11 @@ export default class Desktop {
           // Double-click/tap: open program or social link
           if (!icon.classList.contains("selected")) this.selectIcon(icon, true);
           let programName = icon.getAttribute("data-program-name");
-          const socialKeys = ["github", "instagram", "behance", "linkedin"];
+          const socialKeys = ["github", "instagram", "linkedin"];
           if (socialKeys.includes(programName)) {
             const urls = {
               github: "https://github.com/mitchivin",
               instagram: "https://www.instagram.com/mitchivin",
-              behance: "https://www.behance.net/mitch_ivin",
               linkedin: "https://www.linkedin.com/in/mitchivin",
             };
             window.open(urls[programName], "_blank");

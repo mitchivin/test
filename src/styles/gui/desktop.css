@@ -49,6 +49,13 @@
   background-position: top center;
 }
 
+/* Ultrawide screens: center the image vertically and horizontally */
+@media (min-aspect-ratio: 21/9) {
+  .desktop.wallpaper-default {
+    background-position: center center;
+  }
+}
+
 /* ===== Selection Overlay & Box ===== */
 /* Selection overlay – sits behind everything, handles drag logic */
 .selection-overlay {

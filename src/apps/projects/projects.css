@@ -475,7 +475,7 @@ body {
         font-size: 0.9rem; /* Default size */
         font-weight: 500;
         color: #333 !important;
-        line-height: 1.4; /* Default line-height */
+        line-height: 1.3; /* Default line-height */
         margin-top: 0;
         margin-bottom: 18px; /* Default spacing */
         transition: font-size 0.15s ease-out, line-height 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
@@ -687,10 +687,10 @@ body {
   /* Styling for the "PERSONAL PROJECT" label in mobile top overlay */
   .mobile-overlay-project-label {
     font-family: 'Wix Madefor Display', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #9c9b9bc7;
-    opacity: 0.75;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #adacacc7; /* Slightly lighter than #9c9b9bc7 */
+    opacity: 0.8;
     text-transform: uppercase;
     margin-bottom: -6px; /* Pulls title closer */
     text-align: left;
@@ -700,10 +700,10 @@ body {
   /* Styling for the "DESCRIPTION" label in mobile bottom overlay */
   .mobile-overlay-description-label {
     font-family: 'Wix Madefor Display', sans-serif;
-    font-size: 1rem; /* Consistent with project label */
-    font-weight: 700; /* Consistent with project label */
-    color: #9c9b9bc7; /* Consistent with project label */
-    opacity: 0.75; /* Consistent with project label */
+    font-size: 1.2rem; /* Consistent with project label */
+    font-weight: 800; /* Consistent with project label */
+    color: #adacacc7; /* Slightly lighter than #9c9b9bc7 */
+    opacity: 0.8; /* Consistent with project label */
     text-transform: uppercase;
     margin-top: 12px;
     margin-bottom: 8px; /* Space before the actual description text */
@@ -814,7 +814,7 @@ body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card
 
 body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-body {
   font-size: 1rem;     
-  line-height: 1.65;   
+  line-height: 1.55;   
   margin-bottom: 20px;  
 }
 

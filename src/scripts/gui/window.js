@@ -234,13 +234,13 @@ export default class WindowManager {
                             if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
                             if (textSpan) textSpan.textContent = 'View on Instagram';
                             break;
-                        case 'behance':
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/behance.webp';
-                            if (textSpan) textSpan.textContent = 'View on Behance';
-                            break;
                         case 'github':
                             if (iconImg) iconImg.src = './assets/gui/start-menu/github.webp';
                             if (textSpan) textSpan.textContent = 'View on GitHub';
+                            break;
+                        case 'linkedin':
+                            if (iconImg) iconImg.src = './assets/gui/start-menu/linkedin.webp';
+                            if (textSpan) textSpan.textContent = 'View on LinkedIn';
                             break;
                         default: // Fallback to Instagram or a generic state if linkType is unknown
                             if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
