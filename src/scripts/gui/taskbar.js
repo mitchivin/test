@@ -279,7 +279,7 @@ export function showNetworkBalloon() {
   document.body.appendChild(balloonRoot);
 
   const headerText = "Welcome to my portfolio";
-  const mainText = "It's also the world's best XP recreation.<br>Built from scratch, to the pixel, by Mitch Ivin.";
+  const mainText = "It's also the world's best XP recreation.<br>Built from scratch, to the pixel, by me.";
 
   balloonRoot.innerHTML = `
     <div class="balloon">
@@ -308,16 +308,21 @@ export function showNetworkBalloon() {
     const scale = 0.93;
     const deltaX = (balloonRect.width * (scale - 1)) / 2;
     // Set the balloon position so the pointer aligns with the icon center
-    balloonRoot.style.left = balloonRect.left + offsetX - deltaX - 24 + "px";
+    balloonRoot.style.left = balloonRect.left + offsetX - deltaX - 24 - 2 + "px";
     balloonRoot.style.top =
-      iconRect.top - balloonRect.height - 22 + window.scrollY + "px";
+      iconRect.top - balloonRect.height - 22 - 2 + window.scrollY + "px";
   }, 0);
   const balloon = balloonRoot.querySelector(".balloon");
   const closeBtn = balloonRoot.querySelector(".balloon__close");
   closeBtn.onclick = () => hideBalloon();
   balloon.classList.remove("hide");
-  balloonTimeouts.push(setTimeout(() => balloon.classList.add("hide"), 7000)); // Start fade out after 7s
-  balloonTimeouts.push(setTimeout(() => hideBalloon(), 8000)); // Remove after 8s
+
+  const isMobile = isMobileDevice();
+  const fadeOutDelay = isMobile ? 7000 : 10000; // 7s for mobile, 10s for desktop
+  const removeDelay = isMobile ? 8000 : 11000;   // 8s for mobile, 11s for desktop
+
+  balloonTimeouts.push(setTimeout(() => balloon.classList.add("hide"), fadeOutDelay));
+  balloonTimeouts.push(setTimeout(() => hideBalloon(), removeDelay));
 }
 
 // Instead, show balloon on click of the network icon

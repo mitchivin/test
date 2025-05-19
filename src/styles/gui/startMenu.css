@@ -280,11 +280,12 @@
 /* Apply bold ONLY to specific items - using ID selectors for reliability */
 #menu-internet .item-title,
 #menu-contact .item-title,
-#menu-instagram .item-title,
-#menu-linkedin .item-title,
-#menu-github .item-title,
-#menu-behance .item-title,
-#menu-program4 .item-title /* Right (Most Used Tools) */ {
+/* Only apply bold to these when they are in the right-hand column */
+.middle-right #menu-instagram .item-title,
+.middle-right #menu-linkedin .item-title,
+.middle-right #menu-github .item-title,
+.middle-right #menu-behance .item-title, /* Assuming Behance is also right-column specific if it exists */
+.middle-right #menu-program4 .item-title /* Right (Most Used Tools) */ {
   font-weight: 600;
 }
 

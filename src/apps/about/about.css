@@ -266,6 +266,14 @@ body {
     width: 100%;
     box-sizing: border-box;
   }
+
+  /* Add these styles for mobile paragraph layout */
+  .about-paragraph-icon-col {
+    display: none !important; /* Hide the icon column forcefully */
+  }
+  .about-paragraph-text {
+    padding-left: 0 !important; /* Remove left padding forcefully */
+  }
 }
 
 .about-paragraph-row {

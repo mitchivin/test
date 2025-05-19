@@ -392,9 +392,13 @@ export default class StartMenu {
       programName,
       action,
       url,
+      disabledOverride // New parameter to force disable state
     }) {
-      const programsToDisable = ["mediaPlayer", "my-pictures", "notepad", "cmd", "musicPlayer"];
-      const shouldDisable = programsToDisable.includes(programName);
+      const programsAlwaysDisabled = ["mediaPlayer", "my-pictures", "musicPlayer", "notepad", "cmd"];
+      // Determine disable state:
+      // 1. If disabledOverride is explicitly boolean, use it.
+      // 2. Otherwise, check if the programName is in programsAlwaysDisabled.
+      const shouldDisable = typeof disabledOverride === 'boolean' ? disabledOverride : programsAlwaysDisabled.includes(programName);
 
       const disabledClass = shouldDisable ? " disabled" : "";
       const dataAction = shouldDisable
@@ -416,6 +420,136 @@ export default class StartMenu {
         </div>
       </li>`;
     }
+
+    const mobile = isMobileDevice();
+
+    // Define configurations for the items that will be swapped
+    const socialItems = [
+      {
+        id: "instagram",
+        icon: "./assets/gui/start-menu/instagram.webp",
+        title: "Instagram",
+        url: "https://www.instagram.com/mitchivin",
+        action: "open-url",
+        disabledOverride: false
+      },
+      {
+        id: "github",
+        icon: "./assets/gui/start-menu/github.webp",
+        title: "GitHub",
+        url: "https://github.com/mitchivin",
+        action: "open-url",
+        disabledOverride: false
+      },
+      {
+        id: "linkedin",
+        icon: "./assets/gui/start-menu/linkedin.webp",
+        title: "LinkedIn",
+        url: "https://www.linkedin.com/in/mitchivin",
+        action: "open-url",
+        disabledOverride: false
+      }
+    ];
+
+    const appItemsToSwap = [
+      {
+        id: "mediaPlayer",
+        icon: "./assets/gui/start-menu/mediaPlayer.webp",
+        title: "Media Player",
+        programName: "mediaPlayer",
+        action: "open-program",
+        disabledOverride: true // These are always disabled
+      },
+      {
+        id: "my-pictures",
+        icon: "./assets/gui/start-menu/photos.webp",
+        title: "My Photos",
+        programName: "my-pictures",
+        action: "open-program",
+        disabledOverride: true // These are always disabled
+      },
+      {
+        id: "musicPlayer",
+        icon: "./assets/gui/start-menu/music.webp",
+        title: "Music Player",
+        programName: "musicPlayer",
+        action: "open-program",
+        disabledOverride: true // These are always disabled
+      }
+    ];
+
+    let leftSlot1, leftSlot2, leftSlot3;
+    let rightSlot1Desktop, rightSlot2Desktop, rightSlot3Desktop; // Renamed for clarity
+    let rightSlot1Mobile, rightSlot2Mobile, rightSlot3Mobile;
+
+    if (mobile) {
+      // Reordered for mobile: LinkedIn, GitHub, Instagram
+      leftSlot1 = socialItems[2]; // LinkedIn
+      leftSlot2 = socialItems[1]; // GitHub
+      leftSlot3 = socialItems[0]; // Instagram
+      // On mobile, these slots in the right column will be the app items
+      rightSlot1Mobile = appItemsToSwap[0];
+      rightSlot2Mobile = appItemsToSwap[1];
+      rightSlot3Mobile = appItemsToSwap[2];
+    } else {
+      leftSlot1 = appItemsToSwap[0];
+      leftSlot2 = appItemsToSwap[1];
+      leftSlot3 = appItemsToSwap[2];
+      // On desktop, these slots in the right column will be the social items
+      rightSlot1Desktop = socialItems[0];
+      rightSlot2Desktop = socialItems[1];
+      rightSlot3Desktop = socialItems[2];
+    }
+
+    const notepadConfig = {
+      id: "notepad",
+      icon: "./assets/gui/start-menu/notepad.webp",
+      title: "Notepad",
+      programName: "notepad",
+      action: "open-program"
+    };
+
+    const cmdConfig = {
+      id: "cmd",
+      icon: "./assets/gui/start-menu/cmd.webp",
+      title: "Command Prompt",
+      programName: "cmd",
+      action: "open-program"
+    };
+
+    const recentlyUsedHTML = `
+      <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
+        <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
+        <div class="item-content">
+          <span class="item-title">Recently Used</span>
+        </div>
+      </li>`;
+
+    let middleRightHTML;
+    if (mobile) {
+      middleRightHTML = `
+        ${renderMenuItem(rightSlot1Mobile)}
+        ${renderMenuItem(rightSlot2Mobile)}
+        ${renderMenuItem(rightSlot3Mobile)}
+        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+        ${recentlyUsedHTML}
+        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+        ${renderMenuItem(notepadConfig)}
+        ${renderMenuItem(cmdConfig)}
+      `;
+    } else {
+      middleRightHTML = `
+        ${renderMenuItem(rightSlot1Desktop)}
+        ${renderMenuItem(rightSlot2Desktop)}
+        ${renderMenuItem(rightSlot3Desktop)}
+        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+        ${renderMenuItem(notepadConfig)}
+        ${renderMenuItem(cmdConfig)}
+        <li class="menu-divider divider-darkblue"><hr class="divider"></li>
+        ${recentlyUsedHTML}
+      `;
+    }
+
     return `
       <div class="menutopbar">
         <img src="./assets/gui/boot/userlogin.webp" alt="User" class="userpicture">
@@ -456,25 +590,31 @@ export default class StartMenu {
               action: "open-program",
             })}
             ${renderMenuItem({
-              id: "mediaPlayer",
-              icon: "./assets/gui/start-menu/mediaPlayer.webp",
-              title: "Media Player",
-              programName: "mediaPlayer",
-              action: "open-program",
+              id: leftSlot1.id,
+              icon: leftSlot1.icon,
+              title: leftSlot1.title,
+              programName: leftSlot1.programName,
+              action: leftSlot1.action,
+              url: leftSlot1.url,
+              disabledOverride: leftSlot1.disabledOverride
             })}
             ${renderMenuItem({
-              id: "my-pictures",
-              icon: "./assets/gui/start-menu/photos.webp",
-              title: "My Photos",
-              programName: "my-pictures",
-              action: "open-program",
+              id: leftSlot2.id,
+              icon: leftSlot2.icon,
+              title: leftSlot2.title,
+              programName: leftSlot2.programName,
+              action: leftSlot2.action,
+              url: leftSlot2.url,
+              disabledOverride: leftSlot2.disabledOverride
             })}
             ${renderMenuItem({
-              id: "musicPlayer",
-              icon: "./assets/gui/start-menu/music.webp",
-              title: "Music Player",
-              programName: "musicPlayer",
-              action: "open-program",
+              id: leftSlot3.id,
+              icon: leftSlot3.icon,
+              title: leftSlot3.title,
+              programName: leftSlot3.programName,
+              action: leftSlot3.action,
+              url: leftSlot3.url,
+              disabledOverride: leftSlot3.disabledOverride
             })}
             <li class="menu-divider"><hr class="divider"></li>
           </ul>
@@ -487,49 +627,7 @@ export default class StartMenu {
         </div>
         <div class="middle-section middle-right">
           <ul class="menu-items">
-            ${renderMenuItem({
-              id: "instagram",
-              icon: "./assets/gui/start-menu/instagram.webp",
-              title: "Instagram",
-              url: "https://www.instagram.com/mitchivin",
-              action: "open-url",
-            })}
-            ${renderMenuItem({
-              id: "github",
-              icon: "./assets/gui/start-menu/github.webp",
-              title: "GitHub",
-              url: "https://github.com/mitchivin",
-              action: "open-url",
-            })}
-            ${renderMenuItem({
-              id: "linkedin",
-              icon: "./assets/gui/start-menu/linkedin.webp",
-              title: "LinkedIn",
-              url: "https://www.linkedin.com/in/mitchivin",
-              action: "open-url",
-            })}
-            <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-            ${renderMenuItem({
-              id: "notepad",
-              icon: "./assets/gui/start-menu/notepad.webp",
-              title: "Notepad",
-              programName: "notepad",
-              action: "open-program",
-            })}
-            ${renderMenuItem({
-              id: "cmd",
-              icon: "./assets/gui/start-menu/cmd.webp",
-              title: "Command Prompt",
-              programName: "cmd",
-              action: "open-program",
-            })}
-            <li class="menu-divider divider-darkblue"><hr class="divider"></li>
-            <li class="menu-item" id="menu-program4" data-action="toggle-recently-used">
-              <img src="./assets/gui/start-menu/recently-used.webp" alt="Recently Used">
-              <div class="item-content">
-                <span class="item-title">Recently Used</span>
-              </div>
-            </li>
+            ${middleRightHTML}
           </ul>
         </div>
       </div>
