@@ -349,13 +349,13 @@ export function initBootSequence(eventBus, EVENTS) {
   if (logoffShutDownBtn) {
     const imgEl = logoffShutDownBtn.querySelector("img");
     const spanEl = logoffShutDownBtn.querySelector("span");
-    const shutDownAction = (event) => {
+    const instagramAction = (event) => {
       event.stopPropagation(); // Prevent click from bubbling
       hideLogoffDialog();
-      eventBus.publish(EVENTS.SHUTDOWN_REQUESTED);
+      window.open("https://www.instagram.com/mitchivin", "_blank");
     };
-    if (imgEl) imgEl.addEventListener("click", shutDownAction);
-    if (spanEl) spanEl.addEventListener("click", shutDownAction);
+    if (imgEl) imgEl.addEventListener("click", instagramAction);
+    if (spanEl) spanEl.addEventListener("click", instagramAction);
   }
 
   if (logoffCancelBtn) {
