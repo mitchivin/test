@@ -1047,14 +1047,14 @@
   /* padding: 10px; */ /* Remove padding to shrink container */
   cursor: pointer; /* Re-add for div elements */
   text-align: center;
-  /* width: 100px; */ /* Remove fixed width to shrink container */
+  width: 80px; /* Give a fixed width to help with even icon spacing */
   background: none !important; 
   border: none !important; 
 }
 
 .logoff-dialog-button:hover {
-  /* background-color: rgba(255, 255, 255, 0.1); */ /* Remove hover background */
-  /* border-radius: 3px; */ /* No longer needed */
+  /* Reduce brightness for a more subtle effect */
+  filter: brightness(1.02);
 }
 .logoff-dialog-button:active {
   /* background-color: rgba(0, 0, 0, 0.1); */ /* Remove active background */
@@ -1068,23 +1068,20 @@
   border: none !important; /* Force no border on image element */
   transition: filter 0.15s ease-in-out; /* Smooth transition for brightness */
   cursor: pointer; /* Indicate clickable area */
-  /* position: relative; */ /* No longer needed */
-  /* z-index: 1; */ /* No longer needed */
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.4)); /* Added drop shadow */
 }
 
 .logoff-dialog-button:hover img {
-  filter: brightness(1.2); /* Light up icon on hover */
+  filter: brightness(1.06) drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); /* Adjusted hover shadow */
 }
 
 .logoff-dialog-button span {
-  font-size: 12px; /* Matched to login screen user title */
+  font-size: 13px; /* Increased from 12px */
   font-family: 'Tahoma', Arial, sans-serif; /* Matched to login screen user title */
   color: #FFFFFF; /* Explicitly white, consistent with dialog */
   line-height: 1.2; /* Matched to login screen user title */
-  letter-spacing: 0.05em;
   cursor: pointer; /* Indicate clickable area */
-  /* position: relative; */ /* No longer needed */
-  /* z-index: 1; */ /* No longer needed */
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.4); /* Added text shadow */
 }
 
 .logoff-dialog-footer {
@@ -1126,6 +1123,51 @@
   /* Defer active state to xp.css */
 }
 
+.logoff-dialog-cancel-div-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-family: 'Tahoma', Arial, sans-serif;
+  color: #222; /* Same as toolbar button text */
+  padding: 2px 12px; /* Adjusted padding for text-only */
+  border-radius: 5px;
+  transition: box-shadow 0.13s, border 0.13s, background 0.13s;
+  border: 1.5px solid transparent;
+  box-shadow: none;
+  margin: 0;
+  user-select: none;
+  cursor: pointer; /* Ensure pointer cursor */
+  text-align: center;
+  background: #f0f0f0; /* Default XP button background */
+  /* Adding XP-like outset border */
+  border-top: 1.5px solid #FFFFFF;
+  border-left: 1.5px solid #FFFFFF;
+  border-right: 1.5px solid #6D6D6D;
+  border-bottom: 1.5px solid #6D6D6D;
+  box-shadow: 1px 1px 0px #6D6D6D;
+}
+
+@media (hover: hover) {
+  .logoff-dialog-cancel-div-button:hover {
+    background: #E0E0E0; /* Slightly darker on hover */
+    border-top-color: #FFFFFF;
+    border-left-color: #FFFFFF;
+    border-right-color: #505050;
+    border-bottom-color: #505050;
+    box-shadow: 1px 1px 0px #505050;
+  }
+}
+
+.logoff-dialog-cancel-div-button:active {
+  background: #D4D0C8; /* XP active background */
+  border-top-color: #6D6D6D;
+  border-left-color: #6D6D6D;
+  border-right-color: #FFFFFF;
+  border-bottom-color: #FFFFFF;
+  box-shadow: inset 1px 1px 0px #6D6D6D;
+  padding: 3px 11px 1px 13px; /* Adjusted padding shift for new default */
+}
 
 /* Screen Grayscale Overlay */
 body.screen-grayscale-active > *:not(#logoff-dialog-container):not(.tooltip):not(#context-menu-container) {

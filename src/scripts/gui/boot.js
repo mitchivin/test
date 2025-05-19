@@ -154,6 +154,8 @@ export function initBootSequence(eventBus, EVENTS) {
             showNetworkBalloon();
           }
         }, 3000);
+        // Block logoff button for 5 seconds after successful login
+        window._logoffEnableTime = Date.now() + 5000;
       }, 2500);
     }, 150);
 
@@ -317,6 +319,26 @@ export function initBootSequence(eventBus, EVENTS) {
     requestAnimationFrame(() => {
         logoffDialog.classList.add("visible");
     });
+
+    // Disable Log Off button if within 5 seconds of login
+    if (logoffLogOffBtn) {
+      const now = Date.now();
+      const enableTime = window._logoffEnableTime || 0;
+      if (now < enableTime) {
+        logoffLogOffBtn.classList.add('logoff-button-timed-disable');
+        logoffLogOffBtn.style.pointerEvents = 'none';
+        logoffLogOffBtn.style.opacity = '0.6';
+        setTimeout(() => {
+          logoffLogOffBtn.classList.remove('logoff-button-timed-disable');
+          logoffLogOffBtn.style.pointerEvents = '';
+          logoffLogOffBtn.style.opacity = '';
+        }, enableTime - now);
+      } else {
+        logoffLogOffBtn.classList.remove('logoff-button-timed-disable');
+        logoffLogOffBtn.style.pointerEvents = '';
+        logoffLogOffBtn.style.opacity = '';
+      }
+    }
 
     // Delay before applying grayscale effect
     clearTimeout(grayscaleTimeoutId);

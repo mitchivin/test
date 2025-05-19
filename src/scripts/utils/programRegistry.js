@@ -328,7 +328,7 @@ const programData = {
 
   // Project Showcase Programs
   internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
-    dimensions: { width: 900, height: 700 },
+    dimensions: { width: 1000, height: 700 },
     statusBarText: "Exploring completed design work",
     appPath: "src/apps/projects/projects.html",
     addressBarConfig: {
