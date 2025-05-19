@@ -1397,13 +1397,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentFeedContainer.dataset.revealProcessStarted) {
             currentFeedContainer.dataset.revealProcessStarted = 'true'; // Set a flag
 
-            // REMOVED setTimeout, apply directly:
-            if (currentFeedContainer) { // Check if container still exists
-                if (!currentFeedContainer.classList.contains('loaded')) {
-                    currentFeedContainer.classList.add('loaded'); // Make container visible
+            // ADDED setTimeout for a 0.5s delay
+            setTimeout(() => {
+                if (currentFeedContainer) { // Check if container still exists
+                    if (!currentFeedContainer.classList.contains('loaded')) {
+                        currentFeedContainer.classList.add('loaded'); // Make container visible
+                    }
+                    sendMessageToParent({ type: 'projects-ready' });
                 }
-                sendMessageToParent({ type: 'projects-ready' });
-            }
+            }, 500); // 0.5 second delay
         } else if (currentFeedContainer.classList.contains('loaded')) {
             // If already loaded (e.g. from a resize after initial load), still send projects-ready 
             // to inform parent of potential layout update, but without re-adding class or delay.
@@ -1574,7 +1576,7 @@ document.addEventListener('DOMContentLoaded', () => {
             intersectionObserver.disconnect();
             intersectionObserver = null;
         }
-        gridVideos.forEach(video => { delete video.__isIntersecting; });
+        gridVideos.forEach(video => delete video.__isIntersecting);
     }
 
     // Helper to check if the lightbox is open
