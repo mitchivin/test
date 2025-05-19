@@ -309,7 +309,7 @@ export function initBootSequence(eventBus, EVENTS) {
   // ===== Log Off Dialog Management =====
   const logoffDialog = document.getElementById("logoff-dialog-container");
   const logoffLogOffBtn = document.getElementById("logoff-log-off-btn");
-  const logoffShutDownBtn = document.getElementById("logoff-shut-down-btn");
+  const logoffSwitchUserBtn = document.getElementById("logoff-switch-user-btn");
   const logoffCancelBtn = document.getElementById("logoff-cancel-btn");
   let grayscaleTimeoutId = null;
 
@@ -319,6 +319,13 @@ export function initBootSequence(eventBus, EVENTS) {
     requestAnimationFrame(() => {
         logoffDialog.classList.add("visible");
     });
+
+    // Permanently disable Switch User button
+    if (logoffSwitchUserBtn) {
+        logoffSwitchUserBtn.style.pointerEvents = 'none';
+        logoffSwitchUserBtn.style.opacity = '0.6'; // Visually disable
+        // The 'disabled' class is already added in HTML, CSS can style it further
+    }
 
     // Disable Log Off button if within 5 seconds of login
     if (logoffLogOffBtn) {
@@ -366,18 +373,6 @@ export function initBootSequence(eventBus, EVENTS) {
     };
     if (imgEl) imgEl.addEventListener("click", logOffAction);
     if (spanEl) spanEl.addEventListener("click", logOffAction);
-  }
-
-  if (logoffShutDownBtn) {
-    const imgEl = logoffShutDownBtn.querySelector("img");
-    const spanEl = logoffShutDownBtn.querySelector("span");
-    const instagramAction = (event) => {
-      event.stopPropagation(); // Prevent click from bubbling
-      hideLogoffDialog();
-      window.open("https://www.instagram.com/mitchivin", "_blank");
-    };
-    if (imgEl) imgEl.addEventListener("click", instagramAction);
-    if (spanEl) spanEl.addEventListener("click", instagramAction);
   }
 
   if (logoffCancelBtn) {

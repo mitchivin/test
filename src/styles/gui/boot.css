@@ -890,16 +890,16 @@
 
 #logoff-dialog-container {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0; /* Covers the entire viewport */
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(1px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200000; /* High z-index to be above everything */
+  z-index: 10001; /* Ensures it's above other elements like taskbar */
   opacity: 0;
-  transition: opacity 0.15s ease-in-out;
+  transition: opacity 0.15s ease-out;
+  margin-bottom: 30px; /* Added bottom margin */
 }
 
 #logoff-dialog-container.visible {
@@ -1061,8 +1061,8 @@
 }
 
 .logoff-dialog-button img {
-  width: 36px; /* Increased icon size */
-  height: 36px; /* Increased icon size */
+  width: 40px; /* Increased from 36px */
+  height: 40px; /* Increased from 36px */
   margin-bottom: 4px; /* Adjusted margin */
   background: none !important; /* Force no background on image element */
   border: none !important; /* Force no border on image element */
@@ -1076,7 +1076,7 @@
 }
 
 .logoff-dialog-button span {
-  font-size: 13px; /* Increased from 12px */
+  font-size: 13.5px; /* Increased from 13px by 0.5px */
   font-family: 'Tahoma', Arial, sans-serif; /* Matched to login screen user title */
   color: #FFFFFF; /* Explicitly white, consistent with dialog */
   line-height: 1.2; /* Matched to login screen user title */
@@ -1131,7 +1131,7 @@
   font-family: 'Tahoma', Arial, sans-serif;
   color: #222; /* Same as toolbar button text */
   padding: 2px 12px; /* Adjusted padding for text-only */
-  border-radius: 5px;
+  border-radius: 3px; /* Reduced from 5px by 3px */
   transition: box-shadow 0.13s, border 0.13s, background 0.13s;
   border: 1.5px solid transparent;
   box-shadow: none;
@@ -1150,12 +1150,12 @@
 
 @media (hover: hover) {
   .logoff-dialog-cancel-div-button:hover {
-    background: #E0E0E0; /* Slightly darker on hover */
+    background: #FFFFFF; /* Bright white background on hover */
     border-top-color: #FFFFFF;
     border-left-color: #FFFFFF;
-    border-right-color: #505050;
-    border-bottom-color: #505050;
-    box-shadow: 1px 1px 0px #505050;
+    border-right-color: #B0B0B0; /* Lighter gray for definition */
+    border-bottom-color: #B0B0B0; /* Lighter gray for definition */
+    box-shadow: 1px 1px 0px #B0B0B0; /* Lighter gray shadow */
   }
 }
 
@@ -1166,7 +1166,7 @@
   border-right-color: #FFFFFF;
   border-bottom-color: #FFFFFF;
   box-shadow: inset 1px 1px 0px #6D6D6D;
-  padding: 3px 11px 1px 13px; /* Adjusted padding shift for new default */
+  /* Removed padding shift, click effect now relies on shadow and border inversion */
 }
 
 /* Screen Grayscale Overlay */
