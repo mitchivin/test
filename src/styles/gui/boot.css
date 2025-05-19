@@ -1181,3 +1181,13 @@ body.screen-grayscale-active > *:not(#logoff-dialog-container):not(.tooltip):not
 #context-menu-container {
   filter: none !important;
 }
+
+/* Responsive scaling for logoff dialog on small screens */
+@media (max-width: 480px) {
+  .logoff-dialog {
+    transform: scale(0.9);
+    /* Optionally, adjust width if scaling causes issues or to fine-tune */
+    /* width: 90%; /* Example: use percentage width with scaling */
+    /* max-width: 320px; /* Example: ensure it doesn't exceed a certain scaled size */
+  }
+}
