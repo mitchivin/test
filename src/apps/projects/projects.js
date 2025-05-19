@@ -320,6 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function openLightbox() {
         // Pause all grid videos ONLY when opening the lightbox
         document.querySelectorAll('.feed-container .video-post video').forEach(v => { v.pause(); });
+        // When lightbox opens, the grid videos are not interactive, so their intersection observer should be off.
+        if (typeof cleanupIntersectionObserver === 'function') {
+            cleanupIntersectionObserver();
+        }
 
         // Core content setup is now handled by openLightboxByIndex
         if (currentLightboxIndex === null) {
@@ -387,8 +391,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Restore grid video playback logic after closing lightbox
         if (typeof isMaximized !== 'undefined' && isMaximized) {
-          gridVideos.forEach(video => video.play());
+          if (typeof cleanupIntersectionObserver === 'function') {
+            cleanupIntersectionObserver(); // Ensure observer is off before manually playing
+          }
+          gridVideos.forEach(video => video.play()); // Play all when maximized and lightbox closes
         } else if (typeof setupIntersectionObserver === 'function') {
+          // Pause all first, then let the observer decide based on visibility
+          gridVideos.forEach(video => video.pause());
           setupIntersectionObserver();
         }
     }
@@ -1539,29 +1548,33 @@ document.addEventListener('DOMContentLoaded', () => {
             bodyEl.classList.remove(maximizedClassName);
         }
 
-        // If the lightbox is currently open and the description card is visible (`.lightbox-media-wrapper` has `.desc-visible`):
-        // try to force a re-evaluation of its width by toggling a class that affects layout/sizing,
-        // or directly re-applying its width based on the new state.
-        // This is a more direct attempt to ensure the CSS takes hold.
         const lightboxIsOpen = isLightboxOpen();
+
         if (lightboxIsOpen) {
+            // If lightbox is open, grid videos MUST be paused.
+            // The IntersectionObserver for grid videos should be inactive.
+            if (typeof cleanupIntersectionObserver === 'function') {
+                cleanupIntersectionObserver();
+            }
             gridVideos.forEach(video => video.pause());
         } else {
-            // Only play grid videos if lightbox is closed
-            if (isMaximized) {
-                cleanupIntersectionObserver();
+            // Lightbox is closed. Grid video behavior depends on maximize state.
+            if (isMaximized) { // Window is being maximized (or is already maximized)
+                if (typeof cleanupIntersectionObserver === 'function') {
+                    cleanupIntersectionObserver();
+                }
                 gridVideos.forEach(video => video.play());
-            } else {
-                gridVideos.forEach(video => video.pause());
-                setupIntersectionObserver();
+            } else { // Window is being restored (unmaximized)
+                gridVideos.forEach(video => video.pause()); // Pause all first
+                if (typeof setupIntersectionObserver === 'function') {
+                    setupIntersectionObserver(); // Observer will decide which to play
+                }
             }
         }
 
-        // ... existing code for resizing description card ...
+        // Adjust lightbox description card sizing if lightbox is open
         const lightbox = document.getElementById('project-lightbox');
-        const lightboxContent = document.getElementById('lightbox-content');
-        const lightboxIsOpenForCard = lightbox && lightbox.style.display === 'flex';
-        if (lightboxIsOpenForCard) {
+        if (lightbox && lightbox.style.display === 'flex') {
             const mediaWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
             if (mediaWrapper && mediaWrapper.classList.contains('desc-visible')) {
                 const animWrapper = mediaWrapper.querySelector('.desc-card-anim-wrapper');
