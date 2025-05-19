@@ -1397,17 +1397,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentFeedContainer.dataset.revealProcessStarted) {
             currentFeedContainer.dataset.revealProcessStarted = 'true'; // Set a flag
 
-            setTimeout(() => {
-                if (currentFeedContainer) { // Check if container still exists
-                    if (!currentFeedContainer.classList.contains('loaded')) {
-                        currentFeedContainer.classList.add('loaded'); // Make container visible
-                    }
-                    sendMessageToParent({ type: 'projects-ready' });
+            // REMOVED setTimeout, apply directly:
+            if (currentFeedContainer) { // Check if container still exists
+                if (!currentFeedContainer.classList.contains('loaded')) {
+                    currentFeedContainer.classList.add('loaded'); // Make container visible
                 }
-                // Optional: delete currentFeedContainer.dataset.revealProcessStarted; 
-                // if a re-reveal might be needed later on the same instance.
-                // For now, assume one reveal per load of the iframe content.
-            }, 100); // 100ms delay
+                sendMessageToParent({ type: 'projects-ready' });
+            }
         } else if (currentFeedContainer.classList.contains('loaded')) {
             // If already loaded (e.g. from a resize after initial load), still send projects-ready 
             // to inform parent of potential layout update, but without re-adding class or delay.
@@ -1498,7 +1494,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Assuming mediaElements is defined in the outer scope of DOMContentLoaded
             if (window.projectsLoadedCount === mediaElements.length) { 
                 applyMasonryLayout(); 
-            }
+                    }
         }
         
         // Reset the counter at the beginning of each DOMContentLoaded for this iframe instance
