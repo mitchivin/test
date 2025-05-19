@@ -285,24 +285,12 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
     return null;
 }
 
-let isRevealScheduledOrDone = false; // Flag for the reveal scheduler
-
 document.addEventListener('DOMContentLoaded', () => {
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
     const posts = document.querySelectorAll('.post');
     const feedContainer = document.querySelector('.feed-container');
-
-    // Reset reveal flags on DOMContentLoaded for this iframe instance
-    isRevealScheduledOrDone = false;
-    if (feedContainer && feedContainer.dataset.finalRevealInProgress) {
-        delete feedContainer.dataset.finalRevealInProgress;
-    }
-    if (feedContainer && feedContainer.classList.contains('loaded')) {
-         feedContainer.classList.remove('loaded'); // Ensure it's not pre-loaded from a bad state
-    }
-
 
     userPrefersDescriptionVisible = isDesktop(); // Initialize based on view
 
@@ -1340,19 +1328,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedContainerPosts = Array.from(feedContainer.querySelectorAll('.post'));
 
     function applyMasonryLayout() {
-        const currentFeedContainer = document.querySelector('.feed-container');
+        const currentFeedContainer = document.querySelector('.feed-container'); // Use a local const
         const currentFeedPosts = Array.from(currentFeedContainer ? currentFeedContainer.querySelectorAll('.post') : []);
 
-        if (!currentFeedContainer) {
-            sendMessageToParent({ type: 'projects-ready' });
+        if (!currentFeedContainer) { // Ensure container exists
+            sendMessageToParent({ type: 'projects-ready' }); // Send ready even if no container somehow
             return;
         }
 
         if (currentFeedPosts.length === 0) {
-            // If no posts, and reveal process has started (meaning scheduleFinalLayoutAndReveal was called),
-            // scheduleFinalLayoutAndReveal will handle adding 'loaded' for empty state.
-            // If applyMasonryLayout is called directly (e.g. resize) and it's empty, ensure height is auto.
-            currentFeedContainer.style.height = 'auto';
+            if (!currentFeedContainer.classList.contains('loaded')) {
+                currentFeedContainer.classList.add('loaded');
+            }
+            currentFeedContainer.style.height = 'auto'; // Or some minimal height for empty state
             sendMessageToParent({ type: 'projects-ready' });
             return;
         }
@@ -1365,8 +1353,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const availableWidth = currentFeedContainer.offsetWidth - containerPaddingLeft - containerPaddingRight;
         
-        let numColumns = 2;
-        const gap = 12;
+        let numColumns = 2; // Default for mobile
+        const gap = 12; // Gap between posts, both horizontally and vertically
 
         if (currentFeedContainer.offsetWidth >= 1200) {
             numColumns = 4;
@@ -1403,59 +1391,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const tallestColumnContentHeight = Math.max(0, ...effectiveColumnHeights);
         
         currentFeedContainer.style.height = `${containerPaddingTop + tallestColumnContentHeight + containerPaddingBottom}px`;
-        
-        sendMessageToParent({ type: 'projects-ready' });
-    }
 
-    function scheduleFinalLayoutAndReveal() {
-        const currentFeedContainer = document.querySelector('.feed-container');
-        if (!currentFeedContainer) {
-            sendMessageToParent({ type: 'projects-ready' }); // Should not happen if checks are in place
-            return;
-        }
+        // AT THE END OF applyMasonryLayout:
+        // Check if reveal is already scheduled or done
+        if (!currentFeedContainer.dataset.revealProcessStarted) {
+            currentFeedContainer.dataset.revealProcessStarted = 'true'; // Set a flag
 
-        // If already revealed, or a reveal is actively in its timed sequence, do nothing.
-        if (isRevealScheduledOrDone || currentFeedContainer.dataset.finalRevealInProgress === 'true') {
-            // If it's already loaded, a resize or similar might have called this.
-            // Ensure layout is current, but don't re-reveal.
-            if (currentFeedContainer.classList.contains('loaded')) {
-                applyMasonryLayout();
-            }
-            return;
-        }
-        
-        currentFeedContainer.dataset.finalRevealInProgress = 'true';
-
-        // Stability delay
-        setTimeout(() => {
-            applyMasonryLayout(); // Perform the definitive layout
-
-            // Cosmetic delay for fade-in
             setTimeout(() => {
-                if (currentFeedContainer) { // Check again
-                    currentFeedContainer.style.visibility = 'visible'; // Make it visible before fade-in
+                if (currentFeedContainer) { // Check if container still exists
                     if (!currentFeedContainer.classList.contains('loaded')) {
-                        currentFeedContainer.classList.add('loaded');
+                        currentFeedContainer.classList.add('loaded'); // Make container visible
                     }
+                    sendMessageToParent({ type: 'projects-ready' });
                 }
-                isRevealScheduledOrDone = true; // Mark that the reveal sequence has completed
-                if(currentFeedContainer) delete currentFeedContainer.dataset.finalRevealInProgress;
-            }, 30); // Cosmetic delay (30ms)
-
-        }, 350); // Stability delay (350ms)
+                // Optional: delete currentFeedContainer.dataset.revealProcessStarted; 
+                // if a re-reveal might be needed later on the same instance.
+                // For now, assume one reveal per load of the iframe content.
+            }, 100); // 100ms delay
+        } else if (currentFeedContainer.classList.contains('loaded')) {
+            // If already loaded (e.g. from a resize after initial load), still send projects-ready 
+            // to inform parent of potential layout update, but without re-adding class or delay.
+            // However, this could be too chatty if applyMasonryLayout is called often on resize.
+            // Let's stick to sending 'projects-ready' only on the first reveal via the timeout for now.
+            // To make it send on subsequent resizes that *successfully* lay out, we'd send it outside/after this if block.
+            // For now, the projects-ready signal is tied to the first reveal.
+        }
     }
-
 
     function initMasonryWithVideoCheck() {
-        if (!feedContainer) {
-             scheduleFinalLayoutAndReveal(); 
-             return;
-        }
+        if (!feedContainer) return;
 
         const videos = feedContainerPosts.filter(post => post.querySelector('video')).map(post => post.querySelector('video'));
 
         if (videos.length === 0) {
-            scheduleFinalLayoutAndReveal(); 
+            applyMasonryLayout();
             return;
         }
 
@@ -1463,148 +1432,103 @@ document.addEventListener('DOMContentLoaded', () => {
         let videosReported = 0;
 
         const onMediaReady = (mediaElement, eventType) => {
-            // Prevent multiple calls for the same element
-            const alreadyProcessedFlag = `__${eventType}Processed`;
-            if (mediaElement[alreadyProcessedFlag]) return;
-            mediaElement[alreadyProcessedFlag] = true;
-            
             mediaElement.removeEventListener('loadedmetadata', onMediaReadyHandler);
             mediaElement.removeEventListener('loadeddata', onMediaReadyHandler);
             mediaElement.removeEventListener('error', onErrorHandler);
             
             videosReported++;
             if (videosReported === videosToMonitor) {
-                scheduleFinalLayoutAndReveal(); 
+                applyMasonryLayout();
             }
         };
         
         const onMediaReadyHandler = function(event) { onMediaReady(this, event.type); };
         const onErrorHandler = function(event) { 
-            onMediaReady(this, event.type);
+            onMediaReady(this, event.type); // Count it as "done" to not block layout
         };
 
         videos.forEach(video => {
-            if (video.readyState >= 2) { // HAVE_CURRENT_DATA
-                // To avoid double counting if already processed by a quick follow-up
-                if (!video.__loadedmetadataProcessed && !video.__loadeddataProcessed) {
-                     videosReported++;
-                }
+            if (video.readyState >= 2) { // HAVE_CURRENT_DATA (should mean dimensions are available)
+                videosReported++;
             } else {
                 video.addEventListener('loadedmetadata', onMediaReadyHandler);
-                video.addEventListener('loadeddata', onMediaReadyHandler); 
+                video.addEventListener('loadeddata', onMediaReadyHandler); // For some browsers/cases
                 video.addEventListener('error', onErrorHandler);
             }
         });
 
         if (videosReported === videosToMonitor && videosToMonitor > 0) {
-            scheduleFinalLayoutAndReveal(); 
-        } else if (videosToMonitor === 0) { 
-             scheduleFinalLayoutAndReveal();
+            applyMasonryLayout();
         }
     }
 
     if (feedContainer) {
+        initMasonryWithVideoCheck(); // Initial layout calculation
+
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
+            // On resize, assume media dimensions are stable if they were loaded.
             resizeTimeout = setTimeout(applyMasonryLayout, 150); 
         });
 
-        setTimeout(scheduleFinalLayoutAndReveal, 1200); // Safety net / ultimate fallback
+        // Safety re-layout after 1.2s to catch late-loading videos (especially on mobile)
+        setTimeout(applyMasonryLayout, 1200);
 
-        window.addEventListener('scroll', () => { // These should only relayout if already visible
-            if (feedContainer.classList.contains('loaded')) {
-                 setTimeout(applyMasonryLayout, 100);
-            }
+        // Re-apply layout on scroll and touchend (mobile interaction)
+        window.addEventListener('scroll', () => {
+            setTimeout(applyMasonryLayout, 100);
         });
-        window.addEventListener('touchend', () => { // These should only relayout if already visible
-             if (feedContainer.classList.contains('loaded')) {
-                setTimeout(applyMasonryLayout, 100);
-            }
+        window.addEventListener('touchend', () => {
+            setTimeout(applyMasonryLayout, 100);
         });
 
-        const allMediaPosts = Array.from(feedContainer.querySelectorAll('.post'));
-        const mediaElements = allMediaPosts.map(post => post.querySelector('img, video')).filter(Boolean);
-        
-        window.projectsLoadedCount = 0; // Reset per DOMContentLoaded
-
+        // Notify parent when ready (first load only)
+        // Wait for all images and videos to be loaded, then send message
+        const posts = Array.from(feedContainer.querySelectorAll('.post'));
+        const mediaElements = posts.map(post => post.querySelector('img, video')).filter(Boolean);
+        let loadedCount = 0;
         function checkAllLoadedInternal() {
-            // This function is called by each media element's load/error event
             if (typeof window.projectsLoadedCount === 'undefined') {
-                window.projectsLoadedCount = 0;
+                window.projectsLoadedCount = 0; // Should be redundant due to above but safe
             }
             window.projectsLoadedCount++;
 
-            if (window.projectsLoadedCount >= mediaElements.length) { 
-                // >= handles cases where some might have been ready sync and others async
-                scheduleFinalLayoutAndReveal(); 
+            // Ensure mediaElements is accessible here or passed appropriately
+            // Assuming mediaElements is defined in the outer scope of DOMContentLoaded
+            if (window.projectsLoadedCount === mediaElements.length) { 
+                applyMasonryLayout(); 
             }
         }
         
+        // Reset the counter at the beginning of each DOMContentLoaded for this iframe instance
+        window.projectsLoadedCount = 0;
+
         if (mediaElements.length > 0) {
-            let syncReadyCount = 0;
             mediaElements.forEach(el => {
                 const isImg = el.tagName === 'IMG';
                 const isVid = el.tagName === 'VIDEO';
                 let isAlreadyReady = false;
 
                 if (isImg) {
-                    // For images, .complete can be true but naturalHeight 0 if src is invalid or not yet decoded
-                    isAlreadyReady = el.complete && el.naturalHeight !== 0;
+                    isAlreadyReady = el.complete;
                 } else if (isVid) {
                     isAlreadyReady = el.readyState >= 2; // HAVE_CURRENT_DATA
                 }
 
                 if (isAlreadyReady) {
-                    syncReadyCount++;
-                    // If it's already ready, we still need to ensure projectsLoadedCount is incremented.
-                    // Call checkAllLoadedInternal in a timeout to allow the loop to finish attaching listeners.
-                    setTimeout(() => {
-                        // Check if it was already counted by an event listener that fired super fast
-                        if (!el.__eventBasedLoadCounted) {
-                           if (typeof window.projectsLoadedCount === 'undefined') window.projectsLoadedCount = 0;
-                           window.projectsLoadedCount++;
-                           if (window.projectsLoadedCount >= mediaElements.length) {
-                               scheduleFinalLayoutAndReveal();
-                           }
-                        }
-                    }, 0);
+                    // Defer to next tick to allow browser to potentially calculate dimensions
+                    setTimeout(() => checkAllLoadedInternal.call(el), 0);
                 } else {
-                    const eventToListen = isImg ? 'load' : 'loadeddata';
-                    const errorHandler = () => {
-                        el.__eventBasedLoadCounted = true; // Mark it
-                        checkAllLoadedInternal.call(el);
-                        el.removeEventListener(eventToListen, loadHandler);
-                        el.removeEventListener('error', errorHandler);
-                    };
-                    const loadHandler = () => {
-                        el.__eventBasedLoadCounted = true; // Mark it
-                        checkAllLoadedInternal.call(el);
-                        el.removeEventListener(eventToListen, loadHandler);
-                        el.removeEventListener('error', errorHandler);
-                    };
-                    el.addEventListener(eventToListen, loadHandler);
-                    el.addEventListener('error', errorHandler); 
+                    el.addEventListener('load', checkAllLoadedInternal);
+                    el.addEventListener('loadeddata', checkAllLoadedInternal);
+                    el.addEventListener('error', checkAllLoadedInternal);
                 }
             });
-
-            // If all media were ready synchronously
-            if (syncReadyCount === mediaElements.length) {
-                scheduleFinalLayoutAndReveal();
-            }
         } else {
-            // No media elements to load
-            scheduleFinalLayoutAndReveal();
+            // No media, proceed directly
+            applyMasonryLayout(); // This will now also make container visible and send ready
         }
-        
-        // Fallback for video dimension checks - `initMasonryWithVideoCheck` is now mostly superseded
-        // by the general mediaElements loading, but can be a secondary check if specific video
-        // handling for `loadedmetadata` is still valuable.
-        // For now, primary loading logic is above. If `initMasonryWithVideoCheck` is crucial
-        // for *just videos* beyond the general `mediaElements` check, it could be called
-        // as part of `scheduleFinalLayoutAndReveal` or after all general media is done.
-        // Let's simplify and rely on the main mediaElements loop.
-        // initMasonryWithVideoCheck(); // Consider if this is still needed with the new robust media check
     }
 
     // --- Video Grid Play/Pause Logic for Maximized/Unmaximized States ---
@@ -1699,8 +1623,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Adjust lightbox description card sizing if lightbox is open
-        const lightboxInternal = document.getElementById('project-lightbox'); // Renamed to avoid conflict
-        if (lightboxInternal && lightboxInternal.style.display === 'flex') {
+        const lightbox = document.getElementById('project-lightbox');
+        if (lightbox && lightbox.style.display === 'flex') {
             const mediaWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
             if (mediaWrapper && mediaWrapper.classList.contains('desc-visible')) {
                 const animWrapper = mediaWrapper.querySelector('.desc-card-anim-wrapper');
@@ -1735,7 +1659,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.data.type === 'toolbar-action') {
                 if (event.data.action === 'viewDescription') {
                     const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
-                    // let description = ''; // Unused
+                    let description = '';
                     if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
                         // If on mobile, show subheading in the bottom overlay
                         const currentPostData = allPosts[currentLightboxIndex].dataset;
@@ -1744,8 +1668,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             // The 'descriptionText' for toggleMobileOverlays will be the actual description.
                             // The title for the top overlay is titleForToggle.
                             // The description for the bottom overlay will be fetched inside toggleMobileOverlays itself.
-                            // const linkTypeFromData = currentPostData.linkType; // Unused
-                            // const linkUrlFromData = currentPostData.linkUrl; // Unused
+                            const linkTypeFromData = currentPostData.linkType;
+                            const linkUrlFromData = currentPostData.linkUrl;
                             // Pass the wrapper to the generalized toggle function, using subheading for the bottom overlay
                             toggleMobileOverlays(titleForToggle, "", wrapper);
                         } else {
@@ -1774,10 +1698,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize for default (unmaximized) state
-    if (typeof setupIntersectionObserver === 'function') { // Guard for safety
-        setupIntersectionObserver();
-    }
-
+    setupIntersectionObserver();
 
     // Expose closeLightbox globally for message handler
     window.closeLightbox = closeLightbox;
