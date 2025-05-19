@@ -279,7 +279,7 @@ export function showNetworkBalloon() {
   document.body.appendChild(balloonRoot);
 
   const headerText = "Welcome to my portfolio";
-  const mainText = "It's also the world's best XP recreation.<br>Built from scratch, to the pixel, by me. ";
+  const mainText = "It's also the world's best XP recreation.<br>Built from scratch, to the pixel, by Mitch Ivin.";
 
   balloonRoot.innerHTML = `
     <div class="balloon">
