@@ -655,9 +655,9 @@ export default class StartMenu {
       window.open(url, "_blank");
       this.closeStartMenu();
     } else if (action === "log-off") {
-      sessionStorage.removeItem("logged_in");
-      this.eventBus.publish(EVENTS.LOG_OFF_REQUESTED);
-      this.closeStartMenu();
+      // Instead of direct logoff, request confirmation
+      this.eventBus.publish(EVENTS.LOG_OFF_CONFIRMATION_REQUESTED);
+      this.closeStartMenu(); // Close start menu after clicking
     } else if (action === "shut-down") {
       sessionStorage.removeItem("logged_in");
       window.location.reload();

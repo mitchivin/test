@@ -882,3 +882,260 @@
     inset: 40px 0 !important; /* Reduce top/bottom insets to give more space */
   }
 }
+
+/* Log Off Dialog Styles */
+.logoff-dialog-hidden {
+  display: none !important;
+}
+
+#logoff-dialog-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200000; /* High z-index to be above everything */
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+#logoff-dialog-container.visible {
+  opacity: 1;
+}
+
+.logoff-dialog {
+  background-color: #ECE9D8; /* XP dialog background */
+  border: 1px solid #000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  width: 350px; /* Reduced width from 400px by 50px */
+  font-family: 'Tahoma', sans-serif;
+  font-size: 11px;
+  color: #000;
+  /* Standard XP window_ ETCHED BORDER, but this dialog is simpler */
+  border-top: 1px solid #2b2b2b;
+  border-left: 1px solid #2b2b2b;
+  border-right: 1px solid #2b2b2b;
+  border-bottom: 1px solid #2b2b2b;
+  padding: 0; /* Remove padding from main dialog, will be handled by sections */
+}
+
+.logoff-dialog-body {
+  padding: 0; /* Remove padding, sections will manage their own */
+  /* background: #4A68A3; */ /* Main dialog content background (the lighter blue from image) */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* Stretch children to fill width */
+}
+
+.logoff-dialog-header-content {
+  display: flex;
+  align-items: center;
+  padding: 4px 4px 4px 16px; /* Increased left padding */
+  color: #FFFFFF; /* White text for header */
+  font-size: 20px; /* Increased font size */
+  font-weight: 500;
+  font-family: 'Arial', 'Helvetica', sans-serif; /* Changed font family */
+  /* background-color: #002d99; */ /* Login screen dark blue */
+  background: linear-gradient(to right, #002A8C, #0039A9 50%, #002A8C); /* Dark blue gradient */
+  position: relative; /* For pseudo-element positioning */
+  letter-spacing: 0.1px;
+  justify-content: space-between; /* Push icon to the right */
+  height: 50px; /* Fixed height for top bar */
+  box-sizing: border-box; /* Ensure padding is within height */
+}
+
+.logoff-dialog-header-content::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    transparent 25%,
+    #bad7f8 45%,
+    #bad7f8 55%,
+    transparent 75%
+  );
+  pointer-events: none;
+}
+
+.logoff-dialog-header-icon {
+  width: 36px; /* Increased icon size */
+  height: 36px; /* Increased icon size */
+  margin-right: 10px; /* Reverted margin */
+  order: 2; /* Move icon to the right */
+}
+
+.logoff-dialog-header-text {
+  flex-grow: 1;
+  order: 1; /* Ensure text is on the left */
+}
+
+.logoff-dialog-separator-bar {
+  background-color: #3E5890; /* Darker blue for the separator bars */
+  height: auto; /* Adjust as needed, or use padding for content */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.logoff-dialog-separator-bar-top {
+  /* padding: 15px 25px; */ /* Padding above buttons */
+  /* No border needed if it's just a color band */
+  display: none; /* Hide this element */
+}
+
+.logoff-dialog-separator-bar-bottom {
+  padding: 0 15px; /* Adjusted padding, vertical handled by flex */
+  /* No border needed if it's just a color band */
+  /* background-color: #002d99; */ /* Login screen dark blue */
+  background: linear-gradient(to right, #002A8C, #0039A9 50%, #002A8C); /* Dark blue gradient */
+  position: relative; /* For pseudo-element positioning */
+  height: 50px; /* Fixed height for bottom bar */
+  display: flex; /* For aligning footer content */
+  align-items: center; /* Vertically center footer content */
+  justify-content: flex-end; /* Push footer content (cancel button) to the right */
+  box-sizing: border-box; /* Ensure padding is within height */
+}
+
+.logoff-dialog-button-container {
+  display: flex;
+  /* justify-content: center; */
+  justify-content: space-evenly; /* Distribute space evenly around items */
+  /* gap: 30px; */ /* Remove gap, space-evenly will handle it */
+  width: auto; /* Let it shrink / be centered by parent if body has padding */
+  margin: 0; /* Removed margin-bottom, padding now on separator bar */
+  padding: 36px 0; /* Reduced padding by 25px top/bottom for 50px total height decrease */
+  /* background-color: #587cdb; */ /* Login screen lighter blue */
+  background: linear-gradient(to right, #587CDB, #688CEB 50%, #587CDB); /* Lighter blue gradient */
+  flex-grow: 1; /* Allow this container to take available vertical space */
+  align-items: center; /* Vertically center buttons if container stretches */
+  /* position: relative; */ /* No longer needed for pseudo-element */
+}
+
+/* .logoff-dialog-button-container::before { */ /* Removed this pseudo-element */
+  /* content: ""; */
+  /* position: absolute; */
+  /* top: 50%; */
+  /* left: 0; */
+  /* right: 0; */
+  /* width: 100%; */
+  /* height: 3px; */
+  /* transform: translateY(-50%); */
+  /* background: linear-gradient( */
+  /* to right, */
+  /* transparent 25%, */
+  /* #bad7f8 45%, */
+  /* #bad7f8 55%, */
+  /* transparent 75% */
+  /* ); */
+  /* z-index: 0; */
+/* } */
+
+.logoff-dialog-button {
+  /* background-color: transparent; */
+  /* border: none; */ /* Ensure no default border */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* padding: 10px; */ /* Remove padding to shrink container */
+  cursor: pointer; /* Re-add for div elements */
+  text-align: center;
+  /* width: 100px; */ /* Remove fixed width to shrink container */
+  background: none !important; 
+  border: none !important; 
+}
+
+.logoff-dialog-button:hover {
+  /* background-color: rgba(255, 255, 255, 0.1); */ /* Remove hover background */
+  /* border-radius: 3px; */ /* No longer needed */
+}
+.logoff-dialog-button:active {
+  /* background-color: rgba(0, 0, 0, 0.1); */ /* Remove active background */
+}
+
+.logoff-dialog-button img {
+  width: 36px; /* Increased icon size */
+  height: 36px; /* Increased icon size */
+  margin-bottom: 4px; /* Adjusted margin */
+  background: none !important; /* Force no background on image element */
+  border: none !important; /* Force no border on image element */
+  transition: filter 0.15s ease-in-out; /* Smooth transition for brightness */
+  cursor: pointer; /* Indicate clickable area */
+  /* position: relative; */ /* No longer needed */
+  /* z-index: 1; */ /* No longer needed */
+}
+
+.logoff-dialog-button:hover img {
+  filter: brightness(1.2); /* Light up icon on hover */
+}
+
+.logoff-dialog-button span {
+  font-size: 12px; /* Matched to login screen user title */
+  font-family: 'Tahoma', Arial, sans-serif; /* Matched to login screen user title */
+  color: #FFFFFF; /* Explicitly white, consistent with dialog */
+  line-height: 1.2; /* Matched to login screen user title */
+  letter-spacing: 0.05em;
+  cursor: pointer; /* Indicate clickable area */
+  /* position: relative; */ /* No longer needed */
+  /* z-index: 1; */ /* No longer needed */
+}
+
+.logoff-dialog-footer {
+  /* background: #4A68A3; */ /* Footer is now part of the dark blue bar */
+  padding: 0; /* Remove padding, alignment handled by flex on parent */
+  /* text-align: right; */ /* Alignment handled by parent's justify-content */
+  /* width: 100%; */ /* Not needed with parent flex */
+  /* border-top: 1px solid #3B5587; */ /* Separator is now the bar itself */
+}
+
+.logoff-dialog-cancel-button {
+  /* Standard XP button styles - mostly deferred to xp.css by adding .xp-button class */
+  /* background-color: #f0f0f0; */
+  /* border: 1px solid #000000; */
+  /* border-top-color: #FFFFFF; */
+  /* border-left-color: #FFFFFF; */
+  /* border-right-color: #6D6D6D; */
+  /* border-bottom-color: #6D6D6D; */
+  /* box-shadow: 1px 1px 0px #6D6D6D, inset 1px 1px 0px #C0C0C0; */
+  /* min-width: 77px; */ 
+  /* font-family: 'Tahoma', sans-serif; */ /* Should be inherited from xp.css */
+  /* font-size: 11px; */ /* Should be inherited from xp.css */
+  /* cursor: pointer; */ /* Defer to xp.css */
+  /* border-radius: 5px; */ /* Removing to default to xp.css */
+  /* height: auto; */ /* Removing to default to xp.css */
+}
+
+.logoff-dialog-cancel-button:hover {
+  /* border-color: #0078D7; */ /* XP hover highlight - defer to xp.css */
+}
+
+.logoff-dialog-cancel-button:active {
+  /* background-color: #d4d0c8; */
+  /* border-top-color: #6D6D6D; */
+  /* border-left-color: #6D6D6D; */
+  /* border-right-color: #FFFFFF; */
+  /* border-bottom-color: #FFFFFF; */
+  /* box-shadow: inset 1px 1px 0px #6D6D6D; */
+  /* Defer active state to xp.css */
+}
+
+
+/* Screen Grayscale Overlay */
+body.screen-grayscale-active > *:not(#logoff-dialog-container):not(.tooltip):not(#context-menu-container) {
+  filter: grayscale(100%) brightness(0.7);
+  transition: filter 0.8s ease-in-out; /* Increased duration for a slower fade */
+}
+
+/* Ensure the dialog itself and tooltips/context menus are not grayscaled */
+#logoff-dialog-container,
+.tooltip,
+#context-menu-container {
+  filter: none !important;
+}

@@ -33,15 +33,18 @@ export const EVENTS = {
   WINDOW_FOCUSED: "window:focused", // Window has received focus
   WINDOW_MINIMIZED: "window:minimized", // Window has been minimized
   WINDOW_RESTORED: "window:restored", // Window has been restored from minimized
+  WINDOW_TOOLBAR_ACTION: "windowToolbarAction",
+  PROGRAM_OPEN_INSTANCE: "programOpenInstance",
+  LOG_OFF_CONFIRMATION_REQUESTED: "logOffConfirmationRequested", // New event for logoff dialog
+  SHUTDOWN_REQUESTED: "shutdownRequested",
 
   // UI Control Events
   TASKBAR_ITEM_CLICKED: "taskbar:item:clicked", // Taskbar button clicked
-  STARTMENU_TOGGLE: "startmenu:toggle", // Toggle start menu visibility
+  STARTMENU_TOGGLE: "startMenuToggle",
   STARTMENU_OPENED: "startmenu:opened", // Start menu has been opened
   STARTMENU_CLOSED: "startmenu:closed", // Start menu has been closed
   STARTMENU_CLOSE_REQUEST: "startmenu:close-request", // Request to close start menu
   LOG_OFF_REQUESTED: "logoff:requested", // User requested log off
-  SHUTDOWN_REQUESTED: "shutdown:requested", // User requested shutdown
 };
 
 // ===== EventBus Class =====

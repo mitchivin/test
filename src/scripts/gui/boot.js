@@ -222,6 +222,12 @@ export function initBootSequence(eventBus, EVENTS) {
 
   // Log off: show login screen, hide desktop, reset session
   if (!eventBus || !EVENTS) return;
+
+  // Listen for request to show logoff confirmation dialog
+  eventBus.subscribe(EVENTS.LOG_OFF_CONFIRMATION_REQUESTED, () => {
+    showLogoffDialog();
+  });
+
   eventBus.subscribe(EVENTS.LOG_OFF_REQUESTED, () => {
     try {
       logoffSound.currentTime = 0;
@@ -296,6 +302,66 @@ export function initBootSequence(eventBus, EVENTS) {
       });
       shutdownIcon._shutdownHandlerAttached = true;
     }
+  }
+
+  // ===== Log Off Dialog Management =====
+  const logoffDialog = document.getElementById("logoff-dialog-container");
+  const logoffLogOffBtn = document.getElementById("logoff-log-off-btn");
+  const logoffShutDownBtn = document.getElementById("logoff-shut-down-btn");
+  const logoffCancelBtn = document.getElementById("logoff-cancel-btn");
+  let grayscaleTimeoutId = null;
+
+  function showLogoffDialog() {
+    if (!logoffDialog) return;
+    logoffDialog.classList.remove("logoff-dialog-hidden");
+    requestAnimationFrame(() => {
+        logoffDialog.classList.add("visible");
+    });
+
+    // Delay before applying grayscale effect
+    clearTimeout(grayscaleTimeoutId);
+    grayscaleTimeoutId = setTimeout(() => {
+      document.body.classList.add("screen-grayscale-active");
+    }, 700); // 700ms delay
+  }
+
+  function hideLogoffDialog() {
+    if (!logoffDialog) return;
+    logoffDialog.classList.remove("visible");
+    logoffDialog.classList.add("logoff-dialog-hidden"); // Re-hide it properly
+
+    document.body.classList.remove("screen-grayscale-active");
+    clearTimeout(grayscaleTimeoutId); // Clear timeout if dialog is hidden before it fires
+  }
+
+  if (logoffLogOffBtn) {
+    const imgEl = logoffLogOffBtn.querySelector("img");
+    const spanEl = logoffLogOffBtn.querySelector("span");
+    const logOffAction = (event) => {
+      event.stopPropagation(); // Prevent click from bubbling
+      hideLogoffDialog();
+      eventBus.publish(EVENTS.LOG_OFF_REQUESTED);
+    };
+    if (imgEl) imgEl.addEventListener("click", logOffAction);
+    if (spanEl) spanEl.addEventListener("click", logOffAction);
+  }
+
+  if (logoffShutDownBtn) {
+    const imgEl = logoffShutDownBtn.querySelector("img");
+    const spanEl = logoffShutDownBtn.querySelector("span");
+    const shutDownAction = (event) => {
+      event.stopPropagation(); // Prevent click from bubbling
+      hideLogoffDialog();
+      eventBus.publish(EVENTS.SHUTDOWN_REQUESTED);
+    };
+    if (imgEl) imgEl.addEventListener("click", shutDownAction);
+    if (spanEl) spanEl.addEventListener("click", shutDownAction);
+  }
+
+  if (logoffCancelBtn) {
+    logoffCancelBtn.addEventListener("click", () => {
+      hideLogoffDialog();
+    });
   }
 }
 

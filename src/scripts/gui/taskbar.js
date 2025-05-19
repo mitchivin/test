@@ -288,7 +288,7 @@ export function showNetworkBalloon() {
         <img class="balloon__header__img" src="assets/gui/taskbar/welcome.webp" alt="welcome" />
         <span class="balloon__header__text">${headerText}</span>
       </div>
-      <p class="balloon__text__first">${mainText}</p>
+      <p class="balloon__text__first" style="padding: 0 8px 0 2px;">${mainText}</p>
       <div class="balloon-pointer-anchor" style="position:absolute;bottom:-19px;right:24px;width:0;height:0;"></div>
     </div>
   `;
