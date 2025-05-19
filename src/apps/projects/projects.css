@@ -184,6 +184,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     opacity: 0; /* Initially hidden to prevent FOUC */
+    visibility: hidden; /* Add this line to prevent FOUC */
     transition: opacity 0.3s ease-in-out; /* Smooth transition for reveal */
 }
 

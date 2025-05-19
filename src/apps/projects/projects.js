@@ -285,12 +285,24 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
     return null;
 }
 
+let isRevealScheduledOrDone = false; // Flag for the reveal scheduler
+
 document.addEventListener('DOMContentLoaded', () => {
     const lightbox = document.getElementById('project-lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxDetails = document.getElementById('lightbox-details');
     const posts = document.querySelectorAll('.post');
     const feedContainer = document.querySelector('.feed-container');
+
+    // Reset reveal flags on DOMContentLoaded for this iframe instance
+    isRevealScheduledOrDone = false;
+    if (feedContainer && feedContainer.dataset.finalRevealInProgress) {
+        delete feedContainer.dataset.finalRevealInProgress;
+    }
+    if (feedContainer && feedContainer.classList.contains('loaded')) {
+         feedContainer.classList.remove('loaded'); // Ensure it's not pre-loaded from a bad state
+    }
+
 
     userPrefersDescriptionVisible = isDesktop(); // Initialize based on view
 
@@ -1328,37 +1340,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedContainerPosts = Array.from(feedContainer.querySelectorAll('.post'));
 
     function applyMasonryLayout() {
-        if (!feedContainer || feedContainerPosts.length === 0) {
+        const currentFeedContainer = document.querySelector('.feed-container');
+        const currentFeedPosts = Array.from(currentFeedContainer ? currentFeedContainer.querySelectorAll('.post') : []);
+
+        if (!currentFeedContainer) {
+            sendMessageToParent({ type: 'projects-ready' });
             return;
         }
 
-        const containerStyle = getComputedStyle(feedContainer);
+        if (currentFeedPosts.length === 0) {
+            // If no posts, and reveal process has started (meaning scheduleFinalLayoutAndReveal was called),
+            // scheduleFinalLayoutAndReveal will handle adding 'loaded' for empty state.
+            // If applyMasonryLayout is called directly (e.g. resize) and it's empty, ensure height is auto.
+            currentFeedContainer.style.height = 'auto';
+            sendMessageToParent({ type: 'projects-ready' });
+            return;
+        }
+
+        const containerStyle = getComputedStyle(currentFeedContainer);
         const containerPaddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
         const containerPaddingTop = parseFloat(containerStyle.paddingTop) || 0;
         const containerPaddingRight = parseFloat(containerStyle.paddingRight) || 0;
         const containerPaddingBottom = parseFloat(containerStyle.paddingBottom) || 0;
 
-        const availableWidth = feedContainer.offsetWidth - containerPaddingLeft - containerPaddingRight;
+        const availableWidth = currentFeedContainer.offsetWidth - containerPaddingLeft - containerPaddingRight;
         
-        let numColumns = 2; // Default for mobile
-        const gap = 12; // Gap between posts, both horizontally and vertically
+        let numColumns = 2;
+        const gap = 12;
 
-        if (feedContainer.offsetWidth >= 1200) {
+        if (currentFeedContainer.offsetWidth >= 1200) {
             numColumns = 4;
-        } else if (feedContainer.offsetWidth >= 768) {
+        } else if (currentFeedContainer.offsetWidth >= 768) {
             numColumns = 3;
         }
 
         const columnWidth = (availableWidth - (numColumns - 1) * gap) / numColumns;
 
-        feedContainerPosts.forEach(post => {
+        currentFeedPosts.forEach(post => {
             post.style.position = 'absolute'; 
             post.style.width = `${columnWidth}px`;
         });
 
         const columnHeights = Array(numColumns).fill(0);
 
-        feedContainerPosts.forEach(post => {
+        currentFeedPosts.forEach(post => {
             const postHeight = post.offsetHeight;
             
             let shortestColumnIndex = 0;
@@ -1377,16 +1402,60 @@ document.addEventListener('DOMContentLoaded', () => {
         const effectiveColumnHeights = columnHeights.map(h => h > 0 ? h - gap : 0);
         const tallestColumnContentHeight = Math.max(0, ...effectiveColumnHeights);
         
-        feedContainer.style.height = `${containerPaddingTop + tallestColumnContentHeight + containerPaddingBottom}px`;
+        currentFeedContainer.style.height = `${containerPaddingTop + tallestColumnContentHeight + containerPaddingBottom}px`;
+        
+        sendMessageToParent({ type: 'projects-ready' });
     }
 
+    function scheduleFinalLayoutAndReveal() {
+        const currentFeedContainer = document.querySelector('.feed-container');
+        if (!currentFeedContainer) {
+            sendMessageToParent({ type: 'projects-ready' }); // Should not happen if checks are in place
+            return;
+        }
+
+        // If already revealed, or a reveal is actively in its timed sequence, do nothing.
+        if (isRevealScheduledOrDone || currentFeedContainer.dataset.finalRevealInProgress === 'true') {
+            // If it's already loaded, a resize or similar might have called this.
+            // Ensure layout is current, but don't re-reveal.
+            if (currentFeedContainer.classList.contains('loaded')) {
+                applyMasonryLayout();
+            }
+            return;
+        }
+        
+        currentFeedContainer.dataset.finalRevealInProgress = 'true';
+
+        // Stability delay
+        setTimeout(() => {
+            applyMasonryLayout(); // Perform the definitive layout
+
+            // Cosmetic delay for fade-in
+            setTimeout(() => {
+                if (currentFeedContainer) { // Check again
+                    currentFeedContainer.style.visibility = 'visible'; // Make it visible before fade-in
+                    if (!currentFeedContainer.classList.contains('loaded')) {
+                        currentFeedContainer.classList.add('loaded');
+                    }
+                }
+                isRevealScheduledOrDone = true; // Mark that the reveal sequence has completed
+                if(currentFeedContainer) delete currentFeedContainer.dataset.finalRevealInProgress;
+            }, 30); // Cosmetic delay (30ms)
+
+        }, 350); // Stability delay (350ms)
+    }
+
+
     function initMasonryWithVideoCheck() {
-        if (!feedContainer) return;
+        if (!feedContainer) {
+             scheduleFinalLayoutAndReveal(); 
+             return;
+        }
 
         const videos = feedContainerPosts.filter(post => post.querySelector('video')).map(post => post.querySelector('video'));
 
         if (videos.length === 0) {
-            applyMasonryLayout();
+            scheduleFinalLayoutAndReveal(); 
             return;
         }
 
@@ -1394,91 +1463,148 @@ document.addEventListener('DOMContentLoaded', () => {
         let videosReported = 0;
 
         const onMediaReady = (mediaElement, eventType) => {
+            // Prevent multiple calls for the same element
+            const alreadyProcessedFlag = `__${eventType}Processed`;
+            if (mediaElement[alreadyProcessedFlag]) return;
+            mediaElement[alreadyProcessedFlag] = true;
+            
             mediaElement.removeEventListener('loadedmetadata', onMediaReadyHandler);
             mediaElement.removeEventListener('loadeddata', onMediaReadyHandler);
             mediaElement.removeEventListener('error', onErrorHandler);
             
             videosReported++;
             if (videosReported === videosToMonitor) {
-                applyMasonryLayout();
+                scheduleFinalLayoutAndReveal(); 
             }
         };
         
         const onMediaReadyHandler = function(event) { onMediaReady(this, event.type); };
         const onErrorHandler = function(event) { 
-            onMediaReady(this, event.type); // Count it as "done" to not block layout
+            onMediaReady(this, event.type);
         };
 
         videos.forEach(video => {
-            if (video.readyState >= 2) { // HAVE_CURRENT_DATA (should mean dimensions are available)
-                videosReported++;
+            if (video.readyState >= 2) { // HAVE_CURRENT_DATA
+                // To avoid double counting if already processed by a quick follow-up
+                if (!video.__loadedmetadataProcessed && !video.__loadeddataProcessed) {
+                     videosReported++;
+                }
             } else {
                 video.addEventListener('loadedmetadata', onMediaReadyHandler);
-                video.addEventListener('loadeddata', onMediaReadyHandler); // For some browsers/cases
+                video.addEventListener('loadeddata', onMediaReadyHandler); 
                 video.addEventListener('error', onErrorHandler);
             }
         });
 
         if (videosReported === videosToMonitor && videosToMonitor > 0) {
-            applyMasonryLayout();
+            scheduleFinalLayoutAndReveal(); 
+        } else if (videosToMonitor === 0) { 
+             scheduleFinalLayoutAndReveal();
         }
     }
 
     if (feedContainer) {
-        initMasonryWithVideoCheck(); // Initial layout calculation
-
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
-            // On resize, assume media dimensions are stable if they were loaded.
             resizeTimeout = setTimeout(applyMasonryLayout, 150); 
         });
 
-        // Safety re-layout after 1.2s to catch late-loading videos (especially on mobile)
-        setTimeout(applyMasonryLayout, 1200);
+        setTimeout(scheduleFinalLayoutAndReveal, 1200); // Safety net / ultimate fallback
 
-        // Re-apply layout on scroll and touchend (mobile interaction)
-        window.addEventListener('scroll', () => {
-            setTimeout(applyMasonryLayout, 100);
+        window.addEventListener('scroll', () => { // These should only relayout if already visible
+            if (feedContainer.classList.contains('loaded')) {
+                 setTimeout(applyMasonryLayout, 100);
+            }
         });
-        window.addEventListener('touchend', () => {
-            setTimeout(applyMasonryLayout, 100);
+        window.addEventListener('touchend', () => { // These should only relayout if already visible
+             if (feedContainer.classList.contains('loaded')) {
+                setTimeout(applyMasonryLayout, 100);
+            }
         });
 
-        // Notify parent when ready (first load only)
-        // Wait for all images and videos to be loaded, then send message
-        const posts = Array.from(feedContainer.querySelectorAll('.post'));
-        const mediaElements = posts.map(post => post.querySelector('img, video')).filter(Boolean);
-        let loadedCount = 0;
-        function checkAllLoaded() {
-            loadedCount++;
-            if (loadedCount === mediaElements.length) {
-                // All media elements have reported (loaded or error)
-                // Ensure masonry layout is applied with final dimensions.
-                applyMasonryLayout();
+        const allMediaPosts = Array.from(feedContainer.querySelectorAll('.post'));
+        const mediaElements = allMediaPosts.map(post => post.querySelector('img, video')).filter(Boolean);
+        
+        window.projectsLoadedCount = 0; // Reset per DOMContentLoaded
 
-                // Short delay to allow rendering and layout stabilization before reveal
-                setTimeout(() => {
-                    const feedContainer = document.querySelector('.feed-container');
-                    if (feedContainer) {
-                        feedContainer.classList.add('loaded');
-                    }
-                    // Notify parent that projects app content is ready and visible
-                    sendMessageToParent({ type: 'projects-ready' });
-                }, 100); // 100ms delay, adjust if necessary
+        function checkAllLoadedInternal() {
+            // This function is called by each media element's load/error event
+            if (typeof window.projectsLoadedCount === 'undefined') {
+                window.projectsLoadedCount = 0;
+            }
+            window.projectsLoadedCount++;
+
+            if (window.projectsLoadedCount >= mediaElements.length) { 
+                // >= handles cases where some might have been ready sync and others async
+                scheduleFinalLayoutAndReveal(); 
             }
         }
+        
         if (mediaElements.length > 0) {
+            let syncReadyCount = 0;
             mediaElements.forEach(el => {
-                if ((el.tagName === 'IMG' && el.complete) || (el.tagName === 'VIDEO' && el.readyState >= 2)) {
-                    checkAllLoaded();
+                const isImg = el.tagName === 'IMG';
+                const isVid = el.tagName === 'VIDEO';
+                let isAlreadyReady = false;
+
+                if (isImg) {
+                    // For images, .complete can be true but naturalHeight 0 if src is invalid or not yet decoded
+                    isAlreadyReady = el.complete && el.naturalHeight !== 0;
+                } else if (isVid) {
+                    isAlreadyReady = el.readyState >= 2; // HAVE_CURRENT_DATA
+                }
+
+                if (isAlreadyReady) {
+                    syncReadyCount++;
+                    // If it's already ready, we still need to ensure projectsLoadedCount is incremented.
+                    // Call checkAllLoadedInternal in a timeout to allow the loop to finish attaching listeners.
+                    setTimeout(() => {
+                        // Check if it was already counted by an event listener that fired super fast
+                        if (!el.__eventBasedLoadCounted) {
+                           if (typeof window.projectsLoadedCount === 'undefined') window.projectsLoadedCount = 0;
+                           window.projectsLoadedCount++;
+                           if (window.projectsLoadedCount >= mediaElements.length) {
+                               scheduleFinalLayoutAndReveal();
+                           }
+                        }
+                    }, 0);
                 } else {
-                    el.addEventListener('load', checkAllLoaded);
-                    el.addEventListener('loadeddata', checkAllLoaded);
-                    el.addEventListener('error', checkAllLoaded);
+                    const eventToListen = isImg ? 'load' : 'loadeddata';
+                    const errorHandler = () => {
+                        el.__eventBasedLoadCounted = true; // Mark it
+                        checkAllLoadedInternal.call(el);
+                        el.removeEventListener(eventToListen, loadHandler);
+                        el.removeEventListener('error', errorHandler);
+                    };
+                    const loadHandler = () => {
+                        el.__eventBasedLoadCounted = true; // Mark it
+                        checkAllLoadedInternal.call(el);
+                        el.removeEventListener(eventToListen, loadHandler);
+                        el.removeEventListener('error', errorHandler);
+                    };
+                    el.addEventListener(eventToListen, loadHandler);
+                    el.addEventListener('error', errorHandler); 
                 }
             });
+
+            // If all media were ready synchronously
+            if (syncReadyCount === mediaElements.length) {
+                scheduleFinalLayoutAndReveal();
+            }
+        } else {
+            // No media elements to load
+            scheduleFinalLayoutAndReveal();
         }
+        
+        // Fallback for video dimension checks - `initMasonryWithVideoCheck` is now mostly superseded
+        // by the general mediaElements loading, but can be a secondary check if specific video
+        // handling for `loadedmetadata` is still valuable.
+        // For now, primary loading logic is above. If `initMasonryWithVideoCheck` is crucial
+        // for *just videos* beyond the general `mediaElements` check, it could be called
+        // as part of `scheduleFinalLayoutAndReveal` or after all general media is done.
+        // Let's simplify and rely on the main mediaElements loop.
+        // initMasonryWithVideoCheck(); // Consider if this is still needed with the new robust media check
     }
 
     // --- Video Grid Play/Pause Logic for Maximized/Unmaximized States ---
@@ -1573,8 +1699,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Adjust lightbox description card sizing if lightbox is open
-        const lightbox = document.getElementById('project-lightbox');
-        if (lightbox && lightbox.style.display === 'flex') {
+        const lightboxInternal = document.getElementById('project-lightbox'); // Renamed to avoid conflict
+        if (lightboxInternal && lightboxInternal.style.display === 'flex') {
             const mediaWrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
             if (mediaWrapper && mediaWrapper.classList.contains('desc-visible')) {
                 const animWrapper = mediaWrapper.querySelector('.desc-card-anim-wrapper');
@@ -1609,7 +1735,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.data.type === 'toolbar-action') {
                 if (event.data.action === 'viewDescription') {
                     const wrapper = lightboxContent.querySelector('.lightbox-media-wrapper');
-                    let description = '';
+                    // let description = ''; // Unused
                     if (currentLightboxIndex !== null && allPosts[currentLightboxIndex]) {
                         // If on mobile, show subheading in the bottom overlay
                         const currentPostData = allPosts[currentLightboxIndex].dataset;
@@ -1618,8 +1744,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             // The 'descriptionText' for toggleMobileOverlays will be the actual description.
                             // The title for the top overlay is titleForToggle.
                             // The description for the bottom overlay will be fetched inside toggleMobileOverlays itself.
-                            const linkTypeFromData = currentPostData.linkType;
-                            const linkUrlFromData = currentPostData.linkUrl;
+                            // const linkTypeFromData = currentPostData.linkType; // Unused
+                            // const linkUrlFromData = currentPostData.linkUrl; // Unused
                             // Pass the wrapper to the generalized toggle function, using subheading for the bottom overlay
                             toggleMobileOverlays(titleForToggle, "", wrapper);
                         } else {
@@ -1648,7 +1774,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize for default (unmaximized) state
-    setupIntersectionObserver();
+    if (typeof setupIntersectionObserver === 'function') { // Guard for safety
+        setupIntersectionObserver();
+    }
+
 
     // Expose closeLightbox globally for message handler
     window.closeLightbox = closeLightbox;
