@@ -278,8 +278,8 @@ export function showNetworkBalloon() {
   balloonRoot.style.zIndex = "1400";
   document.body.appendChild(balloonRoot);
 
-  const headerText = "Welcome";
-  const mainText = "Hey, my name's Mitch. Welcome to my portfolio.<br>It doesn't follow the usual format, neither do i.";
+  const headerText = "Welcome to my portfolio";
+  const mainText = "It's also the world's best XP recreation.<br>Built from scratch, to the pixel, by me. ";
 
   balloonRoot.innerHTML = `
     <div class="balloon">
@@ -289,7 +289,7 @@ export function showNetworkBalloon() {
         <span class="balloon__header__text">${headerText}</span>
       </div>
       <p class="balloon__text__first">${mainText}</p>
-      <div class="balloon-pointer-anchor" style="position:absolute;bottom:-19px;right:14px;width:0;height:0;"></div>
+      <div class="balloon-pointer-anchor" style="position:absolute;bottom:-19px;right:24px;width:0;height:0;"></div>
     </div>
   `;
   setTimeout(() => {
