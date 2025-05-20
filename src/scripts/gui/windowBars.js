@@ -296,16 +296,20 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   if (isMobile && windowId === 'contact-window') {
     // Remove disabled buttons
     buttons = buttons.filter(btn => btn.enabled !== false || btn.type === 'separator');
-    // Remove the separator immediately after New Message (if it exists from desktop config)
-    const newMsgIdx = buttons.findIndex(btn => btn.key === 'new');
-    if (newMsgIdx !== -1 && buttons[newMsgIdx + 1] && buttons[newMsgIdx + 1].type === 'separator' && buttons[newMsgIdx + 1].desktopOnly) {
-      buttons.splice(newMsgIdx + 1, 1);
-    }
-    // Add separator before Instagram
-    const instaIdx = buttons.findIndex(btn => btn.key === 'instagram');
-    if (instaIdx !== -1 && (instaIdx === 0 || buttons[instaIdx - 1].type !== 'separator')) {
-        buttons.splice(instaIdx, 0, { type: 'separator' });
-    }
+    
+    // Specifically keep only 'New Message' and 'Send Message' for mobile contact, 
+    // and ensure no separators between/after them. User wants Send then New on mobile.
+    const newButton = buttons.find(btn => btn.key === 'new');
+    const sendButton = buttons.find(btn => btn.key === 'send');
+    
+    const mobileContactButtons = [];
+    if (sendButton) mobileContactButtons.push(sendButton); // Send Message first
+    if (newButton) mobileContactButtons.push(newButton);   // New Message second
+    
+    buttons = mobileContactButtons; // This replaces the original buttons array.
+
+    // The old logic for removing Instagram/LinkedIn and specific separators is no longer needed
+    // as we are explicitly rebuilding the button list.
   }
 
   // On mobile, for About Me only, filter out disabled buttons and remove the separator to the right of My Resume
@@ -399,11 +403,13 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
       }
       if (buttonConfig.text) {
         // --- Mobile: Shorten "New Message" to "New" for contact-window ---
-        let buttonText = buttonConfig.text;
-        if (isMobile && windowId === 'contact-window' && buttonConfig.key === 'new') {
-            buttonText = 'New';
-        }
-        buttonContent += `<span>${buttonText}</span>`;
+        // let buttonText = buttonConfig.text;
+        // if (isMobile && windowId === 'contact-window' && buttonConfig.key === 'new') {
+        //     buttonText = 'New';
+        // }
+        // buttonContent += `<span>${buttonText}</span>`;
+        // Ensure "New Message" text is used directly from config for all views
+        buttonContent += `<span>${buttonConfig.text}</span>`;
       }
       buttonDiv.innerHTML = buttonContent;
       if (buttonConfig.style) {

@@ -3,6 +3,7 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  touch-action: none; /* Disable pinch-zoom and other default touch actions */
 }
 body {
   background: #97958f; /* Slightly darker than #ece9d8 */

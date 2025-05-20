@@ -215,7 +215,7 @@ const programData = {
   }),
   resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
     dimensions: { width: 600, height: 725 },
-    statusBarText: "Viewing Mitch's skills, education, and experience",
+    statusBarText: isMobileDevice() ? "Tap to zoom & pan" : "Click to zoom & pan",
     appPath: "src/apps/resume/resume.html",
     menuBarConfig: {
       items: [
@@ -329,7 +329,7 @@ const programData = {
   // Project Showcase Programs
   internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
     dimensions: { width: 1000, height: 700 },
-    statusBarText: "Explore Mitch's design work",
+    statusBarText: isMobileDevice() ? "Open a project and navigate with the toolbar or swipe" : "Open a project and navigate with the toolbar",
     appPath: "src/apps/projects/projects.html",
     addressBarConfig: {
       enabled: true,

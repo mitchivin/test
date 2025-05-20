@@ -22,6 +22,7 @@ html, body {
     background-color: #111; /* Dark background for the lines effect */
     position: relative; /* For potential pseudo-elements if needed later */
     overflow-x: hidden; /* Good practice */
+    touch-action: none; /* Disable pinch-zoom and other default touch actions */
 }
 
 html {
@@ -181,6 +182,8 @@ body {
     position: relative; /* Added for absolute positioning of posts */
     padding: 10px;
     box-sizing: border-box;
+    margin-top: 2px;
+    margin-bottom: 2px;
     margin-left: auto;
     margin-right: auto;
     opacity: 0; /* Initially hidden to prevent FOUC */

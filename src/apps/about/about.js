@@ -48,4 +48,45 @@ document.addEventListener('click', (event) => {
   if (window.parent && window.parent !== window) {
     window.parent.postMessage({ type: 'iframe-interaction' }, '*');
   }
-}); 
+});
+
+// --- Aggressive Pinch Zoom Prevention ---
+// Prevent gestures
+document.addEventListener('gesturestart', function (e) {
+  e.preventDefault();
+}, { passive: false });
+document.addEventListener('gesturechange', function (e) {
+  e.preventDefault();
+}, { passive: false });
+document.addEventListener('gestureend', function (e) {
+  e.preventDefault();
+}, { passive: false });
+
+// Prevent multi-touch interactions (common for pinch-zoom)
+document.addEventListener('touchstart', function (e) {
+  if (e.touches.length > 1) {
+    e.preventDefault();
+  }
+}, { passive: false });
+document.addEventListener('touchmove', function (e) {
+  if (e.touches.length > 1) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+// Prevent double-tap to zoom
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (event) {
+  const now = (new Date()).getTime();
+  if (now - lastTouchEnd <= 300) {
+    event.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
+// Prevent Ctrl+wheel zoom and general wheel events on the body
+document.addEventListener('wheel', function(event) {
+  if (event.ctrlKey || event.target === document.body || event.target === document.documentElement) {
+    event.preventDefault();
+  }
+}, { passive: false }); 

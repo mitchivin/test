@@ -24,8 +24,10 @@ export function initBootSequence(eventBus, EVENTS) {
   const desktop = document.querySelector(".desktop");
   const crtScanline = document.querySelector(".crt-scanline");
   const crtVignette = document.querySelector(".crt-vignette");
+  const bootDelayMessage = document.getElementById("boot-delay-message");
   const urlParams = new URLSearchParams(window.location.search);
   const forceBoot = urlParams.get("forceBoot") === "true";
+  let delayMessageTimer = null; // Store timer ID to clear it
 
   // Preload login and logoff sounds for instant playback
   const loginSound = new Audio("./assets/sounds/login.wav");
@@ -56,6 +58,8 @@ export function initBootSequence(eventBus, EVENTS) {
     loginScreen.style.display = "none";
     desktop.style.opacity = "1";
     desktop.style.pointerEvents = "auto";
+    if (bootDelayMessage) bootDelayMessage.style.display = "none";
+    if (delayMessageTimer) clearTimeout(delayMessageTimer); // Clear timer if boot is skipped
   }
 
   /**
@@ -72,8 +76,25 @@ export function initBootSequence(eventBus, EVENTS) {
       bootScreen.style.opacity = "1";
       bootScreen.style.pointerEvents = "auto";
 
+      // Timer for the delay message
+      delayMessageTimer = setTimeout(() => {
+        if (bootScreen.style.display === "flex" && bootDelayMessage) {
+          bootDelayMessage.style.opacity = "0";
+          bootDelayMessage.style.transition = "opacity 0.5s ease-in-out";
+          bootDelayMessage.style.display = "block";
+          void bootDelayMessage.offsetWidth;
+          bootDelayMessage.style.opacity = "1";
+        }
+      }, 7000); // Set to 7 seconds
+
       const minBootTime = 5500; // Minimum boot duration (ms)
       setTimeout(() => {
+        // Before starting the fade-to-black, remove the delay message if it exists
+        if (bootDelayMessage && bootDelayMessage.parentNode) {
+          bootDelayMessage.parentNode.removeChild(bootDelayMessage);
+        }
+        clearTimeout(delayMessageTimer); // Clear the timer for showing the message as it's now removed
+
         bootScreen.classList.remove("boot-fade-in");
         setTimeout(() => {
           // Fade to black overlay, then show login
@@ -83,6 +104,7 @@ export function initBootSequence(eventBus, EVENTS) {
             void fadeoutOverlay.offsetWidth;
             fadeoutOverlay.style.transition = "opacity 0.5s";
             fadeoutOverlay.style.opacity = "1";
+
             setTimeout(() => {
               bootScreen.style.display = "none";
               loginScreen.style.display = "flex";
@@ -92,6 +114,8 @@ export function initBootSequence(eventBus, EVENTS) {
               if (loginContent) loginContent.style.opacity = "1";
               attachLoginScreenHandlers();
               fadeoutOverlay.style.opacity = "0";
+              if (bootDelayMessage) bootDelayMessage.style.display = "none";
+              if (delayMessageTimer) clearTimeout(delayMessageTimer); // Clear timer when boot completes
               setTimeout(() => {
                 fadeoutOverlay.style.display = "none";
               }, 500);

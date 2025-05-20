@@ -1707,4 +1707,57 @@ document.addEventListener('DOMContentLoaded', () => {
             window.parent.postMessage({ type: 'iframe-interaction' }, '*');
         }
     });
+
+    // --- Aggressive Pinch Zoom Prevention (Lightbox Aware) ---
+    function shouldPreventZoom(event) {
+        const target = event.target;
+        // If the event target is inside the lightbox, DO NOT prevent zoom/gestures.
+        if (target.closest('#project-lightbox')) {
+            return false;
+        }
+        // Otherwise, prevent zoom.
+        return true;
+    }
+
+    // Prevent gestures
+    document.addEventListener('gesturestart', function (e) {
+        if (shouldPreventZoom(e)) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gesturechange', function (e) {
+        if (shouldPreventZoom(e)) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gestureend', function (e) {
+        if (shouldPreventZoom(e)) e.preventDefault();
+    }, { passive: false });
+
+    // Prevent multi-touch interactions (common for pinch-zoom)
+    document.addEventListener('touchstart', function (e) {
+        if (e.touches.length > 1 && shouldPreventZoom(e)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    document.addEventListener('touchmove', function (e) {
+        if (e.touches.length > 1 && shouldPreventZoom(e)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Prevent double-tap to zoom
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+        if (!shouldPreventZoom(event)) return;
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
+
+    // Prevent Ctrl+wheel zoom and general wheel events on the body
+    document.addEventListener('wheel', function(event) {
+        if (!shouldPreventZoom(event)) return;
+        if (event.ctrlKey || event.target === document.body || event.target === document.documentElement) {
+            event.preventDefault();
+        }
+    }, { passive: false });
 });

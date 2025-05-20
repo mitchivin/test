@@ -56,6 +56,17 @@
 
 /* ===== Global Layout & Body Styles ===== */
 
+html,
+body {
+  overscroll-behavior: none; /* Prevents pull-to-refresh and overscroll bounce */
+  touch-action: none; /* Prevents pinch-zoom and other default touch actions */
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 /* ==================================================
    END Main Stylesheet
    ================================================== */
@@ -117,16 +128,6 @@
   background-color: transparent;
   z-index: 1;
   display: none;
-}
-
-/* Fix for layout shift issue */
-html,
-body {
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
 }
 
 /* Prevent iframe scroll from affecting parent */
