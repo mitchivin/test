@@ -151,7 +151,7 @@
   display: block;
 }
 
-/* Hide second icon row by default */
+/* Hide second icon row by default on desktop */
 .desktop-icons-second-row {
   display: none;
 }
@@ -162,12 +162,13 @@
     background-position: top center !important;
     display: block;
   }
+
   .desktop-icons {
     display: grid;
-    grid-template-columns: 90px;
-    grid-auto-rows: 90px;
+    grid-template-columns: 110px;
+    grid-auto-rows: 110px;
     grid-gap: 6px;
-    padding: 16px 0 0 16px;
+    padding: 24px 0 0 12px;
     place-content: start start;
     width: auto;
     margin: 0;
@@ -175,30 +176,39 @@
     box-sizing: border-box;
     height: calc(100% - var(--taskbar-height, 30px));
   }
+
   .desktop-icons-second-row {
     display: none;
   }
-  .desktop-icons .desktop-icon[data-program-name="resume"] { order: initial; }
-  .desktop-icons .desktop-icon[data-program-name="about"] { order: initial; }
-  .desktop-icons .desktop-icon[data-program-name="internet"] { order: initial; }
-  .desktop-icons .desktop-icon[data-program-name="contact"] { order: initial; }
+
+  /* Set specific order for main mobile icons */
+  .desktop-icons .desktop-icon[data-program-name="contact"] { order: 1; }
+  .desktop-icons .desktop-icon[data-program-name="about"]   { order: 2; }
+  .desktop-icons .desktop-icon[data-program-name="internet"]{ order: 3; }
+  /* Resume icon is hidden, its order property is not needed if display: none */
+  /* .desktop-icons .desktop-icon[data-program-name="resume"] { order: initial; } */
+
+  .desktop-icons .desktop-icon[data-program-name="resume"] {
+    display: none;
+  }
   .desktop-icon {
     flex: initial;
     min-width: initial;
-    height: auto;
+    width: 110px;
+    height: 110px;
     padding: 7px;
     margin: 0;
     transform: initial;
     transition: initial;
   }
   .desktop-icon img {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 6px;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 8px;
   }
   .desktop-icon span {
-    font-size: 13.5px;
-    line-height: 16px;
+    font-size: 16px;
+    line-height: 19px;
     letter-spacing: 0.3px;
   }
 }

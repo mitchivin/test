@@ -469,9 +469,10 @@
 .all-programs-menu,
 .recently-used-menu {
   position: absolute;
-  background-color: #f8f8f8; /* Updated to very light grey */
-  border: 1px solid #d0d0d0; /* Updated to neutral light grey border */
-  box-shadow: 2px 2px 5px rgb(0 0 0 / 30%);
+  width: 180px; /* Standard width for submenus */
+  background: #f2f2f2; /* Updated color */
+  border: 1px solid #d0d0d0;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
   z-index: calc(
     var(--z-startmenu) + 1
   );

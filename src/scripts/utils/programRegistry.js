@@ -176,7 +176,7 @@ const programData = {
   // Portfolio Content
   about: createProgram("about", "About Me", "desktop/about.webp", {
     dimensions: { width: 800, height: 600 },
-    statusBarText: "Viewing background, skills and story",
+    statusBarText: "Viewing Mitch's background",
     appPath: "src/apps/about/about.html",
     toolbarConfig: {
       buttons: [
@@ -215,7 +215,7 @@ const programData = {
   }),
   resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
     dimensions: { width: 600, height: 725 },
-    statusBarText: "Displaying experience, education and credentials",
+    statusBarText: "Viewing Mitch's skills, education, and experience",
     appPath: "src/apps/resume/resume.html",
     menuBarConfig: {
       items: [
@@ -328,8 +328,8 @@ const programData = {
 
   // Project Showcase Programs
   internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
-    dimensions: { width: 1000, height: 700 },
-    statusBarText: "Exploring completed design work",
+    dimensions: { width: 950, height: 550 },
+    statusBarText: "Exploring Mitch's design work",
     appPath: "src/apps/projects/projects.html",
     addressBarConfig: {
       enabled: true,
@@ -411,9 +411,10 @@ const programData = {
     },
   }),
   contact: createProgram("contact", "Contact Me", "desktop/contact.webp", {
-    dimensions: { width: 600, height: 450 },
-    statusBarText: "Ways to connect and get in touch",
+    dimensions: { width: 400, height: 490 },
+    statusBarText: "Get in touch with Mitch",
     appPath: "src/apps/contact/contact.html",
+    canMaximize: !isMobileDevice(),
     toolbarConfig: {
       buttons: [
         {

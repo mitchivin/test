@@ -18,7 +18,7 @@
 /* ===== Menu Bar Styles ===== */
 .menu-bar-container {
   width: 100%;
-  background: #f0f0f0;
+  background: #e9e9e9;
   box-sizing: border-box;
   z-index: 30;
 }
@@ -26,7 +26,7 @@
 .menu-bar {
   display: flex;
   align-items: center;
-  background: #f0f0f0;
+  background: #e9e9e9;
   height: 22px;
   min-height: 22px;
   max-height: 22px;
@@ -40,7 +40,7 @@
   user-select: none;
   position: relative;
   z-index: 30;
-  border-bottom: 2px solid #d7d4ca;
+  border-bottom: 2px solid #e0e0e0;
   cursor: default;
 }
 .menu-bar .menu-item {
@@ -74,7 +74,7 @@
   left: 0;
   top: 100%;
   width: 130px;
-  background: #f8f8f8;
+  background: #f2f2f2;
   border: 1px solid #d0d0d0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   font-size: 11px;
@@ -185,7 +185,7 @@
   all: unset; /* Reset inherited styles, stronger than initial */
   display: flex;
   flex-direction: row;
-  background: #f0f0f0;
+  background: #e9e9e9;
   height: 48px;
   min-height: 48px;
   max-height: 48px;
@@ -221,7 +221,7 @@
   border-top: 2px solid #d7d4ca;
 }
 .toolbar-row:not(.toolbar-bottom) {
-  border-bottom: 2px solid #d7d4ca;
+  border-bottom: 2px solid #e0e0e0;
 }
 
 /* ===== Address Bar Styles ===== */
@@ -237,8 +237,8 @@
   width: 100%;
   align-items: center;
   position: static;
-  background: #f0f0f0;
-  border-bottom: 2px solid #d7d4ca;
+  background: #e9e9e9;
+  border-bottom: 2px solid #e0e0e0;
   height: 34px;
   min-height: 34px;
   max-height: 34px;
