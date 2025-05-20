@@ -159,69 +159,47 @@
 /* ===== Responsive: Mobile Adjustments ===== */
 @media (max-width: 768px) {
   .desktop {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    height: calc(var(--real-vh, 1vh) * 100);
-    width: 100vw;
-    position: relative;
-    overflow: hidden;
-    background-position: bottom center !important;
+    background-position: top center !important;
+    display: block;
   }
   .desktop-icons {
-    width: 95vw;
-    display: flex;
-    justify-content: stretch;
-    align-items: center;
-    gap: 4px;
-    padding: 0;
+    display: grid;
+    grid-template-columns: 90px;
+    grid-auto-rows: 90px;
+    grid-gap: 6px;
+    padding: 16px 0 0 16px;
+    place-content: start start;
+    width: auto;
     margin: 0;
-    margin-bottom: clamp(30px, 16vh, calc(120px + var(--taskbar-height, 30px)));
+    margin-bottom: 0;
     box-sizing: border-box;
-    height: auto;
+    height: calc(100% - var(--taskbar-height, 30px));
   }
   .desktop-icons-second-row {
-    display: flex;
-    width: 95vw;
-    justify-content: stretch;
-    align-items: center;
-    gap: 12px;
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-    height: auto;
-    margin-bottom: 40px;
+    display: none;
   }
-  .desktop-icons .desktop-icon[data-program-name="resume"] { order: 1; }
-  .desktop-icons .desktop-icon[data-program-name="about"] { order: 2; }
-  .desktop-icons .desktop-icon[data-program-name="internet"] { order: 3; }
-  .desktop-icons .desktop-icon[data-program-name="contact"] { order: 4; }
+  .desktop-icons .desktop-icon[data-program-name="resume"] { order: initial; }
+  .desktop-icons .desktop-icon[data-program-name="about"] { order: initial; }
+  .desktop-icons .desktop-icon[data-program-name="internet"] { order: initial; }
+  .desktop-icons .desktop-icon[data-program-name="contact"] { order: initial; }
   .desktop-icon {
-    flex: 1 1 0;
-    min-width: 0;
-    height: 102px;
-    padding: 0;
+    flex: initial;
+    min-width: initial;
+    height: auto;
+    padding: 7px;
     margin: 0;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid transparent;
-    transform: scale(var(--icon-scale, 1));
-    transition: transform 0.2s;
+    transform: initial;
+    transition: initial;
   }
   .desktop-icon img {
-    width: 52px;
-    height: 52px;
-    margin-bottom: 8px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 6px;
   }
   .desktop-icon span {
-    font-size: 14.5px;
-    line-height: 17px;
-    max-width: 100%;
-    letter-spacing: 0.5px;
+    font-size: 13.5px;
+    line-height: 16px;
+    letter-spacing: 0.3px;
   }
 }
 
