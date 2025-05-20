@@ -328,8 +328,8 @@ const programData = {
 
   // Project Showcase Programs
   internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
-    dimensions: { width: 950, height: 550 },
-    statusBarText: "Exploring Mitch's design work",
+    dimensions: { width: 1000, height: 700 },
+    statusBarText: "Explore Mitch's design work",
     appPath: "src/apps/projects/projects.html",
     addressBarConfig: {
       enabled: true,
@@ -411,10 +411,9 @@ const programData = {
     },
   }),
   contact: createProgram("contact", "Contact Me", "desktop/contact.webp", {
-    dimensions: { width: 400, height: 490 },
+    dimensions: { width: 600, height: 450 },
     statusBarText: "Get in touch with Mitch",
     appPath: "src/apps/contact/contact.html",
-    canMaximize: !isMobileDevice(),
     toolbarConfig: {
       buttons: [
         {
