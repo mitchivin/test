@@ -225,6 +225,10 @@ body {
   gap: 10px;
 }
 
+.welcome-image-mobile {
+  display: none; /* Hidden by default on desktop */
+}
+
 .section_text {
   font-size: 15.5px;
   color: #fff;
@@ -267,12 +271,28 @@ body {
     box-sizing: border-box;
   }
 
+  .welcome_text {
+    font-size: 36px; /* Increased font size for mobile */
+    /* Ensure flex properties for alignment if not already inherited or set */
+    display: flex; 
+    align-items: center;
+    gap: 12px; /* Adjusted gap for the new image */
+  }
+
+  .welcome-image-mobile {
+    display: inline-block; /* Or 'block' or 'flex' depending on desired layout */
+    width: 50px; /* Adjust size as needed */
+    height: 50px; /* Adjust size as needed */
+    margin-right: 10px; /* Adjust spacing as needed */
+  }
+
   /* Add these styles for mobile paragraph layout */
   .about-paragraph-icon-col {
     display: none !important; /* Hide the icon column forcefully */
   }
   .about-paragraph-text {
     padding-left: 0 !important; /* Remove left padding forcefully */
+    font-size: 16.5px; /* Increased font size for mobile body copy */
   }
 }
 
