@@ -433,6 +433,11 @@
   transition: none;
 }
 
+/* Prevent images in footer buttons from being dragged */
+.footer-button > img {
+  pointer-events: none;
+}
+
 /* Add padding to the text for spacing */
 .footer-button span {
   padding: 0 6px;
@@ -464,8 +469,8 @@
 .all-programs-menu,
 .recently-used-menu {
   position: absolute;
-  background-color: var(--xp-bg-main);
-  border: 1px solid var(--xp-border-main);
+  background-color: #f8f8f8; /* Updated to very light grey */
+  border: 1px solid #d0d0d0; /* Updated to neutral light grey border */
   box-shadow: 2px 2px 5px rgb(0 0 0 / 30%);
   z-index: calc(
     var(--z-startmenu) + 1
@@ -515,6 +520,12 @@
   width: 100%;
   box-sizing: border-box;
   cursor: default;
+}
+
+/* Prevent images in submenu items from being dragged */
+.all-programs-item > img,
+.recently-used-item > img {
+  pointer-events: none;
 }
 
 /* Hover effect for submenu items */
@@ -585,7 +596,7 @@
 /* Separator within All Programs */
 .all-programs-separator {
   height: 1px;
-  background-color: #d1d1d1;
+  background-color: #e0e0e0; /* Updated to lighter grey separator */
   margin: 3px 0;
   padding: 0;
   border: none;
@@ -597,7 +608,7 @@
 /* Separator for Recently Used items (similar to All Programs) */
 .recently-used-separator {
   height: 1px;
-  background-color: #d1d1d1; /* Same color as all-programs-separator */
+  background-color: #e0e0e0; /* Updated to lighter grey separator */
   margin: 3px 0; /* Same margin */
   padding: 0;
   border: none;

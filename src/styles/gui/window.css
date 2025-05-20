@@ -112,7 +112,7 @@
 
 /* TEMPORARY DIAGNOSTIC: Force status bar styling */
 .app-window .status-bar {
-  background-color: #e0e0e0; /* XP-like light grey */
+  background-color: #e4e4e4; /* Updated to new light grey */
   padding: 1px 3px;
   /* border-top: 1px solid #bababa; */ /* Removed as per user request */
   font-size: 11px;

@@ -13,7 +13,7 @@ html, body {
     font-family: 'Tahoma', Arial, sans-serif;
     font-size: 11px;
     color: #000;
-    background-color: #ece9d8;
+    background-color: #f0f0f0; /* Updated to new light grey */
     box-sizing: border-box;
 }
 
@@ -85,7 +85,7 @@ label {
 }
 
 .input.readonly {
-    background-color: #f0f0f0;
+    background-color: #8d8d8d1e; /* Darker grey for readonly state */
     cursor: default;
     user-select: none;
 }

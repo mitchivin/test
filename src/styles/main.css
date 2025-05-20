@@ -257,3 +257,53 @@ iframe a {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Add styles here to override or supplement xp.css */
+
+/* --- Prevent Unwanted Dragging and Selection on UI Elements --- */
+
+/* Apply to the elements themselves */
+.toolbar-button,
+.menu-item, /* Start Menu general items */
+.footer-button, /* Start Menu footer buttons */
+.all-programs-item, /* Start Menu All Programs popout items */
+.recently-used-item, /* Start Menu Recently Used popout items */
+.all-programs-button, /* Start Menu "All Programs" button itself */
+.desktop-icon, /* Desktop icons */
+.app-window .title-bar-controls button, /* Window Min/Max/Close buttons */
+.logoff-dialog-button, /* Log Off Dialog buttons */
+.left-panel__card__header, /* About Me - card headers (to prevent dragging the header img) */
+.left-panel__card__row, /* About Me - rows in left panel (to prevent dragging the row img) */
+.about-paragraph-row, /* About Me - paragraph rows (parent of icon and text) */
+.about-paragraph-icon-col /* About Me - icon column in paragraph rows */
+/* Note: .about-paragraph-icon is an img itself, handled below */
+{
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Apply to direct image children of these elements */
+.toolbar-button > img,
+.menu-item > img,
+.menu-item .item-content > img, /* Handles nested img in some menu items */
+.footer-button > img,
+.all-programs-item > img,
+.recently-used-item > img,
+.all-programs-button > img, /* For the arrow in "All Programs" button */
+.desktop-icon img, /* Desktop icons often have a wrapper then the img */
+.about-paragraph-icon, /* About Me - paragraph icons */
+.left-panel__card__img, /* About Me - left panel card content icons */
+.left-panel__card__header__img /* About Me - left panel card header icons */
+/* Note: .app-window .title-bar-controls button typically uses background-image, not child img */
+{
+  pointer-events: none;
+}
+
+/* ===== Global Layout & Body Styles ===== */
+
+/* ==================================================
+   END Main Stylesheet
+   ================================================== */
