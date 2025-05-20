@@ -19,8 +19,9 @@
       content="width=device-width, initial-scale=1.0"
     />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="description" content="A Windows XP desktop simulation built with HTML, CSS, and JavaScript. Explore a classic interface with functional apps and nostalgic design elements. Relive the XP era in your browser.">
     <link rel="icon" href="./assets/gui/boot/favicon.png" type="image/png" />
-    <title>Mitch Ivin XP</title>
+    <title>Windows XP Desktop</title>
     <!-- Preload Critical Assets -->
     <link rel="preload" href="./assets/gui/desktop/bliss.jpg" as="image" />
     <link rel="preload" href="./assets/gui/desktop/about.webp" as="image" />
@@ -42,9 +43,10 @@
     <!-- Stylesheets -->
     <link
       rel="stylesheet"
-      href="https://unpkg.com/xp.css@0.2.3/dist/XP.css"
+      href="https://unpkg.com/xp.css@0.2.6/dist/XP.css"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="./src/styles/reset.css" />
     <link rel="stylesheet" href="./src/styles/main.css" />
   </head>
   <body>
@@ -217,18 +219,18 @@
 
           <div class="logoff-dialog-button-container">
             <div id="logoff-switch-user-btn" class="logoff-dialog-button disabled">
-              <img src="assets/gui/start-menu/switch.webp" alt="Switch User Icon" />
+              <img src="assets/gui/start-menu/switch.webp" alt="Switch User Icon" width="22" height="22" />
               <span>Switch User</span>
             </div>
             <div id="logoff-log-off-btn" class="logoff-dialog-button">
-              <img src="assets/gui/start-menu/logoff.webp" alt="Log Off Icon" />
+              <img src="assets/gui/start-menu/logoff.webp" alt="Log Off Icon" width="22" height="22" />
               <span>Log Off</span>
             </div>
           </div>
 
           <div class="logoff-dialog-separator-bar logoff-dialog-separator-bar-bottom">
             <div class="logoff-dialog-footer">
-              <div id="logoff-cancel-btn" class="logoff-dialog-cancel-div-button">Cancel</div>
+              <button id="logoff-cancel-btn" aria-label="Cancel" style="user-select: none;">Cancel</button>
             </div>
           </div>
         </div>

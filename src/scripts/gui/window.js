@@ -630,6 +630,15 @@ export default class WindowManager {
       windowElement.style.height = "100vh";
       windowElement.style.maxWidth = "100vw";
       windowElement.style.maxHeight = "100vh";
+
+      // Ensure the button reflects the maximized state
+      const maximizeBtn = windowElement.querySelector('[data-action="maximize"]');
+      if (maximizeBtn) {
+        maximizeBtn.classList.add("restore");
+        maximizeBtn.setAttribute("aria-label", "Restore");
+        // Functionally and visually disable it on mobile
+        maximizeBtn.disabled = true; 
+      }
     }
 
     let content;
@@ -649,26 +658,21 @@ export default class WindowManager {
       menuBarContainer.setParentWindowElement(windowElement);
     }
 
-    // Create Status Bar
-    const programName = program.id.replace("-window", "");
-    if (programName !== "cmd") {
+    // --- Create XP.css styled Status Bar ---
+    const programId = program.id.replace("-window", "");
+    if (programId !== "cmd") { // cmd program usually doesn't have a status bar
       const statusBar = document.createElement("div");
-      statusBar.className = "status-bar";
-      // --- Create main text field (dynamic or static) ---
-      const statusBarField = document.createElement("p");
-      statusBarField.className = "status-bar-field"; // Class for the main/dynamic field
-      // Determine initial text based on flags and program data
-      let initialText = "Ready";
-      if (program.statusBarText) {
-        initialText = program.statusBarText; // Use static text from registry
-      }
-      statusBarField.textContent = initialText;
-      // Append the main status field
-      statusBar.appendChild(statusBarField);
+      statusBar.className = "status-bar"; // XP.css class for the bar
 
-      // Append the status bar to the window element itself
+      const statusBarField = document.createElement("p");
+      statusBarField.className = "status-bar-field"; // XP.css class for a field
+      statusBarField.textContent = program.statusBarText || "Ready"; // Placeholder or program-specific
+
+      statusBar.appendChild(statusBarField);
       windowElement.appendChild(statusBar);
-      // Store reference for dynamic updates (always points to the main field)
+
+      // Store a reference to the field for potential dynamic updates later
+      // This matches the previous logic, making it easier to re-wire if needed
       windowElement.statusBarField = statusBarField;
     }
 
@@ -711,7 +715,7 @@ export default class WindowManager {
                 </div>
                 <div class="title-bar-controls">
                     ${program.canMinimize !== false ? '<button class="xp-button" aria-label="Minimize" data-action="minimize"></button>' : ""}
-                    ${!isMobile && program.canMaximize !== false ? '<button class="xp-button" aria-label="Maximize" data-action="maximize"></button>' : ""}
+                    ${program.canMaximize !== false ? '<button class="xp-button" aria-label="Maximize" data-action="maximize"></button>' : ""}
                     <button class="xp-button" aria-label="Close" data-action="close"></button>
                 </div>
             </div>
@@ -753,7 +757,7 @@ export default class WindowManager {
     );
 
     windowElement.windowState = {
-      isMaximized: false,
+      isMaximized: windowElement.classList.contains("maximized"), // Check if pre-maximized
       isMinimized: false,
       originalStyles: {
         width: windowElement.style.width,
@@ -820,11 +824,20 @@ export default class WindowManager {
       "click",
       () => this.minimizeWindow(windowElement),
     );
-    this._bindControl(
-      windowElement.querySelector('[data-action="maximize"]'),
-      "click",
-      () => this.toggleMaximize(windowElement),
-    );
+
+    const maximizeBtnForEvent = windowElement.querySelector('[data-action="maximize"]');
+    if (maximizeBtnForEvent) {
+      this._bindControl(
+        maximizeBtnForEvent,
+        "click",
+        () => {
+          // Only toggle if the button is not disabled
+          if (!maximizeBtnForEvent.disabled) { 
+            this.toggleMaximize(windowElement);
+          }
+        },
+      );
+    }
 
     // Listen for custom minimize-window event (from toolbar)
     windowElement.addEventListener("minimize-window", () => {
@@ -1345,7 +1358,7 @@ export default class WindowManager {
   toggleMaximize(windowElement) {
     if (!windowElement) return;
     const state = windowElement.windowState;
-    const maximizeBtn = windowElement.querySelector('[aria-label="Maximize"]');
+    const maximizeBtn = windowElement.querySelector('[aria-label="Maximize"], [aria-label="Restore"]');
 
     if (!state.isMaximized) {
       // Maximize
@@ -1377,6 +1390,7 @@ export default class WindowManager {
         windowElement.classList.add("maximized"); // Add class to trigger CSS styles
         if (maximizeBtn) {
           maximizeBtn.classList.add("restore");
+          maximizeBtn.setAttribute("aria-label", "Restore");
         }
         // Send maximized message to iframe if present
         const iframe = windowElement.querySelector("iframe");
@@ -1406,6 +1420,7 @@ export default class WindowManager {
         windowElement.classList.remove("maximized"); // Remove class
         if (maximizeBtn) {
           maximizeBtn.classList.remove("restore");
+          maximizeBtn.setAttribute("aria-label", "Maximize");
         }
         // Send unmaximized message to iframe if present
         const iframe = windowElement.querySelector("iframe");

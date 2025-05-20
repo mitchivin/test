@@ -891,19 +891,37 @@
 #logoff-dialog-container {
   position: fixed;
   inset: 0; /* Covers the entire viewport */
-  background-color: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(1px);
-  display: flex;
+  display: none; /* Hidden by default, dialog appears instantly when set to flex */
   align-items: center;
   justify-content: center;
   z-index: 10001; /* Ensures it's above other elements like taskbar */
-  opacity: 0;
-  transition: opacity 0.15s ease-out;
-  margin-bottom: 30px; /* Added bottom margin */
+}
+
+#logoff-dialog-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0); /* Start transparent */
+  /* backdrop-filter: blur(0px); */ /* REMOVED blur */
+  opacity: 0; /* Start invisible */
+  z-index: 1; /* Behind the dialog content */
+  /* Default fast fade-out when dialog is hidden: no backdrop-filter */
+  transition: opacity 0.3s ease-in-out, background-color 0.3s ease-in-out;
 }
 
 #logoff-dialog-container.visible {
-  opacity: 1;
+  display: flex; /* Show the container and its children (dialog box) instantly */
+}
+
+#logoff-dialog-container.visible::before {
+  background-color: rgba(0, 0, 0, 0); /* Target dim color */
+  /* backdrop-filter: blur(1px); */ /* REMOVED blur */
+  opacity: 1; /* Target visible */
+  /* Delayed fade-in for dim overlay */
+  transition-property: opacity, background-color;
+  transition-duration: 0.8s;
+  transition-timing-function: ease-in-out;
+  transition-delay: 1.5s;
 }
 
 .logoff-dialog {
@@ -914,12 +932,13 @@
   font-family: 'Tahoma', sans-serif;
   font-size: 11px;
   color: #000;
-  /* Standard XP window_ ETCHED BORDER, but this dialog is simpler */
   border-top: 1px solid #2b2b2b;
   border-left: 1px solid #2b2b2b;
   border-right: 1px solid #2b2b2b;
   border-bottom: 1px solid #2b2b2b;
   padding: 0; /* Remove padding from main dialog, will be handled by sections */
+  position: relative; /* Ensure it can have a z-index */
+  z-index: 2; /* Above the ::before pseudo-element overlay */
 }
 
 .logoff-dialog-body {
@@ -1063,7 +1082,7 @@
 .logoff-dialog-button img {
   width: 40px; /* Increased from 36px */
   height: 40px; /* Increased from 36px */
-  margin-bottom: 4px; /* Adjusted margin */
+  margin-bottom: 6px; /* Adjusted margin */
   background: none !important; /* Force no background on image element */
   border: none !important; /* Force no border on image element */
   transition: filter 0.15s ease-in-out; /* Smooth transition for brightness */
@@ -1169,10 +1188,22 @@
   /* Removed padding shift, click effect now relies on shadow and border inversion */
 }
 
-/* Screen Grayscale Overlay */
+/* Screen Grayscale Overlay - RE-INSTATED */
+/* Base style for elements that can be grayscaled */
+body > *:not(#logoff-dialog-container):not(.tooltip):not(#context-menu-container) {
+  filter: grayscale(0%) brightness(1); /* Initial state: no filter */
+  /* Default fast transition for filter removal (fade-out) */
+  transition: filter 0.3s ease-in-out;
+}
+
+/* Grayscale active state */
 body.screen-grayscale-active > *:not(#logoff-dialog-container):not(.tooltip):not(#context-menu-container) {
-  filter: grayscale(100%) brightness(0.7);
-  transition: filter 0.8s ease-in-out; /* Increased duration for a slower fade */
+  filter: grayscale(100%) brightness(0.7); /* Target state: filtered */
+  /* Delayed transition for filter application (fade-in) */
+  transition-property: filter;
+  transition-duration: 1.2s;
+  transition-timing-function: ease-in-out;
+  transition-delay: 0.5s;
 }
 
 /* Ensure the dialog itself and tooltips/context menus are not grayscaled */

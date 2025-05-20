@@ -46,6 +46,7 @@
   border-radius: 6px 6px 0 0;
   margin: 0 -1px;
   padding-bottom: 1px;
+  min-height: 30px;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
@@ -108,31 +109,37 @@
 }
 
 /* ===== Status Bar ===== */
-.status-bar {
-  height: 22px;
-  flex-shrink: 0;
-  overflow: hidden;
-  margin-top: auto;
-  padding: 0;
+
+/* TEMPORARY DIAGNOSTIC: Force status bar styling */
+.app-window .status-bar {
+  background-color: #e0e0e0; /* XP-like light grey */
+  padding: 1px 3px;
+  /* border-top: 1px solid #bababa; */ /* Removed as per user request */
+  font-size: 11px;
+  height: 22px; /* Common status bar height */
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  background-color: var(--xp-bg-main);
-  border-top: 1px solid var(--xp-border-main);
-  box-sizing: border-box;
+  flex-shrink: 0; /* Prevent shrinking if window content is large */
+  margin-top: auto; /* Push to bottom if window-body is flex-grow */
+  width: 100%; /* Ensure it spans the full width of .app-window */
+  margin-left: 0; /* Override any XP.css margin-left (removed !important) */
 }
 
-.status-bar-field {
-  padding: 0 8px;
-  font-size: 11px;
+.app-window .status-bar .status-bar-field {
+  padding: 0 6px;
   height: 100%;
   display: flex;
   align-items: center;
-  border-right: 1px solid var(--xp-border-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-right: 1px inset #c0c0c0; /* Subtle separator like XP */
 }
 
-.status-bar-field:last-child {
-  margin-left: auto;
+.app-window .status-bar .status-bar-field:last-child {
   border-right: none;
+  flex-grow: 1; /* Allow last field to take remaining space if needed */
 }
 
 .window-inactive-mask {
@@ -285,11 +292,13 @@
   transform-origin: bottom center;
 }
 
+/*
 .app-window:not(.active) .status-bar {
   background-color: #f3f3f3;
   color: #aaa;
   border-top: 1px solid #e0e0e0;
 }
+*/
 
 /* ===== Responsive: Mobile Adjustments ===== */
 @media (max-width: 768px) {

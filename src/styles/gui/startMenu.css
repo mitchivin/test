@@ -435,13 +435,12 @@
 
 /* Add padding to the text for spacing */
 .footer-button span {
-  padding: 0 3px;
+  padding: 0 6px;
 }
 
 .footer-button img {
   width: 24px;
   height: 24px;
-  margin-right: 7px;
   border-radius: 3px;
   box-shadow: none;
   transition: filter 0.1s ease;

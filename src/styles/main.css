@@ -52,10 +52,6 @@
   overflow: hidden !important;
 }
 
-.window-maximize.restore {
-  background-size: 10px 10px;
-}
-
 /* Add styles here to override or supplement xp.css */
 
 /* ===== Global Layout & Body Styles ===== */
