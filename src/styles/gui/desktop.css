@@ -182,9 +182,9 @@
   }
 
   /* Set specific order for main mobile icons */
-  .desktop-icons .desktop-icon[data-program-name="contact"] { order: 1; }
-  .desktop-icons .desktop-icon[data-program-name="about"]   { order: 2; }
-  .desktop-icons .desktop-icon[data-program-name="internet"]{ order: 3; }
+  .desktop-icons .desktop-icon[data-program-name="about"]   { order: 1; }
+  .desktop-icons .desktop-icon[data-program-name="internet"]{ order: 2; }
+  .desktop-icons .desktop-icon[data-program-name="contact"] { order: 3; }
   /* Resume icon is hidden, its order property is not needed if display: none */
   /* .desktop-icons .desktop-icon[data-program-name="resume"] { order: initial; } */
 
