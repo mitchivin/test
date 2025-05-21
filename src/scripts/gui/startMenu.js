@@ -454,7 +454,7 @@ export default class StartMenu {
     // Define configurations for the items that will be swapped
     const socialItems = SOCIALS.map(social => ({
       id: social.key,
-      icon: social.icon,
+      icon: social.icon ? "./" + social.icon.replace(/^\.\//, '').replace(/^\//, '') : '', // Corrected path
       title: social.name,
       url: social.url,
       action: "open-url",
@@ -1147,7 +1147,7 @@ function getAllProgramsItems() {
     ...SOCIALS.map(social => ({
       type: "url",
       url: social.url,
-      icon: social.icon ? "./" + social.icon.replace(/^\.\//, '').replace(/^\//, '') : '', // Prepend "./" and ensure no double slashes or double dots
+      icon: social.icon ? "./" + social.icon.replace(/^\.\//, '').replace(/^\//, '') : '', // Corrected path
       label: social.name,
     })),
   ];

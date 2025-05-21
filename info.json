@@ -53,19 +53,19 @@
     {
       "key": "instagram",
       "name": "Instagram",
-      "icon": "/assets/gui/start-menu/instagram.webp",
+      "icon": "assets/gui/start-menu/instagram.webp",
       "url": "https://www.instagram.com/mitch1ivin"
     },
     {
       "key": "github",
       "name": "Github",
-      "icon": "/assets/gui/start-menu/github.webp",
+      "icon": "assets/gui/start-menu/github.webp",
       "url": "https://github.com/mitchivin"
     },
     {
       "key": "linkedin",
       "name": "LinkedIn",
-      "icon": "/assets/gui/start-menu/linkedin.webp",
+      "icon": "assets/gui/start-menu/linkedin.webp",
       "url": "https://www.linkedin.com/in/mitchivin/"
     }
   ]
