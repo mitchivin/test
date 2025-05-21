@@ -107,7 +107,7 @@ export function initBootSequence(eventBus, EVENTS) {
           void bootDelayMessage.offsetWidth;
           bootDelayMessage.style.opacity = "1";
         }
-      }, 7000); // Set to 7 seconds
+      }, 5000); // Set to 5 seconds
 
       const minBootTime = 5500; // Minimum boot duration (ms)
       setTimeout(() => {
@@ -138,8 +138,13 @@ export function initBootSequence(eventBus, EVENTS) {
               if (loginContent) loginContent.style.opacity = "1";
               attachLoginScreenHandlers();
               fadeoutOverlay.style.opacity = "0";
-              if (bootDelayMessage) bootDelayMessage.style.display = "none";
-              if (delayMessageTimer) clearTimeout(delayMessageTimer); // Clear timer when boot completes
+              if (bootDelayMessage && bootDelayMessage.parentNode) {
+                bootDelayMessage.parentNode.removeChild(bootDelayMessage);
+              }
+              if (delayMessageTimer) {
+                clearTimeout(delayMessageTimer);
+                delayMessageTimer = null;
+              }
               setTimeout(() => {
                 fadeoutOverlay.style.display = "none";
               }, 500);
