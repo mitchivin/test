@@ -14,12 +14,39 @@ window.addEventListener("message", function (event) {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const resumeImage = document.getElementById("resumeImage");
   const scroller = document.getElementById("appRoot");
+  const downloadBtnId = "resumeDownloadBtn";
 
-  if (!resumeImage || !scroller) {
+  // Fetch info.json
+  let info = null;
+  try {
+    const response = await fetch("/info.json");
+    info = await response.json();
+  } catch (e) {
+    console.error("Failed to load info.json", e);
     return;
+  }
+  if (!info || !info.resume) return;
+
+  // Set resume image src
+  if (resumeImage) {
+    resumeImage.src = info.resume.webp;
+  }
+
+  // Add or update download button for PDF
+  let downloadBtn = document.getElementById(downloadBtnId);
+  if (!downloadBtn) {
+    downloadBtn = document.createElement("a");
+    downloadBtn.id = downloadBtnId;
+    downloadBtn.textContent = "Download PDF";
+    downloadBtn.href = info.resume.pdf;
+    downloadBtn.download = "resumeMitchIvin.pdf";
+    downloadBtn.className = "resume-download-btn";
+    resumeImage?.parentNode?.appendChild(downloadBtn);
+  } else {
+    downloadBtn.href = info.resume.pdf;
   }
 
   function initializeZoomPan() {

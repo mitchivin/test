@@ -1160,14 +1160,6 @@ body.screen-grayscale-active
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4); /* Added text shadow */
 }
 
-.logoff-dialog-footer {
-  /* background: #4A68A3; */ /* Footer is now part of the dark blue bar */
-  padding: 0; /* Remove padding, alignment handled by flex on parent */
-  /* text-align: right; */ /* Alignment handled by parent's justify-content */
-  /* width: 100%; */ /* Not needed with parent flex */
-  /* border-top: 1px solid #3B5587; */ /* Separator is now the bar itself */
-}
-
 .logoff-dialog-cancel-button {
   /* Standard XP button styles - mostly deferred to xp.css by adding .xp-button class */
   /* background-color: #f0f0f0; */

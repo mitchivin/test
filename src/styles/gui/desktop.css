@@ -40,13 +40,11 @@
 
 /* Wallpaper classes */
 .desktop.wallpaper-default {
-  background-image: url("../../../assets/gui/bgs/bliss.webp");
-  background-position: top center;
+  /* background-image: url("../../../assets/gui/bgs/bliss.webp"); */
 }
 
 .desktop.wallpaper-mobile {
-  background-image: url("../../../assets/gui/bgs/blissMobile.webp");
-  background-position: top center;
+  /* background-image: url("../../../assets/gui/bgs/blissMobile.webp"); */
 }
 
 /* Ultrawide screens: center the image vertically and horizontally */

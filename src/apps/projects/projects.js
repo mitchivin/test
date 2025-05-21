@@ -309,11 +309,10 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
   return null;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const lightbox = document.getElementById("project-lightbox");
   const lightboxContent = document.getElementById("lightbox-content");
   const lightboxDetails = document.getElementById("lightbox-details");
-  const posts = document.querySelectorAll(".post");
   const feedContainer = document.querySelector(".feed-container");
 
   userPrefersDescriptionVisible = isDesktop(); // Initialize based on view
@@ -321,6 +320,67 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!lightbox || !lightboxContent || !lightboxDetails || !feedContainer) {
     return;
   }
+
+  // Fetch projects.json and render posts
+  let projects = [];
+  try {
+    const response = await fetch("/projects.json");
+    projects = await response.json();
+  } catch (e) {
+    console.error("Failed to load projects.json", e);
+    return;
+  }
+
+  // Helper to ensure asset paths are absolute from web root
+  function toAbsoluteAssetPath(path) {
+    if (!path) return path;
+    if (path.startsWith("/")) return path;
+    if (path.startsWith("assets/")) return "/" + path;
+    return path;
+  }
+
+  // Helper to create post element
+  function createPostElement(project, idx) {
+    const post = document.createElement("div");
+    post.className = `post ${project.type}-post`;
+    post.dataset.type = project.type;
+    post.dataset.src = toAbsoluteAssetPath(project.src);
+    if (project.poster) post.dataset.poster = toAbsoluteAssetPath(project.poster);
+    post.dataset.title = project.title;
+    post.dataset.software = project.software;
+    post.dataset.description = project.description;
+    post.dataset.bulletPoints = project.bulletPoints ? project.bulletPoints.join("|") : "";
+    post.dataset.toolsUsed = project.toolsUsed ? project.toolsUsed.join(", ") : "";
+    post.dataset.idx = idx;
+
+    if (project.type === "image") {
+      const img = document.createElement("img");
+      img.src = toAbsoluteAssetPath(project.src);
+      img.alt = project.alt || project.title || "Project Image";
+      post.appendChild(img);
+    } else if (project.type === "video") {
+      const video = document.createElement("video");
+      video.src = toAbsoluteAssetPath(project.src);
+      if (project.poster) video.poster = toAbsoluteAssetPath(project.poster);
+      video.autoplay = true;
+      video.muted = true;
+      video.loop = true;
+      video.setAttribute("playsinline", "");
+      video.alt = project.alt || project.title || "Project Video";
+      post.appendChild(video);
+    }
+    return post;
+  }
+
+  // Clear and populate feed
+  feedContainer.innerHTML = "";
+  projects.forEach((project, idx) => {
+    const post = createPostElement(project, idx);
+    feedContainer.appendChild(post);
+  });
+
+  // Now that posts are rendered, continue with the rest of the initialization
+  let allPosts = Array.from(document.querySelectorAll(".post"));
 
   function setHomeButtonEnabledInParent(enabled) {
     sendMessageToParent({ type: "set-home-enabled", enabled });
@@ -702,7 +762,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let currentLightboxIndex = null;
-  let allPosts = Array.from(document.querySelectorAll(".post"));
 
   // Ensure a persistent wrapper exists
   function getOrCreateWrapper() {
@@ -1016,7 +1075,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Modify the post click handler to only open the lightbox
-  posts.forEach((post, idx) => {
+  allPosts.forEach((post, idx) => {
     post.addEventListener("click", (event) => {
       if (event.target.tagName === "A") {
         return;

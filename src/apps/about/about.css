@@ -202,17 +202,8 @@ body {
 .left-panel__card__row {
   cursor: default;
 }
-.left-panel__card__row:focus {
-  outline: none;
-}
 .left-panel__card__row:focus-visible {
   outline: 2px dotted #1976d2;
-}
-.left-panel__card__img {
-  cursor: default;
-}
-.left-panel__card__text:not(.link) {
-  cursor: default;
 }
 
 .welcome_text {

@@ -15,6 +15,34 @@
 import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
 
+// Helper to fetch socials from info.json
+let SOCIALS_CACHE = null;
+async function getSocials() {
+  if (SOCIALS_CACHE) return SOCIALS_CACHE;
+  try {
+    const response = await fetch("/info.json");
+    const info = await response.json();
+    SOCIALS_CACHE = Array.isArray(info.socials) ? info.socials : [];
+    return SOCIALS_CACHE;
+  } catch (e) {
+    SOCIALS_CACHE = [];
+    return SOCIALS_CACHE;
+  }
+}
+
+let SYSTEM_ASSETS = null;
+async function getSystemAssets() {
+  if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
+  try {
+    const response = await fetch("/system.json");
+    SYSTEM_ASSETS = await response.json();
+    return SYSTEM_ASSETS;
+  } catch (e) {
+    SYSTEM_ASSETS = {};
+    return SYSTEM_ASSETS;
+  }
+}
+
 // ===== Desktop Class =====
 /**
  * Desktop class manages the desktop UI, icons, and user interactions.
@@ -37,7 +65,12 @@ export default class Desktop {
 
     this.cleanupArtifacts();
     this.createSelectionOverlay();
-    this.setupIconEvents();
+    // Wait for socials to be loaded, then update icons and events
+    getSocials().then((socials) => {
+      this.socials = socials;
+      this.updateSocialDesktopIcons();
+      this.setupIconEvents();
+    });
     this.setupDesktopEvents();
     this.setupPointerSelectionEvents();
 
@@ -58,6 +91,15 @@ export default class Desktop {
     this.eventBus.subscribe(EVENTS.STARTMENU_OPENED, () =>
       this.resetDragSelectionState(),
     );
+
+    // Fetch system.json and set the background image
+    getSystemAssets().then((system) => {
+      if (isMobileDevice()) {
+        this.desktop.style.backgroundImage = `url('${system.wallpaperMobile}')`;
+      } else {
+        this.desktop.style.backgroundImage = `url('${system.wallpaperDesktop}')`;
+      }
+    });
   }
 
   /**
@@ -89,10 +131,30 @@ export default class Desktop {
   }
 
   /**
+   * Update desktop social icon images from info.json
+   */
+  updateSocialDesktopIcons() {
+    if (!this.socials) return;
+    this.socials.forEach((social) => {
+      const iconEl = this.desktop.querySelector(
+        `.desktop-icon[data-program-name="${social.key}"] img`
+      );
+      if (iconEl) {
+        iconEl.src = social.icon;
+        iconEl.alt = social.name;
+      }
+    });
+  }
+
+  /**
    * Attach click/tap events to desktop icons for selection and opening.
    */
   setupIconEvents() {
     const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const socialsByKey = (this.socials || []).reduce((acc, s) => {
+      acc[s.key] = s;
+      return acc;
+    }, {});
     this.getIcons().forEach((icon) => {
       if (icon.tagName === "A") return; // Let anchors handle their own events
       const iconSpan = icon.querySelector("span");
@@ -109,14 +171,8 @@ export default class Desktop {
           // Double-click/tap: open program or social link
           if (!icon.classList.contains("selected")) this.selectIcon(icon, true);
           let programName = icon.getAttribute("data-program-name");
-          const socialKeys = ["github", "instagram", "linkedin"];
-          if (socialKeys.includes(programName)) {
-            const urls = {
-              github: "https://github.com/mitchivin",
-              instagram: "https://www.instagram.com/mitchivin",
-              linkedin: "https://www.linkedin.com/in/mitchivin",
-            };
-            window.open(urls[programName], "_blank");
+          if (socialsByKey[programName]) {
+            window.open(socialsByKey[programName].url, "_blank");
           } else {
             this.eventBus.publish(EVENTS.PROGRAM_OPEN, { programName });
           }
@@ -325,3 +381,14 @@ export default class Desktop {
     this.clearTemporaryHighlights();
   }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const desktopEl = document.querySelector(".desktop");
+  if (!desktopEl) return;
+  const system = await getSystemAssets();
+  if (isMobileDevice()) {
+    desktopEl.style.backgroundImage = `url('${system.wallpaperMobile}')`;
+  } else {
+    desktopEl.style.backgroundImage = `url('${system.wallpaperDesktop}')`;
+  }
+});
