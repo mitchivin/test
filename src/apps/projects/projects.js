@@ -40,11 +40,18 @@ function isTouchDevice() {
   );
 }
 
-// MODIFIED: This function now ensures asset paths are relative to the iframe's location.
+// REVISED: toAbsoluteAssetPath for GitHub Pages iframe context
 function toAbsoluteAssetPath(path) {
   if (!path) return path;
-  // If it's already a full URL or correctly relative for iframe, return as is.
-  if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("../../../")) {
+
+  // If it's already a full URL, return as is.
+  if (path.startsWith("http:") || path.startsWith("https:")) {
+    return path;
+  }
+
+  // If it already seems correctly relative for the iframe, return as is.
+  // Example: ../../../assets/...
+  if (path.startsWith("../")) {
     return path;
   }
 
@@ -54,15 +61,17 @@ function toAbsoluteAssetPath(path) {
     newPath = newPath.substring(1);
   }
 
-  // If the path now starts with "assets/", prepend "../../../" to make it relative to the iframe.
+  // Now, if it starts with "assets/", prepend "../../../" to make it relative to the iframe's HTML file.
   if (newPath.startsWith("assets/")) {
     return "../../../" + newPath;
   }
-
-  // Fallback for paths that don't match the expected "assets/" pattern after normalization.
-  // This might indicate an unexpected path format from projects.json or an already relative path
-  // intended to be local to the iframe (though less common for project assets).
-  return path;
+  
+  // If it doesn't start with "assets/" after normalization (e.g., it might be a relative path
+  // like "my-local-image.png" intended to be relative to projects.html, or an error),
+  // return it as is. Or, you might want to prepend "../../../" if you expect ALL assets
+  // from projects.json to be under the main /assets/ directory.
+  // For now, being conservative: only prepend for "assets/" paths.
+  return newPath; // or path, if you prefer to return the original if not modified
 }
 
 // Utility functions
