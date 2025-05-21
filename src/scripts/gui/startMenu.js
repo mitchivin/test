@@ -20,7 +20,7 @@
 import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
 
-const ALL_PROGRAMS_ITEMS_BASE = [
+const ALL_PROGRAMS_ITEMS = [
   // Main apps first
   {
     type: "program",
@@ -46,44 +46,62 @@ const ALL_PROGRAMS_ITEMS_BASE = [
     icon: "./assets/gui/desktop/contact.webp",
     label: "Contact Me",
   },
-  { type: "separator" },
+  { type: "separator" }, // Divider before disabled apps
   {
     type: "program",
     programName: "my-pictures",
     icon: "./assets/gui/start-menu/photos.webp",
     label: "My Photos",
-    disabled: true,
+    disabled: true, // Always disabled
   },
   {
     type: "program",
     programName: "mediaPlayer",
     icon: "./assets/gui/start-menu/mediaPlayer.webp",
     label: "Media Player",
-    disabled: true,
+    disabled: true, // Always disabled
   },
   {
     type: "program",
     programName: "musicPlayer",
     icon: "./assets/gui/start-menu/music.webp",
     label: "Music Player",
-    disabled: true,
+    disabled: true, // Always disabled
   },
   {
     type: "program",
     programName: "notepad",
     icon: "./assets/gui/start-menu/notepad.webp",
     label: "Notepad",
-    disabled: true,
+    disabled: true, // Always disabled
   },
   {
     type: "program",
     programName: "cmd",
     icon: "./assets/gui/start-menu/cmd.webp",
     label: "Command Prompt",
-    disabled: true,
+    disabled: true, // Always disabled
   },
-  { type: "separator" },
-  // Socials will be appended dynamically
+  { type: "separator" }, // Divider before socials
+  // Socials
+  {
+    type: "url",
+    url: "https://www.instagram.com/mitchivin",
+    icon: "./assets/gui/start-menu/instagram.webp",
+    label: "Instagram",
+  },
+  {
+    type: "url",
+    url: "https://github.com/mitchivin",
+    icon: "./assets/gui/start-menu/github.webp",
+    label: "GitHub",
+  },
+  {
+    type: "url",
+    url: "https://www.linkedin.com/in/mitchivin",
+    icon: "./assets/gui/start-menu/linkedin.webp",
+    label: "LinkedIn",
+  },
 ];
 
 // Add menu item arrays for abstraction
@@ -160,36 +178,6 @@ const RECENTLY_USED_ITEMS = [
   },
 ];
 
-let SOCIALS = [];
-let SYSTEM_ASSETS = null;
-
-async function getSystemAssets() {
-  if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
-  try {
-    const response = await fetch("../../system.json");
-    SYSTEM_ASSETS = await response.json();
-    return SYSTEM_ASSETS;
-  } catch (e) {
-    SYSTEM_ASSETS = {}; // Initialize to empty object on error
-    return SYSTEM_ASSETS;
-  }
-}
-
-// Cache for socials
-let SOCIALS_CACHE = null;
-async function loadSocials() {
-  if (SOCIALS_CACHE) return SOCIALS_CACHE;
-  try {
-    const response = await fetch("../../info.json");
-    const info = await response.json();
-    SOCIALS_CACHE = Array.isArray(info.socials) ? info.socials : [];
-    return SOCIALS_CACHE;
-  } catch (e) {
-    SOCIALS_CACHE = []; // Initialize to empty array on error
-    return SOCIALS_CACHE;
-  }
-}
-
 // Helper to build menu HTML from item array
 function buildMenuHTML(items, itemClass, ulClass) {
   return (
@@ -259,16 +247,9 @@ export default class StartMenu {
     this.allProgramsMenu = null;
     this.recentlyUsedMenu = null;
     this.activeWindowOverlay = null; // Keep track of which overlay is active
-    this.isOpen = false;
-    this.startMenuElement = null;
-    this.activeSubMenu = null; // Track currently active submenu (all programs or recently used)
-    this.activeSubMenuType = null; // 'all-programs' or 'recently-used'
-    this.allProgramsItems = [];
-    this.socials = []; // This will be populated from SOCIALS_CACHE
-    this.systemAssets = {};
-    this.info = {}; // Initialize info
 
-    this._init();
+    this.createStartMenuElement();
+    this.setupEventListeners();
 
     // Subscribe to event bus for start menu toggle and close requests
     this.eventBus.subscribe(EVENTS.STARTMENU_TOGGLE, () =>
@@ -283,32 +264,6 @@ export default class StartMenu {
     this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, (data) => {
       this.updateContentOverlay(data?.windowId);
     });
-  }
-
-  async _init() {
-    // Load system assets and socials first
-    this.systemAssets = await getSystemAssets();
-    this.socials = await loadSocials(); // Use SOCIALS_CACHE via loadSocials
-
-    // Load general info (this might be redundant if socials already loaded it)
-    try {
-      const infoResponse = await fetch("../../info.json");
-      this.info = await infoResponse.json();
-    } catch (e) {
-      console.error("Failed to load info.json in StartMenu:", e);
-      // this.info will remain {}
-    }
-
-    this.createStartMenuElement();
-
-    // Create and cache submenus
-    await this.createAllProgramsMenu(); // Await this
-    this.createRecentlyUsedMenu(); // This one is synchronous
-
-    this.setupEventListeners();
-    this._setupDelegatedEventHandlers(); // For hover effects and submenu triggers
-    this.setupMenuItems();
-    // No, don't call setupAllProgramsMenu here, it's part of createAllProgramsMenu
   }
 
   /**
@@ -330,16 +285,6 @@ export default class StartMenu {
 
     document.body.appendChild(startMenu);
     this.startMenu = startMenu;
-
-    // Dynamically set username from info.json
-    fetch('./info.json')
-      .then(r => r.json())
-      .then(info => {
-        const name = info?.contact?.name || 'Mitch Ivin';
-        startMenu.querySelectorAll('.menutopbar .username').forEach(span => {
-          span.textContent = name;
-        });
-      });
 
     this.createAllProgramsMenu();
     this.createRecentlyUsedMenu();
@@ -399,29 +344,15 @@ export default class StartMenu {
    * Create the All Programs submenu and attach to DOM.
    * @returns {void}
    */
-  async createAllProgramsMenu() {
-    if (this.allProgramsMenu) return; // Already created
-
-    this.allProgramsItems = await getAllProgramsItems(); // Await the async data fetch
-
-    const menuHTML = buildMenuHTML(this.allProgramsItems, "all-programs-item", "all-programs-items");
-    this.allProgramsMenu = this._createSubMenu("all-programs-menu", menuHTML, "allProgramsMenu");
-    // Attach effects after creation
-    attachMenuItemEffects(this.allProgramsMenu, ".all-programs-item");
-
-    // Attach click handlers for items within the All Programs menu
-    this.allProgramsMenu.addEventListener("click", (event) => {
-      const targetItem = event.target.closest(".all-programs-item");
-      if (targetItem && targetItem.dataset.programName) {
-        if (targetItem.dataset.url && targetItem.dataset.isSocial === 'true') {
-          window.open(targetItem.dataset.url, '_blank');
-        } else {
-          this.openProgram(targetItem.dataset.programName);
-        }
-        this.closeStartMenu(); // Close start menu after action
-      } else if (targetItem && targetItem.dataset.action) {
-        // Handle other actions if any
-      }
+  createAllProgramsMenu() {
+    this._createMenuWithEffects({
+      items: ALL_PROGRAMS_ITEMS,
+      itemClass: "all-programs",
+      ulClass: "all-programs-items",
+      menuClass: "all-programs-menu",
+      propertyName: "allProgramsMenu",
+      itemSelector: ".all-programs-item",
+      attachClickHandler: false,
     });
   }
 
@@ -446,9 +377,7 @@ export default class StartMenu {
    * @returns {string} HTML string for the start menu.
    */
   getMenuTemplate() {
-    const userName = this.info?.contact?.name || "Mitch Ivin";
-    const userIcon = this.systemAssets?.userIcon || "./assets/gui/start-menu/defaultuser.webp";
-
+    // Helper to render a menu item with optional disabling
     function renderMenuItem({
       id,
       icon,
@@ -500,14 +429,32 @@ export default class StartMenu {
     const mobile = isMobileDevice();
 
     // Define configurations for the items that will be swapped
-    const socialItems = this.socials.map(social => ({
-      id: social.key,
-      icon: social.icon,
-      title: social.name,
-      url: social.url,
-      action: "open-url",
-      disabledOverride: false,
-    }));
+    const socialItems = [
+      {
+        id: "instagram",
+        icon: "./assets/gui/start-menu/instagram.webp",
+        title: "Instagram",
+        url: "https://www.instagram.com/mitchivin",
+        action: "open-url",
+        disabledOverride: false,
+      },
+      {
+        id: "github",
+        icon: "./assets/gui/start-menu/github.webp",
+        title: "GitHub",
+        url: "https://github.com/mitchivin",
+        action: "open-url",
+        disabledOverride: false,
+      },
+      {
+        id: "linkedin",
+        icon: "./assets/gui/start-menu/linkedin.webp",
+        title: "LinkedIn",
+        url: "https://www.linkedin.com/in/mitchivin",
+        action: "open-url",
+        disabledOverride: false,
+      },
+    ];
 
     const appItemsToSwap = [
       {
@@ -610,8 +557,8 @@ export default class StartMenu {
 
     return `
       <div class="menutopbar">
-        <img src="${userIcon}" alt="User" class="userpicture">
-        <span class="username">${userName}</span>
+        <img src="./assets/gui/boot/userlogin.webp" alt="User" class="userpicture">
+        <span class="username">Mitch Ivin</span>
       </div>
       <div class="start-menu-middle">
         <div class="middle-section middle-left">
@@ -1188,42 +1135,3 @@ export default class StartMenu {
 // ==================================================
 // END Start Menu Module
 // ==================================================
-
-// Helper function to get all program items including dynamic social links
-async function getAllProgramsItems() {
-  // Ensure socials are loaded before constructing items
-  const loadedSocials = await loadSocials(); // Uses SOCIALS_CACHE
-
-  const socialItems = loadedSocials.map(social => ({
-    type: "program",
-    programName: social.key, // Assuming 'key' is used for programName
-    icon: social.icon,
-    label: social.name,
-    isSocial: true,
-    url: social.url,
-  }));
-
-  // Add a separator before social items if there are any social items
-  const allItems = [...ALL_PROGRAMS_ITEMS_BASE];
-  if (socialItems.length > 0) {
-    allItems.push({ type: "separator" });
-    allItems.push(...socialItems);
-  }
-  return allItems;
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const system = await getSystemAssets();
-  document.querySelectorAll('.menutopbar .userpicture').forEach(img => {
-    if (system.userIcon) img.src = system.userIcon;
-  });
-  // Set username from info.json
-  try {
-    const response = await fetch('./info.json');
-    const info = await response.json();
-    const name = info?.contact?.name || "Mitch Ivin";
-    document.querySelectorAll('.menutopbar .username').forEach(span => {
-      span.textContent = name;
-    });
-  } catch (e) {}
-});

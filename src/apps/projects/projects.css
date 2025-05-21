@@ -346,6 +346,23 @@ body {
   min-height: 0;
 }
 
+/* General Lightbox Text Styles (primarily for Desktop) */
+#lightbox-title {
+  color: #f1f1f1;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 10px; /* Base margin, can be overridden by desktop */
+}
+
+#lightbox-description {
+  color: #f1f1f1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
 /* Mobile Layout (becomes Base Layout) */
 #project-lightbox {
   height: 100vh;
@@ -946,6 +963,17 @@ body.projects-window-maximized
 .lightbox-media-wrapper.desc-visible .lightbox-desc-card {
   opacity: 1;
   transform: translateX(0);
+}
+
+body,
+.scroll-content,
+.feed-container,
+.post,
+.main-window-content {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Allow selection in links (if needed) */

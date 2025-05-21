@@ -22,7 +22,6 @@ import {
   createMenuBar,
   createToolbar,
   createAddressBar,
-  getSocials,
 } from "./windowBars.js";
 import { isMobileDevice } from "../utils/device.js";
 
@@ -239,17 +238,28 @@ export default class WindowManager {
             externalLinkBtn.style.display = "";
             externalLinkBtn.dataset.urlToOpen = event.data.linkUrl;
 
-            (async () => {
-              const socials = await getSocials();
-              const social = socials.find(s => s.key === event.data.linkType);
-              if (social) {
-                if (iconImg) iconImg.src = social.icon;
-                if (textSpan) textSpan.textContent = `View on ${social.name}`;
-              } else {
-                if (iconImg) iconImg.src = "./assets/gui/start-menu/instagram.webp";
+            switch (event.data.linkType) {
+              case "instagram":
+                if (iconImg)
+                  iconImg.src = "./assets/gui/start-menu/instagram.webp";
+                if (textSpan) textSpan.textContent = "View on Instagram";
+                break;
+              case "github":
+                if (iconImg)
+                  iconImg.src = "./assets/gui/start-menu/github.webp";
+                if (textSpan) textSpan.textContent = "View on GitHub";
+                break;
+              case "linkedin":
+                if (iconImg)
+                  iconImg.src = "./assets/gui/start-menu/linkedin.webp";
+                if (textSpan) textSpan.textContent = "View on LinkedIn";
+                break;
+              default: // Fallback to Instagram or a generic state if linkType is unknown
+                if (iconImg)
+                  iconImg.src = "./assets/gui/start-menu/instagram.webp";
                 if (textSpan) textSpan.textContent = "View Link";
-              }
-            })();
+                break;
+            }
           } else {
             externalLinkBtn.classList.add("disabled");
             externalLinkBtn.style.display = "none";

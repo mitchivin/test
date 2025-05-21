@@ -249,7 +249,7 @@ export function hideBalloon(instant = false) {
   }, 1000);
 }
 
-export async function showNetworkBalloon() {
+export function showNetworkBalloon() {
   // Prevent balloon if login screen is visible
   const loginScreen = document.getElementById("login-screen");
   if (
@@ -270,17 +270,9 @@ export async function showNetworkBalloon() {
   balloonRoot.style.zIndex = "1400";
   document.body.appendChild(balloonRoot);
 
-  // Fetch system.json for balloon content
-  let headerText = "Welcome to my portfolio";
-  let mainText = "It's also the most accurate XP recreation online.<br>Built from scratch, to the pixel, by me :)";
-  try {
-    const response = await fetch("../../system.json");
-    const system = await response.json();
-    if (system.balloon) {
-      if (system.balloon.title) headerText = system.balloon.title;
-      if (system.balloon.body) mainText = system.balloon.body;
-    }
-  } catch (e) {}
+  const headerText = "Welcome to my portfolio";
+  const mainText =
+    "It's also the most accurate XP recreation online.<br>Built from scratch, to the pixel, by me :)";
 
   balloonRoot.innerHTML = `
     <div class="balloon">

@@ -583,16 +583,19 @@
 /* Icons within submenu items */
 .all-programs-item img,
 .recently-used-item img {
-  max-height: 20px; /* Increased from 16px for better visibility */
-  max-width: 20px; /* Increased from 16px */
-  margin-right: 8px;
-  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
 /* Separator within All Programs */
-.all-programs-item-separator {
+.all-programs-separator {
   height: 1px;
-  background-color: var(--menu-separator-color, #707070); /* Use CSS variable */
+  background-color: #e0e0e0; /* Updated to lighter grey separator */
   margin: 3px 0;
   padding: 0;
   border: none;

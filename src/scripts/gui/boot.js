@@ -13,19 +13,6 @@
 
 import { showNetworkBalloon } from "./taskbar.js";
 
-let SYSTEM_ASSETS = null;
-async function getSystemAssets() {
-  if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
-  try {
-    const response = await fetch("../../system.json");
-    SYSTEM_ASSETS = await response.json();
-    return SYSTEM_ASSETS;
-  } catch (e) {
-    SYSTEM_ASSETS = {};
-    return SYSTEM_ASSETS;
-  }
-}
-
 // ===== Boot Sequence Initialization =====
 /**
  * Initialize the boot sequence and login handling.
@@ -434,32 +421,7 @@ export function initBootSequence(eventBus, EVENTS) {
 
 // On DOMContentLoaded, fade in boot screen and remove pre-boot overlay
 // (This is a visual polish step, not part of the main boot logic)
-document.addEventListener("DOMContentLoaded", async () => {
-  const system = await getSystemAssets();
-  // Boot screen loading spinner
-  const bootLogo = document.getElementById("boot-logo");
-  if (bootLogo && system.loading) bootLogo.src = system.loading;
-  // Login screen XP logo
-  document.querySelectorAll(".xp-logo-image").forEach(img => {
-    if (system.loading) img.src = system.loading;
-  });
-  // Login screen user icon
-  document.querySelectorAll('.login-screen .user img').forEach(img => {
-    if (system.userIcon) img.src = system.userIcon;
-  });
-  // Set login screen name from info.json
-  try {
-    const response = await fetch("../../info.json");
-    const info = await response.json();
-    const name = info?.contact?.name || "Mitch Ivin";
-    document.querySelectorAll('.login-screen .name').forEach(span => {
-      span.textContent = name;
-    });
-    // Update only the name in the login instruction
-    document.querySelectorAll('.login-instruction-name').forEach(span => {
-      span.textContent = name;
-    });
-  } catch (e) {}
+document.addEventListener("DOMContentLoaded", () => {
   const preBoot = document.getElementById("pre-boot-overlay");
   const bootScreen = document.getElementById("boot-screen");
   if (preBoot && bootScreen) {
