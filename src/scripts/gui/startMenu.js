@@ -1160,7 +1160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   // Set username from info.json
   try {
-    const response = await fetch("/info.json");
+    const response = await fetch("./info.json");
     const info = await response.json();
     const name = info?.contact?.name || "Mitch Ivin";
     document.querySelectorAll('.menutopbar .username').forEach(span => {
