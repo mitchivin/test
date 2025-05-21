@@ -351,6 +351,43 @@ export default class WindowManager {
       )
         return;
 
+      // Handle contact form state for toolbar button enable/disable
+      if (event.data && event.data.type === "contactFormState") {
+        // Find the window containing this iframe
+        let contactWindow = null;
+        for (const windowId in this.windows) {
+          const winElement = this.windows[windowId];
+          const iframe = winElement.querySelector("iframe");
+          if (iframe && iframe.contentWindow === event.source) {
+            contactWindow = winElement;
+            break;
+          }
+        }
+        if (contactWindow) {
+          // Find the Send and New Message toolbar buttons
+          const sendBtn = contactWindow.querySelector(
+            ".toolbar-button.send"
+          );
+          const newBtn = contactWindow.querySelector(
+            ".toolbar-button.new"
+          );
+          if (sendBtn) {
+            if (event.data.hasValue) {
+              sendBtn.classList.remove("disabled");
+            } else {
+              sendBtn.classList.add("disabled");
+            }
+          }
+          if (newBtn) {
+            if (event.data.hasValue) {
+              newBtn.classList.remove("disabled");
+            } else {
+              newBtn.classList.add("disabled");
+            }
+          }
+        }
+      }
+
       // Find the .app-window containing the iframe with this contentWindow
       let windowElement = null;
       if (event.data?.type === "iframe-interaction" && event.data.windowId) {
@@ -1030,6 +1067,9 @@ export default class WindowManager {
 
               // 4. Clean up listener
               window.removeEventListener("message", mailtoListener);
+
+              // 5. Tell the iframe to clear the form
+              contactIframe.contentWindow.postMessage({ type: "clearContactForm" }, "*");
             }
           };
           window.addEventListener("message", mailtoListener);

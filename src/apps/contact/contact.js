@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (fromInput) fromInput.value = "";
     if (subjectInput) subjectInput.value = "";
     if (messageTextarea) messageTextarea.value = "";
+    notifyFormState();
   }
 
   window.addEventListener("message", (event) => {
@@ -52,6 +53,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         case "newMessage":
           clearForm();
           break;
+      }
+      // Listen for clearContactForm message
+      if (event.data.type === "clearContactForm") {
+        clearForm();
       }
     }
     if (event.data && event.data.type === "toolbar-action") {
@@ -137,3 +142,28 @@ document.addEventListener(
   },
   { passive: false },
 );
+
+function notifyFormState() {
+  const hasValue =
+    (fromInput && fromInput.value.trim()) ||
+    (subjectInput && subjectInput.value.trim()) ||
+    (messageTextarea && messageTextarea.value.trim());
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage(
+      {
+        type: "contactFormState",
+        hasValue: !!hasValue,
+        windowId: window.name,
+      },
+      "*"
+    );
+  }
+}
+
+[fromInput, subjectInput, messageTextarea].forEach((el) => {
+  if (el) {
+    el.addEventListener("input", notifyFormState);
+  }
+});
+// Notify initial state
+window.addEventListener("DOMContentLoaded", notifyFormState);
