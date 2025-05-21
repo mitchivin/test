@@ -166,7 +166,7 @@ let SYSTEM_ASSETS = null;
 async function getSystemAssets() {
   if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
   try {
-    const response = await fetch("/system.json");
+    const response = await fetch("./system.json");
     SYSTEM_ASSETS = await response.json();
     return SYSTEM_ASSETS;
   } catch (e) {
@@ -177,7 +177,7 @@ async function getSystemAssets() {
 
 async function loadSocials() {
   try {
-    const response = await fetch("/info.json");
+    const response = await fetch("./info.json");
     const info = await response.json();
     SOCIALS = Array.isArray(info.socials) ? info.socials : [];
   } catch (e) {
@@ -299,7 +299,7 @@ export default class StartMenu {
     this.startMenu = startMenu;
 
     // Dynamically set username from info.json
-    fetch('/info.json')
+    fetch('./info.json')
       .then(r => r.json())
       .then(info => {
         const name = info?.contact?.name || 'Mitch Ivin';
@@ -1159,7 +1159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   // Set username from info.json
   try {
-    const response = await fetch("/info.json");
+    const response = await fetch('./info.json');
     const info = await response.json();
     const name = info?.contact?.name || "Mitch Ivin";
     document.querySelectorAll('.menutopbar .username').forEach(span => {

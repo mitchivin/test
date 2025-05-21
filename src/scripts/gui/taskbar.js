@@ -274,7 +274,7 @@ export async function showNetworkBalloon() {
   let headerText = "Welcome to my portfolio";
   let mainText = "It's also the most accurate XP recreation online.<br>Built from scratch, to the pixel, by me :)";
   try {
-    const response = await fetch("/system.json");
+    const response = await fetch("./system.json");
     const system = await response.json();
     if (system.balloon) {
       if (system.balloon.title) headerText = system.balloon.title;
