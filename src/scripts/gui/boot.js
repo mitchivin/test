@@ -17,7 +17,7 @@ let SYSTEM_ASSETS = null;
 async function getSystemAssets() {
   if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
   try {
-    const response = await fetch("/system.json");
+    const response = await fetch("./system.json");
     SYSTEM_ASSETS = await response.json();
     return SYSTEM_ASSETS;
   } catch (e) {

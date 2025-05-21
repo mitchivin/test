@@ -161,17 +161,17 @@ const RECENTLY_USED_ITEMS = [
 ];
 
 let SOCIALS = [];
-let SYSTEM_ASSETS = null;
+let systemAssets = null;
 
 async function getSystemAssets() {
-  if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
+  if (systemAssets) return systemAssets;
   try {
-    const response = await fetch("/system.json");
-    SYSTEM_ASSETS = await response.json();
-    return SYSTEM_ASSETS;
+    const response = await fetch("./system.json");
+    systemAssets = await response.json();
+    return systemAssets;
   } catch (e) {
-    SYSTEM_ASSETS = {};
-    return SYSTEM_ASSETS;
+    systemAssets = {};
+    return systemAssets;
   }
 }
 
