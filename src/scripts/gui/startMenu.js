@@ -1147,7 +1147,7 @@ function getAllProgramsItems() {
     ...SOCIALS.map(social => ({
       type: "url",
       url: social.url,
-      icon: social.icon,
+      icon: social.icon ? "./" + social.icon.replace(/^\.\//, '').replace(/^\//, '') : '', // Prepend "./" and ensure no double slashes or double dots
       label: social.name,
     })),
   ];
