@@ -9,6 +9,21 @@
 /**
  * Initialize listeners for card collapse/expand on DOMContentLoaded.
  */
+function transformAssetPath(path) {
+  if (!path) return path;
+  if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("../../../")) {
+    return path;
+  }
+  let newPath = path;
+  if (newPath.startsWith("/")) {
+    newPath = newPath.substring(1);
+  }
+  if (newPath.startsWith("assets/")) {
+    return "../../../" + newPath;
+  }
+  return newPath;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   document
     .querySelectorAll(".left-panel__card__header__img")
@@ -54,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       icon.className = "about-paragraph-icon";
       icon.draggable = false;
       icon.alt = `Paragraph icon ${i+1}`;
-      icon.src = info.about[`p${i+1}`];
+      icon.src = transformAssetPath(info.about[`p${i+1}`]);
       iconCol.appendChild(icon);
       const textSpan = document.createElement("span");
       textSpan.className = "about-paragraph-text";
@@ -77,7 +92,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const img = document.createElement("img");
         img.className = "left-panel__card__img";
         img.alt = skill;
-        img.src = info.about.skillsIcons[i] || "";
+        img.src = transformAssetPath(info.about.skillsIcons[i] || "");
         const span = document.createElement("span");
         span.className = "left-panel__card__text";
         span.textContent = skill;
@@ -100,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const img = document.createElement("img");
         img.className = "left-panel__card__img";
         img.alt = software;
-        img.src = info.about.softwareIcons[i] || "";
+        img.src = transformAssetPath(info.about.softwareIcons[i] || "");
         const span = document.createElement("span");
         span.className = "left-panel__card__text";
         span.textContent = software;
@@ -122,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         row.className = "left-panel__card__row social-link";
         const img = document.createElement("img");
         img.className = "left-panel__card__img";
-        img.src = social.icon;
+        img.src = transformAssetPath(social.icon);
         img.alt = social.name;
         const a = document.createElement("a");
         a.href = social.url;

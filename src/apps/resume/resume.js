@@ -14,6 +14,21 @@ window.addEventListener("message", function (event) {
   }
 });
 
+function transformAssetPath(path) {
+  if (!path) return path;
+  if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("../../../")) {
+    return path;
+  }
+  let newPath = path;
+  if (newPath.startsWith("/")) {
+    newPath = newPath.substring(1);
+  }
+  if (newPath.startsWith("assets/")) {
+    return "../../../" + newPath;
+  }
+  return newPath;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const resumeImage = document.getElementById("resumeImage");
   const scroller = document.getElementById("appRoot");
@@ -32,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Set resume image src
   if (resumeImage) {
-    resumeImage.src = info.resume.webp;
+    resumeImage.src = transformAssetPath(info.resume.webp);
   }
 
   // Add or update download button for PDF
@@ -41,12 +56,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     downloadBtn = document.createElement("a");
     downloadBtn.id = downloadBtnId;
     downloadBtn.textContent = "Download PDF";
-    downloadBtn.href = info.resume.pdf;
+    downloadBtn.href = transformAssetPath(info.resume.pdf);
     downloadBtn.download = "resumeMitchIvin.pdf";
     downloadBtn.className = "resume-download-btn";
     resumeImage?.parentNode?.appendChild(downloadBtn);
   } else {
-    downloadBtn.href = info.resume.pdf;
+    downloadBtn.href = transformAssetPath(info.resume.pdf);
   }
 
   function initializeZoomPan() {
