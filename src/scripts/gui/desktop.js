@@ -20,7 +20,7 @@ let SOCIALS_CACHE = null;
 async function getSocials() {
   if (SOCIALS_CACHE) return SOCIALS_CACHE;
   try {
-    const response = await fetch("./info.json");
+    const response = await fetch("../../info.json");
     const info = await response.json();
     SOCIALS_CACHE = Array.isArray(info.socials) ? info.socials : [];
     return SOCIALS_CACHE;
@@ -34,7 +34,7 @@ let SYSTEM_ASSETS = null;
 async function getSystemAssets() {
   if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
   try {
-    const response = await fetch("./system.json");
+    const response = await fetch("../../system.json");
     SYSTEM_ASSETS = await response.json();
     return SYSTEM_ASSETS;
   } catch (e) {

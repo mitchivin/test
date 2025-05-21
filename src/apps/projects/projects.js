@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Fetch projects.json and render posts
   let projects = [];
   try {
-    const response = await fetch("./projects.json");
+    const response = await fetch("../../../projects.json");
     projects = await response.json();
   } catch (e) {
     console.error("Failed to load projects.json", e);

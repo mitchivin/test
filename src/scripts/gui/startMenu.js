@@ -166,22 +166,27 @@ let SYSTEM_ASSETS = null;
 async function getSystemAssets() {
   if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
   try {
-    const response = await fetch("./system.json");
+    const response = await fetch("../../system.json");
     SYSTEM_ASSETS = await response.json();
     return SYSTEM_ASSETS;
   } catch (e) {
-    SYSTEM_ASSETS = {};
+    SYSTEM_ASSETS = {}; // Initialize to empty object on error
     return SYSTEM_ASSETS;
   }
 }
 
+// Cache for socials
+let SOCIALS_CACHE = null;
 async function loadSocials() {
+  if (SOCIALS_CACHE) return SOCIALS_CACHE;
   try {
-    const response = await fetch("./info.json");
+    const response = await fetch("../../info.json");
     const info = await response.json();
-    SOCIALS = Array.isArray(info.socials) ? info.socials : [];
+    SOCIALS_CACHE = Array.isArray(info.socials) ? info.socials : [];
+    return SOCIALS_CACHE;
   } catch (e) {
-    SOCIALS = [];
+    SOCIALS_CACHE = []; // Initialize to empty array on error
+    return SOCIALS_CACHE;
   }
 }
 
@@ -254,6 +259,14 @@ export default class StartMenu {
     this.allProgramsMenu = null;
     this.recentlyUsedMenu = null;
     this.activeWindowOverlay = null; // Keep track of which overlay is active
+    this.isOpen = false;
+    this.startMenuElement = null;
+    this.activeSubMenu = null; // Track currently active submenu (all programs or recently used)
+    this.activeSubMenuType = null; // 'all-programs' or 'recently-used'
+    this.allProgramsItems = [];
+    this.socials = []; // This will be populated from SOCIALS_CACHE
+    this.systemAssets = {};
+    this.info = {}; // Initialize info
 
     this._init();
 
@@ -273,9 +286,29 @@ export default class StartMenu {
   }
 
   async _init() {
-    await loadSocials();
+    // Load system assets and socials first
+    this.systemAssets = await getSystemAssets();
+    this.socials = await loadSocials(); // Use SOCIALS_CACHE via loadSocials
+
+    // Load general info (this might be redundant if socials already loaded it)
+    try {
+      const infoResponse = await fetch("../../info.json");
+      this.info = await infoResponse.json();
+    } catch (e) {
+      console.error("Failed to load info.json in StartMenu:", e);
+      // this.info will remain {}
+    }
+
     this.createStartMenuElement();
+
+    // Create and cache submenus
+    await this.createAllProgramsMenu(); // Await this
+    this.createRecentlyUsedMenu(); // This one is synchronous
+
     this.setupEventListeners();
+    this._setupDelegatedEventHandlers(); // For hover effects and submenu triggers
+    this.setupMenuItems();
+    // No, don't call setupAllProgramsMenu here, it's part of createAllProgramsMenu
   }
 
   /**
@@ -366,15 +399,29 @@ export default class StartMenu {
    * Create the All Programs submenu and attach to DOM.
    * @returns {void}
    */
-  createAllProgramsMenu() {
-    this._createMenuWithEffects({
-      items: getAllProgramsItems(),
-      itemClass: "all-programs",
-      ulClass: "all-programs-items",
-      menuClass: "all-programs-menu",
-      propertyName: "allProgramsMenu",
-      itemSelector: ".all-programs-item",
-      attachClickHandler: true,
+  async createAllProgramsMenu() {
+    if (this.allProgramsMenu) return; // Already created
+
+    this.allProgramsItems = await getAllProgramsItems(); // Await the async data fetch
+
+    const menuHTML = buildMenuHTML(this.allProgramsItems, "all-programs-item", "all-programs-items");
+    this.allProgramsMenu = this._createSubMenu("all-programs-menu", menuHTML, "allProgramsMenu");
+    // Attach effects after creation
+    attachMenuItemEffects(this.allProgramsMenu, ".all-programs-item");
+
+    // Attach click handlers for items within the All Programs menu
+    this.allProgramsMenu.addEventListener("click", (event) => {
+      const targetItem = event.target.closest(".all-programs-item");
+      if (targetItem && targetItem.dataset.programName) {
+        if (targetItem.dataset.url && targetItem.dataset.isSocial === 'true') {
+          window.open(targetItem.dataset.url, '_blank');
+        } else {
+          this.openProgram(targetItem.dataset.programName);
+        }
+        this.closeStartMenu(); // Close start menu after action
+      } else if (targetItem && targetItem.dataset.action) {
+        // Handle other actions if any
+      }
     });
   }
 
@@ -399,7 +446,9 @@ export default class StartMenu {
    * @returns {string} HTML string for the start menu.
    */
   getMenuTemplate() {
-    // Helper to render a menu item with optional disabling
+    const userName = this.info?.contact?.name || "Mitch Ivin";
+    const userIcon = this.systemAssets?.userIcon || "./assets/gui/start-menu/defaultuser.webp";
+
     function renderMenuItem({
       id,
       icon,
@@ -451,7 +500,7 @@ export default class StartMenu {
     const mobile = isMobileDevice();
 
     // Define configurations for the items that will be swapped
-    const socialItems = SOCIALS.map(social => ({
+    const socialItems = this.socials.map(social => ({
       id: social.key,
       icon: social.icon,
       title: social.name,
@@ -561,8 +610,8 @@ export default class StartMenu {
 
     return `
       <div class="menutopbar">
-        <img src="./assets/gui/boot/userlogin.webp" alt="User" class="userpicture">
-        <span class="username">Mitch Ivin</span>
+        <img src="${userIcon}" alt="User" class="userpicture">
+        <span class="username">${userName}</span>
       </div>
       <div class="start-menu-middle">
         <div class="middle-section middle-left">
@@ -1140,16 +1189,27 @@ export default class StartMenu {
 // END Start Menu Module
 // ==================================================
 
-function getAllProgramsItems() {
-  return [
-    ...ALL_PROGRAMS_ITEMS_BASE,
-    ...SOCIALS.map(social => ({
-      type: "url",
-      url: social.url,
-      icon: social.icon,
-      label: social.name,
-    })),
-  ];
+// Helper function to get all program items including dynamic social links
+async function getAllProgramsItems() {
+  // Ensure socials are loaded before constructing items
+  const loadedSocials = await loadSocials(); // Uses SOCIALS_CACHE
+
+  const socialItems = loadedSocials.map(social => ({
+    type: "program",
+    programName: social.key, // Assuming 'key' is used for programName
+    icon: social.icon,
+    label: social.name,
+    isSocial: true,
+    url: social.url,
+  }));
+
+  // Add a separator before social items if there are any social items
+  const allItems = [...ALL_PROGRAMS_ITEMS_BASE];
+  if (socialItems.length > 0) {
+    allItems.push({ type: "separator" });
+    allItems.push(...socialItems);
+  }
+  return allItems;
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
