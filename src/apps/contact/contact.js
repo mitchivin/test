@@ -7,16 +7,22 @@ const fromInput = document.getElementById("contact-from");
 const subjectInput = document.getElementById("contact-subject");
 const messageTextarea = document.getElementById("contact-message");
 
-function getFormData() {
-  return {
-    to: '"Mitch Ivin" <mitchellivin@gmail.com>',
-    from: fromInput ? fromInput.value : "",
-    subject: subjectInput ? subjectInput.value : "",
-    message: messageTextarea ? messageTextarea.value : "",
-  };
-}
+document.addEventListener("DOMContentLoaded", async () => {
+  // Fetch info.json for contact details
+  let info = null;
+  try {
+    const response = await fetch("/info.json");
+    info = await response.json();
+  } catch (e) {
+    console.error("Failed to load info.json", e);
+  }
+  const contactName = info?.contact?.name || "Mitch Ivin";
+  const contactEmail = info?.contact?.email || "mitchellivin@gmail.com";
+  const toField = document.getElementById("contact-to");
+  if (toField) {
+    toField.value = `${contactName} <${contactEmail}>`;
+  }
 
-document.addEventListener("DOMContentLoaded", () => {
   function clearForm() {
     if (fromInput) fromInput.value = "";
     if (subjectInput) subjectInput.value = "";
@@ -34,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
           window.parent.postMessage(
             {
               type: "contactFormDataResponse",
-              data: getFormData(),
+              data: getFormData(contactName, contactEmail),
               sourceWindowId: event.data.sourceWindowId,
             },
             "*",
@@ -52,11 +58,32 @@ document.addEventListener("DOMContentLoaded", () => {
       if (event.data.action === "newMessage") {
         clearForm();
       } else if (event.data.action === "sendMessage") {
-        sendMessage();
+        sendMessage(contactName, contactEmail);
       }
     }
   });
 });
+
+function getFormData(contactName = "Mitch Ivin", contactEmail = "mitchellivin@gmail.com") {
+  return {
+    to: `"${contactName}" <${contactEmail}>`,
+    from: fromInput ? fromInput.value : "",
+    subject: subjectInput ? subjectInput.value : "",
+    message: messageTextarea ? messageTextarea.value : "",
+  };
+}
+
+function sendMessage(contactName = "Mitch Ivin", contactEmail = "mitchellivin@gmail.com") {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage(
+      {
+        type: "contactFormDataResponse",
+        data: getFormData(contactName, contactEmail),
+      },
+      "*",
+    );
+  }
+}
 
 function notifyParentIframeInteraction() {
   if (window.parent && window.parent !== window) {
@@ -68,18 +95,6 @@ function notifyParentIframeInteraction() {
 }
 
 document.addEventListener("click", notifyParentIframeInteraction, true);
-
-function sendMessage() {
-  if (window.parent && window.parent !== window) {
-    window.parent.postMessage(
-      {
-        type: "contactFormDataResponse",
-        data: getFormData(),
-      },
-      "*",
-    );
-  }
-}
 
 // Prevent pinch-zoom and multi-touch gestures for consistent UX
 ["gesturestart", "gesturechange", "gestureend"].forEach((evt) => {

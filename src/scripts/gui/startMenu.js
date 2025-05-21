@@ -20,7 +20,7 @@
 import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
 
-const ALL_PROGRAMS_ITEMS = [
+const ALL_PROGRAMS_ITEMS_BASE = [
   // Main apps first
   {
     type: "program",
@@ -46,62 +46,44 @@ const ALL_PROGRAMS_ITEMS = [
     icon: "./assets/gui/desktop/contact.webp",
     label: "Contact Me",
   },
-  { type: "separator" }, // Divider before disabled apps
+  { type: "separator" },
   {
     type: "program",
     programName: "my-pictures",
     icon: "./assets/gui/start-menu/photos.webp",
     label: "My Photos",
-    disabled: true, // Always disabled
+    disabled: true,
   },
   {
     type: "program",
     programName: "mediaPlayer",
     icon: "./assets/gui/start-menu/mediaPlayer.webp",
     label: "Media Player",
-    disabled: true, // Always disabled
+    disabled: true,
   },
   {
     type: "program",
     programName: "musicPlayer",
     icon: "./assets/gui/start-menu/music.webp",
     label: "Music Player",
-    disabled: true, // Always disabled
+    disabled: true,
   },
   {
     type: "program",
     programName: "notepad",
     icon: "./assets/gui/start-menu/notepad.webp",
     label: "Notepad",
-    disabled: true, // Always disabled
+    disabled: true,
   },
   {
     type: "program",
     programName: "cmd",
     icon: "./assets/gui/start-menu/cmd.webp",
     label: "Command Prompt",
-    disabled: true, // Always disabled
+    disabled: true,
   },
-  { type: "separator" }, // Divider before socials
-  // Socials
-  {
-    type: "url",
-    url: "https://www.instagram.com/mitchivin",
-    icon: "./assets/gui/start-menu/instagram.webp",
-    label: "Instagram",
-  },
-  {
-    type: "url",
-    url: "https://github.com/mitchivin",
-    icon: "./assets/gui/start-menu/github.webp",
-    label: "GitHub",
-  },
-  {
-    type: "url",
-    url: "https://www.linkedin.com/in/mitchivin",
-    icon: "./assets/gui/start-menu/linkedin.webp",
-    label: "LinkedIn",
-  },
+  { type: "separator" },
+  // Socials will be appended dynamically
 ];
 
 // Add menu item arrays for abstraction
@@ -178,6 +160,31 @@ const RECENTLY_USED_ITEMS = [
   },
 ];
 
+let SOCIALS = [];
+let SYSTEM_ASSETS = null;
+
+async function getSystemAssets() {
+  if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
+  try {
+    const response = await fetch("/system.json");
+    SYSTEM_ASSETS = await response.json();
+    return SYSTEM_ASSETS;
+  } catch (e) {
+    SYSTEM_ASSETS = {};
+    return SYSTEM_ASSETS;
+  }
+}
+
+async function loadSocials() {
+  try {
+    const response = await fetch("/info.json");
+    const info = await response.json();
+    SOCIALS = Array.isArray(info.socials) ? info.socials : [];
+  } catch (e) {
+    SOCIALS = [];
+  }
+}
+
 // Helper to build menu HTML from item array
 function buildMenuHTML(items, itemClass, ulClass) {
   return (
@@ -248,8 +255,7 @@ export default class StartMenu {
     this.recentlyUsedMenu = null;
     this.activeWindowOverlay = null; // Keep track of which overlay is active
 
-    this.createStartMenuElement();
-    this.setupEventListeners();
+    this._init();
 
     // Subscribe to event bus for start menu toggle and close requests
     this.eventBus.subscribe(EVENTS.STARTMENU_TOGGLE, () =>
@@ -264,6 +270,12 @@ export default class StartMenu {
     this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, (data) => {
       this.updateContentOverlay(data?.windowId);
     });
+  }
+
+  async _init() {
+    await loadSocials();
+    this.createStartMenuElement();
+    this.setupEventListeners();
   }
 
   /**
@@ -285,6 +297,16 @@ export default class StartMenu {
 
     document.body.appendChild(startMenu);
     this.startMenu = startMenu;
+
+    // Dynamically set username from info.json
+    fetch('/info.json')
+      .then(r => r.json())
+      .then(info => {
+        const name = info?.contact?.name || 'Mitch Ivin';
+        startMenu.querySelectorAll('.menutopbar .username').forEach(span => {
+          span.textContent = name;
+        });
+      });
 
     this.createAllProgramsMenu();
     this.createRecentlyUsedMenu();
@@ -346,13 +368,13 @@ export default class StartMenu {
    */
   createAllProgramsMenu() {
     this._createMenuWithEffects({
-      items: ALL_PROGRAMS_ITEMS,
+      items: getAllProgramsItems(),
       itemClass: "all-programs",
       ulClass: "all-programs-items",
       menuClass: "all-programs-menu",
       propertyName: "allProgramsMenu",
       itemSelector: ".all-programs-item",
-      attachClickHandler: false,
+      attachClickHandler: true,
     });
   }
 
@@ -429,32 +451,14 @@ export default class StartMenu {
     const mobile = isMobileDevice();
 
     // Define configurations for the items that will be swapped
-    const socialItems = [
-      {
-        id: "instagram",
-        icon: "./assets/gui/start-menu/instagram.webp",
-        title: "Instagram",
-        url: "https://www.instagram.com/mitchivin",
-        action: "open-url",
-        disabledOverride: false,
-      },
-      {
-        id: "github",
-        icon: "./assets/gui/start-menu/github.webp",
-        title: "GitHub",
-        url: "https://github.com/mitchivin",
-        action: "open-url",
-        disabledOverride: false,
-      },
-      {
-        id: "linkedin",
-        icon: "./assets/gui/start-menu/linkedin.webp",
-        title: "LinkedIn",
-        url: "https://www.linkedin.com/in/mitchivin",
-        action: "open-url",
-        disabledOverride: false,
-      },
-    ];
+    const socialItems = SOCIALS.map(social => ({
+      id: social.key,
+      icon: social.icon,
+      title: social.name,
+      url: social.url,
+      action: "open-url",
+      disabledOverride: false,
+    }));
 
     const appItemsToSwap = [
       {
@@ -1135,3 +1139,31 @@ export default class StartMenu {
 // ==================================================
 // END Start Menu Module
 // ==================================================
+
+function getAllProgramsItems() {
+  return [
+    ...ALL_PROGRAMS_ITEMS_BASE,
+    ...SOCIALS.map(social => ({
+      type: "url",
+      url: social.url,
+      icon: social.icon,
+      label: social.name,
+    })),
+  ];
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const system = await getSystemAssets();
+  document.querySelectorAll('.menutopbar .userpicture').forEach(img => {
+    if (system.userIcon) img.src = system.userIcon;
+  });
+  // Set username from info.json
+  try {
+    const response = await fetch("/info.json");
+    const info = await response.json();
+    const name = info?.contact?.name || "Mitch Ivin";
+    document.querySelectorAll('.menutopbar .username').forEach(span => {
+      span.textContent = name;
+    });
+  } catch (e) {}
+});

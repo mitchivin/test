@@ -309,11 +309,10 @@ function createLightboxMediaElement(type, src, posterUrl = null) {
   return null;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const lightbox = document.getElementById("project-lightbox");
   const lightboxContent = document.getElementById("lightbox-content");
   const lightboxDetails = document.getElementById("lightbox-details");
-  const posts = document.querySelectorAll(".post");
   const feedContainer = document.querySelector(".feed-container");
 
   userPrefersDescriptionVisible = isDesktop(); // Initialize based on view
@@ -321,6 +320,70 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!lightbox || !lightboxContent || !lightboxDetails || !feedContainer) {
     return;
   }
+
+  // Fetch projects.json and render posts
+  let projects = [];
+  try {
+    const response = await fetch("/projects.json");
+    projects = await response.json();
+  } catch (e) {
+    console.error("Failed to load projects.json", e);
+    return;
+  }
+
+  // Helper to ensure asset paths are absolute from web root
+  function toAbsoluteAssetPath(path) {
+    if (!path) return path;
+    if (path.startsWith("/")) return path;
+    if (path.startsWith("assets/")) return "/" + path;
+    return path;
+  }
+
+  // Helper to create post element
+  function createPostElement(project, idx) {
+    const post = document.createElement("div");
+    post.className = `post ${project.type}-post`;
+    post.dataset.type = project.type;
+    post.dataset.src = toAbsoluteAssetPath(project.src);
+    if (project.fullVideoSrc) { // Store full video src if available
+        post.dataset.fullSrc = toAbsoluteAssetPath(project.fullVideoSrc);
+    }
+    if (project.poster) post.dataset.poster = toAbsoluteAssetPath(project.poster);
+    post.dataset.title = project.title;
+    post.dataset.software = project.software;
+    post.dataset.description = project.description;
+    post.dataset.bulletPoints = project.bulletPoints ? project.bulletPoints.join("|") : "";
+    post.dataset.toolsUsed = project.toolsUsed ? project.toolsUsed.join(", ") : "";
+    post.dataset.idx = idx;
+
+    if (project.type === "image") {
+      const img = document.createElement("img");
+      img.src = toAbsoluteAssetPath(project.src);
+      img.alt = project.alt || project.title || "Project Image";
+      post.appendChild(img);
+    } else if (project.type === "video") {
+      const video = document.createElement("video");
+      video.src = toAbsoluteAssetPath(project.src);
+      if (project.poster) video.poster = toAbsoluteAssetPath(project.poster);
+      video.autoplay = true;
+      video.muted = true;
+      video.loop = true;
+      video.setAttribute("playsinline", "");
+      video.alt = project.alt || project.title || "Project Video";
+      post.appendChild(video);
+    }
+    return post;
+  }
+
+  // Clear and populate feed
+  feedContainer.innerHTML = "";
+  projects.forEach((project, idx) => {
+    const post = createPostElement(project, idx);
+    feedContainer.appendChild(post);
+  });
+
+  // Now that posts are rendered, continue with the rest of the initialization
+  let allPosts = Array.from(document.querySelectorAll(".post"));
 
   function setHomeButtonEnabledInParent(enabled) {
     sendMessageToParent({ type: "set-home-enabled", enabled });
@@ -702,7 +765,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let currentLightboxIndex = null;
-  let allPosts = Array.from(document.querySelectorAll(".post"));
 
   // Ensure a persistent wrapper exists
   function getOrCreateWrapper() {
@@ -728,7 +790,8 @@ document.addEventListener("DOMContentLoaded", () => {
     currentLightboxIndex = index; // Update the global index
 
     const type = post.dataset.type;
-    const src = post.dataset.src;
+    // Use fullSrc for lightbox if available, otherwise fallback to src
+    const lightboxVideoSrc = post.dataset.fullSrc || post.dataset.src;
     const poster = post.dataset.poster || null;
     const title = post.dataset.title;
     const desktopDescription = post.dataset.description;
@@ -896,7 +959,8 @@ document.addEventListener("DOMContentLoaded", () => {
           wrapper.classList.add("image-media-active");
         }
 
-        let newMedia = createLightboxMediaElement(type, src, poster);
+        // Use lightboxVideoSrc for creating the media element
+        let newMedia = createLightboxMediaElement(type, lightboxVideoSrc, poster);
 
         if (newMedia) {
           if (!(skipFadeIn && !isDesktop())) {
@@ -1016,7 +1080,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Modify the post click handler to only open the lightbox
-  posts.forEach((post, idx) => {
+  allPosts.forEach((post, idx) => {
     post.addEventListener("click", (event) => {
       if (event.target.tagName === "A") {
         return;
@@ -1151,20 +1215,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const overlayHostForTouchStart = document.getElementById(
           "lightbox-inner-wrapper",
         );
-        const titleOverlayForTouchStart =
-          overlayHostForTouchStart?.querySelector(
-            ".lightbox-title-overlay.show",
-          );
-        const descOverlayForTouchStart =
-          overlayHostForTouchStart?.querySelector(
-            ".lightbox-description-overlay.show",
-          );
+        const titleOverlayForTouchStart = overlayHostForTouchStart?.querySelector(
+          ".lightbox-title-overlay.show",
+        );
+        const descOverlayForTouchStart = overlayHostForTouchStart?.querySelector(
+          ".lightbox-description-overlay.show",
+        );
 
         if (titleOverlayForTouchStart) {
+          titleOverlayForTouchStart.style.opacity = "1"; // Explicitly set opacity before animation none
           titleOverlayForTouchStart.style.animation = "none";
           titleOverlayForTouchStart.style.transition = "none";
         }
         if (descOverlayForTouchStart) {
+          descOverlayForTouchStart.style.opacity = "1"; // Explicitly set opacity before animation none
           descOverlayForTouchStart.style.animation = "none";
           descOverlayForTouchStart.style.transition = "none";
         }
@@ -1252,10 +1316,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!dragHasMoved) {
       // This is a TAP
-      // For a tap, we don't want to clear the style.animation = 'none' set by handleTouchStart
-      // if the overlay is meant to remain static. The function initiating a new animation
-      // will be responsible for clearing it.
+      const isVideo = media && media.tagName === "VIDEO";
+      // For videos, the `media` is the <video> tag. Its parent is the wrapper div returned by createLightboxMediaElement.
+      const mediaInteractiveElement = isVideo ? media.parentElement : media;
 
+      if (e && e.target && media && 
+          (e.target === media || e.target === mediaInteractiveElement)) {
+        // Tap was on the media element (img) or the video's interactive area (video tag or its wrapper div).
+        // Let the media's own click listener (e.g., for video mute/unmute) handle it.
+        // That listener should have e.stopPropagation().
+        return; 
+      }
+
+      // If tap was not on media, check for overlays to hide (mobile only)
       // Handle the tap itself based on the target
       if (e && e.target && media && e.target === media) {
         // Tap was on video, let video's click handler (which has stopPropagation) do its thing.
@@ -1472,43 +1545,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const resetOverlay = (overlay) => {
           if (overlay) {
-            overlay.style.animation = ""; // Clear any JS-set animation styles
-            // overlay.style.transition = ''; // Will be cleared specifically after potential fade-in
+            const isTopOverlay = overlay.classList.contains("lightbox-title-overlay");
+
+            // Clear all potentially conflicting inline styles from drag/swipe phase
+            overlay.style.opacity = "";
+            overlay.style.transform = "";
+            overlay.style.transition = "";
+            overlay.style.animation = ""; // Also clear inline animation property
+
             if (overlay.classList.contains("show")) {
-              // 1. Explicitly stop any CSS @keyframe animations.
-              overlay.style.animation = "none";
-              // 2. Force transform to the final "open" state before opacity transition.
-              overlay.style.transform = "translateY(0)";
+              // Overlay was visible and should re-animate into view.
+              overlay.classList.remove("hide-anim"); // Clean up any residual hide class
 
-              // If opacity was reduced (e.g., during hint swipe), smoothly fade it back.
-              const currentOpacity = parseFloat(overlay.style.opacity);
-              if (!isNaN(currentOpacity) && currentOpacity < 1) {
-                overlay.style.transition = "opacity 300ms ease-out";
-                overlay.style.opacity = "1";
+              // Explicitly set the visual state to the START of its slide-in animation
+              overlay.style.opacity = "0"; 
+              overlay.style.transform = isTopOverlay ? "translateY(-100%)" : "translateY(100%)";
+              
+              // Force the browser to recognize the new "from" state before re-adding .show
+              void overlay.offsetWidth; 
 
-                const onOverlayFadeInEnd = (ev) => {
-                  if (ev.target === overlay && ev.propertyName === "opacity") {
-                    overlay.removeEventListener(
-                      "transitionend",
-                      onOverlayFadeInEnd,
-                    );
-                    overlay.style.transition = ""; // Clear our inline transition
-                  }
-                };
-                overlay.addEventListener("transitionend", onOverlayFadeInEnd);
-                // Fallback timeout for cleanup
-                setTimeout(() => {
-                  if (overlay.style.transition.includes("opacity")) {
-                    overlay.style.transition = "";
-                  }
-                }, 350); // A bit longer than the transition
-              } else {
-                overlay.style.opacity = "1"; // Ensure full opacity if it wasn't changed or is already 1
-                overlay.style.transition = ""; // Clear any stray transitions
-              }
+              // Re-trigger the animation by toggling the .show class
+              // No, don't remove .show if it's already there and supposed to be shown.
+              // The key is ensuring its prior state is the animation's start point.
+              // The class .show should already define the animation.
+              // Instead of toggling, ensure CSS can take over from a clean slate.
+              // The .show class (which should still be on the element) defines the animation.
+              // The problem is usually residual inline styles overriding the animation's 'from' state.
+              // By clearing them and setting opacity/transform to anim start, then reflowing,
+              // the existing .show class's animation should pick up correctly.
+              // One final re-application of a class that *triggers* animation if it's not `.show` itself,
+              // or ensuring no conflicting animation like `animation: none` is set.
+              // Let's rely on the cleared styles and the existing .show class.
+              // If .show *itself* triggers the animation (e.g. `animation-name` is on `.show`), then this should be enough.
+              // We might need to force re-application if .show is always present and animation is triggered by sth else.
+              // However, our CSS is: `.lightbox-title-overlay.show` { animation: mobileTopOverlaySlideIn... }
+              // So the .show class IS the trigger. Removing and re-adding it is the most robust way.
+              
+              overlay.classList.remove("show");
+              void overlay.offsetWidth; // Crucial reflow
+              overlay.classList.add("show");
+
             } else {
+              // Overlay was not, and should not be, visible.
+              // Ensure it's definitively hidden without animation.
               overlay.style.opacity = "0";
-              overlay.style.transition = ""; // Clear any stray transitions
+              overlay.style.transform = isTopOverlay ? "translateY(-100%)" : "translateY(100%)";
+              overlay.classList.remove("hide-anim"); 
+              // No .show class should be present here
             }
           }
         };

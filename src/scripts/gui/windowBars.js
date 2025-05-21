@@ -51,6 +51,21 @@ export function createAddressBar({ icon, title = "About Me" } = {}) {
   return container;
 }
 
+// Add a cache for socials
+let SOCIALS_CACHE = null;
+async function getSocials() {
+  if (SOCIALS_CACHE) return SOCIALS_CACHE;
+  try {
+    const response = await fetch("/info.json");
+    const info = await response.json();
+    SOCIALS_CACHE = Array.isArray(info.socials) ? info.socials : [];
+    return SOCIALS_CACHE;
+  } catch (e) {
+    SOCIALS_CACHE = [];
+    return SOCIALS_CACHE;
+  }
+}
+
 // --- MenuBar Creation ---
 /**
  * Creates a menu bar for a window.
@@ -390,6 +405,38 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
 
   // Render all toolbar buttons in order (with dividers for desktop)
   buttons.forEach((buttonConfig) => {
+    // Handle socials placeholder
+    if (buttonConfig.type === "socials") {
+      (async () => {
+        let socials = await getSocials();
+        // If this is the Contact Me app, filter and order socials
+        if (windowId === "contact-window") {
+          socials = socials.filter(s => s.key === "linkedin" || s.key === "instagram");
+          // Order: LinkedIn, then Instagram
+          socials.sort((a, b) => {
+            if (a.key === "linkedin") return -1;
+            if (b.key === "linkedin") return 1;
+            return 0;
+          });
+        }
+        socials.forEach((social) => {
+          const socialBtn = document.createElement("div");
+          socialBtn.className = `toolbar-button social ${social.key}`;
+          socialBtn.setAttribute("data-action", "openExternalLink");
+          socialBtn.setAttribute("data-url-to-open", social.url);
+          socialBtn.setAttribute("title", `View on ${social.name}`);
+          socialBtn.setAttribute("aria-label", `View on ${social.name}`);
+          socialBtn.setAttribute("data-social-key", social.key);
+          socialBtn.innerHTML = `<img alt="${social.name}" width="25" height="25" src="${social.icon}" />`;
+          socialBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            window.open(social.url, "_blank");
+          });
+          toolbarRow.appendChild(socialBtn);
+        });
+      })();
+      return;
+    }
     // On mobile, skip the Home button in the My Projects window
     if (
       isMobile &&
@@ -534,3 +581,5 @@ if (typeof window !== "undefined") {
     });
   });
 }
+
+export { getSocials };
