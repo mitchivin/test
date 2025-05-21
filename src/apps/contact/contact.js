@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Fetch info.json for contact details
   let info = null;
   try {
-    const response = await fetch("/info.json");
+    const response = await fetch("../../../info.json");
     info = await response.json();
   } catch (e) {
     console.error("Failed to load info.json", e);

@@ -20,7 +20,7 @@ let SOCIALS_CACHE = null;
 async function getSocials() {
   if (SOCIALS_CACHE) return SOCIALS_CACHE;
   try {
-    const response = await fetch("/info.json");
+    const response = await fetch("./info.json");
     const info = await response.json();
     SOCIALS_CACHE = Array.isArray(info.socials) ? info.socials : [];
     return SOCIALS_CACHE;

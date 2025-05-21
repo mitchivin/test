@@ -177,7 +177,7 @@ async function getSystemAssets() {
 
 async function loadSocials() {
   try {
-    const response = await fetch("/info.json");
+    const response = await fetch("./info.json");
     const info = await response.json();
     SOCIALS = Array.isArray(info.socials) ? info.socials : [];
   } catch (e) {
