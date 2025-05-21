@@ -139,8 +139,10 @@ export default class Desktop {
       const iconEl = this.desktop.querySelector(
         `.desktop-icon[data-program-name="${social.key}"] img`
       );
-      if (iconEl) {
-        iconEl.src = social.icon;
+      if (iconEl && social.icon) {
+        // Prepend "./" and ensure no double slashes or initial dots are duplicated
+        const iconPath = "./" + social.icon.replace(/^\.\//, '').replace(/^\//, '');
+        iconEl.src = iconPath;
         iconEl.alt = social.name;
       }
     });
