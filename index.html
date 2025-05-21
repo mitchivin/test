@@ -23,6 +23,11 @@
       name="description"
       content="A Windows XP desktop simulation built with HTML, CSS, and JavaScript. Explore a classic interface with functional apps and nostalgic design elements. Relive the XP era in your browser."
     />
+    <meta
+      name="keywords"
+      content="Windows XP, Desktop, HTML, CSS, JavaScript, Web, UI, Portfolio, Mitch Ivin, Web Development, Frontend, Operating System, Simulation"
+    />
+    <meta name="author" content="Mitch Ivin (mitchellivin@gmail.com)" />
     <link rel="icon" href="./assets/gui/boot/favicon.png" type="image/png" />
     <title>MitchIvin XP</title>
     <!-- Preload Critical Assets -->
@@ -51,13 +56,25 @@
     />
     <link rel="stylesheet" href="./src/styles/reset.css" />
     <link rel="stylesheet" href="./src/styles/main.css" />
+    <link rel="stylesheet" href="./src/styles/gui/desktop.css" />
+    <link rel="stylesheet" href="./src/styles/gui/taskbar.css" />
+    <link rel="stylesheet" href="./src/styles/gui/startMenu.css" />
+    <link rel="stylesheet" href="./src/styles/gui/window.css" />
+    <link rel="stylesheet" href="./src/styles/gui/windowBars.css" />
+    <link rel="stylesheet" href="./src/styles/gui/boot.css" />
+    <link rel="stylesheet" href="./src/styles/utils/crtEffect.css" />
+    <script>
+      const APP_CONFIG = {
+        REPO_NAME: "shell", // Added for GitHub Pages path handling
+      };
+    </script>
   </head>
   <body>
     <!-- ===== Pre-Boot Overlay ===== -->
     <div id="pre-boot-overlay" class="pre-boot-overlay-style"></div>
     <!-- ===== Boot Screen ===== -->
-    <div id="boot-screen">
-      <div class="loading-container">
+    <div id="boot-screen" style="display: none">
+      <div class="loading-container" style="display: none">
         <img
           id="boot-logo"
           src="./assets/gui/boot/loading.webp"
