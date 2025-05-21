@@ -80,12 +80,20 @@ export function initBootSequence(eventBus, EVENTS) {
    * Run the animated boot sequence, then show login screen.
    */
   function startBootSequence() {
-    setTimeout(() => {
+    setTimeout(async () => {
       desktop.style.opacity = "0";
       desktop.style.pointerEvents = "none";
       if (crtScanline) crtScanline.style.display = "none";
       if (crtVignette) crtVignette.style.display = "none";
       if (!bootScreen) return;
+
+      // Get system assets and set the boot logo
+      const system = await getSystemAssets();
+      const bootLogoElement = document.getElementById("boot-logo");
+      if (bootLogoElement && system && system.loading) {
+        bootLogoElement.src = system.loading;
+      }
+
       bootScreen.style.display = "flex";
       bootScreen.style.opacity = "1";
       bootScreen.style.pointerEvents = "auto";

@@ -32,7 +32,8 @@ body {
   padding: 8px;
   gap: 8px;
   min-height: 0; /* Prevent overflow issues */
-  overflow: hidden; /* Hide potential overflow from wrapper itself */
+  overflow-y: auto; /* Allow vertical scroll if content (fields + textarea) overflows */
+  overflow-x: hidden;
 }
 
 /* Field row container (label + input) */

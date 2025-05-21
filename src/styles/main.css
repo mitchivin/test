@@ -96,7 +96,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto; /* Allow window body to scroll if iframe content is too tall */
 }
 
 /* Common styles for all iframe containers */

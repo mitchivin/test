@@ -6,7 +6,6 @@
 html,
 body {
   height: 100%;
-  min-height: 100vh;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -21,7 +20,6 @@ body {
 
 body {
   flex: 1 1 auto;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -29,6 +27,7 @@ body {
 .scroll-content {
   flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
   width: 100%;
   box-sizing: border-box;
   overflow-y: auto;
@@ -39,7 +38,6 @@ body {
   display: flex;
   flex-direction: row;
   flex: 1 1 auto;
-  min-height: 100vh;
   height: 100%;
   position: relative;
   background-image: url("../../../assets/gui/bgs/aboutbg.webp");
@@ -79,7 +77,6 @@ body {
   padding: 0;
   box-sizing: border-box;
   height: 100%;
-  min-height: 100vh;
   font-family: Tahoma, sans-serif;
   color: #333;
   position: relative;

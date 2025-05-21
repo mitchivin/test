@@ -82,8 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setupTooltips("[data-tooltip]");
     ensureLandscapeBlock();
     handleOrientationBlock();
-    window.addEventListener("orientationchange", handleOrientationBlock);
-    window.addEventListener("resize", handleOrientationBlock);
     setRealVh();
     scaleDesktopIconsToFitMobile();
     document.addEventListener(
@@ -201,6 +199,16 @@ document.addEventListener("DOMContentLoaded", () => {
       { passive: false },
     );
     // --- End Aggressive Pinch Zoom Prevention ---
+
+    window.addEventListener("orientationchange", () => {
+      handleOrientationBlock();
+      setRealVh();
+    });
+    window.addEventListener("resize", () => {
+      handleOrientationBlock();
+      setRealVh();
+      scaleDesktopIconsToFitMobile();
+    });
   }
   preloadApps.forEach((app) => {
     const iframe = document.createElement("iframe");

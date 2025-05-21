@@ -42,7 +42,7 @@ html {
       rgb(40, 40, 40) 35%,
       rgb(40, 40, 40) 100%
     );
-  min-height: 100vh;
+  /* min-height: 100vh; */ /* Removed, html should take 100% of iframe height, not viewport */
 }
 
 /* Soft edge lighting */
