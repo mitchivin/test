@@ -365,14 +365,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Helper to ensure asset paths are absolute from web root
-  function toAbsoluteAssetPath(path) {
-    if (!path) return path;
-    if (path.startsWith("/")) return path;
-    if (path.startsWith("assets/")) return "/" + path;
-    return path;
-  }
-
   // Helper to create post element
   function createPostElement(project, idx) {
     const post = document.createElement("div");
@@ -1601,7 +1593,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               // Re-trigger the animation by toggling the .show class
               // No, don't remove .show if it's already there and supposed to be shown.
               // The key is ensuring its prior state is the animation's start point.
-              // The class .show should already define the animation.
+              // The .show class should already define the animation.
               // Instead of toggling, ensure CSS can take over from a clean slate.
               // The .show class (which should still be on the element) defines the animation.
               // The problem is usually residual inline styles overriding the animation's 'from' state.
