@@ -163,7 +163,7 @@ function createMuteIconOverlay(isMuted) {
   const overlay = document.createElement("div");
   overlay.className = "mute-icon-overlay";
   overlay.setAttribute("aria-hidden", "true");
-  overlay.innerHTML = `<img src="../../../assets/apps/projects/${isMuted ? "voldown" : "volup"}.webp" alt="${isMuted ? "Muted" : "Unmuted"}" draggable="false" style="width:100%;height:100%;object-fit:contain;" />`;
+  overlay.innerHTML = `<img src="../../../assets/apps/projects/icons/${isMuted ? "voldown" : "volup"}.webp" alt="${isMuted ? "Muted" : "Unmuted"}" draggable="false" style="width:100%;height:100%;object-fit:contain;" />`;
   return overlay;
 }
 

@@ -28,22 +28,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Preload all assets in assets/apps/projects
   const projectAssets = [
-    "patrickmahomes.webp",
-    "goosebumps.webp",
-    "suaalii-switch-up.mp4",
-    "suaalii-switch-up-poster.webp",
-    "suaalii-switch-up-thumb.mp4",
-    "blues-starting-xv.webp",
-    "dwayne-wade-flashback.mp4",
-    "dwayne-wade-flashback-poster.webp",
-    "dwayne-wade-flashback-thumb.mp4",
-    "all-blacks-final-score.webp",
-    "saquon-snow-day.mp4",
-    "saquon-snow-day-poster.webp",
-    "saquon-snow-day-thumb.mp4",
-    "minnesotas-coldest.webp",
-    "saquon-barkley-cutout.webp",
-    "mavs-final-score.webp",
+    "project1/patrickmahomes.webp",
+    "project2/goosebumps.webp",
+    "project3/suaalii-switch-up.mp4",
+    "project3/suaalii-switch-up-poster.webp",
+    "project3/suaalii-switch-up-thumb.mp4",
+    "project4/blues-starting-xv.webp",
+    "project5/dwayne-wade-flashback.mp4",
+    "project5/dwayne-wade-flashback-poster.webp",
+    "project5/dwayne-wade-flashback-thumb.mp4",
+    "project6/all-blacks-final-score.webp",
+    "project7/saquon-snow-day.mp4",
+    "project7/saquon-snow-day-poster.webp",
+    "project7/saquon-snow-day-thumb.mp4",
+    "project8/minnesotas-coldest.webp",
+    "project9/saquon-barkley-cutout.webp",
+    "project10/mavs-final-score.webp",
   ];
   const head = document.head || document.getElementsByTagName("head")[0];
   projectAssets.forEach((filename) => {
