@@ -449,7 +449,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   // Set login screen name from info.json
   try {
-    const response = await fetch("/info.json");
+    const response = await fetch("./info.json");
     const info = await response.json();
     const name = info?.contact?.name || "Mitch Ivin";
     document.querySelectorAll('.login-screen .name').forEach(span => {

@@ -276,6 +276,7 @@ export default class StartMenu {
     await loadSocials();
     this.createStartMenuElement();
     this.setupEventListeners();
+    this.systemAssets = await getSystemAssets();
   }
 
   /**
@@ -299,7 +300,7 @@ export default class StartMenu {
     this.startMenu = startMenu;
 
     // Dynamically set username from info.json
-    fetch('/info.json')
+    fetch('./info.json')
       .then(r => r.json())
       .then(info => {
         const name = info?.contact?.name || 'Mitch Ivin';
