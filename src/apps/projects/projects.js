@@ -40,6 +40,31 @@ function isTouchDevice() {
   );
 }
 
+// MODIFIED: This function now ensures asset paths are relative to the iframe's location.
+function toAbsoluteAssetPath(path) {
+  if (!path) return path;
+  // If it's already a full URL or correctly relative for iframe, return as is.
+  if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("../../../")) {
+    return path;
+  }
+
+  let newPath = path;
+  // Remove leading slash if present, to normalize paths like "/assets/..." to "assets/..."
+  if (newPath.startsWith("/")) {
+    newPath = newPath.substring(1);
+  }
+
+  // If the path now starts with "assets/", prepend "../../../" to make it relative to the iframe.
+  if (newPath.startsWith("assets/")) {
+    return "../../../" + newPath;
+  }
+
+  // Fallback for paths that don't match the expected "assets/" pattern after normalization.
+  // This might indicate an unexpected path format from projects.json or an already relative path
+  // intended to be local to the iframe (though less common for project assets).
+  return path;
+}
+
 // Utility functions
 function createEl(tag, className, text) {
   const el = document.createElement(tag);
@@ -324,7 +349,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Fetch projects.json and render posts
   let projects = [];
   try {
-    const response = await fetch("/projects.json");
+    const response = await fetch("../../../projects.json"); // MODIFIED fetch path
     projects = await response.json();
   } catch (e) {
     console.error("Failed to load projects.json", e);
