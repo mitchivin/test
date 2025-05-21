@@ -30,8 +30,8 @@ const ALL_PROGRAMS_ITEMS = [
   },
   {
     type: "program",
-    programName: "internet",
-    icon: "./assets/gui/desktop/internet.webp",
+    programName: "projects",
+    icon: "./assets/gui/desktop/projects.webp",
     label: "My Projects",
   },
   {
@@ -234,17 +234,11 @@ function attachMenuItemEffects(menuElement, itemSelector) {
 //  Start Menu Module for Windows XP Simulation
 // ==================================================
 /**
- * StartMenu manages the Windows XP start menu UI, submenus, and event-driven logic.
- *
- * @class
- * @example
- * import StartMenu from './startMenu.js';
- * const startMenu = new StartMenu(eventBus);
+ * StartMenu class manages the Windows XP start menu, including menu items, submenus, and event handling.
  */
 export default class StartMenu {
   /**
-   * Create a new StartMenu instance.
-   * @param {EventBus} eventBus - The event bus instance for communication.
+   * @param {Object} eventBus - Event bus for communication.
    */
   constructor(eventBus) {
     this.eventBus = eventBus;
@@ -392,13 +386,22 @@ export default class StartMenu {
       programName,
       action,
       url,
-      disabledOverride // New parameter to force disable state
+      disabledOverride, // New parameter to force disable state
     }) {
-      const programsAlwaysDisabled = ["mediaPlayer", "my-pictures", "musicPlayer", "notepad", "cmd"];
+      const programsAlwaysDisabled = [
+        "mediaPlayer",
+        "my-pictures",
+        "musicPlayer",
+        "notepad",
+        "cmd",
+      ];
       // Determine disable state:
       // 1. If disabledOverride is explicitly boolean, use it.
       // 2. Otherwise, check if the programName is in programsAlwaysDisabled.
-      const shouldDisable = typeof disabledOverride === 'boolean' ? disabledOverride : programsAlwaysDisabled.includes(programName);
+      const shouldDisable =
+        typeof disabledOverride === "boolean"
+          ? disabledOverride
+          : programsAlwaysDisabled.includes(programName);
 
       const disabledClass = shouldDisable ? " disabled" : "";
       const dataAction = shouldDisable
@@ -412,10 +415,12 @@ export default class StartMenu {
           ? `data-program-name="${programName}"`
           : "";
       const dataUrl = url ? `data-url="${url}"` : "";
+      const isProjects = (programName || id) === "projects";
+      const titleSpan = `<span class="item-title${isProjects ? ' projects-bold' : ''}">${title}</span>`;
       return `<li class="menu-item${disabledClass}" id="menu-${programName || id}" ${dataAction} ${dataProgram} ${dataUrl} tabindex="${shouldDisable ? "-1" : "0"}" aria-disabled="${shouldDisable ? "true" : "false"}">
         <img src="${icon}" alt="${title}">
         <div class="item-content">
-          <span class="item-title">${title}</span>
+          ${titleSpan}
           ${description ? `<span class="item-description">${description}</span>` : ""}
         </div>
       </li>`;
@@ -431,7 +436,7 @@ export default class StartMenu {
         title: "Instagram",
         url: "https://www.instagram.com/mitchivin",
         action: "open-url",
-        disabledOverride: false
+        disabledOverride: false,
       },
       {
         id: "github",
@@ -439,7 +444,7 @@ export default class StartMenu {
         title: "GitHub",
         url: "https://github.com/mitchivin",
         action: "open-url",
-        disabledOverride: false
+        disabledOverride: false,
       },
       {
         id: "linkedin",
@@ -447,8 +452,8 @@ export default class StartMenu {
         title: "LinkedIn",
         url: "https://www.linkedin.com/in/mitchivin",
         action: "open-url",
-        disabledOverride: false
-      }
+        disabledOverride: false,
+      },
     ];
 
     const appItemsToSwap = [
@@ -458,7 +463,7 @@ export default class StartMenu {
         title: "Media Player",
         programName: "mediaPlayer",
         action: "open-program",
-        disabledOverride: true // These are always disabled
+        disabledOverride: true, // These are always disabled
       },
       {
         id: "my-pictures",
@@ -466,7 +471,7 @@ export default class StartMenu {
         title: "My Photos",
         programName: "my-pictures",
         action: "open-program",
-        disabledOverride: true // These are always disabled
+        disabledOverride: true, // These are always disabled
       },
       {
         id: "musicPlayer",
@@ -474,8 +479,8 @@ export default class StartMenu {
         title: "Music Player",
         programName: "musicPlayer",
         action: "open-program",
-        disabledOverride: true // These are always disabled
-      }
+        disabledOverride: true, // These are always disabled
+      },
     ];
 
     let leftSlot1, leftSlot2, leftSlot3;
@@ -506,7 +511,7 @@ export default class StartMenu {
       icon: "./assets/gui/start-menu/notepad.webp",
       title: "Notepad",
       programName: "notepad",
-      action: "open-program"
+      action: "open-program",
     };
 
     const cmdConfig = {
@@ -514,7 +519,7 @@ export default class StartMenu {
       icon: "./assets/gui/start-menu/cmd.webp",
       title: "Command Prompt",
       programName: "cmd",
-      action: "open-program"
+      action: "open-program",
     };
 
     const recentlyUsedHTML = `
@@ -559,11 +564,11 @@ export default class StartMenu {
         <div class="middle-section middle-left">
           <ul class="menu-items">
             ${renderMenuItem({
-              id: "internet",
-              icon: "./assets/gui/desktop/internet.webp",
+              id: "projects",
+              icon: "./assets/gui/desktop/projects.webp",
               title: "My Projects",
               description: "View my work",
-              programName: "internet",
+              programName: "projects",
               action: "open-program",
             })}
             ${renderMenuItem({
@@ -596,7 +601,7 @@ export default class StartMenu {
               programName: leftSlot1.programName,
               action: leftSlot1.action,
               url: leftSlot1.url,
-              disabledOverride: leftSlot1.disabledOverride
+              disabledOverride: leftSlot1.disabledOverride,
             })}
             ${renderMenuItem({
               id: leftSlot2.id,
@@ -605,7 +610,7 @@ export default class StartMenu {
               programName: leftSlot2.programName,
               action: leftSlot2.action,
               url: leftSlot2.url,
-              disabledOverride: leftSlot2.disabledOverride
+              disabledOverride: leftSlot2.disabledOverride,
             })}
             ${renderMenuItem({
               id: leftSlot3.id,
@@ -614,7 +619,7 @@ export default class StartMenu {
               programName: leftSlot3.programName,
               action: leftSlot3.action,
               url: leftSlot3.url,
-              disabledOverride: leftSlot3.disabledOverride
+              disabledOverride: leftSlot3.disabledOverride,
             })}
             <li class="menu-divider"><hr class="divider"></li>
           </ul>
@@ -779,15 +784,13 @@ export default class StartMenu {
    * Sets up delegated event listeners for the start menu.
    */
   _setupDelegatedEventHandlers() {
-    [
-      this.startMenu,
-      this.allProgramsMenu,
-      this.recentlyUsedMenu,
-    ].forEach((menu) => {
-      if (menu) {
-        menu.addEventListener("click", this._handleMenuClick.bind(this));
-      }
-    });
+    [this.startMenu, this.allProgramsMenu, this.recentlyUsedMenu].forEach(
+      (menu) => {
+        if (menu) {
+          menu.addEventListener("click", this._handleMenuClick.bind(this));
+        }
+      },
+    );
   }
 
   /**
@@ -1094,8 +1097,8 @@ export default class StartMenu {
     // Store the handler so it can be removed later
     this._iframeFocusHandler = () => this.closeStartMenu();
     // Attach to all iframes currently in the DOM
-    document.querySelectorAll('iframe').forEach(iframe => {
-      iframe.addEventListener('focus', this._iframeFocusHandler);
+    document.querySelectorAll("iframe").forEach((iframe) => {
+      iframe.addEventListener("focus", this._iframeFocusHandler);
     });
   }
 
@@ -1104,8 +1107,8 @@ export default class StartMenu {
    */
   removeIframeFocusListeners() {
     if (!this._iframeFocusHandler) return;
-    document.querySelectorAll('iframe').forEach(iframe => {
-      iframe.removeEventListener('focus', this._iframeFocusHandler);
+    document.querySelectorAll("iframe").forEach((iframe) => {
+      iframe.removeEventListener("focus", this._iframeFocusHandler);
     });
     this._iframeFocusHandler = null;
   }
@@ -1115,7 +1118,7 @@ export default class StartMenu {
    */
   attachWindowBlurListener() {
     this._windowBlurHandler = () => this.closeStartMenu();
-    window.addEventListener('blur', this._windowBlurHandler);
+    window.addEventListener("blur", this._windowBlurHandler);
   }
 
   /**
@@ -1123,7 +1126,7 @@ export default class StartMenu {
    */
   removeWindowBlurListener() {
     if (this._windowBlurHandler) {
-      window.removeEventListener('blur', this._windowBlurHandler);
+      window.removeEventListener("blur", this._windowBlurHandler);
       this._windowBlurHandler = null;
     }
   }

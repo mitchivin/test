@@ -1,15 +1,8 @@
 /**
  * main.js — Application Entrypoint for Windows XP Simulation
- *
  * Orchestrates initialization of all core components and sets up global event handling.
- * Handles:
- * - Taskbar, Desktop, WindowManager, Boot sequence
- * - Tooltip and CRT scanline effect initialization
- * - Mobile/landscape handling and viewport scaling
- *
- * Usage:
- *   Entry point, loaded by index.html
- *
+ * Handles: Taskbar, Desktop, WindowManager, Boot sequence, Tooltip, CRT scanline, mobile/landscape handling, and viewport scaling.
+ * Entry point, loaded by index.html
  * @module main
  */
 import Desktop from "./gui/desktop.js";
@@ -29,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const preloadApps = [
     { id: "about-window", src: "src/apps/about/about.html" },
     { id: "resume-window", src: "src/apps/resume/resume.html" },
-    { id: "internet-window", src: "src/apps/projects/projects.html" },
+    { id: "projects-window", src: "src/apps/projects/projects.html" },
     { id: "contact-window", src: "src/apps/contact/contact.html" },
   ];
 
@@ -50,20 +43,20 @@ document.addEventListener("DOMContentLoaded", () => {
     "saquon-snow-day-thumb.mp4",
     "minnesotas-coldest.webp",
     "saquon-barkley-cutout.webp",
-    "mavs-final-score.webp"
+    "mavs-final-score.webp",
   ];
-  const head = document.head || document.getElementsByTagName('head')[0];
-  projectAssets.forEach(filename => {
-    const ext = filename.split('.').pop();
-    const link = document.createElement('link');
-    link.rel = 'preload';
+  const head = document.head || document.getElementsByTagName("head")[0];
+  projectAssets.forEach((filename) => {
+    const ext = filename.split(".").pop();
+    const link = document.createElement("link");
+    link.rel = "preload";
     link.href = `assets/apps/projects/${filename}`;
-    if (ext === 'webp') {
-      link.as = 'image';
-    } else if (ext === 'mp4') {
-      link.as = 'video';
+    if (ext === "webp") {
+      link.as = "image";
+    } else if (ext === "mp4") {
+      link.as = "video";
     } else {
-      link.as = 'fetch';
+      link.as = "fetch";
     }
     head.appendChild(link);
   });
@@ -93,87 +86,127 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("resize", handleOrientationBlock);
     setRealVh();
     scaleDesktopIconsToFitMobile();
-    document.addEventListener('touchstart', (event) => {
-      const now = Date.now();
-      const timeSinceLastTouch = now - lastTouchStartTime;
-      const doubleTapThreshold = 300;
-      if (timeSinceLastTouch < doubleTapThreshold && event.touches.length === 1) {
-        event.preventDefault();
-      }
-      lastTouchStartTime = now;
-    }, { passive: false });
-    window.addEventListener('message', (event) => {
-      if (event?.data?.type === 'resume-interaction' && globalTaskbarInstance) {
+    document.addEventListener(
+      "touchstart",
+      (event) => {
+        const now = Date.now();
+        const timeSinceLastTouch = now - lastTouchStartTime;
+        const doubleTapThreshold = 300;
+        if (
+          timeSinceLastTouch < doubleTapThreshold &&
+          event.touches.length === 1
+        ) {
+          event.preventDefault();
+        }
+        lastTouchStartTime = now;
+      },
+      { passive: false },
+    );
+    window.addEventListener("message", (event) => {
+      if (event?.data?.type === "resume-interaction" && globalTaskbarInstance) {
         const startMenu = globalTaskbarInstance.startMenuComponent;
-        if (startMenu && startMenu.startMenu?.classList.contains('active')) {
+        if (startMenu && startMenu.startMenu?.classList.contains("active")) {
           startMenu.closeStartMenu();
         }
       }
       // Listen for Instagram open request from About iframe
-      if (event?.data?.type === 'open-instagram-from-about' && globalTaskbarInstance) {
+      if (
+        event?.data?.type === "open-instagram-from-about" &&
+        globalTaskbarInstance
+      ) {
         // Find the Instagram menu item and simulate a click without opening the Start Menu
-        const startMenu = globalTaskbarInstance.startMenuComponent;
-        const instagramMenuItem = document.querySelector('.menu-item#menu-instagram');
+        const instagramMenuItem = document.querySelector(
+          ".menu-item#menu-instagram",
+        );
         if (instagramMenuItem) {
           instagramMenuItem.click();
-        } else if (startMenu && startMenu._handleMenuClick) {
-          // Fallback: manually trigger the handler with a fake event
-          // } catch (error) {
-            // console.error("Failed to open Instagram:", error);
-            // Handle error (e.g., show a fallback message or log)
-          // const fakeEvent = { target: { closest: () => ({ dataset: { action: 'open-url', url: 'https://www.instagram.com/mitchivin' } }) }, stopPropagation: () => {}, preventDefault: () => {} };
-          // startMenu._handleMenuClick(fakeEvent);
+        } else {
+          console.warn(
+            "Instagram menu item not found for programmatic click from About page.",
+          );
         }
       }
     });
 
     // --- Aggressive Pinch Zoom Prevention (Main Page) ---
     // Prevent gestures
-    document.addEventListener('gesturestart', function (e) {
-      e.preventDefault();
-    }, { passive: false });
-    document.addEventListener('gesturechange', function (e) {
-      e.preventDefault();
-    }, { passive: false });
-    document.addEventListener('gestureend', function (e) {
-      e.preventDefault();
-    }, { passive: false });
+    document.addEventListener(
+      "gesturestart",
+      function (e) {
+        e.preventDefault();
+      },
+      { passive: false },
+    );
+    document.addEventListener(
+      "gesturechange",
+      function (e) {
+        e.preventDefault();
+      },
+      { passive: false },
+    );
+    document.addEventListener(
+      "gestureend",
+      function (e) {
+        e.preventDefault();
+      },
+      { passive: false },
+    );
 
     // Prevent multi-touch interactions (common for pinch-zoom)
-    document.addEventListener('touchstart', function (e) {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-    document.addEventListener('touchmove', function (e) {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+    document.addEventListener(
+      "touchstart",
+      function (e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
+    document.addEventListener(
+      "touchmove",
+      function (e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false },
+    );
 
     // Prevent double-tap to zoom
     let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (event) {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, { passive: false });
+    document.addEventListener(
+      "touchend",
+      function (event) {
+        const now = new Date().getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      },
+      { passive: false },
+    );
 
     // Prevent Ctrl+wheel zoom and general wheel events on the body
-    document.addEventListener('wheel', function(event) {
-      if (event.ctrlKey || event.target === document.body || event.target === document.documentElement) {
-        event.preventDefault();
-      }
-    }, { passive: false });
+    document.addEventListener(
+      "wheel",
+      function (event) {
+        if (
+          event.ctrlKey ||
+          event.target === document.body ||
+          event.target === document.documentElement
+        ) {
+          event.preventDefault();
+        }
+      },
+      { passive: false },
+    );
     // --- End Aggressive Pinch Zoom Prevention ---
   }
-  preloadApps.forEach(app => {
-    const iframe = document.createElement('iframe');
+  preloadApps.forEach((app) => {
+    const iframe = document.createElement("iframe");
     iframe.src = app.src;
-    iframe.name = app.id + '-preload';
-    iframe.setAttribute('data-preload-app', app.id);
+    iframe.name = app.id + "-preload";
+    iframe.setAttribute("data-preload-app", app.id);
     iframe.onload = () => {
       loadedCount++;
       if (loadedCount === preloadApps.length) {
@@ -217,9 +250,7 @@ function setRealVh() {
 }
 
 function scaleDesktopIconsToFitMobile() {
-  const containers = [
-    document.querySelector(".desktop-icons"),
-  ];
+  const containers = [document.querySelector(".desktop-icons")];
   containers.forEach((container) => {
     if (!container) return;
     const icons = Array.from(container.children).filter((child) =>

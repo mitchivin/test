@@ -1,105 +1,105 @@
 /*
  * contact.css — Styles for Contact App in Windows XP Simulation
  * Styles the Contact Me window form and layout.
- * @file contact.css
  */
 
 /* Base styles for iframe context */
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden; /* Body shouldn't scroll */
-    font-family: 'Tahoma', Arial, sans-serif;
-    font-size: 11px;
-    color: #000;
-    background-color: #e9e9e9; /* Updated color */
-    box-sizing: border-box;
-    touch-action: none; /* Disable pinch-zoom and other default touch actions */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Body shouldn't scroll */
+  font-family: "Tahoma", Arial, sans-serif;
+  font-size: 11px;
+  color: #000;
+  background-color: #e9e9e9; /* Updated color */
+  box-sizing: border-box;
+  touch-action: none; /* Disable pinch-zoom and other default touch actions */
 }
 
 /* Primary layout: Flex column with padding and consistent gap */
 body {
-    display: flex; /* Make body a flex container */
-    flex-direction: column; /* Stack children vertically */
+  display: flex; /* Make body a flex container */
+  flex-direction: column; /* Stack children vertically */
 }
 
 /* New wrapper rule */
 .content-wrapper {
-    flex: 1; /* Grow to fill body */
-    display: flex;
-    flex-direction: column;
-    padding: 8px;
-    gap: 8px;
-    min-height: 0; /* Prevent overflow issues */
-    overflow: hidden; /* Hide potential overflow from wrapper itself */
+  flex: 1; /* Grow to fill body */
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 8px;
+  min-height: 0; /* Prevent overflow issues */
+  overflow: hidden; /* Hide potential overflow from wrapper itself */
 }
 
 /* Field row container (label + input) */
 .field {
-    display: flex;
-    align-items: center; /* Vertically align label and input */
-    gap: 2px;
-    flex-shrink: 0; /* Prevent rows from shrinking */
+  display: flex;
+  align-items: center; /* Vertically align label and input */
+  gap: 2px;
+  flex-shrink: 0; /* Prevent rows from shrinking */
 }
 
 /* Label styling */
 label {
-    display: inline-block; /* Reinforce block context */
-    min-width: 40px; /* Ensure consistent label width */
-    text-align: right; /* Align text to the right */
-    padding-right: 6px; /* Add padding to the right of the text */
-    flex-shrink: 0;
+  display: inline-block; /* Reinforce block context */
+  min-width: 40px; /* Ensure consistent label width */
+  text-align: right; /* Align text to the right */
+  padding-right: 6px; /* Add padding to the right of the text */
+  flex-shrink: 0;
 }
 
 /* Shared input/textarea base styles */
 .input,
 .textarea {
-    font-family: inherit;
-    font-size: inherit;
-    padding: 5px 8px;
-    background-color: #ffffff;
-    box-sizing: border-box;
-    border-radius: 2px;
-    /* Force a transparent border to override XP.css inset/outset styles */
-    border: 1px solid transparent !important; 
-    /* Default (Desktop) shadow with slightly off-white highlight */
-    box-shadow:
-        inset 1.75px 1.75px 0 #888,       /* Top-left shadow (dark) */
-        inset -1.75px -1.75px 0 #f0f0f0,  /* Bottom-right highlight (very light grey) */
-        inset 0 0 3px 1px #d6d6d6 !important; /* Inner subtle shadow/border */
-    color: #000;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 5px 8px;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  border-radius: 2px;
+  /* Force a transparent border to override XP.css inset/outset styles */
+  border: 1px solid transparent !important;
+  /* Default (Desktop) shadow with slightly off-white highlight */
+  box-shadow:
+    inset 1.75px 1.75px 0 #888,
+    /* Top-left shadow (dark) */ inset -1.75px -1.75px 0 #f0f0f0,
+    /* Bottom-right highlight (very light grey) */ inset 0 0 3px 1px #d6d6d6 !important; /* Inner subtle shadow/border */
+  color: #000;
 }
 
 .input::placeholder,
 .textarea::placeholder {
-    color: #999;
-    opacity: 1;
-    font-style: italic;
+  color: #999;
+  opacity: 1;
+  font-style: italic;
 }
 
 /* Input-specific styles */
 .input {
-    flex: 1; /* Allow input to grow and fill remaining space */
-    min-width: 0; /* Allow input to shrink if needed */
-    padding-left: 8px !important;
-    /* border: none; */ /* Handled by the shared rule now */
+  flex: 1; /* Allow input to grow and fill remaining space */
+  min-width: 0; /* Allow input to shrink if needed */
+  padding-left: 8px !important;
+  /* border: none; */ /* Handled by the shared rule now */
 }
 
 .input.readonly {
-    background-color: #8d8d8d1e; /* Darker grey for readonly state */
-    cursor: default;
-    user-select: none;
+  background-color: #8d8d8d1e; /* Darker grey for readonly state */
+  cursor: default;
+  user-select: none;
 }
 
 /* Textarea-specific styles */
 .textarea {
-    flex: 1; /* Grow to fill remaining vertical space */
-    resize: none;
-    line-height: 1.4;
-    min-height: 50px; /* Ensure it's not too small initially */
-    overflow: auto; /* Explicitly handle overflow/scrollbar */
-    /* border: none; */ /* Handled by the shared rule now */
+  flex: 1; /* Grow to fill remaining vertical space */
+  resize: none;
+  line-height: 1.4;
+  min-height: 50px; /* Ensure it's not too small initially */
+  overflow: auto; /* Explicitly handle overflow/scrollbar */
+  /* border: none; */ /* Handled by the shared rule now */
 }
 
 @media (pointer: coarse) and (hover: none) {
@@ -111,15 +111,17 @@ label {
     line-height: 1.2;
     /* Mobile: Remove bottom-right highlight */
     box-shadow:
-        inset 1.75px 1.75px 0 #888,       /* Top-left shadow (dark) */
-        inset 0 0 3px 1px #d6d6d6 !important; /* Inner subtle shadow/border */
+      inset 1.75px 1.75px 0 #888,
+      /* Top-left shadow (dark) */ inset 0 0 3px 1px #d6d6d6 !important; /* Inner subtle shadow/border */
   }
   .textarea {
     min-height: 4em;
   }
 }
 
-body, .content-wrapper, .field {
+body,
+.content-wrapper,
+.field {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -127,7 +129,10 @@ body, .content-wrapper, .field {
 }
 
 /* Allow selection in input and textarea fields */
-.input, .textarea, input, textarea {
+.input,
+.textarea,
+input,
+textarea {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;

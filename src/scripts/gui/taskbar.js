@@ -73,17 +73,11 @@ class Clock {
 }
 
 /**
- * Taskbar manages the Windows XP taskbar UI, start menu, tray icons, and clock.
- *
- * @class
- * @example
- * import Taskbar from './taskbar.js';
- * const taskbar = new Taskbar(eventBus);
+ * Taskbar class manages the Windows XP taskbar, including start button, clock, and taskbar items.
  */
 export default class Taskbar {
   /**
-   * Create a new Taskbar instance.
-   * @param {EventBus} eventBus - The event bus instance for communication.
+   * @param {Object} eventBus - Event bus for communication.
    */
   constructor(eventBus) {
     this.eventBus = eventBus;
@@ -115,11 +109,10 @@ export default class Taskbar {
     this.subscribeToEvents();
 
     // Listen for fullscreen changes to reset the network balloon
-    document.addEventListener('fullscreenchange', () => {
+    document.addEventListener("fullscreenchange", () => {
       localStorage.removeItem("networkBalloonShown");
       // Adjust based on final requirements
       // Ensure it doesn't conflict with other UI elements
-      // showNetworkBalloon(); // This might be too intrusive, depends on desired UX
     });
   }
 
@@ -145,9 +138,6 @@ export default class Taskbar {
   }
 
   /**
-   * Set up hover and click effects for start button
-   */
-  /**
    * Set up hover and click effects for the Start button.
    * @returns {void}
    */
@@ -158,9 +148,6 @@ export default class Taskbar {
     });
   }
 
-  /**
-   * Setup responsive taskbar that adjusts program item widths based on available space
-   */
   /**
    * Set up responsive behavior for the taskbar on window resize.
    * @returns {void}
@@ -265,7 +252,12 @@ export function hideBalloon(instant = false) {
 export function showNetworkBalloon() {
   // Prevent balloon if login screen is visible
   const loginScreen = document.getElementById("login-screen");
-  if (loginScreen && loginScreen.style.display !== "none" && loginScreen.style.opacity !== "0") return;
+  if (
+    loginScreen &&
+    loginScreen.style.display !== "none" &&
+    loginScreen.style.opacity !== "0"
+  )
+    return;
   if (document.getElementById("balloon-root")) return;
   // Clear any previous balloon timeouts before showing a new one
   balloonTimeouts.forEach((t) => clearTimeout(t));
@@ -279,7 +271,8 @@ export function showNetworkBalloon() {
   document.body.appendChild(balloonRoot);
 
   const headerText = "Welcome to my portfolio";
-  const mainText = "It's also the world's best XP recreation.<br>Built from scratch, to the pixel, by me.";
+  const mainText =
+    "It's also the most accurate XP recreation online.<br>Built from scratch, to the pixel, by me :)";
 
   balloonRoot.innerHTML = `
     <div class="balloon">
@@ -308,7 +301,8 @@ export function showNetworkBalloon() {
     const scale = 0.93;
     const deltaX = (balloonRect.width * (scale - 1)) / 2;
     // Set the balloon position so the pointer aligns with the icon center
-    balloonRoot.style.left = balloonRect.left + offsetX - deltaX - 24 - 2 + "px";
+    balloonRoot.style.left =
+      balloonRect.left + offsetX - deltaX - 24 - 2 + "px";
     balloonRoot.style.top =
       iconRect.top - balloonRect.height - 22 - 2 + window.scrollY + "px";
   }, 0);
@@ -319,9 +313,11 @@ export function showNetworkBalloon() {
 
   const isMobile = isMobileDevice();
   const fadeOutDelay = isMobile ? 7000 : 10000; // 7s for mobile, 10s for desktop
-  const removeDelay = isMobile ? 8000 : 11000;   // 8s for mobile, 11s for desktop
+  const removeDelay = isMobile ? 8000 : 11000; // 8s for mobile, 11s for desktop
 
-  balloonTimeouts.push(setTimeout(() => balloon.classList.add("hide"), fadeOutDelay));
+  balloonTimeouts.push(
+    setTimeout(() => balloon.classList.add("hide"), fadeOutDelay),
+  );
   balloonTimeouts.push(setTimeout(() => hideBalloon(), removeDelay));
 }
 
@@ -333,9 +329,9 @@ const setupBalloonClick = () => {
 };
 window.addEventListener("DOMContentLoaded", () => {
   setupBalloonClick();
-  const fullscreenIcon = document.querySelector('.tray-fullscreen-icon');
+  const fullscreenIcon = document.querySelector(".tray-fullscreen-icon");
   if (fullscreenIcon) {
-    fullscreenIcon.addEventListener('click', () => {
+    fullscreenIcon.addEventListener("click", () => {
       hideBalloon(true); // Instantly hide the balloon when fullscreen is toggled
       // Try Fullscreen API first
       const docElm = document.documentElement;
@@ -343,15 +339,18 @@ window.addEventListener("DOMContentLoaded", () => {
         document.exitFullscreen();
       } else if (docElm.requestFullscreen) {
         docElm.requestFullscreen();
-      } else if (docElm.mozRequestFullScreen) { /* Firefox */
+      } else if (docElm.mozRequestFullScreen) {
+        /* Firefox */
         docElm.mozRequestFullScreen();
-      } else if (docElm.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+      } else if (docElm.webkitRequestFullscreen) {
+        /* Chrome, Safari & Opera */
         docElm.webkitRequestFullscreen();
-      } else if (docElm.msRequestFullscreen) { /* IE/Edge */
+      } else if (docElm.msRequestFullscreen) {
+        /* IE/Edge */
         docElm.msRequestFullscreen();
       } else {
         // Fallback: try to send F11 (not reliable in browsers)
-        alert('Press F11 to enter fullscreen mode.');
+        alert("Press F11 to enter fullscreen mode.");
       }
     });
   }

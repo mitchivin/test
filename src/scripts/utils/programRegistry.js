@@ -1,14 +1,6 @@
 /**
  * programRegistry.js — Program Registry for Windows XP Simulation
- *
- * Centralized configuration for all available applications, including:
- * - Window properties, dimensions, icons, and content sources
- * - Default templates and menu/toolbar configurations
- *
- * Usage:
- *   import programData from './programRegistry.js';
- *   const aboutConfig = programData['about'];
- *
+ * Centralized configuration for all available applications, including window properties, icons, and content sources.
  * @module programRegistry
  */
 
@@ -34,7 +26,6 @@ const defaults = {
 
 /**
  * Generates a standardized window ID from program name
- *
  * @param {string} name - Program name
  * @returns {string} Formatted window ID
  */
@@ -42,7 +33,6 @@ const makeId = (name) => `${name}-window`;
 
 /**
  * Creates a program configuration with consistent properties
- *
  * @param {string} key - Unique program identifier
  * @param {string} title - Window title displayed in titlebar
  * @param {string} icon - Relative path to program icon
@@ -61,8 +51,18 @@ const createProgram = (key, title, icon, extraProps = {}) => ({
 const VIEW_DROPDOWN = [
   { key: "close", text: "Close", enabled: true, action: "exitProgram" },
   { type: "separator" },
-  { key: "maximize", text: "Maximize", enabled: !isMobileDevice(), action: "maximizeWindow" },
-  { key: "minimize", text: "Minimize", enabled: true, action: "minimizeWindow" },
+  {
+    key: "maximize",
+    text: "Maximize",
+    enabled: !isMobileDevice(),
+    action: "maximizeWindow",
+  },
+  {
+    key: "minimize",
+    text: "Minimize",
+    enabled: true,
+    action: "minimizeWindow",
+  },
 ];
 
 // Common File menu variant: Only Exit enabled
@@ -71,7 +71,12 @@ const FILE_DROPDOWN_EXIT_ONLY = [
   { key: "saveAs", text: "Save as...", enabled: false, action: "fileSaveAs" },
   { type: "separator" },
   { key: "print", text: "Print", enabled: false, action: "filePrint" },
-  { key: "pageSetup", text: "Print Setup", enabled: false, action: "pageSetup" },
+  {
+    key: "pageSetup",
+    text: "Print Setup",
+    enabled: false,
+    action: "pageSetup",
+  },
   { type: "separator" },
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
@@ -83,7 +88,12 @@ const FILE_DROPDOWN_NOTEPAD = [
   { key: "save", text: "Save", enabled: false, action: "fileSave" },
   { key: "saveAs", text: "Save As...", enabled: false, action: "fileSaveAs" },
   { type: "separator" },
-  { key: "pageSetup", text: "Page Setup...", enabled: false, action: "pageSetup" },
+  {
+    key: "pageSetup",
+    text: "Page Setup...",
+    enabled: false,
+    action: "pageSetup",
+  },
   { key: "print", text: "Print...", enabled: false, action: "filePrint" },
   { type: "separator" },
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
@@ -91,11 +101,26 @@ const FILE_DROPDOWN_NOTEPAD = [
 
 // Custom File dropdown for Contact App
 const FILE_DROPDOWN_CONTACT = [
-  { key: "newMessage", text: "New Message", enabled: false, action: "newMessage" },
-  { key: "sendMessage", text: "Send Message", enabled: false, action: "sendMessage" },
+  {
+    key: "newMessage",
+    text: "New Message",
+    enabled: false,
+    action: "newMessage",
+  },
+  {
+    key: "sendMessage",
+    text: "Send Message",
+    enabled: false,
+    action: "sendMessage",
+  },
   { type: "separator" },
   { key: "print", text: "Print", enabled: false, action: "filePrint" },
-  { key: "pageSetup", text: "Print Setup", enabled: false, action: "pageSetup" },
+  {
+    key: "pageSetup",
+    text: "Print Setup",
+    enabled: false,
+    action: "pageSetup",
+  },
   { type: "separator" },
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
@@ -144,7 +169,7 @@ const programData = {
           { key: "help", text: "Help", enabled: false },
         ],
       },
-    }
+    },
   ),
 
   // System and Utility Programs
@@ -180,20 +205,50 @@ const programData = {
     appPath: "src/apps/about/about.html",
     toolbarConfig: {
       buttons: [
-        { key: "previous", enabled: false, icon: "./assets/gui/toolbar/back.webp", text: "Previous", action: "navigatePrevious" },
-        { key: "next", enabled: false, icon: "./assets/gui/toolbar/forward.webp", text: "Next", action: "navigateNext" },
+        {
+          key: "previous",
+          enabled: false,
+          icon: "./assets/gui/toolbar/back.webp",
+          text: "Previous",
+          action: "navigatePrevious",
+        },
+        {
+          key: "next",
+          enabled: false,
+          icon: "./assets/gui/toolbar/forward.webp",
+          text: "Next",
+          action: "navigateNext",
+        },
         { type: "separator", desktopOnly: true },
-        { key: "projects", enabled: true, icon: "./assets/gui/desktop/internet.webp", text: "My Projects", action: "openProjects" },
-        { key: "resume", enabled: true, icon: "./assets/gui/desktop/resume.webp", text: "My Resume", action: "openResume" },
+        {
+          key: "projects",
+          enabled: true,
+          icon: "./assets/gui/desktop/projects.webp",
+          text: "My Projects",
+          action: "openProjects",
+        },
+        {
+          key: "resume",
+          enabled: true,
+          icon: "./assets/gui/desktop/resume.webp",
+          text: "My Resume",
+          action: "openResume",
+        },
         { type: "separator" },
-        { key: "views", enabled: false, icon: "./assets/gui/toolbar/views.webp", text: null, action: "toggleViews" },
+        {
+          key: "views",
+          enabled: false,
+          icon: "./assets/gui/toolbar/views.webp",
+          text: null,
+          action: "toggleViews",
+        },
       ],
     },
     addressBarConfig: {
       enabled: true,
       icon: "./assets/gui/desktop/about.webp",
       title: "About Me",
-      canNavigate: false
+      canNavigate: false,
     },
     menuBarConfig: {
       items: [
@@ -215,7 +270,9 @@ const programData = {
   }),
   resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
     dimensions: { width: 600, height: 725 },
-    statusBarText: isMobileDevice() ? "Tap to zoom & pan" : "Click to zoom & pan",
+    statusBarText: isMobileDevice()
+      ? "Tap to zoom & pan"
+      : "Click to zoom & pan",
     appPath: "src/apps/resume/resume.html",
     menuBarConfig: {
       items: [
@@ -237,7 +294,7 @@ const programData = {
           icon: "./assets/gui/toolbar/print.webp",
           text: "Print",
           desktopOnly: true,
-          tooltip: "Print (Disabled)"
+          tooltip: "Print (Disabled)",
         },
         { type: "separator", desktopOnly: true },
         {
@@ -261,8 +318,8 @@ const programData = {
           icon: "./assets/gui/toolbar/up.webp",
           text: null,
           desktopOnly: true,
-          tooltip: "Up (Disabled)"
-        }
+          tooltip: "Up (Disabled)",
+        },
       ],
     },
   }),
@@ -281,7 +338,7 @@ const programData = {
             enabled: true,
             icon: "./assets/gui/toolbar/back.webp",
             text: "Back",
-            action: (win) => win.contentView.contentWindow.history.back(),
+            action: "navigateBack",
           },
           {
             key: "forward",
@@ -327,15 +384,17 @@ const programData = {
   ),
 
   // Project Showcase Programs
-  internet: createProgram("internet", "My Projects", "desktop/internet.webp", {
+  projects: createProgram("projects", "My Projects", "desktop/projects.webp", {
     dimensions: { width: 1000, height: 700 },
-    statusBarText: isMobileDevice() ? "Open a project and navigate with the toolbar or swipe" : "Open a project and navigate with the toolbar",
+    statusBarText: isMobileDevice()
+      ? "Open a project and navigate with the toolbar or swipe"
+      : "Open a project and navigate with the toolbar",
     appPath: "src/apps/projects/projects.html",
     addressBarConfig: {
       enabled: true,
-      icon: "./assets/gui/desktop/internet.webp",
+      icon: "./assets/gui/desktop/projects.webp",
       title: "https://www.myprojects.com",
-      canNavigate: false
+      canNavigate: false,
     },
     menuBarConfig: {
       items: [
@@ -388,7 +447,7 @@ const programData = {
           icon: "./assets/gui/toolbar/search.webp",
           text: null,
           desktopOnly: true,
-          tooltip: "Search (Disabled)"
+          tooltip: "Search (Disabled)",
         },
         {
           key: "favorites",
@@ -396,7 +455,7 @@ const programData = {
           icon: "./assets/gui/toolbar/favorites.webp",
           text: "Favorites",
           desktopOnly: true,
-          tooltip: "Favorites (Disabled)"
+          tooltip: "Favorites (Disabled)",
         },
         { type: "separator", desktopOnly: true },
         {
@@ -405,8 +464,8 @@ const programData = {
           icon: "./assets/gui/toolbar/print.webp",
           text: "Print",
           desktopOnly: true,
-          tooltip: "Print (Disabled)"
-        }
+          tooltip: "Print (Disabled)",
+        },
       ],
     },
   }),

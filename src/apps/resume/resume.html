@@ -2,7 +2,6 @@
   resume.html — Resume App for Windows XP Simulation
   Provides the My Resume window content and structure.
   Loaded as an iframe in the main shell.
-  @file resume.html
 -->
 <!doctype html>
 <html lang="en">
@@ -11,13 +10,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Resume</title>
     <!-- XP.css: Use CDN link, adjust if using local dependency -->
-    <link rel="stylesheet" href="https://unpkg.com/xp.css@0.2.6/dist/XP.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="resume.css">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/xp.css@0.2.6/dist/XP.css"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="resume.css" />
   </head>
   <body>
     <div class="app-root" id="appRoot">
-      <img 
-        id="resumeImage" 
+      <img
+        id="resumeImage"
         src="../../../assets/apps/resume/resume.webp"
         alt="Mitch Ivin Resume"
         class="resume-image"
@@ -26,4 +29,4 @@
 
     <script src="resume.js" defer></script>
   </body>
-</html> 
+</html>

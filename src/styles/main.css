@@ -152,6 +152,39 @@ iframe a {
    ================================================== */
 
 /* ==================================================
+   Global Mobile Styles (max-width: 768px)
+   ================================================== */
+@media (max-width: 768px) {
+  /* From src/styles/gui/window.css - Window sizing on mobile */
+  .app-window,
+  .window-body.iframe-container {
+    max-height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px));
+  }
+  .app-window .window-body {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .app-window.maximized,
+  .window.maximized {
+    /* These !important height rules override desktop .window.maximized */
+    height: calc(
+      var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)
+    ) !important;
+    max-height: calc(
+      var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)
+    ) !important;
+  }
+
+  /* From src/styles/gui/taskbar.css - Utility class */
+  .desktop-only {
+    display: none !important;
+  }
+}
+/* ==================================================
+   END Global Mobile Styles
+   ================================================== */
+
+/* ==================================================
    XP.css-Inspired Custom Scrollbar Styles (Global)
    ==================================================
    - Ensures all scrollable areas (windows, menus, lists) use a consistent Windows XP look.
@@ -223,7 +256,8 @@ iframe a {
 /* ===== Root & Base Element Styles ===== */
 
 /* Prevent text selection across the UI, allow for inputs/textareas */
-.disabled, [disabled] {
+.disabled,
+[disabled] {
   cursor: default !important;
   user-select: none !important; /* Standard */
   -webkit-user-select: none; /* Safari */
@@ -241,19 +275,21 @@ iframe a {
   position: absolute;
   display: none;
   z-index: 10000;
-  background-color: #FFFFE1; /* XP tooltip yellow */
+  background-color: #ffffe1; /* XP tooltip yellow */
   border: 1px solid #000000; /* Standard black border */
   padding: 2px 5px;
   font-size: 8pt; /* XP standard tooltip font size */
   white-space: nowrap;
   font-family: Tahoma, sans-serif; /* Standard XP font */
   pointer-events: none; /* Tooltip should not be interactive */
-  box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
 
 /* Global box-sizing and font smoothing */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -277,8 +313,7 @@ iframe a {
 .left-panel__card__row, /* About Me - rows in left panel (to prevent dragging the row img) */
 .about-paragraph-row, /* About Me - paragraph rows (parent of icon and text) */
 .about-paragraph-icon-col /* About Me - icon column in paragraph rows */
-/* Note: .about-paragraph-icon is an img itself, handled below */
-{
+/* Note: .about-paragraph-icon is an img itself, handled below */ {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -298,8 +333,7 @@ iframe a {
 .about-paragraph-icon, /* About Me - paragraph icons */
 .left-panel__card__img, /* About Me - left panel card content icons */
 .left-panel__card__header__img /* About Me - left panel card header icons */
-/* Note: .app-window .title-bar-controls button typically uses background-image, not child img */
-{
+/* Note: .app-window .title-bar-controls button typically uses background-image, not child img */ {
   pointer-events: none;
 }
 

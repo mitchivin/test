@@ -17,11 +17,11 @@ import { isMobileDevice } from "../utils/device.js";
 
 // ===== Desktop Class =====
 /**
- * Manages the Windows XP desktop UI: icons, selection, drag, and wallpaper.
+ * Desktop class manages the desktop UI, icons, and user interactions.
  */
 export default class Desktop {
   /**
-   * @param {EventBus} eventBus - Event bus for cross-component communication
+   * @param {Object} eventBus - Event bus for communication.
    */
   constructor(eventBus) {
     this.eventBus = eventBus;
@@ -42,18 +42,22 @@ export default class Desktop {
     this.setupPointerSelectionEvents();
 
     // Set wallpaper class based on device
-    this.desktop.classList.remove('wallpaper-default', 'wallpaper-mobile');
+    this.desktop.classList.remove("wallpaper-default", "wallpaper-mobile");
     if (isMobileDevice()) {
-      this.desktop.classList.add('wallpaper-mobile');
+      this.desktop.classList.add("wallpaper-mobile");
     } else {
-      this.desktop.classList.add('wallpaper-default');
+      this.desktop.classList.add("wallpaper-default");
     }
 
     // Event subscriptions for selection/drag state
     this.eventBus.subscribe(EVENTS.WINDOW_CREATED, () => this.clearSelection());
     this.eventBus.subscribe(EVENTS.WINDOW_FOCUSED, () => this.clearSelection());
-    this.eventBus.subscribe(EVENTS.PROGRAM_OPEN, () => this.resetDragSelectionState());
-    this.eventBus.subscribe(EVENTS.STARTMENU_OPENED, () => this.resetDragSelectionState());
+    this.eventBus.subscribe(EVENTS.PROGRAM_OPEN, () =>
+      this.resetDragSelectionState(),
+    );
+    this.eventBus.subscribe(EVENTS.STARTMENU_OPENED, () =>
+      this.resetDragSelectionState(),
+    );
   }
 
   /**
@@ -68,7 +72,9 @@ export default class Desktop {
    * Remove any selection box artifacts from previous interactions.
    */
   cleanupArtifacts() {
-    document.querySelectorAll("#selection-box, .selection-box").forEach((box) => box.remove());
+    document
+      .querySelectorAll("#selection-box, .selection-box")
+      .forEach((box) => box.remove());
   }
 
   /**
@@ -86,11 +92,13 @@ export default class Desktop {
    * Attach click/tap events to desktop icons for selection and opening.
    */
   setupIconEvents() {
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     this.getIcons().forEach((icon) => {
       if (icon.tagName === "A") return; // Let anchors handle their own events
       const iconSpan = icon.querySelector("span");
-      const iconId = iconSpan ? iconSpan.textContent.trim().toLowerCase().replace(/\s+/g, "-") : "";
+      const iconId = iconSpan
+        ? iconSpan.textContent.trim().toLowerCase().replace(/\s+/g, "-")
+        : "";
       const handleIconActivate = (e) => {
         e.stopPropagation();
         if (isTouch && e.type === "click") return; // Prevent double event on touch
@@ -149,9 +157,15 @@ export default class Desktop {
       if (e.target !== this.overlay && e.target !== this.desktop) return;
       if (isMobileDevice()) {
         // Multi-touch or stuck drag: reset state
-        if (this.activeDragPointerId !== null && this.activeDragPointerId !== e.pointerId) {
+        if (
+          this.activeDragPointerId !== null &&
+          this.activeDragPointerId !== e.pointerId
+        ) {
           this.resetDragSelectionState();
-        } else if (this.isDragging && this.activeDragPointerId === e.pointerId) {
+        } else if (
+          this.isDragging &&
+          this.activeDragPointerId === e.pointerId
+        ) {
           this.resetDragSelectionState();
         }
       }

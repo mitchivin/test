@@ -1,5 +1,6 @@
 // ==================================================
 //  boot.js — Boot Sequence & Login Handling for Windows XP Simulation
+//  Handles boot animation, login process, session state, and event-driven logoff/shutdown.
 // ==================================================
 /**
  * Handles the boot animation, login process, and session state for the Windows XP simulation.
@@ -98,7 +99,9 @@ export function initBootSequence(eventBus, EVENTS) {
         bootScreen.classList.remove("boot-fade-in");
         setTimeout(() => {
           // Fade to black overlay, then show login
-          const fadeoutOverlay = document.getElementById("boot-fadeout-overlay");
+          const fadeoutOverlay = document.getElementById(
+            "boot-fadeout-overlay",
+          );
           if (fadeoutOverlay) {
             fadeoutOverlay.style.display = "block";
             void fadeoutOverlay.offsetWidth;
@@ -138,22 +141,23 @@ export function initBootSequence(eventBus, EVENTS) {
       loginContent.querySelector(".right-bottom"),
       loginContent.querySelector(".xp-logo-image"),
       loginContent.querySelector(".left-text"),
-      loginContent.querySelector(".login-separator.mobile-only")
+      loginContent.querySelector(".login-separator.mobile-only"),
     ];
-    fadeTargets.forEach(el => {
+    fadeTargets.forEach((el) => {
       if (el) {
         el.style.transition = "opacity 0.15s";
         el.style.opacity = "0";
       }
     });
     setTimeout(() => {
-      fadeTargets.forEach(el => { if (el) el.style.display = "none"; });
+      fadeTargets.forEach((el) => {
+        if (el) el.style.display = "none";
+      });
       setTimeout(() => {
         welcomeMsg.style.display = "block";
         setTimeout(() => {
           welcomeMsg.classList.add("visible");
         }, 10);
-
       }, 500); // Welcome message appears after this delay
       setTimeout(() => {
         welcomeMsg.classList.remove("visible");
@@ -168,7 +172,9 @@ export function initBootSequence(eventBus, EVENTS) {
         try {
           loginSound.currentTime = 0;
           loginSound.play();
-        } catch {}
+        } catch {
+          /* intentionally empty */
+        }
         sessionStorage.setItem("logged_in", "true");
         setTimeout(() => {
           if (
@@ -186,54 +192,52 @@ export function initBootSequence(eventBus, EVENTS) {
     // Preload critical assets for About and Resume apps
     const appCriticalAssets = [
       // Resume App
-      { path: './assets/apps/resume/resume.webp', type: 'image' },
-      { path: './assets/apps/resume/resumeMitchIvin.pdf', type: 'document' },
+      { path: "./assets/apps/resume/resume.webp", type: "image" },
+      { path: "./assets/apps/resume/resumeMitchIvin.pdf", type: "document" },
       // About App
-      { path: './assets/apps/about/aboutbg.webp', type: 'image' },
-      { path: './assets/apps/about/pullup-alt.webp', type: 'image' },
-      { path: './assets/apps/about/pullup.webp', type: 'image' },
-      { path: './assets/apps/about/skill1.webp', type: 'image' },
-      { path: './assets/apps/about/skill2.webp', type: 'image' },
-      { path: './assets/apps/about/skill3.webp', type: 'image' },
-      { path: './assets/apps/about/skill4.webp', type: 'image' },
-      { path: './assets/apps/about/skill5.webp', type: 'image' },
-      { path: './assets/apps/about/software1.webp', type: 'image' },
-      { path: './assets/apps/about/software2.webp', type: 'image' },
-      { path: './assets/apps/about/software3.webp', type: 'image' },
-      { path: './assets/apps/about/software4.webp', type: 'image' },
-      { path: './assets/apps/about/p1.webp', type: 'image' },
-      { path: './assets/apps/about/p2.webp', type: 'image' },
-      { path: './assets/apps/about/p3.webp', type: 'image' },
-      { path: './assets/apps/about/p4.webp', type: 'image' },
-      { path: './assets/apps/about/p5.webp', type: 'image' },
+      { path: "./assets/gui/bgs/aboutbg.webp", type: "image" },
+      { path: "./assets/apps/about/pullup-alt.webp", type: "image" },
+      { path: "./assets/apps/about/pullup.webp", type: "image" },
+      { path: "./assets/apps/about/skill1.webp", type: "image" },
+      { path: "./assets/apps/about/skill2.webp", type: "image" },
+      { path: "./assets/apps/about/skill3.webp", type: "image" },
+      { path: "./assets/apps/about/skill4.webp", type: "image" },
+      { path: "./assets/apps/about/skill5.webp", type: "image" },
+      { path: "./assets/apps/about/software1.webp", type: "image" },
+      { path: "./assets/apps/about/software2.webp", type: "image" },
+      { path: "./assets/apps/about/software3.webp", type: "image" },
+      { path: "./assets/apps/about/software4.webp", type: "image" },
+      { path: "./assets/apps/about/p1.webp", type: "image" },
+      { path: "./assets/apps/about/p2.webp", type: "image" },
+      { path: "./assets/apps/about/p3.webp", type: "image" },
+      { path: "./assets/apps/about/p4.webp", type: "image" },
+      { path: "./assets/apps/about/p5.webp", type: "image" },
       // Toolbar Icons
-      { path: './assets/gui/toolbar/barlogo.webp', type: 'image' },
-      { path: './assets/gui/toolbar/back.webp', type: 'image' },
-      { path: './assets/gui/toolbar/copy.webp', type: 'image' },
-      { path: './assets/gui/toolbar/cut.webp', type: 'image' },
-      { path: './assets/gui/toolbar/delete.webp', type: 'image' },
-      { path: './assets/gui/toolbar/forward.webp', type: 'image' },
-      { path: './assets/gui/toolbar/go.webp', type: 'image' },
-      { path: './assets/gui/toolbar/home.webp', type: 'image' },
-      { path: './assets/gui/toolbar/new.webp', type: 'image' },
-      { path: './assets/gui/toolbar/paste.webp', type: 'image' },
-      { path: './assets/gui/toolbar/print.webp', type: 'image' },
-      { path: './assets/gui/toolbar/save.webp', type: 'image' },
-      { path: './assets/gui/toolbar/search.webp', type: 'image' },
-      { path: './assets/gui/toolbar/send.webp', type: 'image' },
-      { path: './assets/gui/toolbar/tooldropdown.webp', type: 'image' },
-      { path: './assets/gui/toolbar/up.webp', type: 'image' },
-      { path: './assets/gui/toolbar/views.webp', type: 'image' },
-      { path: './assets/gui/toolbar/desc.webp', type: 'image' }
+      { path: "./assets/gui/toolbar/barlogo.webp", type: "image" },
+      { path: "./assets/gui/toolbar/back.webp", type: "image" },
+      { path: "./assets/gui/toolbar/copy.webp", type: "image" },
+      { path: "./assets/gui/toolbar/cut.webp", type: "image" },
+      { path: "./assets/gui/toolbar/delete.webp", type: "image" },
+      { path: "./assets/gui/toolbar/forward.webp", type: "image" },
+      { path: "./assets/gui/toolbar/go.webp", type: "image" },
+      { path: "./assets/gui/toolbar/home.webp", type: "image" },
+      { path: "./assets/gui/toolbar/new.webp", type: "image" },
+      { path: "./assets/gui/toolbar/paste.webp", type: "image" },
+      { path: "./assets/gui/toolbar/print.webp", type: "image" },
+      { path: "./assets/gui/toolbar/save.webp", type: "image" },
+      { path: "./assets/gui/toolbar/search.webp", type: "image" },
+      { path: "./assets/gui/toolbar/send.webp", type: "image" },
+      { path: "./assets/gui/toolbar/tooldropdown.webp", type: "image" },
+      { path: "./assets/gui/toolbar/up.webp", type: "image" },
+      { path: "./assets/gui/toolbar/views.webp", type: "image" },
+      { path: "./assets/gui/toolbar/desc.webp", type: "image" },
     ];
 
-    appCriticalAssets.forEach(asset => {
+    appCriticalAssets.forEach((asset) => {
       const img = new Image();
       img.src = asset.path;
-      img.onload = () => {
-      };
-      img.onerror = () => {
-      };
+      img.onload = () => {};
+      img.onerror = () => {};
     });
   }
 
@@ -258,7 +262,9 @@ export function initBootSequence(eventBus, EVENTS) {
     try {
       logoffSound.currentTime = 0;
       logoffSound.play();
-    } catch {}
+    } catch {
+      /* intentionally empty */
+    }
     const balloon = document.getElementById("balloon-root");
     if (balloon && balloon.parentNode) {
       balloon.parentNode.removeChild(balloon);
@@ -282,14 +288,17 @@ export function initBootSequence(eventBus, EVENTS) {
         loginContent.querySelector(".right-bottom"),
         loginContent.querySelector(".xp-logo-image"),
         loginContent.querySelector(".left-text"),
-        loginContent.querySelector(".login-separator.mobile-only")
+        loginContent.querySelector(".login-separator.mobile-only"),
       ];
-      restoreTargets.forEach(el => {
+      restoreTargets.forEach((el) => {
         if (el) {
-          if (el.classList.contains('login-separator') && el.classList.contains('mobile-only')) {
-            el.style.opacity = '0.25';
+          if (
+            el.classList.contains("login-separator") &&
+            el.classList.contains("mobile-only")
+          ) {
+            el.style.opacity = "0.25";
           } else {
-            el.style.opacity = '1';
+            el.style.opacity = "1";
           }
           el.style.display = "";
           el.style.transition = "";
@@ -341,14 +350,14 @@ export function initBootSequence(eventBus, EVENTS) {
     if (!logoffDialog) return;
     logoffDialog.classList.remove("logoff-dialog-hidden");
     requestAnimationFrame(() => {
-        logoffDialog.classList.add("visible");
+      logoffDialog.classList.add("visible");
     });
 
     // Permanently disable Switch User button
     if (logoffSwitchUserBtn) {
-        logoffSwitchUserBtn.style.pointerEvents = 'none';
-        logoffSwitchUserBtn.style.opacity = '0.6'; // Visually disable
-        // The 'disabled' class is already added in HTML, CSS can style it further
+      logoffSwitchUserBtn.style.pointerEvents = "none";
+      logoffSwitchUserBtn.style.opacity = "0.6"; // Visually disable
+      // The 'disabled' class is already added in HTML, CSS can style it further
     }
 
     // Disable Log Off button if within 5 seconds of login
@@ -356,18 +365,18 @@ export function initBootSequence(eventBus, EVENTS) {
       const now = Date.now();
       const enableTime = window._logoffEnableTime || 0;
       if (now < enableTime) {
-        logoffLogOffBtn.classList.add('logoff-button-timed-disable');
-        logoffLogOffBtn.style.pointerEvents = 'none';
-        logoffLogOffBtn.style.opacity = '0.6';
+        logoffLogOffBtn.classList.add("logoff-button-timed-disable");
+        logoffLogOffBtn.style.pointerEvents = "none";
+        logoffLogOffBtn.style.opacity = "0.6";
         setTimeout(() => {
-          logoffLogOffBtn.classList.remove('logoff-button-timed-disable');
-          logoffLogOffBtn.style.pointerEvents = '';
-          logoffLogOffBtn.style.opacity = '';
+          logoffLogOffBtn.classList.remove("logoff-button-timed-disable");
+          logoffLogOffBtn.style.pointerEvents = "";
+          logoffLogOffBtn.style.opacity = "";
         }, enableTime - now);
       } else {
-        logoffLogOffBtn.classList.remove('logoff-button-timed-disable');
-        logoffLogOffBtn.style.pointerEvents = '';
-        logoffLogOffBtn.style.opacity = '';
+        logoffLogOffBtn.classList.remove("logoff-button-timed-disable");
+        logoffLogOffBtn.style.pointerEvents = "";
+        logoffLogOffBtn.style.opacity = "";
       }
     }
 

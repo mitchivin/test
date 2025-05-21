@@ -1,4 +1,9 @@
-html, body {
+/*
+ * resume.css — Styles for Resume App in Windows XP Simulation
+ * Styles the My Resume window, image, and responsive layout.
+ */
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -41,7 +46,11 @@ body {
   height: auto;
   object-fit: contain;
   cursor: zoom-in;
-  transition: max-width 0.2s, max-height 0.2s, width 0.2s, height 0.2s;
+  transition:
+    max-width 0.2s,
+    max-height 0.2s,
+    width 0.2s,
+    height 0.2s;
   box-sizing: content-box;
 }
 .resume-image.zoomed {
@@ -69,7 +78,9 @@ body {
   display: block;
 }
 
-body, .app-root, .resume-image {
+body,
+.app-root,
+.resume-image {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -77,7 +88,8 @@ body, .app-root, .resume-image {
 }
 
 /* Allow selection in input and textarea fields (if any) */
-input, textarea {
+input,
+textarea {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;

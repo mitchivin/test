@@ -2,7 +2,6 @@
   contact.html — Contact App for Windows XP Simulation
   Provides the Contact Me window content and structure.
   Loaded as an iframe in the main shell.
-  @file contact.html
 -->
 <!doctype html>
 <html lang="en">
@@ -11,26 +10,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contact Me</title>
     <!-- XP.css (Keep for standalone, might be inherited later) -->
-    <link rel="stylesheet" href="https://unpkg.com/xp.css@0.2.6/dist/XP.css" crossorigin="anonymous"/>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/xp.css@0.2.6/dist/XP.css"
+      crossorigin="anonymous"
+    />
     <!-- Updated CSS link -->
     <link rel="stylesheet" href="contact.css" />
   </head>
   <body>
     <div class="content-wrapper">
-        <div class="field">
-            <label for="contact-to">To:</label>
-            <input type="text" id="contact-to" class="input readonly" value="Mitch Ivin <mitchellivin@gmail.com>" readonly />
-        </div>
-        <div class="field">
-            <label for="contact-from">From:</label>
-            <input type="text" id="contact-from" class="input" placeholder="Your email address" />
-        </div>
-        <div class="field">
-            <label for="contact-subject">Subject:</label>
-            <input type="text" id="contact-subject" class="input" placeholder="Subject of your message" />
-        </div>
-        <textarea id="contact-message" class="textarea" placeholder="Write your message here"></textarea>
+      <div class="field">
+        <label for="contact-to">To:</label>
+        <input
+          type="text"
+          id="contact-to"
+          class="input readonly"
+          value="Mitch Ivin <mitchellivin@gmail.com>"
+          readonly
+        />
+      </div>
+      <div class="field">
+        <label for="contact-from">From:</label>
+        <input
+          type="text"
+          id="contact-from"
+          class="input"
+          placeholder="Your email address"
+        />
+      </div>
+      <div class="field">
+        <label for="contact-subject">Subject:</label>
+        <input
+          type="text"
+          id="contact-subject"
+          class="input"
+          placeholder="Subject of your message"
+        />
+      </div>
+      <textarea
+        id="contact-message"
+        class="textarea"
+        placeholder="Write your message here"
+      ></textarea>
     </div>
     <script src="contact.js"></script>
   </body>
-</html> 
+</html>

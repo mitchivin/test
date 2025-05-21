@@ -25,27 +25,29 @@ import { isMobileDevice } from "../utils/device.js";
  * @param {string} selector - CSS selector for elements that should have tooltips. Defaults to '[data-tooltip]'.
  * @param {HTMLElement} [tooltipContainer=document.body] - The container where the tooltip will be appended.
  * @param {number} [delay=100] - Delay in milliseconds before hiding the tooltip after mouseleave.
+ * @param {Function} [condition=() => true] - A function that returns true if the tooltip should be shown, false otherwise. Receives the target element as an argument.
  * @returns {void}
  */
 export function setupTooltips(
-  selector = '[data-tooltip]',
+  selector = "[data-tooltip]",
   tooltipContainer = document.body,
   delay = 100,
+  condition = () => true,
 ) {
   let activeTooltip = null;
   let tooltipTimeout = null;
   const tooltipElement =
-    tooltipContainer.querySelector('.dynamic-tooltip') ||
+    tooltipContainer.querySelector(".dynamic-tooltip") ||
     (() => {
-      const el = document.createElement('div');
-      el.className = 'dynamic-tooltip dynamic-tooltip-style';
+      const el = document.createElement("div");
+      el.className = "dynamic-tooltip dynamic-tooltip-style";
       tooltipContainer.appendChild(el);
       return el;
     })();
   const hideImmediately = () => {
     clearTimeout(tooltipTimeout);
     if (activeTooltip) {
-      activeTooltip.style.display = 'none';
+      activeTooltip.style.display = "none";
     }
     activeTooltip = null;
   };
@@ -54,18 +56,15 @@ export function setupTooltips(
     tooltipTimeout = setTimeout(hideImmediately, delay);
   };
   const showTooltip = (element) => {
-    // Prevent tooltip if balloon is active and this is the tray network icon
-    if (
-      element.classList.contains('tray-network-icon') &&
-      document.getElementById('balloon-root')
-    )
-      return;
-    clearTimeout(tooltipTimeout);
     const tooltipText =
-      element.getAttribute('data-tooltip') || element.getAttribute('title');
+      element.getAttribute("data-tooltip") || element.getAttribute("title");
     if (!tooltipText) return;
+
+    if (!condition(element)) return;
+
+    clearTimeout(tooltipTimeout);
     tooltipElement.textContent = tooltipText;
-    tooltipElement.style.display = 'block';
+    tooltipElement.style.display = "block";
     activeTooltip = tooltipElement;
     const containerRect =
       tooltipContainer === document.body
@@ -86,16 +85,16 @@ export function setupTooltips(
   // Balloon tooltips triggered separately by click handlers are unaffected
   if (!isMobileDevice()) {
     // Attach delegated listeners
-    document.body.addEventListener('mouseover', function(event) {
+    document.body.addEventListener("mouseover", function (event) {
       const target = event.target.closest(selector);
       if (target) showTooltip(target);
     });
-    document.body.addEventListener('mouseout', function(event) {
+    document.body.addEventListener("mouseout", function (event) {
       const target = event.target.closest(selector);
       // Only hide if the mouse actually left the element (not just moved within it)
       if (target && !target.contains(event.relatedTarget)) hideTooltip();
     });
-    document.body.addEventListener('click', function(event) {
+    document.body.addEventListener("click", function (event) {
       const target = event.target.closest(selector);
       if (target) hideImmediately();
     });

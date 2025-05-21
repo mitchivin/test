@@ -16,7 +16,9 @@
    ================================================== */
 
 /* ===== Universal Box Sizing & Font Smoothing ===== */
-* , *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -69,7 +71,10 @@ table {
 }
 
 /* ===== Form Styles ===== */
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font-size: 11px;
   user-select: text !important;
   -webkit-user-select: text !important;
@@ -103,16 +108,6 @@ a {
   --z-tooltip: 1000;
   --z-startmenu: 1500;
 }
-
-/*
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden; // Prevent scrollbars on body
-}
-*/
 
 #windows-container {
   position: absolute;

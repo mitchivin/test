@@ -40,12 +40,12 @@
 
 /* Wallpaper classes */
 .desktop.wallpaper-default {
-  background-image: url('../../../assets/gui/desktop/bliss.jpg');
+  background-image: url("../../../assets/gui/bgs/bliss.webp");
   background-position: top center;
 }
 
 .desktop.wallpaper-mobile {
-  background-image: url('../../../assets/gui/desktop/blissMobile.jpg');
+  background-image: url("../../../assets/gui/bgs/blissMobile.webp");
   background-position: top center;
 }
 
@@ -182,9 +182,15 @@
   }
 
   /* Set specific order for main mobile icons */
-  .desktop-icons .desktop-icon[data-program-name="about"]   { order: 1; }
-  .desktop-icons .desktop-icon[data-program-name="internet"]{ order: 2; }
-  .desktop-icons .desktop-icon[data-program-name="contact"] { order: 3; }
+  .desktop-icons .desktop-icon[data-program-name="about"] {
+    order: 1;
+  }
+  .desktop-icons .desktop-icon[data-program-name="projects"] {
+    order: 2;
+  }
+  .desktop-icons .desktop-icon[data-program-name="contact"] {
+    order: 3;
+  }
   /* Resume icon is hidden, its order property is not needed if display: none */
   /* .desktop-icons .desktop-icon[data-program-name="resume"] { order: initial; } */
 
@@ -198,30 +204,18 @@
     height: 110px;
     padding: 7px;
     margin: 0;
-    transform: initial;
-    transition: initial;
+    box-sizing: border-box;
+    border-radius: var(--icon-border-radius);
+    border: 1px solid transparent;
   }
   .desktop-icon img {
-    width: 58px;
-    height: 58px;
-    margin-bottom: 8px;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 6px;
   }
   .desktop-icon span {
-    font-size: 16px;
-    line-height: 19px;
-    letter-spacing: 0.3px;
-  }
-}
-
-@media (max-width: 768px) and (orientation: landscape) {
-  #landscape-block {
-    display: flex;
-  }
-  .desktop,
-  .desktop-icons,
-  .selection-overlay {
-    filter: blur(2px) grayscale(0.2);
-    pointer-events: none;
+    font-size: 15px;
+    line-height: 18px;
   }
 }
 

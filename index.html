@@ -19,13 +19,16 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta name="description" content="A Windows XP desktop simulation built with HTML, CSS, and JavaScript. Explore a classic interface with functional apps and nostalgic design elements. Relive the XP era in your browser.">
+    <meta
+      name="description"
+      content="A Windows XP desktop simulation built with HTML, CSS, and JavaScript. Explore a classic interface with functional apps and nostalgic design elements. Relive the XP era in your browser."
+    />
     <link rel="icon" href="./assets/gui/boot/favicon.png" type="image/png" />
     <title>MitchIvin XP</title>
     <!-- Preload Critical Assets -->
-    <link rel="preload" href="./assets/gui/desktop/bliss.jpg" as="image" />
+    <link rel="preload" href="./assets/gui/bgs/bliss.webp" as="image" />
     <link rel="preload" href="./assets/gui/desktop/about.webp" as="image" />
-    <link rel="preload" href="./assets/gui/desktop/internet.webp" as="image" />
+    <link rel="preload" href="./assets/gui/desktop/projects.webp" as="image" />
     <link rel="preload" href="./assets/gui/desktop/contact.webp" as="image" />
     <link rel="preload" href="./assets/gui/desktop/resume.webp" as="image" />
     <link
@@ -67,7 +70,20 @@
           <div class="box"></div>
         </div>
       </div>
-      <div id="boot-delay-message" style="display: none; position: absolute; top: 40px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 14px; text-shadow: 1px 1px 2px #000; text-align: center;">
+      <div
+        id="boot-delay-message"
+        style="
+          display: none;
+          position: absolute;
+          top: 40px;
+          left: 50%;
+          transform: translateX(-50%);
+          color: #fff;
+          font-size: 14px;
+          text-shadow: 1px 1px 2px #000;
+          text-align: center;
+        "
+      >
         Still booting... hang tight.
       </div>
       <div class="boot-bottom-left">
@@ -75,7 +91,11 @@
         <span>For the best experience</span>
       </div>
       <div class="boot-bottom-right">
-        <img src="./assets/gui/boot/boot-wordmark.webp" alt="Boot Wordmark" draggable="false" />
+        <img
+          src="./assets/gui/boot/boot-wordmark.webp"
+          alt="Boot Wordmark"
+          draggable="false"
+        />
       </div>
     </div>
     <div id="boot-fadeout-overlay" class="boot-fadeout-overlay-style"></div>
@@ -92,7 +112,9 @@
                 draggable="false"
               />
               <div class="left-text">
-                <span class="desktop-login-instruction">To begin, click on 'Mitch Ivin' to log in</span>
+                <span class="desktop-login-instruction"
+                  >To begin, click on 'Mitch Ivin' to log in</span
+                >
               </div>
             </div>
             <hr class="login-separator mobile-only" />
@@ -123,9 +145,15 @@
           <div class="shutdown-text">Turn off computer</div>
         </div>
         <div class="right-bottom">
-          <span class="desktop-bottom-detail">After you log on, the system's yours to explore.</span>
-          <span class="desktop-bottom-detail">Every detail has been designed with a purpose.</span>
-          <span class="mobile-bottom-detail">Tap on the user icon to begin</span>
+          <span class="desktop-bottom-detail"
+            >After you log on, the system's yours to explore.</span
+          >
+          <span class="desktop-bottom-detail"
+            >Every detail has been designed with a purpose.</span
+          >
+          <span class="mobile-bottom-detail"
+            >Tap on the user icon to begin</span
+          >
         </div>
       </div>
       <div class="welcome-message welcome-message-initial-hidden">
@@ -143,9 +171,9 @@
           />
           <span>About Me</span>
         </div>
-        <div class="desktop-icon" data-program-name="internet">
+        <div class="desktop-icon" data-program-name="projects">
           <img
-            src="./assets/gui/desktop/internet.webp"
+            src="./assets/gui/desktop/projects.webp"
             alt="My Projects"
             loading="eager"
           />
@@ -218,26 +246,55 @@
       <div class="logoff-dialog">
         <div class="logoff-dialog-body">
           <div class="logoff-dialog-header-content">
-            <img src="assets/gui/boot/favicon.png" alt="" class="logoff-dialog-header-icon" />
+            <img
+              src="assets/gui/boot/favicon.png"
+              alt=""
+              class="logoff-dialog-header-icon"
+            />
             <span class="logoff-dialog-header-text">Log Off Windows</span>
           </div>
 
-          <div class="logoff-dialog-separator-bar logoff-dialog-separator-bar-top"></div>
+          <div
+            class="logoff-dialog-separator-bar logoff-dialog-separator-bar-top"
+          ></div>
 
           <div class="logoff-dialog-button-container">
-            <div id="logoff-switch-user-btn" class="logoff-dialog-button disabled">
-              <img src="assets/gui/start-menu/switch.webp" alt="Switch User Icon" width="22" height="22" draggable="false" />
+            <div
+              id="logoff-switch-user-btn"
+              class="logoff-dialog-button disabled"
+            >
+              <img
+                src="assets/gui/start-menu/switch.webp"
+                alt="Switch User Icon"
+                width="22"
+                height="22"
+                draggable="false"
+              />
               <span>Switch User</span>
             </div>
             <div id="logoff-log-off-btn" class="logoff-dialog-button">
-              <img src="assets/gui/start-menu/logoff.webp" alt="Log Off Icon" width="22" height="22" draggable="false" />
+              <img
+                src="assets/gui/start-menu/logoff.webp"
+                alt="Log Off Icon"
+                width="22"
+                height="22"
+                draggable="false"
+              />
               <span>Log Off</span>
             </div>
           </div>
 
-          <div class="logoff-dialog-separator-bar logoff-dialog-separator-bar-bottom">
+          <div
+            class="logoff-dialog-separator-bar logoff-dialog-separator-bar-bottom"
+          >
             <div class="logoff-dialog-footer">
-              <button id="logoff-cancel-btn" aria-label="Cancel" style="user-select: none;">Cancel</button>
+              <button
+                id="logoff-cancel-btn"
+                aria-label="Cancel"
+                style="user-select: none"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

@@ -22,14 +22,13 @@ import { isMobileDevice } from "../utils/device.js";
  * @param {string} [options.title] - Title text for the address bar.
  * @returns {HTMLElement} The address bar container element.
  */
-export function createAddressBar({
-  icon,
-  title = "About Me",
-} = {}) {
+export function createAddressBar({ icon, title = "About Me" } = {}) {
   const container = document.createElement("div");
   container.className = "addressbar-container";
 
-  const icon_img_html = icon ? `<img style="margin: 0 3px 0 0" alt="icon" width="14" height="14" src="${icon}" />` : '';
+  const icon_img_html = icon
+    ? `<img style="margin: 0 3px 0 0" alt="icon" width="14" height="14" src="${icon}" />`
+    : "";
 
   container.innerHTML = `
     <div class="addressbar-row">
@@ -53,6 +52,13 @@ export function createAddressBar({
 }
 
 // --- MenuBar Creation ---
+/**
+ * Creates a menu bar for a window.
+ * @param {Object} menuBarConfig - Configuration for the menu bar.
+ * @param {string} windowId - The window's unique ID.
+ * @param {HTMLElement} parentWindowElement - The parent window element.
+ * @returns {HTMLElement|null} The menu bar container or null if config is invalid.
+ */
 export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
   if (!menuBarConfig || !menuBarConfig.items) return null;
   const menuBarContainer = document.createElement("div");
@@ -86,25 +92,33 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
   menuBar.className = "menu-bar";
   menuBarConfig.items.forEach((itemConfig) => {
     // Special handling for Resume app's File menu
-    if (windowId === 'resume-window' && itemConfig.key === 'file' && Array.isArray(itemConfig.dropdown)) {
+    if (
+      windowId === "resume-window" &&
+      itemConfig.key === "file" &&
+      Array.isArray(itemConfig.dropdown)
+    ) {
       // Remove Print Setup (action: 'pageSetup')
-      itemConfig.dropdown = itemConfig.dropdown.filter(opt => opt.action !== 'pageSetup');
+      itemConfig.dropdown = itemConfig.dropdown.filter(
+        (opt) => opt.action !== "pageSetup",
+      );
       // Prevent duplicate Download option
-      if (!itemConfig.dropdown.some(opt => opt.action === 'saveResume')) {
+      if (!itemConfig.dropdown.some((opt) => opt.action === "saveResume")) {
         // Insert Download above Print (action: 'filePrint')
-        const printIdx = itemConfig.dropdown.findIndex(opt => opt.action === 'filePrint');
+        const printIdx = itemConfig.dropdown.findIndex(
+          (opt) => opt.action === "filePrint",
+        );
         if (printIdx !== -1) {
           itemConfig.dropdown.splice(printIdx, 0, {
-            text: 'Download',
-            action: 'saveResume',
-            enabled: true
+            text: "Download",
+            action: "saveResume",
+            enabled: true,
           });
         } else {
           // If Print not found, just add Download at the end
           itemConfig.dropdown.push({
-            text: 'Download',
-            action: 'saveResume',
-            enabled: true
+            text: "Download",
+            action: "saveResume",
+            enabled: true,
           });
         }
       }
@@ -114,7 +128,11 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
     menuItemDiv.textContent = itemConfig.text;
     menuItemDiv.setAttribute("data-menu", itemConfig.key);
     menuBar.appendChild(menuItemDiv);
-    if (itemConfig.dropdown && itemConfig.dropdown.length > 0 && !['edit', 'tools', 'help'].includes(itemConfig.key)) {
+    if (
+      itemConfig.dropdown &&
+      itemConfig.dropdown.length > 0 &&
+      !["edit", "tools", "help"].includes(itemConfig.key)
+    ) {
       const dropdownMenu = document.createElement("div");
       dropdownMenu.id = `${itemConfig.key}-menu-${windowId}`;
       dropdownMenu.className = "dropdown-menu";
@@ -195,11 +213,17 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
         closeActiveMenu();
         // --- DYNAMIC MAXIMIZE/RESTORE LABEL FOR VIEW MENU ---
         if (menuName === "view" && _parentWindowElement) {
-          const maximizeOption = menu.querySelector('[data-action="maximizeWindow"]');
+          const maximizeOption = menu.querySelector(
+            '[data-action="maximizeWindow"]',
+          );
           if (maximizeOption) {
-            const isMaximized = _parentWindowElement.classList.contains("maximized");
+            const isMaximized =
+              _parentWindowElement.classList.contains("maximized");
             maximizeOption.textContent = isMaximized ? "Restore" : "Maximize";
-            maximizeOption.setAttribute("aria-label", isMaximized ? "Restore" : "Maximize");
+            maximizeOption.setAttribute(
+              "aria-label",
+              isMaximized ? "Restore" : "Maximize",
+            );
           }
         }
         item.classList.add("active");
@@ -235,41 +259,26 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
         e.preventDefault();
         const action = newOption.getAttribute("data-action");
         let win = _parentWindowElement;
-        // Special handling for Resume app's File > Download
-        if (win && win.id === 'resume-window' && action === 'saveResume') {
-          // Find the parent WindowManager instance and call _handleToolbarAction directly if possible
-          if (window.WindowManager && typeof window.WindowManager.prototype._handleToolbarAction === 'function') {
-            // Find the window element for resume
-            const windowElement = document.getElementById('resume-window');
-            if (windowElement) {
-              // Call the download logic directly
-              window.WindowManager.prototype._handleToolbarAction.call(window.WindowManager.prototype, 'saveResume', windowElement);
-            }
-          } else {
-            // Fallback: create and click a hidden download link
-            const link = document.createElement('a');
-            link.href = './assets/apps/resume/resumeMitchIvin.pdf';
-            link.download = 'resumeMitchIvin.pdf';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }
-          closeActiveMenu();
-          return;
-        }
-        // Special handling for Contact Me app's File > New/Send Message -- REMOVED AS MENU ITEMS ARE GONE
 
-        if (action) {
-          if (action === "exitProgram" && _parentWindowElement) {
-            _parentWindowElement.dispatchEvent(
+        if (action === "saveResume" && win) {
+          win.dispatchEvent(
+            new CustomEvent("dispatchToolbarAction", {
+              detail: { action: "saveResume", button: null }, // button can be null or a dummy
+              bubbles: false,
+            }),
+          );
+        } else if (action) {
+          // General actions
+          if (action === "exitProgram" && win) {
+            win.dispatchEvent(
               new CustomEvent("request-close-window", { bubbles: false }),
             );
-          } else if (action === "minimizeWindow" && _parentWindowElement) {
-            _parentWindowElement.dispatchEvent(
+          } else if (action === "minimizeWindow" && win) {
+            win.dispatchEvent(
               new CustomEvent("request-minimize-window", { bubbles: false }),
             );
-          } else if (action === "maximizeWindow" && _parentWindowElement) {
-            _parentWindowElement.dispatchEvent(
+          } else if (action === "maximizeWindow" && win) {
+            win.dispatchEvent(
               new CustomEvent("request-maximize-window", { bubbles: false }),
             );
           }
@@ -293,19 +302,21 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   let buttons = toolbarConfig.buttons;
 
   // On mobile, for Contact Me only, filter out disabled buttons
-  if (isMobile && windowId === 'contact-window') {
+  if (isMobile && windowId === "contact-window") {
     // Remove disabled buttons
-    buttons = buttons.filter(btn => btn.enabled !== false || btn.type === 'separator');
-    
-    // Specifically keep only 'New Message' and 'Send Message' for mobile contact, 
+    buttons = buttons.filter(
+      (btn) => btn.enabled !== false || btn.type === "separator",
+    );
+
+    // Specifically keep only 'New Message' and 'Send Message' for mobile contact,
     // and ensure no separators between/after them. User wants Send then New on mobile.
-    const newButton = buttons.find(btn => btn.key === 'new');
-    const sendButton = buttons.find(btn => btn.key === 'send');
-    
+    const newButton = buttons.find((btn) => btn.key === "new");
+    const sendButton = buttons.find((btn) => btn.key === "send");
+
     const mobileContactButtons = [];
     if (sendButton) mobileContactButtons.push(sendButton); // Send Message first
-    if (newButton) mobileContactButtons.push(newButton);   // New Message second
-    
+    if (newButton) mobileContactButtons.push(newButton); // New Message second
+
     buttons = mobileContactButtons; // This replaces the original buttons array.
 
     // The old logic for removing Instagram/LinkedIn and specific separators is no longer needed
@@ -313,31 +324,43 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   }
 
   // On mobile, for About Me only, filter out disabled buttons and remove the separator to the right of My Resume
-  if (isMobile && windowId === 'about-window') {
-    buttons = buttons.filter(btn => btn.enabled !== false || btn.type === 'separator');
+  if (isMobile && windowId === "about-window") {
+    buttons = buttons.filter(
+      (btn) => btn.enabled !== false || btn.type === "separator",
+    );
     // Remove all separators before and after My Projects and My Resume
-    const projectsIdx = buttons.findIndex(btn => btn.key === 'projects');
-    const resumeIdx = buttons.findIndex(btn => btn.key === 'resume');
+    const projectsIdx = buttons.findIndex((btn) => btn.key === "projects");
+    let resumeIdx = buttons.findIndex((btn) => btn.key === "resume");
     // Remove separator before My Resume if present
-    if (resumeIdx > 0 && buttons[resumeIdx - 1].type === 'separator') {
+    if (resumeIdx > 0 && buttons[resumeIdx - 1].type === "separator") {
       buttons.splice(resumeIdx - 1, 1);
       // Adjust indices after removal
       if (projectsIdx < resumeIdx) resumeIdx--;
     }
     // Remove separator after My Resume if present
-    if (buttons[resumeIdx + 1] && buttons[resumeIdx + 1].type === 'separator') {
+    if (buttons[resumeIdx + 1] && buttons[resumeIdx + 1].type === "separator") {
       buttons.splice(resumeIdx + 1, 1);
     }
     // Ensure separator exists between Projects and Resume
-    if (projectsIdx !== -1 && resumeIdx !== -1 && resumeIdx - projectsIdx === 1) {
-      buttons.splice(resumeIdx, 0, { type: 'separator' });
+    if (
+      projectsIdx !== -1 &&
+      resumeIdx !== -1 &&
+      resumeIdx - projectsIdx === 1
+    ) {
+      buttons.splice(resumeIdx, 0, { type: "separator" });
     }
   }
 
   // On mobile, for My Projects only, remove the separator to the right of view-description
-  if (isMobile && windowId === 'internet-window') {
-    const viewDescIdx = buttons.findIndex(btn => btn.key === 'view-description');
-    if (viewDescIdx !== -1 && buttons[viewDescIdx + 1] && buttons[viewDescIdx + 1].type === 'separator') {
+  if (isMobile && windowId === "projects-window") {
+    const viewDescIdx = buttons.findIndex(
+      (btn) => btn.key === "view-description",
+    );
+    if (
+      viewDescIdx !== -1 &&
+      buttons[viewDescIdx + 1] &&
+      buttons[viewDescIdx + 1].type === "separator"
+    ) {
       buttons.splice(viewDescIdx + 1, 1);
     }
   }
@@ -348,7 +371,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
     mobileCloseBtn = document.createElement("div");
     mobileCloseBtn.className = "toolbar-button toolbar-close-button";
     mobileCloseBtn.setAttribute("aria-label", "Close");
-    mobileCloseBtn.innerHTML = `<img alt=\"close\" width=\"25\" height=\"25\" src=\"assets/gui/toolbar/delete.webp\" /><span>Close</span>`;
+    mobileCloseBtn.innerHTML = `<img alt="close" width="25" height="25" src="assets/gui/toolbar/delete.webp" /><span>Close</span>`;
     mobileCloseBtn.addEventListener("click", function (e) {
       e.stopPropagation();
       // Find the parent window element and dispatch the close event
@@ -368,22 +391,31 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   // Render all toolbar buttons in order (with dividers for desktop)
   buttons.forEach((buttonConfig) => {
     // On mobile, skip the Home button in the My Projects window
-    if (isMobile && windowId === "internet-window" && buttonConfig.key === "home") return;
+    if (
+      isMobile &&
+      windowId === "projects-window" &&
+      buttonConfig.key === "home"
+    )
+      return;
 
-    // Skip 'view-description' button on desktop for 'internet-window'
-    if (!isMobile && windowId === "internet-window" && buttonConfig.key === "view-description") {
-        return; 
+    // Skip 'view-description' button on desktop for 'projects-window'
+    if (
+      !isMobile &&
+      windowId === "projects-window" &&
+      buttonConfig.key === "view-description"
+    ) {
+      return;
     }
 
     // Skip buttons marked as desktopOnly if on mobile
     if (isMobile && buttonConfig.desktopOnly) {
-        return;
+      return;
     }
 
     // --- Desktop: Render separator as a vertical line ---
-    if (buttonConfig.type === 'separator') {
-      const divider = document.createElement('div');
-      divider.className = 'vertical_line';
+    if (buttonConfig.type === "separator") {
+      const divider = document.createElement("div");
+      divider.className = "vertical_line";
       toolbarRow.appendChild(divider);
       return;
     }
@@ -392,28 +424,22 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
       const buttonDiv = document.createElement("div");
       buttonDiv.className = `toolbar-button ${buttonConfig.key}`;
       if (!buttonConfig.enabled) buttonDiv.classList.add("disabled");
-      if (buttonConfig.key === "home" && windowId === "internet-window") {
+      if (buttonConfig.key === "home" && windowId === "projects-window") {
         buttonDiv.setAttribute("data-action", "navigateHome");
       } else if (buttonConfig.action) {
         buttonDiv.setAttribute("data-action", buttonConfig.action);
       }
       let buttonContent = "";
       if (buttonConfig.icon) {
-        buttonContent += `<img alt=\"${buttonConfig.key}\" width=\"25\" height=\"25\" src=\"${buttonConfig.icon}\" />`;
+        buttonContent += `<img alt="${buttonConfig.key}" width="25" height="25" src="${buttonConfig.icon}" />`;
       }
       if (buttonConfig.text) {
-        // --- Mobile: Shorten "New Message" to "New" for contact-window ---
-        // let buttonText = buttonConfig.text;
-        // if (isMobile && windowId === 'contact-window' && buttonConfig.key === 'new') {
-        //     buttonText = 'New';
-        // }
-        // buttonContent += `<span>${buttonText}</span>`;
-        // Ensure "New Message" text is used directly from config for all views
+        // Ensure "New Message" text is used directly from config for all views (previously shortened for mobile)
         buttonContent += `<span>${buttonConfig.text}</span>`;
       }
       buttonDiv.innerHTML = buttonContent;
       if (buttonConfig.style) {
-        buttonDiv.setAttribute('style', buttonConfig.style);
+        buttonDiv.setAttribute("style", buttonConfig.style);
       }
       // Add data-url-to-open if the button config has a URL
       if (buttonConfig.url) {
@@ -426,26 +452,26 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   toolbarWrapper.appendChild(toolbarRow);
 
   // --- Mobile: Listen for lightbox-state messages to toggle close/home button ---
-  if (isMobile && windowId === "internet-window" && mobileCloseBtn) {
+  if (isMobile && windowId === "projects-window" && mobileCloseBtn) {
     let isHomeMode = false;
     function setToHomeMode() {
       isHomeMode = true;
-      mobileCloseBtn.innerHTML = `<img alt=\"home\" width=\"25\" height=\"25\" src=\"assets/gui/toolbar/home.webp\" /><span>Home</span>`;
-      mobileCloseBtn.setAttribute('aria-label', 'Home');
+      mobileCloseBtn.innerHTML = `<img alt="home" width="25" height="25" src="assets/gui/toolbar/home.webp" /><span>Home</span>`;
+      mobileCloseBtn.setAttribute("aria-label", "Home");
     }
     function setToCloseMode() {
       isHomeMode = false;
-      mobileCloseBtn.innerHTML = `<img alt=\"close\" width=\"25\" height=\"25\" src=\"assets/gui/toolbar/delete.webp\" /><span>Close</span>`;
-      mobileCloseBtn.setAttribute('aria-label', 'Close');
+      mobileCloseBtn.innerHTML = `<img alt="close" width="25" height="25" src="assets/gui/toolbar/delete.webp" /><span>Close</span>`;
+      mobileCloseBtn.setAttribute("aria-label", "Close");
     }
     // Initial mode is close
     setToCloseMode();
     // Remove all previous click listeners
     mobileCloseBtn.replaceWith(mobileCloseBtn.cloneNode(true));
     // Re-attach reference
-    mobileCloseBtn = toolbarRow.querySelector('.toolbar-close-button');
+    mobileCloseBtn = toolbarRow.querySelector(".toolbar-close-button");
     // Attach a single click handler that checks mode
-    mobileCloseBtn.addEventListener('click', function(e) {
+    mobileCloseBtn.addEventListener("click", function (e) {
       e.stopPropagation();
       if (isHomeMode) {
         // Only close the lightbox (send navigateHome to iframe)
@@ -454,9 +480,12 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
           parent = parent.parentElement;
         }
         if (parent) {
-          const iframe = parent.querySelector('iframe');
+          const iframe = parent.querySelector("iframe");
           if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage({ type: 'toolbar-action', action: 'navigateHome' }, '*');
+            iframe.contentWindow.postMessage(
+              { type: "toolbar-action", action: "navigateHome" },
+              "*",
+            );
           }
         }
       } else {
@@ -472,8 +501,8 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
         }
       }
     });
-    window.addEventListener('message', function(event) {
-      if (event.data && event.data.type === 'lightbox-state') {
+    window.addEventListener("message", function (event) {
+      if (event.data && event.data.type === "lightbox-state") {
         if (event.data.open) {
           setToHomeMode();
         } else {
@@ -487,20 +516,20 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
 }
 
 // Add this at the end of the file to ensure all toolbar buttons get the correct pressed-in effect on both desktop and mobile
-if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.toolbar-button').forEach(btn => {
-      btn.addEventListener('pointerdown', function() {
-        btn.classList.add('touch-active');
+if (typeof window !== "undefined") {
+  window.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".toolbar-button").forEach((btn) => {
+      btn.addEventListener("pointerdown", function () {
+        btn.classList.add("touch-active");
       });
-      btn.addEventListener('pointerup', function() {
-        btn.classList.remove('touch-active');
+      btn.addEventListener("pointerup", function () {
+        btn.classList.remove("touch-active");
       });
-      btn.addEventListener('pointerleave', function() {
-        btn.classList.remove('touch-active');
+      btn.addEventListener("pointerleave", function () {
+        btn.classList.remove("touch-active");
       });
-      btn.addEventListener('pointercancel', function() {
-        btn.classList.remove('touch-active');
+      btn.addEventListener("pointercancel", function () {
+        btn.classList.remove("touch-active");
       });
     });
   });

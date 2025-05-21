@@ -18,7 +18,11 @@
  */
 import programData from "../utils/programRegistry.js";
 import { EVENTS } from "../utils/eventBus.js";
-import { createMenuBar, createToolbar, createAddressBar } from "./windowBars.js";
+import {
+  createMenuBar,
+  createToolbar,
+  createAddressBar,
+} from "./windowBars.js";
 import { isMobileDevice } from "../utils/device.js";
 
 const TASKBAR_HEIGHT = 30; // Define constant taskbar height
@@ -82,7 +86,7 @@ class WindowTemplates {
       toolbarWrapper = createToolbar(
         programConfig.toolbarConfig,
         windowId,
-        programConfig && programConfig.id === "my-pictures-window"
+        programConfig && programConfig.id === "my-pictures-window",
       );
     }
 
@@ -112,12 +116,15 @@ class WindowTemplates {
     // Send initial maximized/unmaximized state to iframe on load
     iframe.onload = () => {
       if (iframe.contentWindow) {
-        const appWindow = iframe.closest('.app-window');
+        const appWindow = iframe.closest(".app-window");
         if (appWindow) {
-          if (appWindow.classList.contains('maximized')) {
+          if (appWindow.classList.contains("maximized")) {
             iframe.contentWindow.postMessage({ type: "window:maximized" }, "*");
           } else {
-            iframe.contentWindow.postMessage({ type: "window:unmaximized" }, "*");
+            iframe.contentWindow.postMessage(
+              { type: "window:unmaximized" },
+              "*",
+            );
           }
         }
       }
@@ -135,17 +142,11 @@ class WindowTemplates {
 }
 
 /**
- * WindowManager handles all window operations, stacking, drag, focus, and taskbar integration.
- *
- * @class
- * @example
- * import WindowManager from './window.js';
- * const windowManager = new WindowManager(eventBus);
+ * WindowManager class manages application windows, their state, and interactions in the Windows XP simulation.
  */
 export default class WindowManager {
   /**
-   * Create a new WindowManager instance.
-   * @param {EventBus} eventBus - The event bus instance for communication.
+   * @param {Object} eventBus - Event bus for communication.
    */
   constructor(eventBus) {
     this.eventBus = eventBus;
@@ -163,9 +164,9 @@ export default class WindowManager {
     this.windowsContainer = document.getElementById("windows-container");
     this.taskbarPrograms = document.querySelector(".taskbar-programs"); // Cache taskbar-programs
     this.zIndexStack = []; // Array to track window stacking order (IDs)
-    // --- Multi-column cascade state ---
-    this.cascadeColumn = 0;
-    this.cascadeRow = 0;
+    // --- Multi-column cascade state --- (These seem unused, positionWindowCascade calculates its own)
+    // this.cascadeColumn = 0;
+    // this.cascadeRow = 0;
 
     this.lastInteractionTimes = {}; // To store timestamps for throttling
 
@@ -173,221 +174,255 @@ export default class WindowManager {
     this._subscribeToEvents();
 
     // Listen for messages from iframes
-    window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'set-home-enabled') {
-            const homeButton = document.querySelector('.toolbar-button.home');
-            if (homeButton) {
-                if (event.data.enabled) {
-                    homeButton.classList.remove('disabled');
-                } else {
-                    homeButton.classList.add('disabled');
-                }
-            }
-        }
-        
-        if (event.data && event.data.type === 'lightbox-state') {
-            const projectsWindow = this.windows['internet-window'];
-            let viewDescBtn, backBtn, forwardBtn, externalLinkBtn;
-
-            if (projectsWindow) {
-                 viewDescBtn = projectsWindow.querySelector('.toolbar-button.view-description');
-                 backBtn = projectsWindow.querySelector('.toolbar-button.previous');
-                 forwardBtn = projectsWindow.querySelector('.toolbar-button.next');
-                 externalLinkBtn = projectsWindow.querySelector('.toolbar-button.viewExternalLink'); 
-            } else { 
-                viewDescBtn = document.querySelector('.toolbar-button.view-description');
-                backBtn = document.querySelector('.toolbar-button.previous');
-                forwardBtn = document.querySelector('.toolbar-button.next');
-                externalLinkBtn = document.querySelector('.toolbar-button.viewExternalLink');
-            }
-
-            if (viewDescBtn) {
-                viewDescBtn.classList.toggle('disabled', !event.data.open);
-                const textSpan = viewDescBtn.querySelector('span');
-                // Always set initial text to 'Show more' if not open
-                if (event.data.open) {
-                    if (textSpan) textSpan.textContent = 'Show less';
-                    viewDescBtn.setAttribute('aria-label', 'Show less');
-                } else {
-                    if (textSpan) textSpan.textContent = 'Show more';
-                    viewDescBtn.setAttribute('aria-label', 'Show more');
-                }
-            }
-            if (backBtn) {
-                backBtn.classList.toggle('disabled', !event.data.open);
-            }
-            if (forwardBtn) {
-                forwardBtn.classList.toggle('disabled', !event.data.open);
-            }
-            
-            if (externalLinkBtn) {
-                const iconImg = externalLinkBtn.querySelector('img');
-                const textSpan = externalLinkBtn.querySelector('span');
-
-                if (event.data.open && event.data.linkType && event.data.linkUrl) {
-                    externalLinkBtn.classList.remove('disabled');
-                    externalLinkBtn.style.display = '';
-                    externalLinkBtn.dataset.urlToOpen = event.data.linkUrl; 
-
-                    switch (event.data.linkType) {
-                        case 'instagram':
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
-                            if (textSpan) textSpan.textContent = 'View on Instagram';
-                            break;
-                        case 'github':
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/github.webp';
-                            if (textSpan) textSpan.textContent = 'View on GitHub';
-                            break;
-                        case 'linkedin':
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/linkedin.webp';
-                            if (textSpan) textSpan.textContent = 'View on LinkedIn';
-                            break;
-                        default: // Fallback to Instagram or a generic state if linkType is unknown
-                            if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
-                            if (textSpan) textSpan.textContent = 'View Link'; 
-                            break;
-                    }
-                } else {
-                    externalLinkBtn.classList.add('disabled');
-                    externalLinkBtn.style.display = 'none';
-                    delete externalLinkBtn.dataset.urlToOpen; 
-                    // Reset to default (Instagram) appearance when no link or lightbox closed
-                    if (iconImg) iconImg.src = './assets/gui/start-menu/instagram.webp';
-                    if (textSpan) textSpan.textContent = 'View on Instagram';
-                }
-            }
-        }
-
-        if (event.data && event.data.type === 'description-state') {
-            let sourceWindowElement = null;
-            for (const windowId in this.windows) {
-                const winElement = this.windows[windowId];
-                const iframe = winElement.querySelector('iframe');
-                if (iframe && iframe.contentWindow === event.source) {
-                    sourceWindowElement = winElement;
-                    break;
-                }
-            }
-
-            if (sourceWindowElement && sourceWindowElement.id === 'internet-window') {
-                const viewDescButton = sourceWindowElement.querySelector('.toolbar-button.view-description');
-                if (viewDescButton) {
-                    const textSpan = viewDescButton.querySelector('span');
-                    if (event.data.open) {
-                        if (textSpan) textSpan.textContent = 'Show less';
-                        viewDescButton.setAttribute('aria-label', 'Show less');
-                    } else {
-                        if (textSpan) textSpan.textContent = 'Show more';
-                        viewDescButton.setAttribute('aria-label', 'Show more');
-                    }
-                }
-            }
-        }
-
-        if (event.data && event.data.type === 'throttle-toolbar' && event.data.key === 'view-description') {
-            const projectsWindow = this.windows['internet-window'];
-            let viewDescBtn;
-            if (projectsWindow) {
-                viewDescBtn = projectsWindow.querySelector('.toolbar-button.view-description');
-            } else {
-                viewDescBtn = document.querySelector('.toolbar-button.view-description');
-            }
-            if (viewDescBtn && !viewDescBtn.classList.contains('disabled')) {
-                viewDescBtn.classList.add('disabled');
-                setTimeout(() => {
-                    viewDescBtn.classList.remove('disabled');
-                }, 500);
-            }
-        }
-
-        if (event.data && event.data.type === 'set-external-link-enabled') {
-            const projectsWindow = this.windows && this.windows['internet-window'];
-            let externalLinkBtn;
-            if (projectsWindow) {
-                externalLinkBtn = projectsWindow.querySelector('.toolbar-button.viewExternalLink');
-            } else {
-                externalLinkBtn = document.querySelector('.toolbar-button.viewExternalLink');
-            }
-            if (externalLinkBtn) {
-                if (event.data.enabled) {
-                    externalLinkBtn.classList.remove('disabled');
-                    externalLinkBtn.style.display = '';
-                    if (event.data.url) {
-                        externalLinkBtn.dataset.urlToOpen = event.data.url;
-                    }
-                } else {
-                    externalLinkBtn.classList.add('disabled');
-                    externalLinkBtn.style.display = 'none';
-                    delete externalLinkBtn.dataset.urlToOpen;
-                }
-            }
-        }
-
-        // Accept messages from same-origin or file protocol (local dev)
-        if (
-          !(
-            window.location.protocol === "file:" ||
-            event.origin === window.origin
-          )
-        )
-          return;
-
-        // Find the .app-window containing the iframe with this contentWindow
-        let windowElement = null;
-        if (event.data?.type === 'iframe-interaction' && event.data.windowId) {
-          windowElement = document.getElementById(event.data.windowId);
-        }
-        if (!windowElement) {
-          windowElement = Array.from(
-            document.querySelectorAll(".app-window"),
-          ).find((win) => {
-            const iframe = win.querySelector("iframe");
-            return iframe && iframe.contentWindow === event.source;
-          });
-        }
-        // Fallback: if not found, try to match by src for contact app
-        if (!windowElement && event.data?.type === 'iframe-interaction') {
-          windowElement = Array.from(document.querySelectorAll('.app-window')).find(win => {
-            const iframe = win.querySelector('iframe');
-            return iframe && iframe.src.includes('contact.html');
-          });
-        }
-        if (!windowElement) return;
-
-        // Handle iframe-interaction message to close menubar popouts
-        if (event.data?.type === 'iframe-interaction') {
-          windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
-          return;
-        }
-
-        if (event.data?.type === "minimize-window") {
-          this.minimizeWindow(windowElement);
-        } else if (event.data?.type === "close-window") {
-          this.closeWindow(windowElement);
-        } else if (
-          event.data?.type === "updateStatusBar" &&
-          typeof event.data.text === "string"
-        ) {
-          // Handle status bar updates from specific apps (like Notepad)
-          if (windowElement.statusBarField) {
-            windowElement.statusBarField.textContent = event.data.text;
+    window.addEventListener("message", (event) => {
+      if (event.data && event.data.type === "set-home-enabled") {
+        const homeButton = document.querySelector(".toolbar-button.home");
+        if (homeButton) {
+          if (event.data.enabled) {
+            homeButton.classList.remove("disabled");
+          } else {
+            homeButton.classList.add("disabled");
           }
         }
+      }
+
+      if (event.data && event.data.type === "lightbox-state") {
+        const projectsWindow = this.windows["projects-window"];
+        let viewDescBtn, backBtn, forwardBtn, externalLinkBtn;
+
+        if (projectsWindow) {
+          viewDescBtn = projectsWindow.querySelector(
+            ".toolbar-button.view-description",
+          );
+          backBtn = projectsWindow.querySelector(".toolbar-button.previous");
+          forwardBtn = projectsWindow.querySelector(".toolbar-button.next");
+          externalLinkBtn = projectsWindow.querySelector(
+            ".toolbar-button.viewExternalLink",
+          );
+        } else {
+          viewDescBtn = document.querySelector(
+            ".toolbar-button.view-description",
+          );
+          backBtn = document.querySelector(".toolbar-button.previous");
+          forwardBtn = document.querySelector(".toolbar-button.next");
+          externalLinkBtn = document.querySelector(
+            ".toolbar-button.viewExternalLink",
+          );
+        }
+
+        if (viewDescBtn) {
+          viewDescBtn.classList.toggle("disabled", !event.data.open);
+          const textSpan = viewDescBtn.querySelector("span");
+          // Always set initial text to 'Show more' if not open
+          if (event.data.open) {
+            if (textSpan) textSpan.textContent = "Show less";
+            viewDescBtn.setAttribute("aria-label", "Show less");
+          } else {
+            if (textSpan) textSpan.textContent = "Show more";
+            viewDescBtn.setAttribute("aria-label", "Show more");
+          }
+        }
+        if (backBtn) {
+          backBtn.classList.toggle("disabled", !event.data.open);
+        }
+        if (forwardBtn) {
+          forwardBtn.classList.toggle("disabled", !event.data.open);
+        }
+
+        if (externalLinkBtn) {
+          const iconImg = externalLinkBtn.querySelector("img");
+          const textSpan = externalLinkBtn.querySelector("span");
+
+          if (event.data.open && event.data.linkType && event.data.linkUrl) {
+            externalLinkBtn.classList.remove("disabled");
+            externalLinkBtn.style.display = "";
+            externalLinkBtn.dataset.urlToOpen = event.data.linkUrl;
+
+            switch (event.data.linkType) {
+              case "instagram":
+                if (iconImg)
+                  iconImg.src = "./assets/gui/start-menu/instagram.webp";
+                if (textSpan) textSpan.textContent = "View on Instagram";
+                break;
+              case "github":
+                if (iconImg)
+                  iconImg.src = "./assets/gui/start-menu/github.webp";
+                if (textSpan) textSpan.textContent = "View on GitHub";
+                break;
+              case "linkedin":
+                if (iconImg)
+                  iconImg.src = "./assets/gui/start-menu/linkedin.webp";
+                if (textSpan) textSpan.textContent = "View on LinkedIn";
+                break;
+              default: // Fallback to Instagram or a generic state if linkType is unknown
+                if (iconImg)
+                  iconImg.src = "./assets/gui/start-menu/instagram.webp";
+                if (textSpan) textSpan.textContent = "View Link";
+                break;
+            }
+          } else {
+            externalLinkBtn.classList.add("disabled");
+            externalLinkBtn.style.display = "none";
+            delete externalLinkBtn.dataset.urlToOpen;
+            // Reset to default (Instagram) appearance when no link or lightbox closed
+            if (iconImg) iconImg.src = "./assets/gui/start-menu/instagram.webp";
+            if (textSpan) textSpan.textContent = "View on Instagram";
+          }
+        }
+      }
+
+      if (event.data && event.data.type === "description-state") {
+        let sourceWindowElement = null;
+        for (const windowId in this.windows) {
+          const winElement = this.windows[windowId];
+          const iframe = winElement.querySelector("iframe");
+          if (iframe && iframe.contentWindow === event.source) {
+            sourceWindowElement = winElement;
+            break;
+          }
+        }
+
+        if (
+          sourceWindowElement &&
+          sourceWindowElement.id === "projects-window"
+        ) {
+          const viewDescButton = sourceWindowElement.querySelector(
+            ".toolbar-button.view-description",
+          );
+          if (viewDescButton) {
+            const textSpan = viewDescButton.querySelector("span");
+            if (event.data.open) {
+              if (textSpan) textSpan.textContent = "Show less";
+              viewDescButton.setAttribute("aria-label", "Show less");
+            } else {
+              if (textSpan) textSpan.textContent = "Show more";
+              viewDescButton.setAttribute("aria-label", "Show more");
+            }
+          }
+        }
+      }
+
+      if (
+        event.data &&
+        event.data.type === "throttle-toolbar" &&
+        event.data.key === "view-description"
+      ) {
+        const projectsWindow = this.windows["projects-window"];
+        let viewDescBtn;
+        if (projectsWindow) {
+          viewDescBtn = projectsWindow.querySelector(
+            ".toolbar-button.view-description",
+          );
+        } else {
+          viewDescBtn = document.querySelector(
+            ".toolbar-button.view-description",
+          );
+        }
+        if (viewDescBtn && !viewDescBtn.classList.contains("disabled")) {
+          viewDescBtn.classList.add("disabled");
+          setTimeout(() => {
+            viewDescBtn.classList.remove("disabled");
+          }, 500);
+        }
+      }
+
+      if (event.data && event.data.type === "set-external-link-enabled") {
+        const projectsWindow = this.windows && this.windows["projects-window"];
+        let externalLinkBtn;
+        if (projectsWindow) {
+          externalLinkBtn = projectsWindow.querySelector(
+            ".toolbar-button.viewExternalLink",
+          );
+        } else {
+          externalLinkBtn = document.querySelector(
+            ".toolbar-button.viewExternalLink",
+          );
+        }
+        if (externalLinkBtn) {
+          if (event.data.enabled) {
+            externalLinkBtn.classList.remove("disabled");
+            externalLinkBtn.style.display = "";
+            if (event.data.url) {
+              externalLinkBtn.dataset.urlToOpen = event.data.url;
+            }
+          } else {
+            externalLinkBtn.classList.add("disabled");
+            externalLinkBtn.style.display = "none";
+            delete externalLinkBtn.dataset.urlToOpen;
+          }
+        }
+      }
+
+      // Accept messages from same-origin or file protocol (local dev)
+      if (
+        !(
+          window.location.protocol === "file:" || event.origin === window.origin
+        )
+      )
+        return;
+
+      // Find the .app-window containing the iframe with this contentWindow
+      let windowElement = null;
+      if (event.data?.type === "iframe-interaction" && event.data.windowId) {
+        windowElement = document.getElementById(event.data.windowId);
+      }
+      if (!windowElement) {
+        windowElement = Array.from(
+          document.querySelectorAll(".app-window"),
+        ).find((win) => {
+          const iframe = win.querySelector("iframe");
+          return iframe && iframe.contentWindow === event.source;
+        });
+      }
+      // Fallback: if not found, try to match by src for contact app
+      if (!windowElement && event.data?.type === "iframe-interaction") {
+        windowElement = Array.from(
+          document.querySelectorAll(".app-window"),
+        ).find((win) => {
+          const iframe = win.querySelector("iframe");
+          return iframe && iframe.src.includes("contact.html");
+        });
+      }
+      if (!windowElement) return;
+
+      // Handle iframe-interaction message to close menubar popouts
+      if (event.data?.type === "iframe-interaction") {
+        windowElement.dispatchEvent(
+          new CustomEvent("iframe-interaction", { bubbles: false }),
+        );
+        return;
+      }
+
+      if (event.data?.type === "minimize-window") {
+        this.minimizeWindow(windowElement);
+      } else if (event.data?.type === "close-window") {
+        this.closeWindow(windowElement);
+      } else if (
+        event.data?.type === "updateStatusBar" &&
+        typeof event.data.text === "string"
+      ) {
+        // Handle status bar updates from specific apps (like Notepad)
+        if (windowElement.statusBarField) {
+          windowElement.statusBarField.textContent = event.data.text;
+        }
+      }
     });
 
     // Add click handler to Home button to send close-lightbox message to Projects app iframe only
-    const homeButton = document.querySelector('.toolbar-button.home');
+    const homeButton = document.querySelector(".toolbar-button.home");
     if (homeButton) {
-        homeButton.addEventListener('click', function() {
-            if (!homeButton.classList.contains('disabled')) {
-                // Find the Projects app window and its iframe
-                const projectsWindow = document.getElementById('internet-window');
-                const iframe = projectsWindow ? projectsWindow.querySelector('iframe') : null;
-                if (iframe && iframe.contentWindow) {
-                    iframe.contentWindow.postMessage({ type: 'close-lightbox' }, '*');
-                }
-            }
-        });
+      homeButton.addEventListener("click", function () {
+        if (!homeButton.classList.contains("disabled")) {
+          // Find the Projects app window and its iframe
+          const projectsWindow = document.getElementById("projects-window");
+          const iframe = projectsWindow
+            ? projectsWindow.querySelector("iframe")
+            : null;
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: "close-lightbox" }, "*");
+          }
+        }
+      });
     }
   }
 
@@ -401,63 +436,6 @@ export default class WindowManager {
         if (clickedOnDesktopSpace && !e.target.closest(".window")) {
           if (this.activeWindow) {
             this.deactivateAllWindows();
-          }
-        }
-      },
-      true,
-    );
-
-    window.addEventListener(
-      "message",
-      (event) => {
-        // Accept messages from same-origin or file protocol (local dev)
-        if (
-          !(
-            window.location.protocol === "file:" ||
-            event.origin === window.origin
-          )
-        )
-          return;
-
-        // Find the .app-window containing the iframe with this contentWindow
-        let windowElement = null;
-        if (event.data?.type === 'iframe-interaction' && event.data.windowId) {
-          windowElement = document.getElementById(event.data.windowId);
-        }
-        if (!windowElement) {
-          windowElement = Array.from(
-            document.querySelectorAll(".app-window"),
-          ).find((win) => {
-            const iframe = win.querySelector("iframe");
-            return iframe && iframe.contentWindow === event.source;
-          });
-        }
-        // Fallback: if not found, try to match by src for contact app
-        if (!windowElement && event.data?.type === 'iframe-interaction') {
-          windowElement = Array.from(document.querySelectorAll('.app-window')).find(win => {
-            const iframe = win.querySelector('iframe');
-            return iframe && iframe.src.includes('contact.html');
-          });
-        }
-        if (!windowElement) return;
-
-        // Handle iframe-interaction message to close menubar popouts
-        if (event.data?.type === 'iframe-interaction') {
-          windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
-          return;
-        }
-
-        if (event.data?.type === "minimize-window") {
-          this.minimizeWindow(windowElement);
-        } else if (event.data?.type === "close-window") {
-          this.closeWindow(windowElement);
-        } else if (
-          event.data?.type === "updateStatusBar" &&
-          typeof event.data.text === "string"
-        ) {
-          // Handle status bar updates from specific apps (like Notepad)
-          if (windowElement.statusBarField) {
-            windowElement.statusBarField.textContent = event.data.text;
           }
         }
       },
@@ -530,7 +508,10 @@ export default class WindowManager {
         this.bringToFront(windowElement);
         this._handleWindowFocus(windowElement.id); // Ensure focus on existing
       }
-      this.eventBus.publish(EVENTS.PROGRAM_OPENED, { programName, windowId: windowElement.id });
+      this.eventBus.publish(EVENTS.PROGRAM_OPENED, {
+        programName,
+        windowId: windowElement.id,
+      });
       return windowElement;
     }
 
@@ -541,61 +522,80 @@ export default class WindowManager {
     document.getElementById("windows-container").appendChild(windowElement);
     this.positionWindowCascade(windowElement); // Use cascade for new windows
 
-    this.eventBus.publish(EVENTS.PROGRAM_OPENING, { programName, windowId: windowElement.id });
+    this.eventBus.publish(EVENTS.PROGRAM_OPENING, {
+      programName,
+      windowId: windowElement.id,
+    });
 
-    // Special handling for 'internet' (Projects) app to wait for content readiness
-    if (program.id === 'internet') {
-      windowElement.style.opacity = '0'; // Keep it initially invisible
-      windowElement.setAttribute('data-program-loading', 'true'); // Mark as loading
+    // Special handling for 'projects' (Projects) app to wait for content readiness
+    if (program.id === "projects") {
+      windowElement.style.opacity = "0"; // Keep it initially invisible
+      windowElement.setAttribute("data-program-loading", "true"); // Mark as loading
 
-      const iframe = windowElement.querySelector('iframe');
+      const iframe = windowElement.querySelector("iframe");
       if (iframe) {
         const onProjectsReady = (event) => {
-          if (event.source === iframe.contentWindow && event.data && event.data.type === 'projects-ready') {
-            window.removeEventListener('message', onProjectsReady); // Clean up listener
+          if (
+            event.source === iframe.contentWindow &&
+            event.data &&
+            event.data.type === "projects-ready"
+          ) {
+            window.removeEventListener("message", onProjectsReady); // Clean up listener
             clearTimeout(projectsReadyTimeout); // Clear fallback timeout
 
-            windowElement.style.opacity = '1';
-            windowElement.removeAttribute('data-program-loading');
+            windowElement.style.opacity = "1";
+            windowElement.removeAttribute("data-program-loading");
             this.bringToFront(windowElement); // Ensure z-index is correct
             this._handleWindowFocus(windowElement.id); // Now focus
-            this.eventBus.publish(EVENTS.PROGRAM_OPENED, { programName, windowId: windowElement.id });
+            this.eventBus.publish(EVENTS.PROGRAM_OPENED, {
+              programName,
+              windowId: windowElement.id,
+            });
           }
         };
 
         const projectsReadyTimeout = setTimeout(() => {
-          window.removeEventListener('message', onProjectsReady);
-          if (windowElement.hasAttribute('data-program-loading')) {
-            console.warn('[WindowManager] Timeout waiting for projects-ready message.');
-            windowElement.style.opacity = '1';
-            windowElement.removeAttribute('data-program-loading');
+          window.removeEventListener("message", onProjectsReady);
+          if (windowElement.hasAttribute("data-program-loading")) {
+            console.warn(
+              "[WindowManager] Timeout waiting for projects-ready message.",
+            );
+            windowElement.style.opacity = "1";
+            windowElement.removeAttribute("data-program-loading");
             this.bringToFront(windowElement);
             this._handleWindowFocus(windowElement.id);
-            this.eventBus.publish(EVENTS.PROGRAM_OPENED, { programName, windowId: windowElement.id });
+            this.eventBus.publish(EVENTS.PROGRAM_OPENED, {
+              programName,
+              windowId: windowElement.id,
+            });
           }
         }, 7000); // 7-second timeout
 
-        window.addEventListener('message', onProjectsReady);
+        window.addEventListener("message", onProjectsReady);
       }
       // For projects app, bringToFront is called here to set z-index, but actual focus/visibility is delayed
       this.bringToFront(windowElement);
     } else {
       // Standard handling for other programs - make them briefly invisible to prevent iframe flash
-      windowElement.style.opacity = '0';
+      windowElement.style.opacity = "0";
       // Add a transition if you want a fade-in, directly in JS or via a CSS class
       // For simplicity, a quick fade-in can be done with a short timeout.
       // Ensure window is brought to front before making it visible for correct z-indexing during transition
       this.bringToFront(windowElement);
-      
-      requestAnimationFrame(() => { // Or setTimeout(() => {...}, 0); or a slightly longer one like 50ms
-        windowElement.style.transition = 'opacity 0.15s ease-out'; // Smooth, quick fade-in
-        windowElement.style.opacity = '1';
+
+      requestAnimationFrame(() => {
+        // Or setTimeout(() => {...}, 0); or a slightly longer one like 50ms
+        windowElement.style.transition = "opacity 0.15s ease-out"; // Smooth, quick fade-in
+        windowElement.style.opacity = "1";
         // Focus after it's made visible
         this._handleWindowFocus(windowElement.id);
-        this.eventBus.publish(EVENTS.PROGRAM_OPENED, { programName, windowId: windowElement.id });
+        this.eventBus.publish(EVENTS.PROGRAM_OPENED, {
+          programName,
+          windowId: windowElement.id,
+        });
         // Clean up transition after it completes to avoid affecting other opacity changes
         setTimeout(() => {
-            if (windowElement) windowElement.style.transition = '';
+          if (windowElement) windowElement.style.transition = "";
         }, 150); // Duration of the transition
       });
     }
@@ -632,12 +632,14 @@ export default class WindowManager {
       windowElement.style.maxHeight = "100vh";
 
       // Ensure the button reflects the maximized state
-      const maximizeBtn = windowElement.querySelector('[data-action="maximize"]');
+      const maximizeBtn = windowElement.querySelector(
+        '[data-action="maximize"]',
+      );
       if (maximizeBtn) {
         maximizeBtn.classList.add("restore");
         maximizeBtn.setAttribute("aria-label", "Restore");
         // Functionally and visually disable it on mobile
-        maximizeBtn.disabled = true; 
+        maximizeBtn.disabled = true;
       }
     }
 
@@ -660,7 +662,8 @@ export default class WindowManager {
 
     // --- Create XP.css styled Status Bar ---
     const programId = program.id.replace("-window", "");
-    if (programId !== "cmd") { // cmd program usually doesn't have a status bar
+    if (programId !== "cmd") {
+      // cmd program usually doesn't have a status bar
       const statusBar = document.createElement("div");
       statusBar.className = "status-bar"; // XP.css class for the bar
 
@@ -703,7 +706,6 @@ export default class WindowManager {
    * @returns {string} HTML string for the window base.
    */
   _getWindowBaseHTML(program) {
-    const isMobile = isMobileDevice();
     return `
             <div class="window-inactive-mask"></div>
             <div class="title-bar">
@@ -755,6 +757,7 @@ export default class WindowManager {
       windowElement,
       program,
     );
+    this.windowCount++; // Increment window count when a window is registered
 
     windowElement.windowState = {
       isMaximized: windowElement.classList.contains("maximized"), // Check if pre-maximized
@@ -825,18 +828,16 @@ export default class WindowManager {
       () => this.minimizeWindow(windowElement),
     );
 
-    const maximizeBtnForEvent = windowElement.querySelector('[data-action="maximize"]');
+    const maximizeBtnForEvent = windowElement.querySelector(
+      '[data-action="maximize"]',
+    );
     if (maximizeBtnForEvent) {
-      this._bindControl(
-        maximizeBtnForEvent,
-        "click",
-        () => {
-          // Only toggle if the button is not disabled
-          if (!maximizeBtnForEvent.disabled) { 
-            this.toggleMaximize(windowElement);
-          }
-        },
-      );
+      this._bindControl(maximizeBtnForEvent, "click", () => {
+        // Only toggle if the button is not disabled
+        if (!maximizeBtnForEvent.disabled) {
+          this.toggleMaximize(windowElement);
+        }
+      });
     }
 
     // Listen for custom minimize-window event (from toolbar)
@@ -873,15 +874,29 @@ export default class WindowManager {
     this._setupIframeActivationOverlay(windowElement);
 
     // Add listeners for toolbar actions within this window
-    const toolbarButtons = windowElement.querySelectorAll('.toolbar-button[data-action]');
-    toolbarButtons.forEach(button => {
-        const newButton = button.cloneNode(true);
-        button.replaceWith(newButton);
-        this._bindControl(newButton, 'click', () => {
-            if (newButton.classList.contains('disabled')) return;
-            const action = newButton.getAttribute('data-action');
-            this._handleToolbarAction(action, windowElement, newButton);
-        });
+    const toolbarButtons = windowElement.querySelectorAll(
+      ".toolbar-button[data-action]",
+    );
+    toolbarButtons.forEach((button) => {
+      const newButton = button.cloneNode(true);
+      button.replaceWith(newButton);
+      this._bindControl(newButton, "click", () => {
+        if (newButton.classList.contains("disabled")) return;
+        const action = newButton.getAttribute("data-action");
+        this._handleToolbarAction(action, windowElement, newButton);
+      });
+    });
+
+    // Listen for actions dispatched from the menu bar (e.g., Save Resume)
+    windowElement.addEventListener("dispatchToolbarAction", (e) => {
+      if (e.detail && e.detail.action) {
+        // e.detail.button will be null or a dummy passed from menu bar
+        this._handleToolbarAction(
+          e.detail.action,
+          windowElement,
+          e.detail.button,
+        );
+      }
     });
   }
 
@@ -889,18 +904,20 @@ export default class WindowManager {
    * Handle actions from toolbar buttons.
    * @private
    * @param {string} action - The action to perform.
-   * @param {HTMLElement} windowElement - The window element a Mcting as context.
+   * @param {HTMLElement} windowElement - The window element acting as context.
    * @param {HTMLElement} button - The clicked button element.
    * @returns {void}
    */
   _handleToolbarAction(action, windowElement, button) {
     const windowId = windowElement.id; // Get the window ID for specific throttling
 
-    // Throttle 'viewDescription' action for 'internet-window' (My Projects)
-    if (action === 'viewDescription' && windowId === 'internet-window') {
+    // Throttle 'viewDescription' action for 'projects-window' (My Projects)
+    if (action === "viewDescription" && windowId === "projects-window") {
       const now = Date.now();
       const buttonKey = `${windowId}-${action}`;
-      const viewDescButton = windowElement.querySelector('.toolbar-button.view-description'); // Get the button element
+      const viewDescButton = windowElement.querySelector(
+        ".toolbar-button.view-description",
+      ); // Get the button element
 
       if (!this.lastInteractionTimes[buttonKey]) {
         this.lastInteractionTimes[buttonKey] = 0;
@@ -911,107 +928,135 @@ export default class WindowManager {
 
       if (timeSinceLastClick < throttleDuration) {
         if (viewDescButton) {
-          viewDescButton.classList.add('disabled');
+          viewDescButton.classList.add("disabled");
           // Re-enable after the throttle period for this specific click has passed
           setTimeout(() => {
             // Only re-enable if another click hasn't re-disabled it in the meantime
             const currentTime = Date.now();
-            if (currentTime - this.lastInteractionTimes[buttonKey] >= throttleDuration) {
-                 if (viewDescButton) viewDescButton.classList.remove('disabled');
+            if (
+              currentTime - this.lastInteractionTimes[buttonKey] >=
+              throttleDuration
+            ) {
+              if (viewDescButton) viewDescButton.classList.remove("disabled");
             }
           }, throttleDuration - timeSinceLastClick);
         }
         return; // Ignore the click if it's too soon
       }
-      
+
       // Not throttled, proceed with action but disable button for the throttle duration
       this.lastInteractionTimes[buttonKey] = now; // Update the timestamp
       if (viewDescButton) {
-        viewDescButton.classList.add('disabled');
+        viewDescButton.classList.add("disabled");
         setTimeout(() => {
-            // Only re-enable if another click hasn't re-disabled it in the meantime
-            // This check is important if the user clicks again right before this timeout fires.
-            const currentTime = Date.now();
-            if (currentTime - this.lastInteractionTimes[buttonKey] >= throttleDuration) {
-                 if (viewDescButton) viewDescButton.classList.remove('disabled');
-            }
+          // Only re-enable if another click hasn't re-disabled it in the meantime
+          // This check is important if the user clicks again right before this timeout fires.
+          const currentTime = Date.now();
+          if (
+            currentTime - this.lastInteractionTimes[buttonKey] >=
+            throttleDuration
+          ) {
+            if (viewDescButton) viewDescButton.classList.remove("disabled");
+          }
         }, throttleDuration);
       }
     }
 
     switch (action) {
-        case 'openInternet': 
-        case 'openProjects': 
-            this.openProgram('internet');
-            break;
-        case 'openExternalLink': 
-            if (button && button.dataset.urlToOpen && !button.classList.contains('disabled')) {
-                window.open(button.dataset.urlToOpen, '_blank');
-            } else {
-                console.warn('Could not open external link. Button or URL missing, or button disabled.', button);
-            }
-            break;
-        case 'openResume':   
-            this.openProgram('resume');
-            break;
-        case 'openContact': // For "Contact Me" on "My Resume" toolbar
-            this.openProgram('contact');
-            break;
-        case 'saveResume':
-            if (isMobileDevice()) {
-                window.open('./assets/apps/resume/resumeMitchIvin.pdf', '_blank');
-            } else {
-                const link = document.createElement('a');
-                link.href = './assets/apps/resume/resumeMitchIvin.pdf';
-                link.download = 'resumeMitchIvin.pdf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-            break;
-        case 'navigatePrevious':
-        case 'navigateNext':
-            const iframeForGenericAction = windowElement.querySelector('iframe');
-            if (iframeForGenericAction && iframeForGenericAction.contentWindow) {
-                iframeForGenericAction.contentWindow.postMessage({ type: 'toolbar-action', action: action }, '*');
-            }
-            break;
-        case 'sendMessage':
-            const contactIframe = windowElement.querySelector('iframe');
-            if (contactIframe && contactIframe.contentWindow) {
-                // 1. Post message to get form data
-                contactIframe.contentWindow.postMessage({ type: 'getContactFormData' }, '*');
+      case "openProjects":
+        this.openProgram("projects");
+        break;
+      case "openExternalLink":
+        if (
+          button &&
+          button.dataset.urlToOpen &&
+          !button.classList.contains("disabled")
+        ) {
+          window.open(button.dataset.urlToOpen, "_blank");
+        } else {
+          console.warn(
+            "Could not open external link. Button or URL missing, or button disabled.",
+            button,
+          );
+        }
+        break;
+      case "openResume":
+        this.openProgram("resume");
+        break;
+      case "openContact": // For "Contact Me" on "My Resume" toolbar
+        this.openProgram("contact");
+        break;
+      case "saveResume":
+        if (isMobileDevice()) {
+          window.open("./assets/apps/resume/resumeMitchIvin.pdf", "_blank");
+        } else {
+          const link = document.createElement("a");
+          link.href = "./assets/apps/resume/resumeMitchIvin.pdf";
+          link.download = "resumeMitchIvin.pdf";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+        break;
+      case "navigatePrevious":
+      case "navigateNext": {
+        const iframeForGenericAction = windowElement.querySelector("iframe");
+        if (iframeForGenericAction && iframeForGenericAction.contentWindow) {
+          iframeForGenericAction.contentWindow.postMessage(
+            { type: "toolbar-action", action: action },
+            "*",
+          );
+        }
+        break;
+      }
+      case "sendMessage": {
+        const contactIframe = windowElement.querySelector("iframe");
+        if (contactIframe && contactIframe.contentWindow) {
+          // 1. Post message to get form data
+          contactIframe.contentWindow.postMessage(
+            { type: "getContactFormData" },
+            "*",
+          );
 
-                // 2. Listen for the response
-                const mailtoListener = (event) => {
-                    // Ensure the message is from the contact app's iframe and is the correct type
-                    if (event.source === contactIframe.contentWindow && event.data && event.data.type === 'contactFormDataResponse') {
-                        const formData = event.data.data;
-                        const to = formData.to; // This is mitchellivin@gmail.com
-                        const subject = encodeURIComponent(formData.subject);
-                        const body = encodeURIComponent(formData.message);
+          // 2. Listen for the response
+          const mailtoListener = (event) => {
+            // Ensure the message is from the contact app's iframe and is the correct type
+            if (
+              event.source === contactIframe.contentWindow &&
+              event.data &&
+              event.data.type === "contactFormDataResponse"
+            ) {
+              const formData = event.data.data;
+              const to = formData.to; // This is mitchellivin@gmail.com
+              const subject = encodeURIComponent(formData.subject);
+              const body = encodeURIComponent(formData.message);
 
-                        let mailtoLink = `mailto:${to}`;
-                        mailtoLink += `?subject=${subject}`;
-                        mailtoLink += `&body=${body}`;
+              let mailtoLink = `mailto:${to}`;
+              mailtoLink += `?subject=${subject}`;
+              mailtoLink += `&body=${body}`;
 
-                        // 3. Open mailto link
-                        window.open(mailtoLink, '_blank');
+              // 3. Open mailto link
+              window.open(mailtoLink, "_blank");
 
-                        // 4. Clean up listener
-                        window.removeEventListener('message', mailtoListener);
-                    }
-                };
-                window.addEventListener('message', mailtoListener);
+              // 4. Clean up listener
+              window.removeEventListener("message", mailtoListener);
             }
-            break;
-        default:
-            // Unhandled toolbar action: send a generic message
-            const genericIframe = windowElement.querySelector('iframe');
-            if (genericIframe && genericIframe.contentWindow) {
-                genericIframe.contentWindow.postMessage({ type: 'toolbar-action', action: action }, '*');
-            }
-            break;
+          };
+          window.addEventListener("message", mailtoListener);
+        }
+        break;
+      }
+      default: {
+        // Unhandled toolbar action: send a generic message
+        const genericIframe = windowElement.querySelector("iframe");
+        if (genericIframe && genericIframe.contentWindow) {
+          genericIframe.contentWindow.postMessage(
+            { type: "toolbar-action", action: action },
+            "*",
+          );
+        }
+        break;
+      }
     }
   }
 
@@ -1052,11 +1097,15 @@ export default class WindowManager {
       }
 
       // --- New: Listen for focus/click on iframe to close menubar popouts ---
-      iframe.addEventListener('focus', () => {
-        windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
+      iframe.addEventListener("focus", () => {
+        windowElement.dispatchEvent(
+          new CustomEvent("iframe-interaction", { bubbles: false }),
+        );
       });
-      iframe.addEventListener('mousedown', () => {
-        windowElement.dispatchEvent(new CustomEvent('iframe-interaction', { bubbles: false }));
+      iframe.addEventListener("mousedown", () => {
+        windowElement.dispatchEvent(
+          new CustomEvent("iframe-interaction", { bubbles: false }),
+        );
       });
     });
   }
@@ -1175,8 +1224,8 @@ export default class WindowManager {
 
     // If no windows remain, reset cascade position
     if (Object.keys(this.windows).length === 0) {
-      this.cascadeColumn = 0;
-      this.cascadeRow = 0;
+      // this.cascadeColumn = 0;
+      // this.cascadeRow = 0;
     }
 
     this.eventBus.publish(EVENTS.WINDOW_CLOSED, { windowId });
@@ -1258,7 +1307,6 @@ export default class WindowManager {
     if (programName && this.programData[programName]) {
       this.programData[programName].isOpen = false;
     }
-    this.eventBus.publish(EVENTS.WINDOW_CLOSED, { windowId });
   }
 
   /**
@@ -1269,10 +1317,13 @@ export default class WindowManager {
   minimizeWindow(windowElement) {
     if (!windowElement || windowElement.windowState.isMinimized) return;
 
-    const wasActiveWindow = (this.activeWindow === windowElement); // Capture state before animation
+    const wasActiveWindow = this.activeWindow === windowElement; // Capture state before animation
 
     const taskbarItem = this.taskbarItems[windowElement.id];
-    const minimizeTransform = this._calculateWindowToTaskbarTransform(windowElement, taskbarItem);
+    const minimizeTransform = this._calculateWindowToTaskbarTransform(
+      windowElement,
+      taskbarItem,
+    );
 
     windowElement.style.setProperty(
       "--window-minimize-transform",
@@ -1293,7 +1344,8 @@ export default class WindowManager {
           this._updateStackOrder(windowElement.id, "remove");
           this._updateZIndices();
 
-          if (wasActiveWindow) { // Use captured state
+          if (wasActiveWindow) {
+            // Use captured state
             this.activeWindow = null; // Explicitly nullify if the minimized window was active
             const topWindow = this._findTopWindow();
             if (topWindow) {
@@ -1324,7 +1376,10 @@ export default class WindowManager {
     windowElement.style.display = "flex";
 
     const taskbarItem = this.taskbarItems[windowElement.id];
-    const restoreTransform = this._calculateWindowToTaskbarTransform(windowElement, taskbarItem);
+    const restoreTransform = this._calculateWindowToTaskbarTransform(
+      windowElement,
+      taskbarItem,
+    );
 
     windowElement.style.setProperty(
       "--window-restore-transform",
@@ -1337,9 +1392,9 @@ export default class WindowManager {
         windowElement.style.removeProperty("--window-restore-transform");
         windowElement.removeEventListener("animationend", handler);
 
-        // Notify 'internet' app iframe that it has been restored
-        if (windowElement.id === 'internet-window') {
-          const iframe = windowElement.querySelector('iframe');
+        // Notify 'projects' app iframe that it has been restored
+        if (windowElement.id === "projects-window") {
+          const iframe = windowElement.querySelector("iframe");
           if (iframe && iframe.contentWindow) {
             iframe.contentWindow.postMessage({ type: "window:restored" }, "*");
           }
@@ -1358,7 +1413,9 @@ export default class WindowManager {
   toggleMaximize(windowElement) {
     if (!windowElement) return;
     const state = windowElement.windowState;
-    const maximizeBtn = windowElement.querySelector('[aria-label="Maximize"], [aria-label="Restore"]');
+    const maximizeBtn = windowElement.querySelector(
+      '[aria-label="Maximize"], [aria-label="Restore"]',
+    );
 
     if (!state.isMaximized) {
       // Maximize
@@ -1556,7 +1613,7 @@ export default class WindowManager {
         windowElement.style.transform;
     }
 
-    this.windowCount++;
+    this.windowCount++; // Moved to _registerWindow
   }
 
   /**
@@ -1718,7 +1775,8 @@ export default class WindowManager {
       (e) => {
         if (
           e.target.tagName === "BUTTON" ||
-          (windowElement.windowState && windowElement.windowState.isMaximized) ||
+          (windowElement.windowState &&
+            windowElement.windowState.isMaximized) ||
           isMobileDevice()
         )
           return;
@@ -1811,18 +1869,16 @@ export default class WindowManager {
    * @returns {HTMLElement|null} The top window or null.
    */
   _findTopWindow() {
-    let topWindow = null;
-    let maxZ = this.baseZIndex - 1;
-    Object.values(this.windows).forEach((win) => {
-      if (!win.windowState.isMinimized) {
-        const z = parseInt(win.style.zIndex) || this.baseZIndex;
-        if (z > maxZ) {
-          maxZ = z;
-          topWindow = win;
-        }
+    // Iterate zIndexStack from the end (topmost) to find the highest visible window
+    for (let i = this.zIndexStack.length - 1; i >= 0; i--) {
+      const windowId = this.zIndexStack[i];
+      const win = this.windows[windowId];
+      // Ensure the window exists and is not minimized
+      if (win && win.windowState && !win.windowState.isMinimized) {
+        return win;
       }
-    });
-    return topWindow;
+    }
+    return null; // No suitable window found
   }
 
   /**

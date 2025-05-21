@@ -50,6 +50,7 @@ export const EVENTS = {
 // ===== EventBus Class =====
 /**
  * EventBus implements the publish-subscribe pattern for decoupled communication.
+ * Allows components to communicate without direct references.
  *
  * Usage:
  *   import { eventBus, EVENTS } from './eventBus.js';
@@ -62,8 +63,6 @@ export const EVENTS = {
 class EventBus {
   /**
    * Create a new EventBus instance
-   *
-   * @constructor
    */
   constructor() {
     /**
@@ -76,33 +75,21 @@ class EventBus {
 
   /**
    * Subscribe to an event
-   *
    * @param {string} event - Event name to subscribe to
    * @param {function} callback - Function to call when event is triggered
    * @returns {function} Unsubscribe function for easy cleanup
-   * @example
-   * const unsubscribe = eventBus.subscribe(EVENTS.PROGRAM_OPEN, handler);
-   * // Later: unsubscribe();
    */
   subscribe(event, callback) {
-    // Initialize array if needed with nullish coalescing, then push callback
     (this.events[event] ??= []).push(callback);
-
-    // Return unsubscribe function for easy cleanup
     return () => this.unsubscribe(event, callback);
   }
 
   /**
    * Unsubscribe from an event.
-   *
    * @param {string} event - Event name to unsubscribe from.
    * @param {function} callback - Function to unsubscribe.
-   * @returns {void}
-   * @example
-   * eventBus.unsubscribe(EVENTS.PROGRAM_OPEN, handler);
    */
   unsubscribe(event, callback) {
-    // Check if event exists and has subscribers before filtering
     if (this.events[event] && this.events[event].length > 0) {
       this.events[event] = this.events[event].filter((cb) => cb !== callback);
     }
@@ -110,15 +97,10 @@ class EventBus {
 
   /**
    * Publish an event to all subscribers.
-   *
    * @param {string} event - Event name to publish.
    * @param {any} data - Data to pass to subscribers.
-   * @returns {void}
-   * @example
-   * eventBus.publish(EVENTS.PROGRAM_OPEN, { programName: 'notepad' });
    */
   publish(event, data) {
-    // Execute each callback with the provided data
     this.events[event]?.forEach((callback) => callback(data));
   }
 }

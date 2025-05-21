@@ -115,7 +115,7 @@
   justify-content: flex-start;
   color: #eaf2fb;
   font-size: 11px;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.10);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
   cursor: default;
   white-space: nowrap;
   overflow: hidden;
@@ -128,7 +128,10 @@
     #0753b6 100%
   ); /* Subtle, less saturated blue gradient */
   box-shadow: 0 1px 2px 0 rgba(10, 60, 151, 0.904); /* Faint outer shadow for separation */
-  transition: width 0.15s, background 0.18s, box-shadow 0.18s;
+  transition:
+    width 0.15s,
+    background 0.18s,
+    box-shadow 0.18s;
   flex-shrink: 1;
 }
 
@@ -442,13 +445,11 @@
    END Taskbar Styles
    ================================================== */
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) { // MOVED TO main.css
   .desktop-only {
-    display: none !important;
+    display: none;
   }
-}
+} */
 
-/* Media query to disable log off button on mobile */
-@media (max-width: 768px) {
-  /* ... existing code ... */
-}
+/* @media (max-width: 768px) { // REMOVED - Empty media query
+} */

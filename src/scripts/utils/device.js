@@ -1,13 +1,6 @@
 /**
  * device.js — Device Detection Utility for Windows XP Simulation
- *
- * Provides:
- * - Utility function to detect mobile devices (user agent or viewport width)
- *
- * Usage:
- *   import { isMobileDevice } from './device.js';
- *   if (isMobileDevice()) { ... }
- *
+ * Utility function to detect mobile devices (user agent or viewport width).
  * @module device
  */
 

@@ -62,11 +62,11 @@
   color: #bcbcbc;
 }
 .menu-bar .menu-item.disabled:hover {
-    background: none;
-    color: #bcbcbc;
-    border: none;
-    outline: none;
-    box-shadow: none;
+  background: none;
+  color: #bcbcbc;
+  border: none;
+  outline: none;
+  box-shadow: none;
 }
 .menu-bar-container .dropdown-menu {
   display: none;
@@ -76,7 +76,7 @@
   width: 130px;
   background: #f2f2f2;
   border: 1px solid #d0d0d0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   font-size: 11px;
   font-family: Tahoma, Arial, sans-serif;
   z-index: 1000;
@@ -121,11 +121,14 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  font-family: 'Tahoma', Arial, sans-serif;
+  font-family: "Tahoma", Arial, sans-serif;
   color: #222;
   padding: 6px 8px;
   border-radius: 5px;
-  transition: box-shadow 0.13s, border 0.13s, background 0.13s;
+  transition:
+    box-shadow 0.13s,
+    border 0.13s,
+    background 0.13s;
   border: 1.5px solid transparent;
   box-shadow: none;
   margin: 0;
@@ -152,12 +155,16 @@
 
 .toolbar-button:not(.disabled):active {
   border: 1.5px solid #a0a0a0;
-  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2), inset -1px -1px 1px rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 1px 1px 2px rgba(0, 0, 0, 0.2),
+    inset -1px -1px 1px rgba(255, 255, 255, 0.7);
   background: #dadada;
 }
 .toolbar-button.touch-active {
   border: 1.5px solid #a0a0a0;
-  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2), inset -1px -1px 1px rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 1px 1px 2px rgba(0, 0, 0, 0.2),
+    inset -1px -1px 1px rgba(255, 255, 255, 0.7);
   background: #dadada;
 }
 .toolbar-button > img + span {
@@ -208,7 +215,8 @@
   background: none;
   will-change: transform;
 }
-.toolbar-row img, .toolbar-row span {
+.toolbar-row img,
+.toolbar-row span {
   margin: 0;
   padding: 0;
   user-select: none;
@@ -316,7 +324,9 @@
 }
 
 /* Ensure consistent cursor */
-.toolbar-button, .addressbar-row span, .go-button-container span {
+.toolbar-button,
+.addressbar-row span,
+.go-button-container span {
   cursor: default;
 }
 
@@ -342,7 +352,7 @@
     display: flex;
     align-items: center;
     position: relative; /* For ::after pseudo-element positioning */
-    margin-right: 3px;  /* Create space for the divider line and some padding after it */
+    margin-right: 3px; /* Create space for the divider line and some padding after it */
   }
 
   .toolbar-close-button::after {
@@ -356,4 +366,4 @@
     transform: translateY(-50%) scaleX(0.5); /* Vertically center and scale to 0.5px width */
     transform-origin: left center; /* Scale from the left edge for sharpness */
   }
-} 
+}

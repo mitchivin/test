@@ -3,7 +3,8 @@
  * Styles the About Me window, left panel, and main content.
  */
 
-html, body {
+html,
+body {
   height: 100%;
   min-height: 100vh;
   margin: 0;
@@ -41,7 +42,7 @@ body {
   min-height: 100vh;
   height: 100%;
   position: relative;
-  background-image: url("../../../assets/apps/about/aboutbg.webp");
+  background-image: url("../../../assets/gui/bgs/aboutbg.webp");
   background-repeat: no-repeat;
   background-position: center bottom;
   background-size: cover;
@@ -91,7 +92,7 @@ body {
   -ms-user-select: none;
 }
 .left-panel::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   right: 0;
@@ -148,7 +149,9 @@ body {
   border-radius: 0 0 0 0;
   max-height: 1000px;
   overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+  transition:
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s;
   opacity: 1;
 }
 
@@ -173,7 +176,9 @@ body {
   margin-left: 2px;
   vertical-align: middle;
   filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5));
-  transition: filter 0.1s ease, transform 0.05s ease;
+  transition:
+    filter 0.1s ease,
+    transform 0.05s ease;
 }
 
 .left-panel__card__header__img:hover {
@@ -218,7 +223,9 @@ body {
   margin-top: 0;
   margin-bottom: 24px;
   letter-spacing: 0.5px;
-  text-shadow: 1px 1px 0 #000, 0 0px 1px #000;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0px 1px #000;
   padding-left: 0;
   line-height: 1;
   display: flex;
@@ -238,8 +245,15 @@ body {
   margin-bottom: 18px;
   padding: 0;
   line-height: 1.35;
-  text-shadow: 1px 1px 0 #000, 0 0px 1px #000;
-  font-family: Tahoma, Segoe UI, Verdana, Arial, sans-serif;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0px 1px #000;
+  font-family:
+    Tahoma,
+    Segoe UI,
+    Verdana,
+    Arial,
+    sans-serif;
   width: 100%;
   max-width: 100%;
   display: block;
@@ -275,7 +289,7 @@ body {
   .welcome_text {
     font-size: 36px; /* Increased font size for mobile */
     /* Ensure flex properties for alignment if not already inherited or set */
-    display: flex; 
+    display: flex;
     align-items: center;
     gap: 12px; /* Adjusted gap for the new image */
   }
@@ -331,7 +345,9 @@ body {
   max-height: 0;
   opacity: 0;
   padding: 0;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s;
+  transition:
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.18s;
   pointer-events: none;
 }
 
@@ -384,7 +400,8 @@ body {
 }
 
 /* Allow selection in links (if needed) */
-.left-panel__card__text.link, a {
+.left-panel__card__text.link,
+a {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;

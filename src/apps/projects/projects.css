@@ -1,7 +1,6 @@
 /*
  * projects.css — Styles for Projects App in Windows XP Simulation
  * Styles the My Projects window, feed, lightbox, and responsive layout.
- * @file projects.css
  */
 
 /* Universal Reset from example - might need adjustment if conflicting with xp.css */
@@ -12,89 +11,88 @@
 }
 
 /* ===== Base Layout & Background ===== */
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: #333; /* Original text color, example uses #f2f2f2 */
-    width: 100%;
-    background-color: #111; /* Dark background for the lines effect */
-    position: relative; /* For potential pseudo-elements if needed later */
-    overflow-x: hidden; /* Good practice */
-    touch-action: none; /* Disable pinch-zoom and other default touch actions */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  color: #333; /* Original text color, example uses #f2f2f2 */
+  width: 100%;
+  background-color: #111; /* Dark background for the lines effect */
+  position: relative; /* For potential pseudo-elements if needed later */
+  overflow-x: hidden; /* Good practice */
+  touch-action: none; /* Disable pinch-zoom and other default touch actions */
 }
 
 html {
-    background:
-        radial-gradient(ellipse at top center, rgba(200, 200, 220, 0.15) 0%, transparent 60%),
-        radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0) top left / 3px 3px repeat,
-        linear-gradient(to bottom, rgb(55,55,55) 0%, rgb(40,40,40) 35%, rgb(40,40,40) 100%);
-    min-height: 100vh;
+  background:
+    radial-gradient(
+      ellipse at top center,
+      rgba(200, 200, 220, 0.15) 0%,
+      transparent 60%
+    ),
+    radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0) top left / 3px
+      3px repeat,
+    linear-gradient(
+      to bottom,
+      rgb(55, 55, 55) 0%,
+      rgb(40, 40, 40) 35%,
+      rgb(40, 40, 40) 100%
+    );
+  min-height: 100vh;
 }
 
 /* Soft edge lighting */
 html::before,
 html::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 50%; /* Controls how far the light appears to spread from the edge */
-    pointer-events: none; 
-    z-index: 0; /* Above html direct background, below body content (including lines) */
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%; /* Controls how far the light appears to spread from the edge */
+  pointer-events: none;
+  z-index: 0; /* Above html direct background, below body content (including lines) */
 }
 
 html::before {
-    left: 0;
-    background: radial-gradient(
-        ellipse at left center, 
-        rgba(255, 255, 255, 0.25) 0%,  /* Increased opacity */
-        transparent 65%  /* Increased spread */
-    );
+  left: 0;
+  background: radial-gradient(
+    ellipse at left center,
+    rgba(255, 255, 255, 0.25) 0%,
+    /* Increased opacity */ transparent 65% /* Increased spread */
+  );
 }
 
 html::after {
-    right: 0;
-    background: radial-gradient(
-        ellipse at right center, 
-        rgba(255, 255, 255, 0.25) 0%, /* Increased opacity */
-        transparent 65% /* Increased spread */
-    );
+  right: 0;
+  background: radial-gradient(
+    ellipse at right center,
+    rgba(255, 255, 255, 0.25) 0%,
+    /* Increased opacity */ transparent 65% /* Increased spread */
+  );
 }
 
 body {
-    width: 100%;
-    height: 100%;
-    background-color: transparent;  /* Body should be transparent over HTML's #111 bg */
-    color: #f2f2f2; /* Text color from user example - for lines, app content should override */
-    line-height: 1.6;
-    position: relative; /* For .lines positioning and .scroll-content */
-    font-family: sans-serif; /* From user example, can be overridden by app specifics */
-}
-
-/* Original @keyframes background - Kept for body if needed, but html has main bg now */
-@keyframes background { 
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  width: 100%;
+  height: 100%;
+  background-color: transparent; /* Body should be transparent over HTML's #111 bg */
+  color: #f2f2f2; /* Text color from user example - for lines, app content should override */
+  line-height: 1.6;
+  position: relative; /* For .lines positioning and .scroll-content */
+  font-family: sans-serif; /* From user example, can be overridden by app specifics */
 }
 
 .scroll-content {
-    height: 100%; 
-    overflow-y: auto; 
-    position: relative; 
-    z-index: 10; /* High z-index to be on top of lines */
-    background-color: transparent; 
-    color: #333; /* Restore app text color for content */
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+  z-index: 10; /* High z-index to be on top of lines */
+  background-color: transparent;
+  color: #333; /* Restore app text color for content */
 }
-
 
 /* === Animated Lines Styling (Adapted for Left-to-Right Sweep) === */
 .lines {
@@ -102,73 +100,89 @@ body {
   top: 30px; /* Shifted down by 30px */
   left: 0;
   /* right: 0; */ /* Not needed if left:0 and width:100% */
-  height: calc(100% - 30px); /* Adjusted height to fit within viewport after top shift */
+  height: calc(
+    100% - 30px
+  ); /* Adjusted height to fit within viewport after top shift */
   /* margin: auto; */ /* Not needed if left:0 and width:100% */
   width: 100%; /* Make lines span full width */
   display: flex;
   flex-direction: column; /* Stack horizontal lines vertically */
   justify-content: space-around; /* Distribute lines vertically */
-  z-index: 1; 
-  pointer-events: none; 
+  z-index: 1;
+  pointer-events: none;
 }
 
 .line {
   position: relative;
   width: 100%; /* Line track is full width */
-  height: 1px;  /* Thin horizontal line */
+  height: 1px; /* Thin horizontal line */
   background-color: transparent; /* Track is invisible */
   overflow: hidden;
 }
 
 .line::after {
-  content: '';
+  content: "";
   display: block;
   position: absolute;
-  height: 100%; 
-  width: 20vw;  
+  height: 100%;
+  width: 20vw;
   top: 0;
-  left: 0; 
-  transform: translateX(-20vw); 
+  left: 0;
+  transform: translateX(-20vw);
   opacity: 0; /* Initial state: invisible */
   /* All lines are now white (slightly transparent white with faded edges) */
-  background: linear-gradient(to right, 
-              rgba(255,255,255,0) 0%,      
-              rgba(255,255,255,0.6) 30%,   
-              rgba(255,255,255,0.6) 70%,   
-              rgba(255,255,255,0) 100%
-            );
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 30%,
+    rgba(255, 255, 255, 0.6) 70%,
+    rgba(255, 255, 255, 0) 100%
+  );
   animation: sweepLeftToRight 7s 0s infinite;
   animation-fill-mode: forwards;
   animation-timing-function: cubic-bezier(0.4, 0.26, 0, 0.97);
 }
 
 /* Updated animation-delay rules for 5 .line::after for more randomness */
-.line:nth-child(1)::after { animation-delay: 0.5s; }
-.line:nth-child(2)::after { animation-delay: 2.0s; }
-.line:nth-child(3)::after { animation-delay: 3.5s; }
-.line:nth-child(4)::after { animation-delay: 5.0s; }
-.line:nth-child(5)::after { animation-delay: 6.0s; }
-
+.line:nth-child(1)::after {
+  animation-delay: 0.5s;
+}
+.line:nth-child(2)::after {
+  animation-delay: 2s;
+}
+.line:nth-child(3)::after {
+  animation-delay: 3.5s;
+}
+.line:nth-child(4)::after {
+  animation-delay: 5s;
+}
+.line:nth-child(5)::after {
+  animation-delay: 6s;
+}
 
 @keyframes sweepLeftToRight {
   0% {
-    transform: translateX(-20vw); 
+    transform: translateX(-20vw);
     opacity: 0;
   }
-  5% { /* Quicker to start becoming visible */
+  5% {
+    /* Quicker to start becoming visible */
     transform: translateX(-15vw);
     opacity: 0;
   }
-  15% { /* Quicker to full visibility */
-    transform: translateX(0vw);   
+  15% {
+    /* Quicker to full visibility */
+    transform: translateX(0vw);
     opacity: 1;
   }
-  85% { /* Stays visible, then starts to exit */
-    transform: translateX(85vw);  
+  85% {
+    /* Stays visible, then starts to exit */
+    transform: translateX(85vw);
     opacity: 1;
   }
-  95% { /* Quicker to fade out */
-    transform: translateX(100vw); 
+  95% {
+    /* Quicker to fade out */
+    transform: translateX(100vw);
     opacity: 0;
   }
   100% {
@@ -179,182 +193,187 @@ body {
 
 /* ====== Feed Container & Posts ====== */
 .feed-container {
-    position: relative; /* Added for absolute positioning of posts */
-    padding: 10px;
-    box-sizing: border-box;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    margin-left: auto;
-    margin-right: auto;
-    opacity: 0; /* Initially hidden to prevent FOUC */
-    transition: opacity 0.3s ease-in-out; /* Smooth transition for reveal */
+  position: relative; /* Added for absolute positioning of posts */
+  padding: 10px;
+  box-sizing: border-box;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0; /* Initially hidden to prevent FOUC */
+  transition: opacity 0.3s ease-in-out; /* Smooth transition for reveal */
 }
 
 .feed-container.loaded {
-    opacity: 1; /* Reveal when content is loaded and layout is applied */
+  opacity: 1; /* Reveal when content is loaded and layout is applied */
 }
 
 /* Tablet and Small Desktop: 3 columns (Changed from 2) */
 @media (min-width: 768px) {
-    .feed-container {
-        padding: 40px;
-        max-width: 1072px;
-    }
+  .feed-container {
+    padding: 40px;
+    max-width: 1072px;
+  }
 
-    .post {
-        max-width: 320px;
-    }
+  .post {
+    max-width: 320px;
+  }
 }
 
 /* Large Desktop: 4 columns (Changed from 3) */
 @media (min-width: 1200px) {
-    .feed-container {
-        max-width: 1408px;
-    }
+  .feed-container {
+    max-width: 1408px;
+  }
 }
 
 .post {
-    border-radius: 8px;
-    width: 100%; /* JS will set specific width for items in columns */
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.692);
-    overflow: hidden;
-    cursor: pointer;
-    position: relative;
-    border: 2px solid transparent; /* Added for hover effect */
-    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), 
-                box-shadow 0.25s cubic-bezier(0.4,0,0.2,1),
-                border-color 0.25s cubic-bezier(0.4,0,0.2,1), /* Added for border fade */
-                z-index 0s 0.25s; /* Delay z-index change until transition starts to prevent flicker */
+  border-radius: 8px;
+  width: 100%; /* JS will set specific width for items in columns */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.692);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  border: 2px solid transparent; /* Added for hover effect */
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    /* Added for border fade */ z-index 0s 0.25s; /* Delay z-index change until transition starts to prevent flicker */
 }
 
-
 .post.image-post img {
-    display: block; /* Remove potential bottom space */
-    width: 100%;   /* Fill container width */
-    height: auto;  /* Maintain aspect ratio */
+  display: block; /* Remove potential bottom space */
+  width: 100%; /* Fill container width */
+  height: auto; /* Maintain aspect ratio */
 }
 
 .post.video-post video {
-    display: block;
-    width: 100%;
-    height: unset;
-    min-height: 180px;
-    aspect-ratio: 9/16;
-    min-width: 100%;
-    object-fit: fill;
-    box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: unset;
+  min-height: 180px;
+  aspect-ratio: 9/16;
+  min-width: 100%;
+  object-fit: fill;
+  box-sizing: border-box;
 }
 
 /* Lightbox Styles */
 #project-lightbox {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1);
-    display: none; /* display is toggled by JS */
-    justify-content: center; 
-    align-items: center; 
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100dvh; 
-    background-color: rgba(30, 30, 30, 0.9) !important; /* Inverted: Dark semi-transparent background */
-    z-index: 100010; 
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: none; /* display is toggled by JS */
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  background-color: rgba(
+    30,
+    30,
+    30,
+    0.9
+  ) !important; /* Inverted: Dark semi-transparent background */
+  z-index: 100010;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 #project-lightbox.fade-in {
-    opacity: 1;
-    pointer-events: auto;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 #project-lightbox.fade-out {
-    opacity: 0;
-    pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 #lightbox-inner-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 1440px;
-    height: 100%;
-    box-sizing: border-box;
-    overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1440px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: visible !important;
 }
 
 #lightbox-content {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 #lightbox-content img,
 #lightbox-content video {
-    display: block;
-    width: 100%;
-    height: auto;
-    position: relative;
-    z-index: 1;
-    margin: 0;
-    padding: 0;
-    border-radius: 20px;
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  border-radius: 20px;
 }
 
 #project-lightbox.fade-in #lightbox-content img,
 #project-lightbox.fade-in #lightbox-content video {
-    opacity: 1;
+  opacity: 1;
 }
 
 #project-lightbox.fade-out #lightbox-content img,
 #project-lightbox.fade-out #lightbox-content video {
-    opacity: 0;
+  opacity: 0;
 }
 
 #lightbox-details {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 90vw;
-    text-align: center;
-    background-color: #333;
-    border-radius: 20px;
-    flex-grow: 1;
-    min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 90vw;
+  text-align: center;
+  background-color: #333;
+  border-radius: 20px;
+  flex-grow: 1;
+  min-height: 0;
 }
 
 /* General Lightbox Text Styles (primarily for Desktop) */
 #lightbox-title {
-    color: #f1f1f1;
-    font-size: 1.9rem;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-top: 10px; /* Base margin, can be overridden by desktop */
+  color: #f1f1f1;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 10px; /* Base margin, can be overridden by desktop */
 }
 
 #lightbox-description {
-    color: #f1f1f1;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin-top: 10px; 
-    margin-bottom: 15px; 
+  color: #f1f1f1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 10px;
+  margin-bottom: 15px;
 }
 
 /* Mobile Layout (becomes Base Layout) */
 #project-lightbox {
-  height: 100vh; 
+  height: 100vh;
   min-height: 100vh;
   align-items: center;
   justify-content: center;
-  padding: 0; 
+  padding: 0;
   margin: 0;
   overflow: hidden;
 }
-#project-lightbox #lightbox-inner-wrapper { 
+#project-lightbox #lightbox-inner-wrapper {
   height: 100vh;
   min-height: 100vh;
   display: flex;
@@ -364,7 +383,7 @@ body {
   padding: 0;
   margin: 0;
 }
-#project-lightbox #lightbox-content { 
+#project-lightbox #lightbox-content {
   height: 100vh;
   min-height: 100vh;
   max-height: 100vh;
@@ -377,20 +396,20 @@ body {
   margin: 0;
 }
 
-#project-lightbox #lightbox-title, 
-#project-lightbox #lightbox-description { 
-    display: none;
+#project-lightbox #lightbox-title,
+#project-lightbox #lightbox-description {
+  display: none;
 }
 
-#project-lightbox #lightbox-details { 
-    justify-content: center;
-    background-color: transparent;
-    padding: 0;
-    flex-grow: 0; 
+#project-lightbox #lightbox-details {
+  justify-content: center;
+  background-color: transparent;
+  padding: 0;
+  flex-grow: 0;
 }
 
-#project-lightbox #lightbox-content img, 
-#project-lightbox #lightbox-content video { 
+#project-lightbox #lightbox-content img,
+#project-lightbox #lightbox-content video {
   max-width: calc(100vw - 24px);
   max-height: calc(100vh - 24px);
   width: auto;
@@ -406,199 +425,154 @@ body {
   position: relative;
 }
 
-@media (min-width: 768px) { 
-    #lightbox-content {
-      align-items: center; 
-    }
-    .lightbox-media-wrapper {
-      display: flex !important; 
-      flex-direction: row; 
-      align-items: stretch; 
-      justify-content: center; 
-      position: relative; 
-      min-height: 320px; 
-      height: 90vh; 
-      width: 90vw; /* Always 90% of viewport width */
-      max-width: 100%; /* Ensures it doesn't exceed its parent's width constraints */
-      margin-left: auto; /* To center the 90vw block */
-      margin-right: auto; /* To center the 90vw block */
-    }
+@media (min-width: 768px) {
+  #lightbox-content {
+    align-items: center;
+  }
+  .lightbox-media-wrapper {
+    display: flex !important;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    position: relative;
+    min-height: 320px;
+    height: 90vh;
+    width: 90vw; /* Always 90% of viewport width */
+    max-width: 100%; /* Ensures it doesn't exceed its parent's width constraints */
+    margin-left: auto; /* To center the 90vw block */
+    margin-right: auto; /* To center the 90vw block */
+  }
+  .lightbox-desc-card {
+    background: rgba(223, 223, 223, 0.877) !important;
+    width: 95% !important;
+  }
+
+  /* Styling for the PROJECT label */
+  .lightbox-media-wrapper .lightbox-desc-card .card-project-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3d3d3d; /* Example color, will be faint due to opacity */
+    opacity: 0.25;
+    text-transform: uppercase;
+    margin-bottom: 4px; /* Default spacing */
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out; /* Faster transition */
+  }
+
+  /* Styling for title, subheading, body within the description card */
+  .lightbox-media-wrapper .lightbox-desc-card .card-title {
+    font-family: "Work Sans", sans-serif;
+    font-size: 1.8rem; /* Default size */
+    font-weight: 700;
+    color: #222 !important; /* Inverted: Dark text */
+    margin-bottom: 12px; /* Default spacing */
+    line-height: 1.2;
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out; /* Faster transition */
+  }
+
+  /* Styling for the HR divider below the title */
+  .lightbox-media-wrapper .lightbox-desc-card .card-title-divider {
+    border: none; /* Remove default HR border */
+    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Light, subtle top border */
+    height: 1px;
+    margin: 12px 0; /* Default Space above and below the divider */
+    width: 100%; /* Full width of its container */
+    transition: margin 0.15s ease-out; /* Faster transition */
+  }
+
+  /* Styling for the DESCRIPTION label */
+  .lightbox-media-wrapper .lightbox-desc-card .card-description-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3d3d3d;
+    opacity: 0.25;
+    text-transform: uppercase;
+    margin-bottom: 0px; /* Default Space before body */
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out; /* Faster transition */
+  }
+
+  .lightbox-media-wrapper .lightbox-desc-card .card-body {
+    font-family: "Work Sans", sans-serif;
+    font-size: 0.9rem; /* Default size */
+    font-weight: 500;
+    color: #333 !important;
+    line-height: 1.3; /* Default line-height */
+    margin-top: 0;
+    margin-bottom: 18px; /* Default spacing */
+    transition:
+      font-size 0.15s ease-out,
+      line-height 0.15s ease-out,
+      margin-bottom 0.15s ease-out; /* Faster transition */
+  }
+
+  /* Styling for the Bullet Points section */
+  .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points {
+    font-family: "Work Sans", sans-serif;
+    /* font-size, line-height, color are on li */
+    margin-top: 12px;
+    margin-bottom: 18px; /* Default spacing */
+    padding-left: 0;
+    text-align: left;
+    transition: margin-bottom 0.15s ease-out; /* Faster transition */
+  }
+
+  .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    padding-left: 0;
+  }
+
+  .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points li {
+    font-size: 0.85rem; /* Default size */
+    font-weight: 500;
+    color: #333;
+    line-height: 1.4; /* Default line-height */
+    margin-bottom: 6px; /* Default spacing */
+    transition:
+      font-size 0.15s ease-out,
+      line-height 0.15s ease-out,
+      margin-bottom 0.15s ease-out; /* Faster transition */
+  }
+
+  /* Styling for the TOOLS USED label */
+  .lightbox-media-wrapper .lightbox-desc-card .card-tools-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1rem; /* Default size */
+    font-weight: 700;
+    color: #3d3d3d;
+    opacity: 0.25;
+    text-transform: uppercase;
+    margin-top: 12px;
+    margin-bottom: 4px; /* Default spacing */
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out; /* Faster transition */
+  }
+
+  /* Styling for the TOOLS USED list */
+  .lightbox-media-wrapper .lightbox-desc-card .card-tools-list {
+    font-family: "Work Sans", sans-serif;
+    font-size: 0.9rem; /* Default size */
+    line-height: 1.5; /* Default line-height */
+    color: #333; /* Consistent dark color */
+    padding-left: 4px;
+    transition:
+      font-size 0.15s ease-out,
+      line-height 0.15s ease-out; /* Faster transition */
+  }
+
+  body.projects-window-maximized
+    .lightbox-media-wrapper.video-media-active
     .lightbox-desc-card {
-      background: rgba(223, 223, 223, 0.877) !important;
-      width: 95% !important;
-    }
-
-    /* Styling for the PROJECT label */
-    .lightbox-media-wrapper .lightbox-desc-card .card-project-label {
-        font-family: 'Wix Madefor Display', sans-serif;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #3d3d3d; /* Example color, will be faint due to opacity */
-        opacity: 0.25;
-        text-transform: uppercase;
-        margin-bottom: 4px; /* Default spacing */
-        transition: font-size 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
-    }
-
-    /* Styling for title, subheading, body within the description card */
-    .lightbox-media-wrapper .lightbox-desc-card .card-title {
-        font-family: 'Work Sans', sans-serif;
-        font-size: 1.8rem; /* Default size */
-        font-weight: 700;
-        color: #222 !important; /* Inverted: Dark text */
-        margin-bottom: 12px; /* Default spacing */
-        line-height: 1.2;
-        transition: font-size 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
-    }
-
-    /* Styling for the HR divider below the title */
-    .lightbox-media-wrapper .lightbox-desc-card .card-title-divider {
-        border: none; /* Remove default HR border */
-        border-top: 1px solid rgba(0, 0, 0, 0.1); /* Light, subtle top border */
-        height: 1px;
-        margin: 12px 0; /* Default Space above and below the divider */
-        width: 100%; /* Full width of its container */
-        transition: margin 0.15s ease-out; /* Faster transition */
-    }
-
-    /* Styling for the DESCRIPTION label */
-    .lightbox-media-wrapper .lightbox-desc-card .card-description-label {
-        font-family: 'Wix Madefor Display', sans-serif;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #3d3d3d;
-        opacity: 0.25;
-        text-transform: uppercase;
-        margin-bottom: 0px; /* Default Space before body */
-        transition: font-size 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
-    }
-
-    .lightbox-media-wrapper .lightbox-desc-card .card-body {
-        font-family: 'Work Sans', sans-serif;
-        font-size: 0.9rem; /* Default size */
-        font-weight: 500;
-        color: #333 !important;
-        line-height: 1.3; /* Default line-height */
-        margin-top: 0;
-        margin-bottom: 18px; /* Default spacing */
-        transition: font-size 0.15s ease-out, line-height 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
-    }
-
-    /* Styling for the Bullet Points section */
-    .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points {
-        font-family: 'Work Sans', sans-serif;
-        /* font-size, line-height, color are on li */
-        margin-top: 12px;
-        margin-bottom: 18px; /* Default spacing */
-        padding-left: 0; 
-        text-align: left; 
-        transition: margin-bottom 0.15s ease-out; /* Faster transition */
-    }
-
-    .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points ul {
-        list-style-type: disc; 
-        margin-left: 20px; 
-        padding-left: 0; 
-    }
-
-    .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points li {
-        font-size: 0.85rem; /* Default size */
-        font-weight: 500; 
-        color: #333; 
-        line-height: 1.4; /* Default line-height */
-        margin-bottom: 6px; /* Default spacing */
-        transition: font-size 0.15s ease-out, line-height 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
-    }
-
-    /* Styling for the TOOLS USED label */
-    .lightbox-media-wrapper .lightbox-desc-card .card-tools-label {
-        font-family: 'Wix Madefor Display', sans-serif;
-        font-size: 1rem; /* Default size */
-        font-weight: 700;
-        color: #3d3d3d;
-        opacity: 0.25;
-        text-transform: uppercase;
-        margin-top: 12px; 
-        margin-bottom: 4px; /* Default spacing */
-        transition: font-size 0.15s ease-out, margin-bottom 0.15s ease-out; /* Faster transition */
-    }
-
-    /* Styling for the TOOLS USED list */
-    .lightbox-media-wrapper .lightbox-desc-card .card-tools-list {
-        font-family: 'Work Sans', sans-serif;
-        font-size: 0.9rem; /* Default size */
-        line-height: 1.5; /* Default line-height */
-        color: #333; /* Consistent dark color */
-        padding-left: 4px; 
-        transition: font-size 0.15s ease-out, line-height 0.15s ease-out; /* Faster transition */
-    }
-
-    body.projects-window-maximized .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
-        padding-right: 64px; /* Apply extra right padding for videos only when maximized */
-    }
-
-    .lightbox-desc-card .lightbox-close-btn {
-        position: absolute;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10;
-        width: 28px;
-        height: 28px;
-        background: transparent !important;
-        border: 1.5px solid #333 !important; /* Inverted: Dark border */
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.16);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        overflow: hidden;
-        transition: none !important;
-    }
-    .lightbox-desc-card .lightbox-close-btn:hover {
-        background: transparent !important;
-        border-color: #777 !important; /* Softer dark grey border on hover */
-        box-shadow: inset 0 0 6px 2px rgba(119, 119, 119, 0.35); /* Soft inner glow effect */
-    }
-    .lightbox-desc-card .lightbox-close-btn:hover svg {
-        stroke: #777 !important; /* Softer dark grey stroke on hover */
-    }
-
-    .lightbox-media-wrapper > img,
-    .lightbox-media-wrapper > div > video { /* Target video element directly for its own border */
-      height: 100% !important;
-      max-height: 100% !important;
-      object-fit: contain !important;
-      border: 2px solid rgb(240, 240, 240);
-      border-radius: 20px;
-      box-sizing: border-box; 
-    }
-
-    /* Specific styling for the div that WRAPS a video, if one exists */
-    .lightbox-media-wrapper > div:has(> video) {
-        border: 2px solid rgb(240, 240, 240);
-        border-radius: 20px;
-        box-sizing: border-box;
-    }
-
-    /* This rule should be fine as is, as videos already have border-radius from above */
-    .lightbox-media-wrapper > div > video {
-      height: 100% !important;
-      max-height: 100% !important;
-      object-fit: contain !important;
-    }
-
-    .lightbox-desc-card .lightbox-close-btn,
-    .lightbox-desc-card .lightbox-close-btn:hover {
-      align-items: center !important;
-    }
-    .lightbox-desc-card .lightbox-close-btn .close-icon,
-    .lightbox-desc-card .lightbox-close-btn .close-text {
-      line-height: 1;
-      vertical-align: middle;
-    }
+    padding-right: 64px; /* Apply extra right padding for videos only when maximized */
+  }
 }
 
 /* Hide navigation buttons and hint on mobile */
@@ -608,7 +582,9 @@ body {
     overflow: hidden;
     border-radius: 20px; /* Ensure the clipping container is also rounded */
   }
-  .lightbox-description-overlay, .lightbox-title-overlay { /* Apply common mobile overlay animation base */
+  .lightbox-description-overlay,
+  .lightbox-title-overlay {
+    /* Apply common mobile overlay animation base */
     position: absolute;
     left: 0;
     right: 0;
@@ -618,11 +594,13 @@ body {
     pointer-events: none;
     animation: none;
   }
-  .lightbox-description-overlay.show, .lightbox-title-overlay.show {
+  .lightbox-title-overlay.show {
+    /* Simplified selector */
     opacity: 1;
     pointer-events: auto;
   }
-  .lightbox-description-overlay.hide-anim, .lightbox-title-overlay.hide-anim {
+  .lightbox-description-overlay.hide-anim,
+  .lightbox-title-overlay.hide-anim {
     opacity: 0;
     pointer-events: none;
   }
@@ -641,15 +619,17 @@ body {
     font-size: 0.95rem;
     font-weight: 500;
     line-height: 1.4;
-    background: linear-gradient(0deg, 
-                rgba(20,20,20,0.95) 0%, 
-                rgba(20,20,20,0.95) 40%, 
-                rgba(20,20,20,0.9) 50%, 
-                rgba(20,20,20,0.8) 60%, 
-                rgba(20,20,20,0.65) 70%, 
-                rgba(20,20,20,0.45) 80%, 
-                rgba(20,20,20,0.25) 90%, 
-                rgba(20,20,20,0.0) 100%);
+    background: linear-gradient(
+      0deg,
+      rgba(20, 20, 20, 0.95) 0%,
+      rgba(20, 20, 20, 0.95) 40%,
+      rgba(20, 20, 20, 0.9) 50%,
+      rgba(20, 20, 20, 0.8) 60%,
+      rgba(20, 20, 20, 0.65) 70%,
+      rgba(20, 20, 20, 0.45) 80%,
+      rgba(20, 20, 20, 0.25) 90%,
+      rgba(20, 20, 20, 0) 100%
+    );
     pointer-events: none;
     transform: translateY(100%);
     transition: none !important;
@@ -659,37 +639,39 @@ body {
   }
   .lightbox-description-overlay.show {
     transform: translateY(0);
-    animation: mobileBottomOverlaySlideIn 400ms cubic-bezier(0.4,0,0.2,1) forwards;
+    animation: mobileBottomOverlaySlideIn 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
   .lightbox-description-overlay.hide-anim {
     transform: translateY(100%);
-    animation: mobileBottomOverlaySlideOut 250ms cubic-bezier(0.4,0,0.2,1) forwards; /* Duration 250ms */
+    animation: mobileBottomOverlaySlideOut 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards; /* Duration 650ms */
   }
 
   /* Specific for top title overlay */
   .lightbox-title-overlay {
     top: 0;
-    transform: translateY(-100%); 
-    display: flex; 
+    transform: translateY(-100%);
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     padding: 18px 24px 20px 24px;
-    background: linear-gradient(180deg, 
-                rgba(20,20,20,0.95) 0%, 
-                rgba(20,20,20,0.95) 40%, 
-                rgba(20,20,20,0.9) 50%, 
-                rgba(20,20,20,0.8) 60%, 
-                rgba(20,20,20,0.65) 70%, 
-                rgba(20,20,20,0.45) 80%, 
-                rgba(20,20,20,0.25) 90%, 
-                rgba(20,20,20,0.0) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(20, 20, 20, 0.95) 0%,
+      rgba(20, 20, 20, 0.95) 40%,
+      rgba(20, 20, 20, 0.9) 50%,
+      rgba(20, 20, 20, 0.8) 60%,
+      rgba(20, 20, 20, 0.65) 70%,
+      rgba(20, 20, 20, 0.45) 80%,
+      rgba(20, 20, 20, 0.25) 90%,
+      rgba(20, 20, 20, 0) 100%
+    );
     color: #fff;
   }
 
   /* Styling for the "PERSONAL PROJECT" label in mobile top overlay */
   .mobile-overlay-project-label {
-    font-family: 'Wix Madefor Display', sans-serif;
+    font-family: "Wix Madefor Display", sans-serif;
     font-size: 1.2rem;
     font-weight: 800;
     color: #adacacc7; /* Slightly lighter than #9c9b9bc7 */
@@ -702,7 +684,7 @@ body {
 
   /* Styling for the "DESCRIPTION" label in mobile bottom overlay */
   .mobile-overlay-description-label {
-    font-family: 'Wix Madefor Display', sans-serif;
+    font-family: "Wix Madefor Display", sans-serif;
     font-size: 1.2rem; /* Consistent with project label */
     font-weight: 800; /* Consistent with project label */
     color: #adacacc7; /* Slightly lighter than #9c9b9bc7 */
@@ -714,79 +696,94 @@ body {
     width: 100%;
   }
 
-  .lightbox-overlay-title-text { 
-      flex-grow: 0; /* Do not grow, allow natural size */
-      text-align: left; 
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: normal; /* Allow title to wrap if needed */
-      max-width: 100%; /* Ensure it doesn't overflow its parent */
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1.5;
-      color: #fff; /* Ensure title text is white */
-      margin-bottom: 24px;
-  }
-
-  .mobile-title-link-icon {
-    display: inline-flex; 
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0; /* Prevent icon from shrinking */
+  .lightbox-overlay-title-text {
+    flex-grow: 0; /* Do not grow, allow natural size */
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal; /* Allow title to wrap if needed */
+    max-width: 100%; /* Ensure it doesn't overflow its parent */
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.5;
+    color: #fff; /* Ensure title text is white */
+    margin-bottom: 0; /* Adjust as needed, no direct icon after */
   }
 
   .lightbox-title-overlay.show {
     transform: translateY(0);
-    animation: mobileTopOverlaySlideIn 400ms cubic-bezier(0.4,0,0.2,1) forwards;
+    animation: mobileTopOverlaySlideIn 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
   .lightbox-title-overlay.hide-anim {
     transform: translateY(-100%);
-    animation: mobileTopOverlaySlideOut 250ms cubic-bezier(0.4,0,0.2,1) forwards; /* Duration 250ms */
+    animation: mobileTopOverlaySlideOut 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards; /* Duration 650ms */
   }
-}
 
-
-.lightbox-description-overlay.show {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
+  #project-lightbox,
+  #project-lightbox #lightbox-inner-wrapper,
+  #project-lightbox #lightbox-content {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+  }
+  #project-lightbox #lightbox-content img,
+  #project-lightbox #lightbox-content video {
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block;
+    padding: 0;
+    border: none;
+  }
 }
 
 .lightbox-media-wrapper img,
 .lightbox-media-wrapper video {
-  max-height: 100%; 
-  min-width: 0; 
-  min-height: 0; 
-  flex: 0 0 auto; 
-  margin-right: 0; 
-  display: block; 
-  object-fit: contain; 
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 0 0 auto;
+  margin-right: 0;
+  display: block;
+  object-fit: contain;
   z-index: 2;
+}
+
+/* Crucial style for videos wrapped in a div, ensuring they respect container height */
+.lightbox-media-wrapper > div > video {
+  height: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
 }
 
 /* Base style for the description card in desktop view */
 .lightbox-media-wrapper .lightbox-desc-card {
-  margin-left: auto; 
-  margin-right: 0; 
-  height: 100%; 
+  margin-left: auto;
+  margin-right: 0;
+  height: 100%;
   border-radius: 18px;
   background: rgba(240, 240, 240, 0.95);
-  display: flex; 
+  display: flex;
   flex-direction: column;
   font-size: 1.13rem;
   font-weight: 500;
   color: #333;
   z-index: 1;
   box-sizing: border-box;
-  opacity: 0; 
-  transform: translateX(-40px); 
-  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out, overflow 0s 0.3s; /* Delay overflow change */
+  opacity: 0;
+  transform: translateX(-40px);
+  transition:
+    opacity 0.5s ease-in-out,
+    transform 0.5s ease-in-out,
+    overflow 0s 0.3s; /* Delay overflow change */
   overflow: hidden; /* Changed from auto */
-  padding: 30px 30px 30px 30px; 
-  text-align: left; 
-  white-space: normal; 
-  word-break: break-word; 
-  flex-shrink: 1; 
+  padding: 30px 30px 30px 30px;
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+  flex-shrink: 1;
 }
 
 /* Styles for Maximized Window State */
@@ -796,66 +793,101 @@ body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card {
   overflow: auto; /* Allow scrollbars if content overflows in maximized state */
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-project-label {
-  font-size: 1.05rem; 
-  margin-bottom: 6px;   
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-project-label {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-title {
-  font-size: 2.2rem;   
-  margin-bottom: 12px;  
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-title {
+  font-size: 2.2rem;
+  margin-bottom: 12px;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-title-divider {
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-title-divider {
   margin: 16px 0; /* Increased top and bottom margin */
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-description-label {
-  font-size: 1.05rem; 
-  margin-bottom: 8px;   
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-description-label {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-body {
-  font-size: 1rem;     
-  line-height: 1.55;   
-  margin-bottom: 20px;  
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-body {
+  font-size: 1rem;
+  line-height: 1.55;
+  margin-bottom: 20px;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points {
-  margin-bottom: 20px; 
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-bullet-points {
+  margin-bottom: 20px;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points ul li {
-  font-size: 1rem;     
-  line-height: 1.65;   
-  margin-bottom: 7px;   
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-bullet-points
+  ul
+  li {
+  font-size: 1rem;
+  line-height: 1.65;
+  margin-bottom: 7px;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-tools-section .card-title-divider {
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-tools-section
+  .card-title-divider {
   /* This rule was targeting the specific divider in tools, ensure its base style also has transition */
   /* Base style for .card-title-divider already has transition: margin 0.3s ease-out; */
   margin: 16px 0; /* Increased top and bottom margin */
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-tools-label {
-  font-size: 1.05rem; 
-  margin-bottom: 8px;   
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-tools-label {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card .card-tools-list {
-  font-size: 1rem;     
-  line-height: 1.55;   
-  color: #333; 
+body.projects-window-maximized
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-tools-list {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #333;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper.video-media-active .lightbox-desc-card {
+body.projects-window-maximized
+  .lightbox-media-wrapper.video-media-active
+  .lightbox-desc-card {
   padding-right: 64px; /* Apply extra right padding for videos only when maximized */
 }
 
 .lightbox-media-wrapper .lightbox-desc-card .card-tools-section {
-    flex-shrink: 0; /* Prevents this section from shrinking */
-    margin-top: auto; /* This can also help push to bottom if parent has height */
-    /* We are primarily relying on flex-grow of the main content though */
+  flex-shrink: 0; /* Prevents this section from shrinking */
+  margin-top: auto; /* This can also help push to bottom if parent has height */
+  /* We are primarily relying on flex-grow of the main content though */
 }
 
 @keyframes mobileBottomOverlaySlideIn {
@@ -917,7 +949,9 @@ body.projects-window-maximized .lightbox-media-wrapper.video-media-active .light
   max-width: 450px;
 }
 
-body.projects-window-maximized .lightbox-media-wrapper.video-media-active .desc-card-anim-wrapper {
+body.projects-window-maximized
+  .lightbox-media-wrapper.video-media-active
+  .desc-card-anim-wrapper {
   max-width: 545px;
 }
 
@@ -931,7 +965,11 @@ body.projects-window-maximized .lightbox-media-wrapper.video-media-active .desc-
   transform: translateX(0);
 }
 
-body, .scroll-content, .feed-container, .post, .main-window-content {
+body,
+.scroll-content,
+.feed-container,
+.post,
+.main-window-content {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -939,7 +977,8 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
 }
 
 /* Allow selection in links (if needed) */
-.post a, a {
+.post a,
+a {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
@@ -953,7 +992,7 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
   z-index: 10;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   width: 28px;
   height: 28px;
   display: flex;
@@ -962,7 +1001,7 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
 }
 .mute-icon-overlay.show {
   opacity: 1;
-  transition: opacity 0.18s cubic-bezier(0.4,0,0.2,1);
+  transition: opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 768px) {
@@ -970,10 +1009,6 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 44px;
-    height: 44px;
-  }
-  .mute-icon-overlay svg {
     width: 44px;
     height: 44px;
   }
@@ -1003,15 +1038,19 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
   min-height: 48px;
   max-width: 48px;
   max-height: 48px;
-  border: 4px solid rgba(255,255,255,0.25);
+  border: 4px solid rgba(255, 255, 255, 0.25);
   border-top: 4px solid #fff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   box-sizing: border-box;
 }
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .mute-icon-overlay img {
@@ -1021,27 +1060,27 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
 
 /* Push text span to bottom of overlay */
 .lightbox-description-overlay > span {
-    margin-top: auto;
+  margin-top: auto;
 }
 
 /* DESKTOP ONLY BORDERS for lightbox media */
 @media (min-width: 768px) {
   .lightbox-media-wrapper > img {
-      border: 2px solid rgb(240, 240, 240) !important;
-      border-radius: 20px !important; 
-      box-sizing: border-box;
+    border: 2px solid rgb(240, 240, 240) !important;
+    border-radius: 20px !important;
+    box-sizing: border-box;
   }
 
   .lightbox-media-wrapper > div:has(> video) {
-      border: 2px solid rgb(240, 240, 240);
-      border-radius: 20px;
-      box-sizing: border-box;
+    border: 2px solid rgb(240, 240, 240);
+    border-radius: 20px;
+    box-sizing: border-box;
   }
 
   /* This rule ensures video element itself doesn't get a double border if its wrapper has one */
   .lightbox-media-wrapper > div:has(> video) > video {
-      border: none !important; /* Keep this to remove any direct border on video */
-      /* Desktop videos can inherit radius from their wrapper if needed, or have their own.
+    border: none !important; /* Keep this to remove any direct border on video */
+    /* Desktop videos can inherit radius from their wrapper if needed, or have their own.
          If the wrapper gets border-radius: 20px, video itself might not need it.
          Let's assume wrapper's radius is sufficient. */
   }
@@ -1050,50 +1089,42 @@ body, .scroll-content, .feed-container, .post, .main-window-content {
 /* MOBILE: Explicitly set dark borders and radius for lightbox media, and light background for lightbox */
 @media (max-width: 767px) {
   #project-lightbox {
-    background-color: rgba(184, 184, 184, 0.747) !important; /* Light semi-transparent background */
+    background-color: rgba(
+      184,
+      184,
+      184,
+      0.747
+    ) !important; /* Light semi-transparent background */
   }
 
   .lightbox-media-wrapper > img {
-      border: 2px solid rgb(240, 240, 240) !important;
-      border-radius: 20px !important; /* Rounded corners */
-      box-sizing: border-box;
+    border: 2px solid rgb(240, 240, 240) !important;
+    border-radius: 20px !important; /* Rounded corners */
+    box-sizing: border-box;
   }
 
   .lightbox-media-wrapper > div:has(> video) {
-      border: 2px solid rgb(240, 240, 240) !important;
-      border-radius: 20px !important; /* Rounded corners */
-      box-sizing: border-box;
+    border: 2px solid rgb(240, 240, 240) !important;
+    border-radius: 20px !important; /* Rounded corners */
+    box-sizing: border-box;
   }
 
   .lightbox-media-wrapper > div:has(> video) > video {
-      border: none !important;
-      border-radius: 20px !important; /* Match wrapper's radius if displayed directly */
+    border: none !important;
+    border-radius: 20px !important; /* Match wrapper's radius if displayed directly */
   }
 
   /* For mobile, the main #lightbox-content might need overflow hidden and radius if media touches edges */
-  /* This was already in the mobile specific rules further up, which is good:
-    #project-lightbox #lightbox-content img, 
-    #project-lightbox #lightbox-content video { 
-        ...
-        border: none; // This might be overridden by the more specific rules above, hence the need for !important there
-    }
-    We need to ensure that #lightbox-content on mobile does not clip rounded corners IF the media itself had them.
-    Since we're removing media radius on mobile, this is less of a concern, but good to keep in mind.
-    The existing mobile rules for #lightbox-content img/video set max-width/height to fit within padding,
-    and object-fit: contain. The border-radius: 20px on .lightbox-media-wrapper at line 596 might be the source
-    of rounded corners on mobile if not overridden for the media elements themselves.
-    The #project-lightbox #lightbox-content img, video rule at line 391 already has border: none;
-    My new rules above with !important will ensure this.
-  */
 }
 
 /* Desktop Hover Effect for Posts */
 @media (hover: hover) and (pointer: fine) {
-    .feed-container .post:hover {
-        transform: scale(1.03);
-        z-index: 20; /* Ensure hovered item is above others */
-        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); /* More pronounced shadow */
-        border-color: #fff; /* Fade in white border */
-        transition-delay: 0s, 0s, 0s, 0s; /* Ensure z-index and border change immediately on hover */
-    }
+  .feed-container .post:hover {
+    transform: scale(1.03);
+    z-index: 20; /* Ensure hovered item is above others */
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); /* More pronounced shadow */
+    border-color: #fff; /* Fade in white border */
+    transition-delay:
+      0s, 0s, 0s, 0s; /* Ensure z-index and border change immediately on hover */
+  }
 }

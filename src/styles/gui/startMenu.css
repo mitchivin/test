@@ -472,10 +472,8 @@
   width: 180px; /* Standard width for submenus */
   background: #f2f2f2; /* Updated color */
   border: 1px solid #d0d0d0;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
-  z-index: calc(
-    var(--z-startmenu) + 1
-  );
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+  z-index: calc(var(--z-startmenu) + 1);
   padding: 2px;
   min-width: 170px;
   display: none;
@@ -809,8 +807,8 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    #a1c4fc 50%, /* dark blue */
-    transparent 100%
+    #a1c4fc 50%,
+    /* dark blue */ transparent 100%
   );
 }
 
@@ -843,5 +841,9 @@
 .menu-item.menu-item-clicked {
   background-color: #1e5fa9; /* Darker blue for clicked state */
   color: white;
-  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.3);
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.projects-bold {
+  font-weight: bold;
 }
