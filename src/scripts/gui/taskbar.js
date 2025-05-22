@@ -304,23 +304,19 @@ export async function showNetworkBalloon() {
   setTimeout(() => {
     const iconRect = icon.getBoundingClientRect();
     const balloon = balloonRoot.querySelector(".balloon");
-    const balloonRect = balloon.getBoundingClientRect();
     const pointerAnchor = balloon.querySelector(".balloon-pointer-anchor");
-    const pointerRect = pointerAnchor.getBoundingClientRect();
-    // Calculate the center of the icon
-    const iconCenterX = iconRect.left + iconRect.width / 2 + window.scrollX;
-    // Calculate the position of the pointer within the balloon
-    const pointerX = pointerRect.left + window.scrollX;
-    // Calculate the difference
-    const offsetX = iconCenterX - pointerX;
-    // Adjust for scale transform (0.93)
-    const scale = 0.93;
-    const deltaX = (balloonRect.width * (scale - 1)) / 2;
-    // Set the balloon position so the pointer aligns with the icon center
-    balloonRoot.style.left =
-      balloonRect.left + offsetX - deltaX - 24 - 2 + "px";
-    balloonRoot.style.top =
-      iconRect.top - balloonRect.height - 22 - 2 + window.scrollY + "px";
+    // Use requestAnimationFrame to ensure DOM is rendered
+    requestAnimationFrame(() => {
+      const pointerRect = pointerAnchor.getBoundingClientRect();
+      // Calculate the center of the icon
+      const iconCenterX = iconRect.left + iconRect.width / 2 + window.scrollX;
+      // Calculate the center of the pointer anchor
+      const pointerCenterX = pointerRect.left + pointerRect.width / 2 + window.scrollX;
+      // Adjust horizontally by -8px (left) and vertically by -12px (higher)
+      const offsetX = iconCenterX - pointerCenterX - 8;
+      balloonRoot.style.left = (balloonRoot.offsetLeft + offsetX) + "px";
+      balloonRoot.style.top = (iconRect.top - balloon.offsetHeight - 8 - 12 + window.scrollY) + "px";
+    });
   }, 0);
   const balloon = balloonRoot.querySelector(".balloon");
   const closeBtn = balloonRoot.querySelector(".balloon__close");

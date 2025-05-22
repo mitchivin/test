@@ -1715,7 +1715,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       numColumns = 3;
     }
 
-    const columnWidth = (availableWidth - (numColumns - 1) * gap) / numColumns;
+    const maxColumnWidth = 320;
+    const columnWidth = Math.min((availableWidth - (numColumns - 1) * gap) / numColumns, maxColumnWidth);
 
     currentFeedPosts.forEach((post) => {
       post.style.position = "absolute";
