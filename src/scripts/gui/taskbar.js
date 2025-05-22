@@ -20,6 +20,7 @@ import StartMenu from "./startMenu.js";
 import { EVENTS } from "../utils/eventBus.js";
 import { setupTooltips } from "./tooltip.js"; // Corrected path from utils
 import { isMobileDevice } from "../utils/device.js";
+import { balloonSound } from "./boot.js"; // Import balloonSound
 
 /**
  * Clock class for managing the system clock display and time updates.
@@ -262,6 +263,13 @@ export async function showNetworkBalloon() {
   // Clear any previous balloon timeouts before showing a new one
   balloonTimeouts.forEach((t) => clearTimeout(t));
   balloonTimeouts = [];
+
+  // Play the balloon sound
+  if (balloonSound) {
+    balloonSound.currentTime = 0;
+    balloonSound.play().catch(error => console.error("Error playing balloon sound:", error));
+  }
+
   const icon = document.querySelector(".tray-network-icon");
   if (!icon) return;
   const balloonRoot = document.createElement("div");

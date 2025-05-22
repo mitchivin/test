@@ -211,7 +211,7 @@ body {
 /* Tablet and Small Desktop: 3 columns (Changed from 2) */
 @media (min-width: 768px) {
   .feed-container {
-    padding: 40px;
+    padding: 20px;
     max-width: 1072px;
   }
 

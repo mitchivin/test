@@ -14,6 +14,8 @@
 import { showNetworkBalloon } from "./taskbar.js";
 
 let SYSTEM_ASSETS = null;
+export let balloonSound = null;
+
 async function getSystemAssets() {
   if (SYSTEM_ASSETS) return SYSTEM_ASSETS;
   try {
@@ -48,6 +50,9 @@ export function initBootSequence(eventBus, EVENTS) {
   const logoffSound = new Audio("./assets/sounds/logoff.wav");
   loginSound.load();
   logoffSound.load();
+
+  balloonSound = new Audio("./assets/sounds/balloon.wav");
+  balloonSound.load();
 
   // Boot logic: force boot, skip for returning users, or run full sequence
   if (forceBoot) {
