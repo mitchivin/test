@@ -1,0 +1,133 @@
+[
+  {
+    "type": "image",
+      "src": "assets/apps/projects/project5/portfolioxp.webp",
+      "images": [
+        "assets/apps/projects/project5/portfolioxp2.webp"
+      ],
+      "title": "Portfolio XP",
+      "subtitle": "A fully interactive Windows XP simulation reimagined as a design portfolio experience.",
+      "software": "premiere pro",
+      "description": "A fully interactive portfolio built inside a custom-coded Windows XP simulation. Designed to feel like a living OS, this project showcases my work through functional apps, retro UI, and immersive detail. Every element, from the boot screen to the file explorer, is crafted to reflect originality and precision.",
+      "bulletPoints": [
+        "Fully navigable desktop with working XP-style programs",
+        "Built from scratch using HTML, CSS, and JavaScript",
+        "Emphasizes creative direction, technical execution, and detail-driven design"
+      ],
+      "toolsUsed": ["Premiere Pro"],
+      "alt": "Portfolio XP"
+  },
+  {
+    "type": "video",
+    "src": "assets/apps/projects/project3/suaalii-switch-up-thumb.mp4",
+    "fullVideoSrc": "assets/apps/projects/project3/suaalii-switch-up.mp4",
+    "poster": "assets/apps/projects/project3/suaalii-switch-up-poster.webp",
+    "images": [
+      {
+        "type": "video",
+        "src": "assets/apps/projects/project3/suaalii-switch-up.mp4",
+        "poster": "assets/apps/projects/project3/suaalii-switch-up-poster.webp"
+      },
+      {
+        "type": "video",
+        "src": "assets/apps/projects/project3/flashback.mp4",
+        "poster": "assets/apps/projects/project3/flashback-poster.webp"
+      },
+      {
+        "type": "video",
+        "src": "assets/apps/projects/project3/saquon-snow-day.mp4",
+        "poster": "assets/apps/projects/project3/saquon-snow-day-poster.webp"
+      }
+    ],
+    "title": "Highlight Reels",
+    "subtitle": "Fast-paced edits capturing key moments, emotion, and story.",
+    "software": "premiere pro,chatgpt",
+    "description": "A collection of highlight reels designed to amplify big plays, emotional moments, and live energy. Formats range from music-driven edits to voiceover-led narratives, each tailored to the pace and feel of the sport.",
+    "bulletPoints": [
+      "Built for hype, emotion, and impact",
+      "Covers multiple sports and styles",
+      "Edits tailored for each platform and audience"
+    ],
+    "toolsUsed": ["Premiere Pro", "ChatGPT"],
+    "alt": "Sua'ali'i Switch Up Video"
+  },
+  {
+    "type": "image",
+    "src": "assets/apps/projects/project10/mavs-final-score.webp",
+    "images": [
+      "assets/apps/projects/project10/all-blacks-final-score.webp",
+      "assets/apps/projects/project10/gameday-blues.webp"
+    ],
+    "title": "Game-Time Graphics",
+    "subtitle": "Post-match visuals delivering results with clarity, emotion, and brand alignment.",
+    "software": "photoshop,illustrator",
+    "description": "A versatile suite of game time graphics designed for every stage of the match cycle. From pre-game lineups to final scores, each piece is built to inform, engage, and reinforce brand identity across platforms.",
+    "bulletPoints": [
+      "Consistent framework tailored for pre and post-game use",
+      "Emphasis on clarity, team identity, and match context",
+      "Flexible layouts suited to a range of content types"
+    ],
+    "toolsUsed": ["Photoshop", "Illustrator"],
+    "alt": "Mavs Final Score Graphic"
+  },
+  {
+    "type": "video",
+    "src": "assets/apps/projects/test/wide-video-thumb.mp4",
+    "images": [
+      {
+        "type": "video",
+        "src": "assets/apps/projects/test/wide-video-actual.mp4",
+        "srcMobile": "assets/apps/projects/test/wide-video-actual-mobile.mp4",
+        "poster": "assets/apps/projects/test/wide-video-poster.webp",
+        "posterMobile": "assets/apps/projects/test/wide-video-poster-mobile.webp"
+      }
+    ],
+    "title": "Client Event Videos",
+    "subtitle": "Commissioned event videos spotlighting Australian sporting legends for charity luncheon.",
+    "software": "premiere pro",
+    "workType": "client",
+    "description": "Commissioned video packages created to introduce athletes at live events. These edits play in the lead-up to on-stage appearances or formal recognitions, setting the tone, capturing attention, and creating a strong sense of occasion.",
+    "bulletPoints": [
+      "Played during athlete walk-ons or live intros",
+      "Tone and pacing aligned with each event brief",
+      "Delivered in client-ready formats for live production"
+    ],
+    "toolsUsed": ["Test Suite"],
+    "alt": "Wide Video Test Project",
+    "lightboxDescStartsHiddenRight": true
+  },
+  {
+    "type": "image",
+    "src": "assets/apps/projects/project1/patrickmahomes.webp",
+    "images": [
+      "assets/apps/projects/project1/barkley-big-head.webp",
+      "assets/apps/projects/project1/minnesotas-coldest.webp"
+    ],
+    "title": "Creative Composites",
+    "subtitle": "Photoshop-driven image manipulation and design exploration.",
+    "software": "photoshop",
+    "description": "A collection of image-based design work built through Photoshop. This project explores compositing, retouching, and visual manipulation as tools to push style, technique, and creative direction across different subjects and formats.",
+    "bulletPoints": [
+      "Designed to highlight individuality and presence",
+      "Balances composition, contrast, and scale",
+      "Adapts style to suit each player and moment"
+    ],
+    "toolsUsed": ["Photoshop"],
+    "alt": "Patrick Mahomes"
+  },
+  {
+    "type": "image",
+    "src": "assets/apps/projects/project2/goosebumps.webp",
+    "title": "AI Experiments",
+    "subtitle": "A personal deep dive into AI tools, used to test ideas, challenge habits, and expand creative range.",
+    "software": "photoshop",
+    "description": "A mixed collection of AI-generated designs that sit outside defined projects. This space is used to explore style, technique, and creative direction through AI, without the constraints of a specific brief or category.",
+    "bulletPoints": [
+      "Concept-first visuals without set rules",
+      "Explores new styles, prompts, and workflows",
+      "Used to test ideas and push creative boundaries"
+    ],
+    "toolsUsed": ["Photoshop"],
+    "alt": "Blues Starting XV Graphic"
+  }
+]
