@@ -88,36 +88,6 @@
     "alt": "AI Experiments"
   },
   {
-    "type": "video",
-    "src": "assets/apps/projects/event-commissions/wide-video-thumb.mp4",
-    "images": [
-      {
-        "type": "video",
-        "src": "assets/apps/projects/event-commissions/wide-video-actual.mp4",
-        "srcMobile": "assets/apps/projects/event-commissions/wide-video-actual-mobile.mp4",
-        "poster": "assets/apps/projects/event-commissions/wide-video-poster.webp",
-        "posterMobile": "assets/apps/projects/event-commissions/wide-video-poster-mobile.webp"
-      },
-      {
-        "type": "video",
-        "src": "assets/apps/projects/event-commissions/wide-video-actual2.mp4",
-        "poster": "assets/apps/projects/highlight-reels/flashback-poster.webp"
-      }
-    ],
-    "title": "Event Commissions",
-    "subtitle": "Commissioned event videos spotlighting Australian sporting legends for charity luncheons.",
-    "workType": "client",
-    "description": "Commissioned video packages created to introduce athletes at live events. These edits play in the lead-up to on-stage appearances, setting the tone, capturing attention, and creating a strong sense of occasion.",
-    "bulletPoints": [
-      "Played during athlete walk-ons or live intros",
-      "Tone and pacing aligned with each event brief",
-      "Delivered in client-ready formats for live production"
-    ],
-    "toolsUsed": ["Premiere Pro, After Effects"],
-    "alt": "Event Commissions",
-    "lightboxDescStartsHiddenRight": true
-  },
-  {
     "type": "image",
     "src": "assets/apps/projects/creative-composites/patrickmahomes.webp",
     "images": [
