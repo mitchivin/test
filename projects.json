@@ -20,21 +20,17 @@
   {
     "type": "video",
     "src": "assets/apps/projects/highlight-reels/flashback-thumb.mp4",
-    "fullVideoSrc": "assets/apps/projects/highlight-reels/flashback.mp4",
     "poster": "assets/apps/projects/highlight-reels/flashback-poster.webp",
     "images": [
       {
-        "type": "video",
         "src": "assets/apps/projects/highlight-reels/flashback.mp4",
         "poster": "assets/apps/projects/highlight-reels/flashback-poster.webp"
       },
       {
-        "type": "video",
         "src": "assets/apps/projects/highlight-reels/suaalii-switch-up.mp4",
         "poster": "assets/apps/projects/highlight-reels/suaalii-switch-up-poster.webp"
       },
       {
-        "type": "video",
         "src": "assets/apps/projects/highlight-reels/saquon-snow-day.mp4",
         "poster": "assets/apps/projects/highlight-reels/saquon-snow-day-poster.webp"
       }
@@ -96,7 +92,6 @@
     ],
     "title": "Creative Composites",
     "subtitle": "Photoshop-driven image manipulation and design exploration.",
-    "software": "photoshop",
     "description": "A collection of image-based design work built through Photoshop. This project explores compositing, retouching, and visual manipulation as tools to push style, technique, and creative direction across different subjects and formats.",
     "bulletPoints": [
       "Designed to highlight individuality and presence",
