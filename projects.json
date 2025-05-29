@@ -1,21 +1,21 @@
 [
   {
     "type": "image",
-      "src": "assets/apps/projects/portfolioxp/image2.webp",
-      "images": [
-        "assets/apps/projects/portfolioxp/image2.webp",
-        "assets/apps/projects/portfolioxp/image3.webp"
-      ],
-      "title": "Portfolio XP",
-      "subtitle": "A fully interactive Windows XP simulation reimagined as a design portfolio experience.",
-      "description": "A fully interactive portfolio built inside a custom-coded Windows XP simulation. Designed to feel like a living OS, this project showcases my work through functional apps, retro UI, and immersive detail. Every element, from the boot screen to the file explorer, is crafted to reflect originality and precision.",
-      "bulletPoints": [
-        "Fully navigable desktop with working XP-style programs",
-        "Built from scratch using HTML, CSS, and JavaScript",
-        "Emphasizes creative direction, technical execution, and detail-driven design"
-      ],
-      "toolsUsed": ["HTML/CSS/JS, Generative AI, Illustrator, Photoshop"],
-      "alt": "Portfolio XP"
+    "src": "assets/apps/projects/portfolioxp/image2.webp",
+    "images": [
+      "assets/apps/projects/portfolioxp/image2.webp",
+      "assets/apps/projects/portfolioxp/image3.webp"
+    ],
+    "title": "Portfolio XP",
+    "subtitle": "A fully interactive Windows XP simulation reimagined as a design portfolio experience.",
+    "description": "A fully interactive portfolio built inside a custom-coded Windows XP simulation. Designed to feel like a living OS, this project showcases my work through functional apps, retro UI, and immersive detail. Every element, from the boot screen to the file explorer, is crafted to reflect originality and precision.",
+    "bulletPoints": [
+      "Fully navigable desktop with working XP-style programs",
+      "Built from scratch using HTML, CSS, and JavaScript",
+      "Emphasizes creative direction, technical execution, and detail-driven design"
+    ],
+    "toolsUsed": ["HTML/CSS/JS, Generative AI, Illustrator, Photoshop"],
+    "alt": "Portfolio XP"
   },
   {
     "type": "video",
@@ -69,9 +69,9 @@
     "type": "image",
     "src": "assets/apps/projects/ai-experiments/goosebumps1.webp",
     "images": [
-        "assets/apps/projects/ai-experiments/goosebumps2.webp",
-        "assets/apps/projects/ai-experiments/goosebumps3.webp"
-      ],
+      "assets/apps/projects/ai-experiments/goosebumps2.webp",
+      "assets/apps/projects/ai-experiments/goosebumps3.webp"
+    ],
     "title": "Goosebumps XV",
     "subtitle": "Classic Goosebumps horror covers reimagined around rugby folklore.",
     "description": "A trio of covers blending the lurid colour palette and worn paperback grit of 90s Goosebumps with iconic rugby imagery. Built from tuned AI prompts then polished in Photoshop for small details and color correction.",
