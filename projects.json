@@ -1,21 +1,22 @@
 [
   {
     "type": "image",
-    "src": "assets/apps/projects/portfolioxp/image2.webp",
+    "src": "assets/apps/projects/game-time-graphics/mavs-final-score.webp",
     "images": [
-      "assets/apps/projects/portfolioxp/image2.webp",
-      "assets/apps/projects/portfolioxp/image3.webp"
+      "assets/apps/projects/game-time-graphics/all-blacks-final-score.webp",
+      "assets/apps/projects/game-time-graphics/blues-starting-xv.webp",
+      "assets/apps/projects/game-time-graphics/gameday-blues.webp"
     ],
-    "title": "Portfolio XP",
-    "subtitle": "A fully interactive Windows XP simulation reimagined as a design portfolio experience.",
-    "description": "A fully interactive portfolio built inside a custom-coded Windows XP simulation. Designed to feel like a living OS, this project showcases my work through functional apps, retro UI, and immersive detail. Every element, from the boot screen to the file explorer, is crafted to reflect originality and precision.",
+    "title": "Game Day Graphics",
+    "subtitle": "Post-match visuals delivering results with clarity, emotion, and brand alignment.",
+    "description": "A versatile suite of game time graphics designed for every stage of the match cycle. From pre-game lineups to final scores, each piece is built to inform, engage, and reinforce brand identity across platforms.",
     "bulletPoints": [
-      "Fully navigable desktop with working XP-style programs",
-      "Built from scratch using HTML, CSS, and JavaScript",
-      "Emphasizes creative direction, technical execution, and detail-driven design"
+      "Consistent framework tailored for pre and post-game use",
+      "Emphasis on clarity, team identity, and match context",
+      "Flexible layouts suited to a range of content types"
     ],
-    "toolsUsed": ["HTML/CSS/JS, Generative AI, Illustrator, Photoshop"],
-    "alt": "Portfolio XP"
+    "toolsUsed": ["Photoshop", "Illustrator"],
+    "alt": "Game-Time Graphics"
   },
   {
     "type": "video",
@@ -48,43 +49,6 @@
   },
   {
     "type": "image",
-    "src": "assets/apps/projects/game-time-graphics/mavs-final-score.webp",
-    "images": [
-      "assets/apps/projects/game-time-graphics/all-blacks-final-score.webp",
-      "assets/apps/projects/game-time-graphics/blues-starting-xv.webp",
-      "assets/apps/projects/game-time-graphics/gameday-blues.webp"
-    ],
-    "title": "Game Day Graphics",
-    "subtitle": "Post-match visuals delivering results with clarity, emotion, and brand alignment.",
-    "description": "A versatile suite of game time graphics designed for every stage of the match cycle. From pre-game lineups to final scores, each piece is built to inform, engage, and reinforce brand identity across platforms.",
-    "bulletPoints": [
-      "Consistent framework tailored for pre and post-game use",
-      "Emphasis on clarity, team identity, and match context",
-      "Flexible layouts suited to a range of content types"
-    ],
-    "toolsUsed": ["Photoshop", "Illustrator"],
-    "alt": "Game-Time Graphics"
-  },
-  {
-    "type": "image",
-    "src": "assets/apps/projects/ai-experiments/goosebumps1.webp",
-    "images": [
-      "assets/apps/projects/ai-experiments/goosebumps2.webp",
-      "assets/apps/projects/ai-experiments/goosebumps3.webp"
-    ],
-    "title": "Goosebumps XV",
-    "subtitle": "Classic Goosebumps horror covers reimagined around rugby folklore.",
-    "description": "A trio of covers blending the lurid colour palette and worn paperback grit of 90s Goosebumps with iconic rugby imagery. Built from tuned AI prompts then polished in Photoshop for small details and color correction.",
-    "bulletPoints": [
-      "Concept-first visuals",
-      "Prompt-engineered AI base, hand retouch finish",
-      "Used to test ideas and push creative boundaries"
-    ],
-    "toolsUsed": ["Generative AI, Photoshop"],
-    "alt": "AI Experiments"
-  },
-  {
-    "type": "image",
     "src": "assets/apps/projects/creative-composites/patrickmahomes.webp",
     "images": [
       "assets/apps/projects/creative-composites/barkley-big-head.webp",
@@ -100,5 +64,26 @@
     ],
     "toolsUsed": ["Photoshop, Illustrator"],
     "alt": "Creative Composites"
+  },
+  {
+    "type": "image",
+    "src": "assets/apps/projects/portfolioxp/image1.webp",
+    "images": [
+      "assets/apps/projects/portfolioxp/image2.webp",
+      "assets/apps/projects/portfolioxp/image3.webp",
+      "assets/apps/projects/portfolioxp/image4.webp",
+      "assets/apps/projects/portfolioxp/image5.webp",
+      "assets/apps/projects/portfolioxp/image6.webp"
+    ],
+    "title": "MitchIvin XP",
+    "subtitle": "A fully interactive Windows XP simulation reimagined as a design portfolio experience.",
+    "description": "A fully interactive portfolio built inside a custom-coded Windows XP simulation. Designed to feel like a living OS, this project showcases my work through functional apps, retro UI, and immersive detail. Every element, from the boot screen to the file explorer, is crafted to reflect originality and precision.",
+    "bulletPoints": [
+      "Fully navigable desktop with working XP-style programs",
+      "Built from scratch using HTML, CSS, and JavaScript",
+      "Emphasizes creative direction, technical execution, and detail-driven design"
+    ],
+    "toolsUsed": ["HTML/CSS/JS, Generative AI, Illustrator, Photoshop"],
+    "alt": "Portfolio XP"
   }
 ]
