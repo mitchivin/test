@@ -1,15 +1,8 @@
-/**
- * windowBars.js — Window Bar Utilities for Windows XP Simulation
- *
- * Handles creation and initialization of:
- * - MenuBar (with dropdowns and event logic)
- * - Toolbar (with dynamic button logic)
- * - AddressBar (XP-style address bar)
- *
- * Usage:
- *   import { createMenuBar, createToolbar, createAddressBar } from './windowBars.js';
- *
- * @module windowBars
+/*
+ * windowBars.js — Window bar utilities for Windows XP simulation.
+ * Provides functions to create menu bars, toolbars, address bars, and fetch social links for
+ * application windows. Handles mobile/desktop differences and dynamic toolbar content.
+ * @file src/scripts/gui/windowBars.js
  */
 
 import { isMobileDevice } from "../utils/device.js";
@@ -17,9 +10,9 @@ import { isMobileDevice } from "../utils/device.js";
 // ===== Address Bar Utility =====
 /**
  * Creates a Windows XP-style address bar component.
- * @param {Object} options - Options for the address bar.
+ * @param {Object} [options={}] - Options for the address bar.
  * @param {string} [options.icon] - Icon URL for the address bar.
- * @param {string} [options.title] - Title text for the address bar.
+ * @param {string} [options.title="About Me"] - Title text for the address bar.
  * @returns {HTMLElement} The address bar container element.
  */
 export function createAddressBar({ icon, title = "About Me" } = {}) {
@@ -52,7 +45,14 @@ export function createAddressBar({ icon, title = "About Me" } = {}) {
 }
 
 // Add a cache for socials
-let SOCIALS_CACHE = null;
+let SOCIALS_CACHE = null; // Caches the fetched social media links to avoid redundant API calls.
+
+/**
+ * Asynchronously fetches and caches social media links from `info.json`.
+ * If the cache is populated, it returns the cached data. Otherwise, it fetches,
+ * caches, and then returns the social links. Returns an empty array on fetch error.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of social objects.
+ */
 async function getSocials() {
   if (SOCIALS_CACHE) return SOCIALS_CACHE;
   try {
@@ -61,7 +61,7 @@ async function getSocials() {
     const info = await response.json();
     SOCIALS_CACHE = Array.isArray(info.socials) ? info.socials : [];
     return SOCIALS_CACHE;
-  } catch (e) {
+  } catch (_e) {
     SOCIALS_CACHE = [];
     return SOCIALS_CACHE;
   }
@@ -69,11 +69,13 @@ async function getSocials() {
 
 // --- MenuBar Creation ---
 /**
- * Creates a menu bar for a window.
- * @param {Object} menuBarConfig - Configuration for the menu bar.
- * @param {string} windowId - The window's unique ID.
- * @param {HTMLElement} parentWindowElement - The parent window element.
- * @returns {HTMLElement|null} The menu bar container or null if config is invalid.
+ * Creates a menu bar for a window, including its items and dropdowns.
+ * Handles special cases for certain windows (e.g., Resume app's File menu)
+ * and manages the active state of dropdown menus.
+ * @param {Object} menuBarConfig - Configuration for the menu bar, expecting an `items` array.
+ * @param {string} windowId - The unique ID of the window this menu bar belongs to.
+ * @param {HTMLElement} parentWindowElement - The parent window DOM element.
+ * @returns {HTMLElement|null} The menu bar container element, or null if `menuBarConfig` or `menuBarConfig.items` is falsy.
  */
 export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
   if (!menuBarConfig || !menuBarConfig.items) return null;
@@ -276,37 +278,76 @@ export function createMenuBar(menuBarConfig, windowId, parentWindowElement) {
         const action = newOption.getAttribute("data-action");
         let win = _parentWindowElement;
 
-        if (action === "saveResume" && win) {
-          win.dispatchEvent(
-            new CustomEvent("dispatchToolbarAction", {
-              detail: { action: "saveResume", button: null }, // button can be null or a dummy
-              bubbles: false,
-            }),
-          );
-        } else if (action) {
-          // General actions
-          if (action === "exitProgram" && win) {
-            win.dispatchEvent(
-              new CustomEvent("request-close-window", { bubbles: false }),
-            );
-          } else if (action === "minimizeWindow" && win) {
-            win.dispatchEvent(
-              new CustomEvent("request-minimize-window", { bubbles: false }),
-            );
-          } else if (action === "maximizeWindow" && win) {
-            win.dispatchEvent(
-              new CustomEvent("request-maximize-window", { bubbles: false }),
-            );
-          }
+        // Check the flag before dispatching menu action
+        if (win && win.dataset.acceptInput === "false") {
+          // console.log("[windowBars] Menu option: Input not accepted yet.");
+          closeActiveMenu(); // Still close the dropdown itself
+          return; // Ignore action if input is not yet accepted
+        }
+
+        if (action && win) {
+          const performAction = () => {
+            if (action === "exitProgram") {
+              win.dispatchEvent(
+                new CustomEvent("request-close-window", { bubbles: false }),
+              );
+            } else if (action === "minimizeWindow") {
+              win.dispatchEvent(
+                new CustomEvent("request-minimize-window", { bubbles: false }),
+              );
+            } else if (action === "maximizeWindow") {
+              win.dispatchEvent(
+                new CustomEvent("request-maximize-window", { bubbles: false }),
+              );
+            } else if (
+              action.startsWith("file") ||
+              action.startsWith("edit") ||
+              action.startsWith("view") ||
+              action.startsWith("tools") ||
+              action.startsWith("help") ||
+              action === "saveResume" ||
+              action === "newMessage" ||
+              action === "sendMessage"
+            ) {
+              win.dispatchEvent(
+                new CustomEvent("dispatchToolbarAction", {
+                  detail: { action: action, button: null },
+                  bubbles: false,
+                }),
+              );
+            }
+          };
+
+          performAction();
         }
         closeActiveMenu();
       });
     });
   }, 0);
+
+  // Listen for the custom iframe-interaction event
+  // This part seems to be missing its actual attachment to an element or is incomplete
+  // if (_parentWindowElement) { // This check might be needed depending on where this code snippet fits
+  //   _parentWindowElement.addEventListener("iframe-interaction", () => {
+  //     if (activeMenu) {
+  //         closeActiveMenu();
+  //     }
+  //   });
+  // }
+
   return menuBarContainer;
 }
 
 // --- Toolbar Creation ---
+/**
+ * Creates a toolbar for a window, adapting its content based on the device type (mobile/desktop)
+ * and specific window context (e.g., Projects, Contact Me).
+ * Handles dynamic button filtering, ordering, and special behaviors like the mobile close/home button.
+ * @param {Object} toolbarConfig - Configuration for the toolbar, expecting a `buttons` array.
+ * @param {string} windowId - The unique ID of the window this toolbar belongs to.
+ * @param {boolean} [isBottom=false] - Indicates if the toolbar is a bottom toolbar.
+ * @returns {HTMLElement|null} The toolbar wrapper element, or null if `toolbarConfig` or `toolbarConfig.buttons` is falsy.
+ */
 export function createToolbar(toolbarConfig, windowId, isBottom) {
   if (!toolbarConfig || !toolbarConfig.buttons) return null;
   const toolbarWrapper = document.createElement("div");
@@ -316,6 +357,13 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
   if (isBottom) toolbarRow.classList.add("toolbar-bottom");
   const isMobile = isMobileDevice();
   let buttons = toolbarConfig.buttons;
+
+  // For "projects-window", the "view-description" button is mobile-only.
+  if (windowId === "projects-window" && !isMobile) {
+    buttons = buttons.filter(
+      (btnConfig) => btnConfig.key !== "view-description",
+    );
+  }
 
   // On mobile, for Contact Me only, filter out disabled buttons
   if (isMobile && windowId === "contact-window") {
@@ -390,13 +438,26 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
     mobileCloseBtn.innerHTML = `<img alt="close" width="25" height="25" src="assets/gui/toolbar/delete.webp" /><span>Close</span>`;
     mobileCloseBtn.addEventListener("click", function (e) {
       e.stopPropagation();
-      // Find the parent window element and dispatch the close event
-      let parent = toolbarWrapper.parentElement;
-      while (parent && !parent.classList.contains("app-window")) {
-        parent = parent.parentElement;
+      // Find the parent window element
+      let parentWindowElement = toolbarWrapper.parentElement;
+      while (
+        parentWindowElement &&
+        !parentWindowElement.classList.contains("app-window")
+      ) {
+        parentWindowElement = parentWindowElement.parentElement;
       }
-      if (parent) {
-        parent.dispatchEvent(
+
+      // Check the flag before dispatching close event
+      if (
+        parentWindowElement &&
+        parentWindowElement.dataset.acceptInput === "false"
+      ) {
+        // console.log("[windowBars] Mobile close button: Input not accepted yet.");
+        return; // Ignore click if input is not yet accepted
+      }
+
+      if (parentWindowElement) {
+        parentWindowElement.dispatchEvent(
           new CustomEvent("request-close-window", { bubbles: false }),
         );
       }
@@ -413,7 +474,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
         // If this is the Contact Me app, filter and order socials
         if (windowId === "contact-window") {
           // Only keep LinkedIn for Contact Me toolbar
-          socials = socials.filter(s => s.key === "linkedin");
+          socials = socials.filter((s) => s.key === "linkedin");
         }
         socials.forEach((social) => {
           const socialBtn = document.createElement("div");
@@ -424,7 +485,11 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
           socialBtn.setAttribute("aria-label", `View on ${social.name}`);
           socialBtn.setAttribute("data-social-key", social.key);
           // For Contact Me toolbar, show both icon and text for LinkedIn
-          if (windowId === "contact-window" && social.key === "linkedin" && !isMobile) {
+          if (
+            windowId === "contact-window" &&
+            social.key === "linkedin" &&
+            !isMobile
+          ) {
             socialBtn.innerHTML = `<img alt="${social.name}" width="25" height="25" src="${social.icon}" /><span>LinkedIn</span>`;
           } else {
             socialBtn.innerHTML = `<img alt="${social.name}" width="25" height="25" src="${social.icon}" />`;
@@ -446,15 +511,6 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
     )
       return;
 
-    // Skip 'view-description' button on desktop for 'projects-window'
-    if (
-      !isMobile &&
-      windowId === "projects-window" &&
-      buttonConfig.key === "view-description"
-    ) {
-      return;
-    }
-
     // Skip buttons marked as desktopOnly if on mobile
     if (isMobile && buttonConfig.desktopOnly) {
       return;
@@ -473,7 +529,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
       buttonDiv.className = `toolbar-button ${buttonConfig.key}`;
       if (!buttonConfig.enabled) buttonDiv.classList.add("disabled");
       if (buttonConfig.key === "home" && windowId === "projects-window") {
-        buttonDiv.setAttribute("data-action", "navigateHome");
+        buttonDiv.setAttribute("data-action", "home");
       } else if (buttonConfig.action) {
         buttonDiv.setAttribute("data-action", buttonConfig.action);
       }
@@ -501,7 +557,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
 
   // --- Mobile: Listen for lightbox-state messages to toggle close/home button ---
   if (isMobile && windowId === "projects-window" && mobileCloseBtn) {
-    let isHomeMode = false;
+    let isHomeMode = false; // Tracks if the mobile button should act as 'Home' (true) or 'Close' (false).
     function setToHomeMode() {
       isHomeMode = true;
       mobileCloseBtn.innerHTML = `<img alt="home" width="25" height="25" src="assets/gui/toolbar/home.webp" /><span>Home</span>`;
@@ -522,7 +578,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
     mobileCloseBtn.addEventListener("click", function (e) {
       e.stopPropagation();
       if (isHomeMode) {
-        // Only close the lightbox (send navigateHome to iframe)
+        // Only close the lightbox (send home to iframe)
         let parent = toolbarWrapper.parentElement;
         while (parent && !parent.classList.contains("app-window")) {
           parent = parent.parentElement;
@@ -531,7 +587,7 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
           const iframe = parent.querySelector("iframe");
           if (iframe && iframe.contentWindow) {
             iframe.contentWindow.postMessage(
-              { type: "toolbar-action", action: "navigateHome" },
+              { type: "toolbar-action", action: "home" },
               "*",
             );
           }
@@ -555,6 +611,10 @@ export function createToolbar(toolbarConfig, windowId, isBottom) {
           setToHomeMode();
         } else {
           setToCloseMode();
+          // Force reflow/update if needed
+          if (mobileCloseBtn) {
+            mobileCloseBtn.offsetWidth;
+          }
         }
       }
     });

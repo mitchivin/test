@@ -2,6 +2,7 @@
   contact.html — Contact App for Windows XP Simulation
   Provides the Contact Me window content and structure.
   Loaded as an iframe in the main shell.
+  @file src/apps/contact/contact.html
 -->
 <!doctype html>
 <html lang="en">
@@ -15,11 +16,12 @@
       href="https://unpkg.com/xp.css@0.2.6/dist/XP.css"
       crossorigin="anonymous"
     />
-    <!-- Updated CSS link -->
     <link rel="stylesheet" href="contact.css" />
   </head>
   <body>
+    <!-- ===== Form Structure ===== -->
     <div class="content-wrapper">
+      <!-- ===== Form Field: To (Readonly) ===== -->
       <div class="field">
         <label for="contact-to">To:</label>
         <input
@@ -30,6 +32,7 @@
           readonly
         />
       </div>
+      <!-- ===== Form Field: From ===== -->
       <div class="field">
         <label for="contact-from">From:</label>
         <input
@@ -39,6 +42,7 @@
           placeholder="Your email address"
         />
       </div>
+      <!-- ===== Form Field: Subject ===== -->
       <div class="field">
         <label for="contact-subject">Subject:</label>
         <input
@@ -48,12 +52,14 @@
           placeholder="Subject of your message"
         />
       </div>
+      <!-- ===== Form Field: Message ===== -->
       <textarea
         id="contact-message"
         class="textarea"
         placeholder="Write your message here"
       ></textarea>
     </div>
+    <!-- ===== App Interactivity Script ===== -->
     <script src="contact.js"></script>
   </body>
 </html>

@@ -1,35 +1,25 @@
 /*
- * taskbar.css — Taskbar Styles for Windows XP Simulation
- *
- * Styles for:
- * - Taskbar, start button, quick launch, taskbar items, system tray, and clock
- * - Balloon tooltips and responsive adjustments
- *
+ * taskbar.css — Taskbar styles for Windows XP simulation.
+ * Handles taskbar, start button, quick launch, taskbar items, system tray, clock, and XP-specific UI details.
+ * Matches the look and feel of Windows XP.
  * @file src/styles/gui/taskbar.css
  */
 
-/* ==================================================
-   Taskbar Styles for Windows XP Simulation
-   ==================================================
-   - Handles taskbar, start button, quick launch, taskbar items, system tray, and clock.
-   - Matches the look and feel of Windows XP.
-   ================================================== */
-
 /* ===== Root Variables ===== */
 :root {
-  --taskbar-height: 30px;
-  --taskbar-item-height: 24px; /* Set to 24px */
-  --taskbar-active-color: #184f8b;
-  --taskbar-hover-color: #3b98f7;
-  --taskbar-gradient-start: #2980d5;
-  --taskbar-gradient-end: #1e5aa0;
-  --taskbar-text-shadow: 1px 1px 1px rgb(0 0 0 / 60%);
-  --tray-spacing: 6px;
-  --icon-size-small: 15px;
-  --z-taskbar: 500;
+  --taskbar-height: 30px; /* Height of the taskbar */
+  --taskbar-item-height: 26px; /* Height of each taskbar item - User updated */
+  --taskbar-text-shadow: 1px 1px 1px rgb(0 0 0 / 60%); /* Text shadow for taskbar text (used by clock) */
+  --tray-spacing: 6px; /* Spacing between tray icons */
+  --icon-size-small: 15px; /* Size for small icons in taskbar */
+  --z-taskbar: 500; /* Z-index for taskbar (above windows, below start menu) */
 }
 
 /* ===== Taskbar Container ===== */
+/*
+  Main taskbar container, fixed to the bottom of the viewport.
+  Uses a repeating XP background image and flex layout for child elements.
+*/
 .taskbar {
   position: fixed;
   bottom: 0;
@@ -46,7 +36,10 @@
 }
 
 /* ===== Start Button ===== */
-/* Start button */
+/*
+  Start button styled to match Windows XP, with hover/active states and no border.
+  Prevents tap highlight on mobile and disables drag on the image.
+*/
 .start-button {
   position: relative;
   height: var(--taskbar-height);
@@ -91,7 +84,9 @@
 }
 
 /* ===== Quick Launch & Programs Area ===== */
-/* Programs area */
+/*
+  Programs area (taskbar-programs) holds running app buttons, stretches to fill available space.
+*/
 .taskbar-programs {
   flex-grow: 1;
   height: 100%;
@@ -104,35 +99,44 @@
 }
 
 /* ===== Taskbar Items ===== */
-/* Taskbar program buttons */
+/*
+  Taskbar program buttons, styled for XP look with gradients, shadows, and hover/active states.
+  .icon-only mode is used as a last resort for space.
+*/
 .taskbar-item {
   height: var(--taskbar-item-height);
-  margin: 0.5px;
   padding: 0 10px;
-  border-radius: 5px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  color: #eaf2fb;
+  color: #ffffff;
   font-size: 11px;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
   cursor: default;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
-  border: 1px solid rgba(20, 75, 156, 0.842); /* Faint dark border */
+  /* MODIFIED: Default Inactive state - Vibrant XP Blue (less glossy & less vibrant) */
   background: linear-gradient(
     to bottom,
-    #5790fa 0%,
-    #0753b6 100%
-  ); /* Subtle, less saturated blue gradient */
-  box-shadow: 0 1px 2px 0 rgba(10, 60, 151, 0.904); /* Faint outer shadow for separation */
+    #3ba0e7 0%,
+    /* Top is now a deeper blue, less white */ #3295eb 50%,
+    /* Strong blue middle */ #3389d4 100% /* Bottom blue closer to top */
+  );
+  border: 1px solid #0e63ad; /* Matches new bottom for unity */
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2); /* Kept highlight opacity */
   transition:
     width 0.15s,
     background 0.18s,
-    box-shadow 0.18s;
+    box-shadow 0.18s,
+    border-color 0.18s;
   flex-shrink: 1;
+}
+
+.taskbar-item:first-child {
+  margin-left: 0;
 }
 
 /* Only use icon-only mode as an absolute last resort */
@@ -154,43 +158,43 @@
   .taskbar-item:hover:not(.active) {
     background: linear-gradient(
       to bottom,
-      #4da2f8 0%,
-      #2678d8 100%
-    ); /* Less bright hover gradient */
-
+      #56b6fc 0%,
+      /* Lighter blue top for hover */ #52aeff 50%,
+      /* Same strong blue middle */ #0e81ec 100%
+        /* Slightly deeper blue bottom */
+    );
+    border: 1px solid #2176c7;
     box-shadow:
-      inset 0 1px 1px rgb(255 255 255 / 35%),
-      inset 0 -1px 1px rgb(0 0 0 / 14%),
-      inset 1px 0 0 rgb(255 255 255 / 28%),
-      inset -1px 0 0 rgb(0 0 0 / 9%),
-      0 1px 2px rgb(0 0 0 / 20%); /* Slightly smaller outer shadow on hover */
-  }
-
-  .taskbar-item.active:hover {
-    background: linear-gradient(
-      to top,
-      #226ac4 0%,
-      #1a5c9d 100%
-    ); /* Adjusted active hover gradient */
-
-    box-shadow:
-      inset 0 1px 2px rgb(0 0 0 / 30%),
-      /* Adjusted active hover shadow */ inset 0 -1px 0 rgb(255 255 255 / 14%),
-      inset 1px 0 1px rgb(0 0 0 / 20%),
-      inset -1px 0 1px rgb(0 0 0 / 20%);
+      inset 0 1px 1px rgba(255, 255, 255, 0.45),
+      0 1px 2px rgba(0, 0, 0, 0.18);
   }
 }
 
 .taskbar-item.active {
   background: linear-gradient(
     to top,
-    #1e62bc 0%,
-    #185294 100%
-  ); /* Slightly adjusted active gradient */
-
+    #1a5a99 0%,
+    /* Deep blue for pressed base */ #2176c7 100%
+      /* Lighter blue for pressed body */
+  );
   box-shadow:
-    inset 0 1px 2px rgb(0 0 0 / 25%),
-    inset -1px 0 1px rgb(0 0 0 / 15%); /* Adjusted inner side shadows */
+    inset 1px 1px 1px rgba(0, 0, 0, 0.4),
+    inset -1px -1px 0px rgba(255, 255, 255, 0.05);
+  border: 1px solid #174a7c;
+  color: #ffffff;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+@media (hover: hover) {
+  .taskbar-item.active:hover {
+    background: linear-gradient(
+      to top,
+      #206ebb 0%,
+      /* Slightly lighter than pressed base */ #1e73b1 100%
+        /* Slightly lighter than pressed body */
+    );
+    /* Keep other properties same as .active for pressed look */
+  }
 }
 
 .taskbar-item img {
@@ -213,7 +217,10 @@
 }
 
 /* ===== System Tray & Clock ===== */
-/* System tray */
+/*
+  System tray area (system-tray) and clock, styled to match XP.
+  Tray icons are spaced and sized for clarity, and the clock uses a white font with shadow.
+*/
 .system-tray {
   height: 100%;
   width: auto;
@@ -263,19 +270,7 @@
   cursor: pointer !important;
 }
 
-.tray-network-icon {
-  width: 16px;
-  height: 16px;
-  position: relative;
-  top: 0;
-  transform: none;
-  margin: 1px 0 0 0;
-  object-fit: contain;
-  cursor: default;
-  display: flex;
-  align-items: center;
-}
-
+.tray-network-icon,
 .tray-fullscreen-icon {
   width: 16px;
   height: 16px;
@@ -284,9 +279,27 @@
   transform: none;
   margin: 1px 0 0 0;
   object-fit: contain;
-  cursor: pointer;
   display: flex;
   align-items: center;
+}
+
+.tray-network-icon {
+  cursor: default;
+}
+
+/* Disable hover effects on welcome icon when balloon is open */
+body:has(#balloon-root) .tray-network-icon {
+  pointer-events: none !important;
+}
+
+body:has(#balloon-root) .tray-network-icon:hover {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.tray-fullscreen-icon {
+  cursor: pointer;
 }
 
 .system-tray img {
@@ -307,9 +320,10 @@
 }
 
 /* ===== Balloon Tooltip ===== */
-/* Start Menu styles moved to startmenu.css */
-
-/* === Balloon Tooltip Styles === */
+/*
+  Balloon tooltip styles for notifications, styled to match XP's yellow tooltips.
+  Includes fade-in/out animations and close button.
+*/
 #balloon-root {
   position: relative;
 }
@@ -444,12 +458,3 @@
 /* ==================================================
    END Taskbar Styles
    ================================================== */
-
-/* @media (max-width: 768px) { // MOVED TO main.css
-  .desktop-only {
-    display: none;
-  }
-} */
-
-/* @media (max-width: 768px) { // REMOVED - Empty media query
-} */

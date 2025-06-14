@@ -1,20 +1,7 @@
 /**
- * window.js — Window Manager for Windows XP Simulation
- *
- * Handles all window operations, including:
- * - Window creation, focus, minimize, maximize, close, drag, and cascade
- * - Taskbar and event bus integration
- * - Dynamic content and toolbar/address bar logic
- *
- * Usage:
- *   import WindowManager from './window.js';
- *   const windowManager = new WindowManager(eventBus);
- *
- * Edge Cases:
- *   - If required DOM containers are missing, window creation will fail.
- *   - If program registry is missing entries, unknown apps cannot be opened.
- *
- * @module window
+ * @fileoverview Window Manager for Windows XP simulation.
+ * @description Handles all window operations, including creation, focus, minimize, maximize, close, drag, cascade, and integration with the taskbar and event bus. Manages dynamic content, toolbars, and address bars for application windows.
+ * @module scripts/gui/window
  */
 import programData from "../utils/programRegistry.js";
 import { EVENTS } from "../utils/eventBus.js";
@@ -22,15 +9,12 @@ import {
   createMenuBar,
   createToolbar,
   createAddressBar,
-  getSocials,
 } from "./windowBars.js";
 import { isMobileDevice } from "../utils/device.js";
 
-const TASKBAR_HEIGHT = 30; // Define constant taskbar height
+const TASKBAR_HEIGHT = 30; // Defines constant taskbar height in pixels, used for window positioning and calculations.
 
-// ==================================================
-//  Window Manager Module for Windows XP Simulation
-// ==================================================
+// ===== Window Templates =====
 
 /**
  * WindowTemplates provides templates for different window types (iframe, error, empty).
@@ -42,8 +26,9 @@ const TASKBAR_HEIGHT = 30; // Define constant taskbar height
 class WindowTemplates {
   /**
    * Gets a template container for windows
-   * @param {string} [templateName] - Optional template type identifier
-   * @param {object} [programConfig] - Optional program configuration object
+   * @static
+   * @param {string} [templateName] - Optional template type identifier (e.g., 'iframe-standard').
+   * @param {object} [programConfig] - Optional program configuration object, used for specific template types like 'iframe-standard'.
    * @returns {HTMLElement} DOM element containing the window content
    */
   static getTemplate(templateName, programConfig) {
@@ -52,7 +37,7 @@ class WindowTemplates {
       return this.createIframeContainer(
         programConfig.appPath,
         programConfig.id,
-        programConfig, // Pass the whole config object
+        programConfig,
       );
     }
     // Create error container for invalid templates or non-iframe types
@@ -66,6 +51,7 @@ class WindowTemplates {
   }
 
   static createIframeContainer(appPath, windowId, programConfig) {
+    /** @type {HTMLElement} The main container for the window body content. */
     const container = document.createElement("div");
     container.className = "window-body";
 
@@ -98,9 +84,11 @@ class WindowTemplates {
     }
 
     // --- Create iframe container and iframe ---
+    /** @type {HTMLElement} A dedicated container for the iframe to manage its layout. */
     const iframeContainer = document.createElement("div");
     iframeContainer.className = "iframe-container";
     iframeContainer.style.position = "relative";
+    /** @type {HTMLIFrameElement} The iframe element to load the application content. */
     const iframe = document.createElement("iframe");
     Object.assign(iframe, { src: appPath, title: `${windowId}-content` });
     iframe.name = windowId; // Set unique name for identification
@@ -108,28 +96,14 @@ class WindowTemplates {
       frameborder: "0",
       width: "100%",
       height: "100%",
+      scrolling: "no",
       sandbox:
         "allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads",
     };
     for (const [attr, value] of Object.entries(attrs))
       iframe.setAttribute(attr, value);
 
-    // Send initial maximized/unmaximized state to iframe on load
-    iframe.onload = () => {
-      if (iframe.contentWindow) {
-        const appWindow = iframe.closest(".app-window");
-        if (appWindow) {
-          if (appWindow.classList.contains("maximized")) {
-            iframe.contentWindow.postMessage({ type: "window:maximized" }, "*");
-          } else {
-            iframe.contentWindow.postMessage(
-              { type: "window:unmaximized" },
-              "*",
-            );
-          }
-        }
-      }
-    };
+
 
     iframeContainer.appendChild(iframe);
 
@@ -142,40 +116,57 @@ class WindowTemplates {
   }
 }
 
+// ===== Window Manager =====
+
 /**
  * WindowManager class manages application windows, their state, and interactions in the Windows XP simulation.
  */
 export default class WindowManager {
   /**
-   * @param {Object} eventBus - Event bus for communication.
+   * Constructs the WindowManager instance.
+   * @param {EventBus} eventBus - The global event bus instance for inter-component communication.
+   * @see {@link module:scripts/utils/eventBus.EventBus}
    */
   constructor(eventBus) {
+    /** @type {EventBus} The global event bus. */
     this.eventBus = eventBus;
+    /** @type {Object.<string, HTMLElement>} A map of window IDs to their DOM elements. */
     this.windows = {};
+    /** @type {HTMLElement | null} The currently active (focused) window element. */
     this.activeWindow = null;
+    /** @type {Object.<string, HTMLElement>} A map of window IDs to their corresponding taskbar item DOM elements. */
     this.taskbarItems = {};
+    /** @type {number} A counter for the number of currently open (non-closed) windows. */
     this.windowCount = 0;
+    /** @type {object} A reference to the program registry data. */
     this.programData = programData;
+    /** @type {number} The base z-index value for windows, typically fetched from CSS custom properties. */
     this.baseZIndex =
       parseInt(
         getComputedStyle(document.documentElement).getPropertyValue(
           "--z-window",
         ),
       ) || 100;
+    /** @type {HTMLElement} The main container element in the DOM where all window elements are appended. */
     this.windowsContainer = document.getElementById("windows-container");
-    this.taskbarPrograms = document.querySelector(".taskbar-programs"); // Cache taskbar-programs
+    /** @type {HTMLElement} The container in the taskbar where taskbar items for open programs are placed. */
+    this.taskbarPrograms = document.querySelector(".taskbar-programs");
+    /** @type {Array<string>} An array of window IDs representing the stacking order (front to back). The last element is the topmost window. */
     this.zIndexStack = []; // Array to track window stacking order (IDs)
     // --- Multi-column cascade state --- (These seem unused, positionWindowCascade calculates its own)
-    // this.cascadeColumn = 0;
-    // this.cascadeRow = 0;
 
+    /** @type {Object.<string, number>} Stores timestamps of last interactions for specific actions, used for throttling. Keyed by a unique action identifier (e.g., `windowId-actionName`). */
     this.lastInteractionTimes = {}; // To store timestamps for throttling
+    /** @type {boolean} Flag to indicate if navigation buttons in the 'Projects' app lightbox are currently throttled. */
+    this.projectNavThrottled = false; // For projects app lightbox nav throttling
 
     this._setupGlobalHandlers();
     this._subscribeToEvents();
 
     // Listen for messages from iframes
     window.addEventListener("message", (event) => {
+      // Handles 'set-home-enabled' message, typically from 'projects-window' iframe.
+      // Enables or disables the 'Home' toolbar button based on the message.
       if (event.data && event.data.type === "set-home-enabled") {
         const homeButton = document.querySelector(".toolbar-button.home");
         if (homeButton) {
@@ -187,76 +178,32 @@ export default class WindowManager {
         }
       }
 
-      if (event.data && event.data.type === "lightbox-state") {
+      // Handles 'throttle-nav-buttons' message, from 'projects-window' iframe.
+      // Used to temporarily disable lightbox navigation buttons (prev/next) during transitions or loading.
+      if (event.data && event.data.type === "throttle-nav-buttons") {
+        this.projectNavThrottled = event.data.active;
         const projectsWindow = this.windows["projects-window"];
-        let viewDescBtn, backBtn, forwardBtn, externalLinkBtn;
-
         if (projectsWindow) {
-          viewDescBtn = projectsWindow.querySelector(
-            ".toolbar-button.view-description",
+          const backBtn = projectsWindow.querySelector(
+            ".toolbar-button.previous",
           );
-          backBtn = projectsWindow.querySelector(".toolbar-button.previous");
-          forwardBtn = projectsWindow.querySelector(".toolbar-button.next");
-          externalLinkBtn = projectsWindow.querySelector(
-            ".toolbar-button.viewExternalLink",
+          const forwardBtn = projectsWindow.querySelector(
+            ".toolbar-button.next",
           );
-        } else {
-          viewDescBtn = document.querySelector(
-            ".toolbar-button.view-description",
-          );
-          backBtn = document.querySelector(".toolbar-button.previous");
-          forwardBtn = document.querySelector(".toolbar-button.next");
-          externalLinkBtn = document.querySelector(
-            ".toolbar-button.viewExternalLink",
-          );
-        }
 
-        if (viewDescBtn) {
-          viewDescBtn.classList.toggle("disabled", !event.data.open);
-          const textSpan = viewDescBtn.querySelector("span");
-          // Always set initial text to 'Show more' if not open
-          if (event.data.open) {
-            if (textSpan) textSpan.textContent = "Show less";
-            viewDescBtn.setAttribute("aria-label", "Show less");
+          if (this.projectNavThrottled) {
+            if (backBtn) {
+              backBtn.classList.add("disabled");
+              backBtn.disabled = true;
+            }
+            if (forwardBtn) {
+              forwardBtn.classList.add("disabled");
+              forwardBtn.disabled = true;
+            }
           } else {
-            if (textSpan) textSpan.textContent = "Show more";
-            viewDescBtn.setAttribute("aria-label", "Show more");
-          }
-        }
-        if (backBtn) {
-          backBtn.classList.toggle("disabled", !event.data.open);
-        }
-        if (forwardBtn) {
-          forwardBtn.classList.toggle("disabled", !event.data.open);
-        }
-
-        if (externalLinkBtn) {
-          const iconImg = externalLinkBtn.querySelector("img");
-          const textSpan = externalLinkBtn.querySelector("span");
-
-          if (event.data.open && event.data.linkType && event.data.linkUrl) {
-            externalLinkBtn.classList.remove("disabled");
-            externalLinkBtn.style.display = "";
-            externalLinkBtn.dataset.urlToOpen = event.data.linkUrl;
-
-            (async () => {
-              const socials = await getSocials();
-              const social = socials.find(s => s.key === event.data.linkType);
-              if (social) {
-                if (iconImg) iconImg.src = social.icon;
-                if (textSpan) textSpan.textContent = `View on ${social.name}`;
-              } else {
-                if (iconImg) iconImg.src = "./assets/gui/start-menu/instagram.webp";
-                if (textSpan) textSpan.textContent = "View Link";
-              }
-            })();
-          } else {
-            externalLinkBtn.classList.add("disabled");
-            externalLinkBtn.style.display = "none";
-            delete externalLinkBtn.dataset.urlToOpen;
-            // Reset to default (Instagram) appearance when no link or lightbox closed
-            if (iconImg) iconImg.src = "./assets/gui/start-menu/instagram.webp";
-            if (textSpan) textSpan.textContent = "View on Instagram";
+            // When throttle ends, lightbox-state will be re-sent by iframe
+            // to determine actual button enabled/disabled state.
+            // No need to explicitly enable here, just ensure the flag is false.
           }
         }
       }
@@ -279,7 +226,7 @@ export default class WindowManager {
           const viewDescButton = sourceWindowElement.querySelector(
             ".toolbar-button.view-description",
           );
-          if (viewDescButton) {
+          if (viewDescButton && !viewDescButton.disabled) {
             const textSpan = viewDescButton.querySelector("span");
             if (event.data.open) {
               if (textSpan) textSpan.textContent = "Show less";
@@ -303,15 +250,13 @@ export default class WindowManager {
           viewDescBtn = projectsWindow.querySelector(
             ".toolbar-button.view-description",
           );
-        } else {
-          viewDescBtn = document.querySelector(
-            ".toolbar-button.view-description",
-          );
         }
         if (viewDescBtn && !viewDescBtn.classList.contains("disabled")) {
           viewDescBtn.classList.add("disabled");
           setTimeout(() => {
-            viewDescBtn.classList.remove("disabled");
+            if (viewDescBtn) {
+              viewDescBtn.classList.remove("disabled");
+            }
           }, 500);
         }
       }
@@ -365,12 +310,8 @@ export default class WindowManager {
         }
         if (contactWindow) {
           // Find the Send and New Message toolbar buttons
-          const sendBtn = contactWindow.querySelector(
-            ".toolbar-button.send"
-          );
-          const newBtn = contactWindow.querySelector(
-            ".toolbar-button.new"
-          );
+          const sendBtn = contactWindow.querySelector(".toolbar-button.send");
+          const newBtn = contactWindow.querySelector(".toolbar-button.new");
           if (sendBtn) {
             if (event.data.hasValue) {
               sendBtn.classList.remove("disabled");
@@ -433,6 +374,121 @@ export default class WindowManager {
           windowElement.statusBarField.textContent = event.data.text;
         }
       }
+
+      // Message handler for lightbox state changes (e.g. open/close, nav availability, description visibility)
+      if (event.data && event.data.type === "lightbox-state") {
+        const projectsWindow = this.windows["projects-window"];
+        let viewDescBtn, backBtn, forwardBtn, externalLinkBtn;
+        const isMobile = isMobileDevice();
+
+        if (projectsWindow) {
+          viewDescBtn = projectsWindow.querySelector(
+            ".toolbar-button.view-description",
+          );
+          backBtn = projectsWindow.querySelector(".toolbar-button.previous");
+          forwardBtn = projectsWindow.querySelector(".toolbar-button.next");
+          externalLinkBtn = projectsWindow.querySelector(
+            ".toolbar-button.viewExternalLink",
+          );
+        }
+
+        if (viewDescBtn) {
+          if (isMobile) {
+            // Mobile: Enable/disable "Show more/Show less" button based on lightbox state
+            if (event.data.open) {
+              viewDescBtn.disabled = false;
+              viewDescBtn.classList.remove("disabled");
+            } else {
+              viewDescBtn.disabled = true;
+              viewDescBtn.classList.add("disabled");
+            }
+
+            // Update button text for mobile when lightbox is open
+            if (event.data.open) {
+              const textSpan = viewDescBtn.querySelector("span");
+              if (event.data.descriptionState !== undefined) {
+                if (event.data.descriptionState) {
+                  if (textSpan) textSpan.textContent = "Show less";
+                  viewDescBtn.setAttribute("aria-label", "Show less");
+                } else {
+                  if (textSpan) textSpan.textContent = "Show more";
+                  viewDescBtn.setAttribute("aria-label", "Show more");
+                }
+              }
+            }
+          }
+          // Desktop: "Show more/Show less" button is always disabled (no overlay mode functionality)
+          if (!isMobile) {
+            viewDescBtn.disabled = true;
+            viewDescBtn.classList.add("disabled");
+            const textSpan = viewDescBtn.querySelector("span");
+            if (textSpan) textSpan.textContent = "Show more";
+            viewDescBtn.setAttribute("aria-label", "Show more");
+          }
+        }
+
+        if (backBtn) {
+          if (isMobile) {
+            if (event.data.open && event.data.hasPrevious) {
+              backBtn.disabled = false;
+              backBtn.classList.remove("disabled");
+            } else {
+              backBtn.disabled = true;
+              backBtn.classList.add("disabled");
+            }
+          }
+          // Desktop button enabled/disabled state is NOT managed here.
+        }
+
+        if (forwardBtn) {
+          if (isMobile) {
+            if (event.data.open && event.data.hasNext) {
+              forwardBtn.disabled = false;
+              forwardBtn.classList.remove("disabled");
+            } else {
+              forwardBtn.disabled = true;
+              forwardBtn.classList.add("disabled");
+            }
+          }
+          // Desktop button enabled/disabled state is NOT managed here.
+        }
+
+        if (externalLinkBtn) {
+          if (isMobile) {
+            if (event.data.open) {
+              externalLinkBtn.disabled = false;
+              externalLinkBtn.classList.remove("disabled");
+            } else {
+              externalLinkBtn.disabled = true;
+              externalLinkBtn.classList.add("disabled");
+            }
+          }
+          // Desktop button enabled/disabled state is NOT managed here.
+        }
+
+        // === ADD THIS BLOCK FOR DESKTOP ===
+        if (!isMobile) {
+          // DESKTOP: Enable/disable next/previous buttons based on hasNext/hasPrevious
+          if (backBtn) {
+            if (event.data.hasPrevious) {
+              backBtn.disabled = false;
+              backBtn.classList.remove("disabled");
+            } else {
+              backBtn.disabled = true;
+              backBtn.classList.add("disabled");
+            }
+          }
+          if (forwardBtn) {
+            if (event.data.hasNext) {
+              forwardBtn.disabled = false;
+              forwardBtn.classList.remove("disabled");
+            } else {
+              forwardBtn.disabled = true;
+              forwardBtn.classList.add("disabled");
+            }
+          }
+        }
+      }
     });
 
     // Add click handler to Home button to send close-lightbox message to Projects app iframe only
@@ -489,6 +545,14 @@ export default class WindowManager {
     this.eventBus.subscribe(EVENTS.TASKBAR_ITEM_CLICKED, (data) =>
       this._handleTaskbarClick(data.windowId),
     );
+    this.eventBus.subscribe(EVENTS.PROGRAM_CLOSE_REQUESTED, (data) => {
+      if (data && data.programId) {
+        const windowElement = this.windows[data.programId];
+        if (windowElement) {
+          this.closeWindow(windowElement);
+        }
+      }
+    });
   }
 
   _calculateWindowToTaskbarTransform(windowElement, taskbarItem) {
@@ -517,7 +581,7 @@ export default class WindowManager {
   /**
    * Open a program window by name. Handles overlays and standard windows.
    * @param {string} programName - The name/key of the program to open.
-   * @returns {void}
+   * @returns {HTMLElement | undefined} The created or focused window element, or undefined if an error occurs.
    */
   openProgram(programName) {
     if (!programName || !this.programData[programName]) {
@@ -547,7 +611,7 @@ export default class WindowManager {
     this._setupWindowEvents(windowElement);
 
     document.getElementById("windows-container").appendChild(windowElement);
-    this.positionWindowCascade(windowElement); // Use cascade for new windows
+    this.positionWindow(windowElement); // Changed from positionWindowCascade
 
     this.eventBus.publish(EVENTS.PROGRAM_OPENING, {
       programName,
@@ -584,9 +648,6 @@ export default class WindowManager {
         const projectsReadyTimeout = setTimeout(() => {
           window.removeEventListener("message", onProjectsReady);
           if (windowElement.hasAttribute("data-program-loading")) {
-            console.warn(
-              "[WindowManager] Timeout waiting for projects-ready message.",
-            );
             windowElement.style.opacity = "1";
             windowElement.removeAttribute("data-program-loading");
             this.bringToFront(windowElement);
@@ -627,14 +688,59 @@ export default class WindowManager {
       });
     }
 
+    // -------- START GENERALIZED MOBILE INPUT DELAY LOGIC --------
+    if (isMobileDevice()) {
+      // Apply to all programs on mobile
+      const menuBarContainer = windowElement.querySelector(
+        ".menu-bar-container",
+      );
+      const toolbarContainer =
+        windowElement.querySelector(".toolbar-container");
+
+      if (menuBarContainer) {
+        menuBarContainer.style.pointerEvents = "none";
+        menuBarContainer.classList.add("menubar-temporarily-disabled");
+      }
+      if (toolbarContainer) {
+        toolbarContainer.style.pointerEvents = "none";
+        toolbarContainer.classList.add("toolbar-temporarily-disabled");
+      }
+
+      windowElement.dataset.acceptInput = "false";
+
+      setTimeout(() => {
+        if (document.body.contains(windowElement)) {
+          if (menuBarContainer) {
+            menuBarContainer.style.pointerEvents = "auto";
+          }
+          if (toolbarContainer) {
+            toolbarContainer.style.pointerEvents = "auto";
+          }
+        }
+      }, 500); // pointer-events re-enabled after 500ms
+
+      setTimeout(() => {
+        if (document.body.contains(windowElement)) {
+          windowElement.dataset.acceptInput = "true";
+          if (toolbarContainer) {
+            toolbarContainer.classList.remove("toolbar-temporarily-disabled");
+          }
+          if (menuBarContainer) {
+            menuBarContainer.classList.remove("menubar-temporarily-disabled");
+          }
+        }
+      }, 550); // Flag and visual disabling re-enabled after 550ms
+    }
+    // -------- END GENERALIZED MOBILE INPUT DELAY LOGIC --------
+
     return windowElement;
   }
 
   /**
    * Create a window DOM element for a program.
    * @private
-   * @param {Object} program - Program configuration object.
-   * @returns {HTMLElement|null} The created window element or null on error.
+   * @param {Object} program - Program configuration object from `programRegistry.js`.
+   * @returns {HTMLElement | null} The created window element (`div.app-window`) or null if content creation fails.
    */
   _createWindowElement(program) {
     const windowElement = document.createElement("div");
@@ -654,9 +760,7 @@ export default class WindowManager {
       windowElement.style.left = "0";
       windowElement.style.top = "0";
       windowElement.style.width = "100vw";
-      windowElement.style.height = "100vh";
       windowElement.style.maxWidth = "100vw";
-      windowElement.style.maxHeight = "100vh";
 
       // Ensure the button reflects the maximized state
       const maximizeBtn = windowElement.querySelector(
@@ -689,7 +793,8 @@ export default class WindowManager {
 
     // --- Create XP.css styled Status Bar ---
     const programId = program.id.replace("-window", "");
-    if (programId !== "cmd") {
+    if (programId !== "cmd" && programId !== "musicPlayer") {
+      // Added check for musicPlayer
       // cmd program usually doesn't have a status bar
       const statusBar = document.createElement("div");
       statusBar.className = "status-bar"; // XP.css class for the bar
@@ -733,6 +838,21 @@ export default class WindowManager {
    * @returns {string} HTML string for the window base.
    */
   _getWindowBaseHTML(program) {
+    const resizable = program.resizable !== false; // Default to true if not specified or explicitly true
+    let resizerHTML = "";
+    if (resizable) {
+      resizerHTML = `
+            <div class="resizer resizer-n"></div>
+            <div class="resizer resizer-ne"></div>
+            <div class="resizer resizer-e"></div>
+            <div class="resizer resizer-se"></div>
+            <div class="resizer resizer-s"></div>
+            <div class="resizer resizer-sw"></div>
+            <div class="resizer resizer-w"></div>
+            <div class="resizer resizer-nw"></div>
+      `;
+    }
+
     return `
             <div class="window-inactive-mask"></div>
             <div class="title-bar">
@@ -748,6 +868,7 @@ export default class WindowManager {
                     <button class="xp-button" aria-label="Close" data-action="close"></button>
                 </div>
             </div>
+            ${resizerHTML}
         `;
   }
 
@@ -780,6 +901,7 @@ export default class WindowManager {
   _registerWindow(windowElement, program) {
     const windowId = windowElement.id;
     this.windows[windowId] = windowElement;
+
     this.taskbarItems[windowId] = this._createTaskbarItem(
       windowElement,
       program,
@@ -798,8 +920,6 @@ export default class WindowManager {
       },
     };
 
-    this._setupWindowEvents(windowElement);
-
     // Add to stack and update Z-indices
     this._updateStackOrder(windowId, "add");
     this._updateZIndices();
@@ -817,6 +937,7 @@ export default class WindowManager {
     taskbarItem.className = "taskbar-item";
     taskbarItem.id = `taskbar-${windowElement.id}`;
     taskbarItem.setAttribute("data-window-id", windowElement.id);
+    taskbarItem.setAttribute("data-program-id", program.id); // Ensures taskbar items can be uniquely identified by program ID
     taskbarItem.innerHTML = `
             <img src="${program.icon}" alt="${program.title}" />
             <span>${program.title}</span>
@@ -925,14 +1046,17 @@ export default class WindowManager {
         );
       }
     });
+
+    // Setup resizing
+    this.makeResizable(windowElement);
   }
 
   /**
    * Handle actions from toolbar buttons.
    * @private
-   * @param {string} action - The action to perform.
-   * @param {HTMLElement} windowElement - The window element acting as context.
-   * @param {HTMLElement} button - The clicked button element.
+   * @param {string} action - The action to perform (from `data-action` attribute).
+   * @param {HTMLElement} windowElement - The parent window element, providing context for the action.
+   * @param {HTMLElement} button - The clicked button element (can be null if action dispatched programmatically).
    * @returns {void}
    */
   _handleToolbarAction(action, windowElement, button) {
@@ -951,7 +1075,7 @@ export default class WindowManager {
       }
 
       const timeSinceLastClick = now - this.lastInteractionTimes[buttonKey];
-      const throttleDuration = 500; // Changed from 1000ms to 500ms (0.5 seconds)
+      const throttleDuration = 500; // Throttle duration: 0.5 seconds
 
       if (timeSinceLastClick < throttleDuration) {
         if (viewDescButton) {
@@ -1000,11 +1124,6 @@ export default class WindowManager {
           !button.classList.contains("disabled")
         ) {
           window.open(button.dataset.urlToOpen, "_blank");
-        } else {
-          console.warn(
-            "Could not open external link. Button or URL missing, or button disabled.",
-            button,
-          );
         }
         break;
       case "openResume":
@@ -1031,6 +1150,16 @@ export default class WindowManager {
         if (iframeForGenericAction && iframeForGenericAction.contentWindow) {
           iframeForGenericAction.contentWindow.postMessage(
             { type: "toolbar-action", action: action },
+            "*",
+          );
+        }
+        break;
+      }
+      case "home": {
+        const iframeForGenericAction = windowElement.querySelector("iframe");
+        if (iframeForGenericAction && iframeForGenericAction.contentWindow) {
+          iframeForGenericAction.contentWindow.postMessage(
+            { type: "toolbar-action", action: "home" },
             "*",
           );
         }
@@ -1069,7 +1198,10 @@ export default class WindowManager {
               window.removeEventListener("message", mailtoListener);
 
               // 5. Tell the iframe to clear the form
-              contactIframe.contentWindow.postMessage({ type: "clearContactForm" }, "*");
+              contactIframe.contentWindow.postMessage(
+                { type: "clearContactForm" },
+                "*",
+              );
             }
           };
           window.addEventListener("message", mailtoListener);
@@ -1092,6 +1224,8 @@ export default class WindowManager {
 
   /**
    * Set up iframe overlays for activation/focus.
+   * These overlays are placed over iframes when their parent window is inactive.
+   * Clicking the overlay brings the window to the front, effectively focusing it.
    * @private
    * @param {HTMLElement} windowElement - The window DOM element.
    * @returns {void}
@@ -1101,6 +1235,7 @@ export default class WindowManager {
     if (!windowElement.iframeOverlays) windowElement.iframeOverlays = [];
 
     iframes.forEach((iframe) => {
+      /** @type {HTMLElement} The overlay div. */
       const overlay = document.createElement("div");
       overlay.className = "iframe-overlay";
       overlay.style.position = "absolute";
@@ -1142,7 +1277,11 @@ export default class WindowManager {
 
   /**
    * Handle a click on a taskbar item.
-   * @private
+   * Logic:
+   * - If window is minimized: restore it.
+   * - If window is active and not minimized: minimize it.
+   * - If window is not active and not minimized: bring it to front.
+   * - If window doesn't exist (e.g., taskbar item for a program not yet open): open the program.
    * @param {string} windowId - The ID of the window.
    * @returns {void}
    */
@@ -1181,7 +1320,8 @@ export default class WindowManager {
   }
 
   /**
-   * Handle window focus event.
+   * Handle window focus event (e.g., from event bus).
+   * Brings the specified window to the front if it's not minimized.
    * @private
    * @param {string} windowId - The ID of the window.
    * @returns {void}
@@ -1194,7 +1334,8 @@ export default class WindowManager {
   }
 
   /**
-   * Handle window restore event.
+   * Handle window restore event (e.g., from event bus).
+   * Restores the specified window if it exists.
    * @private
    * @param {string} windowId - The ID of the window.
    * @returns {void}
@@ -1207,7 +1348,8 @@ export default class WindowManager {
   }
 
   /**
-   * Handle window minimize event.
+   * Handle window minimize event (e.g., from event bus).
+   * Minimizes the specified window if it exists.
    * @private
    * @param {string} windowId - The ID of the window.
    * @returns {void}
@@ -1221,6 +1363,8 @@ export default class WindowManager {
 
   /**
    * Handle window close cleanup event.
+   * Removes the taskbar item, cleans up internal references, updates active window status,
+   * and refreshes the window stacking order and Z-indices.
    * @private
    * @param {string} windowId - The ID of the window.
    * @returns {void}
@@ -1252,17 +1396,12 @@ export default class WindowManager {
     this._updateStackOrder(windowId, "remove");
     this._updateZIndices();
 
-    // If no windows remain, reset cascade position
-    if (Object.keys(this.windows).length === 0) {
-      // this.cascadeColumn = 0;
-      // this.cascadeRow = 0;
-    }
-
     this.eventBus.publish(EVENTS.WINDOW_CLOSED, { windowId });
   }
 
   /**
    * Refresh the active window after a close or minimize.
+   * Finds the topmost non-minimized window and brings it to the front.
    * @private
    * @returns {void}
    */
@@ -1318,6 +1457,7 @@ export default class WindowManager {
   closeWindow(windowElement) {
     if (!windowElement) return;
     const windowId = windowElement.id;
+
     // Prevent double-close
     if (windowElement.classList.contains("window-closing")) return;
     // Add closing animation class
@@ -1441,7 +1581,11 @@ export default class WindowManager {
    * @returns {void}
    */
   toggleMaximize(windowElement) {
-    if (!windowElement) return;
+    if (
+      !windowElement ||
+      (isMobileDevice() && windowElement.classList.contains("maximized"))
+    )
+      return;
     const state = windowElement.windowState;
     const maximizeBtn = windowElement.querySelector(
       '[aria-label="Maximize"], [aria-label="Restore"]',
@@ -1631,7 +1775,26 @@ export default class WindowManager {
 
     // Position window: cascade or custom
     if (program && program.position && program.position.type === "custom") {
-      this.positionWindowCustom(windowElement, program.position);
+      if (typeof program.position.y === "number") {
+        windowElement.style.top = `${program.position.y}px`;
+      }
+
+      if (
+        program.position.relativeTo === "right" &&
+        typeof program.position.x === "number"
+      ) {
+        const windowWidth =
+          windowElement.offsetWidth ||
+          parseInt(windowElement.style.width) ||
+          program.dimensions.width;
+        windowElement.style.left = `${document.documentElement.clientWidth - windowWidth - program.position.x}px`;
+      } else if (typeof program.position.x === "number") {
+        windowElement.style.left = `${program.position.x}px`;
+        windowElement.style.transform = "none"; // Ensure no other transforms interfere
+      } else {
+        // Fallback to cascade if custom coordinates are not valid
+        this.positionWindowCascade(windowElement);
+      }
     } else {
       this.positionWindowCascade(windowElement);
     }
@@ -1642,8 +1805,6 @@ export default class WindowManager {
       windowElement.windowState.originalStyles.transform =
         windowElement.style.transform;
     }
-
-    this.windowCount++; // Moved to _registerWindow
   }
 
   /**
@@ -1860,7 +2021,7 @@ export default class WindowManager {
    *
    * @private
    * @param {string} windowId - The window ID.
-   * @param {string} action - 'add' or 'remove'.
+   * @param {'add' | 'remove'} action - Specifies whether to add/move to top or remove from stack.
    * @returns {void}
    */
   _updateStackOrder(windowId, action = "add") {
@@ -1924,5 +2085,155 @@ export default class WindowManager {
     if (element) {
       element.addEventListener(eventType, handler, useCapture);
     }
+  }
+
+  makeResizable(windowElement) {
+    const programKey = windowElement.getAttribute("data-program");
+    const programConfig = this.programData[programKey];
+
+    // Get min dimensions from program config, with fallbacks
+    const minWidth = programConfig?.minDimensions?.width || 200;
+    const minHeight = programConfig?.minDimensions?.height || 150;
+
+    const resizers = windowElement.querySelectorAll(".resizer");
+    let original_width = 0;
+    let original_height = 0;
+    let original_x = 0;
+    let original_y = 0;
+    let original_mouse_x = 0;
+    let original_mouse_y = 0;
+
+    resizers.forEach((resizer) => {
+      resizer.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        if (
+          windowElement.windowState &&
+          windowElement.windowState.isMaximized
+        ) {
+          return; // Don't resize if maximized
+        }
+
+        original_width = parseFloat(
+          getComputedStyle(windowElement, null)
+            .getPropertyValue("width")
+            .replace("px", ""),
+        );
+        original_height = parseFloat(
+          getComputedStyle(windowElement, null)
+            .getPropertyValue("height")
+            .replace("px", ""),
+        );
+        original_x = windowElement.getBoundingClientRect().left;
+        original_y = windowElement.getBoundingClientRect().top;
+        original_mouse_x = e.pageX;
+        original_mouse_y = e.pageY;
+
+        const onMouseMove = (e) => {
+          const current_mouse_x = e.pageX;
+          const current_mouse_y = e.pageY;
+          const deltaX = current_mouse_x - original_mouse_x;
+          const deltaY = current_mouse_y - original_mouse_y;
+
+          if (resizer.classList.contains("resizer-se")) {
+            const width = original_width + deltaX;
+            const height = original_height + deltaY;
+            if (width > minWidth) {
+              windowElement.style.width = width + "px";
+            }
+            if (height > minHeight) {
+              windowElement.style.height = height + "px";
+            }
+          } else if (resizer.classList.contains("resizer-sw")) {
+            const width = original_width - deltaX;
+            const height = original_height + deltaY;
+            if (height > minHeight) {
+              windowElement.style.height = height + "px";
+            }
+            if (width > minWidth) {
+              windowElement.style.width = width + "px";
+              windowElement.style.left = original_x + deltaX + "px";
+            }
+          } else if (resizer.classList.contains("resizer-ne")) {
+            const width = original_width + deltaX;
+            const height = original_height - deltaY;
+            if (width > minWidth) {
+              windowElement.style.width = width + "px";
+            }
+            if (height > minHeight) {
+              windowElement.style.height = height + "px";
+              windowElement.style.top = original_y + deltaY + "px";
+            }
+          } else if (resizer.classList.contains("resizer-nw")) {
+            const width = original_width - deltaX;
+            const height = original_height - deltaY;
+            if (width > minWidth) {
+              windowElement.style.width = width + "px";
+              windowElement.style.left = original_x + deltaX + "px";
+            }
+            if (height > minHeight) {
+              windowElement.style.height = height + "px";
+              windowElement.style.top = original_y + deltaY + "px";
+            }
+          } else if (resizer.classList.contains("resizer-n")) {
+            let new_height = original_height - deltaY;
+            let new_top = original_y + deltaY;
+            if (new_height < minHeight) {
+              new_height = minHeight;
+              new_top = original_y + (original_height - minHeight);
+            }
+            windowElement.style.height = new_height + "px";
+            windowElement.style.top = new_top + "px";
+          } else if (resizer.classList.contains("resizer-e")) {
+            let new_width = original_width + deltaX;
+            if (new_width < minWidth) {
+              new_width = minWidth;
+            }
+            windowElement.style.width = new_width + "px";
+          } else if (resizer.classList.contains("resizer-s")) {
+            let new_height = original_height + deltaY;
+            if (new_height < minHeight) {
+              new_height = minHeight;
+            }
+            windowElement.style.height = new_height + "px";
+          } else if (resizer.classList.contains("resizer-w")) {
+            let new_width = original_width - deltaX;
+            let new_left = original_x + deltaX;
+            if (new_width < minWidth) {
+              new_width = minWidth;
+              new_left = original_x + (original_width - minWidth);
+            }
+            windowElement.style.width = new_width + "px";
+            windowElement.style.left = new_left + "px";
+          }
+          // Update originalStyles for persistence if needed
+          if (windowElement.windowState) {
+            windowElement.windowState.originalStyles.width =
+              windowElement.style.width;
+            windowElement.windowState.originalStyles.height =
+              windowElement.style.height;
+            windowElement.windowState.originalStyles.left =
+              windowElement.style.left;
+            windowElement.windowState.originalStyles.top =
+              windowElement.style.top;
+          }
+          // Dispatch a custom event to notify other components (e.g., iframe content) of resize
+          windowElement.dispatchEvent(
+            new CustomEvent("window-resized", { bubbles: true }),
+          );
+        };
+
+        const onMouseUp = () => {
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+          windowElement.classList.remove("resizing-window"); // Optional: class to indicate resizing state
+          // Final constraint check after resize
+          this._constrainWindowToViewport(windowElement);
+        };
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+        windowElement.classList.add("resizing-window"); // Optional
+      });
+    });
   }
 }

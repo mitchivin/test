@@ -1,24 +1,15 @@
 /*
- * startMenu.css — Start Menu Styles for Windows XP Simulation
- *
- * Styles for:
- * - Main start menu, submenus, menu items, and footer
- * - Responsive/mobile adjustments
- *
+ * startMenu.css — Start Menu styles for Windows XP simulation.
+ * Handles main start menu, submenus, menu items, footer, and XP-specific UI details.
+ * Matches the look and feel of Windows XP.
  * @file src/styles/gui/startMenu.css
  */
 
-/* ==================================================
-   Start Menu Styles for Windows XP Simulation
-   ==================================================
-   - Handles main start menu, submenus, menu items, and footer.
-   - Matches the look and feel of Windows XP.
-   ================================================== */
-
 /* ===== Main Start Menu Container ===== */
-/* Windows XP Start Menu Styles */
-
-/* Main Start Menu container */
+/*
+  Main Start Menu container, positioned above the taskbar and styled to match Windows XP.
+  Uses z-index: var(--z-startmenu) to ensure it overlays windows and taskbar.
+*/
 .startmenu {
   position: absolute;
   bottom: calc(var(--taskbar-height) + 1px);
@@ -49,7 +40,6 @@
 .startmenu.active {
   visibility: visible;
   opacity: 1;
-
   /* Keep transition only for opening */
   transition:
     opacity 0.1s ease,
@@ -59,6 +49,9 @@
 /* =============================================
   Top Bar Section
 ============================================= */
+/*
+  Top bar of the Start Menu, with XP blue gradient and user info.
+*/
 .menutopbar {
   width: 100%;
   height: 51px;
@@ -204,9 +197,6 @@
 .middle-left .menu-item {
   flex: 1;
   padding: 4px 8px;
-  margin: 0;
-  box-sizing: border-box;
-  transition: background-color 0.05s ease;
 }
 
 /* Right side menu items */
@@ -325,9 +315,6 @@
 
 /* Left side menu items - use fixed height */
 .middle-left .menu-divider {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   height: 1px;
   flex: 0 0 auto; /* Keep non-growing */
 }
@@ -503,7 +490,7 @@
   width: 100%;
 }
 
-/* Individual submenu items */
+/* Individual submenu items - COMMON BASE */
 .all-programs-item,
 .recently-used-item {
   position: relative;
@@ -521,13 +508,13 @@
   cursor: default;
 }
 
-/* Prevent images in submenu items from being dragged */
+/* Prevent images in submenu items from being dragged - COMMON */
 .all-programs-item > img,
 .recently-used-item > img {
   pointer-events: none;
 }
 
-/* Hover effect for submenu items */
+/* Hover effect for submenu items - COMMON */
 .all-programs-item:hover,
 .recently-used-item:hover {
   background-color: #2f71cd;
@@ -535,7 +522,7 @@
   padding-left: 30px; /* Ensure consistent padding */
 }
 
-/* Create a background overlay that can transition smoothly */
+/* Create a background overlay that can transition smoothly - COMMON */
 .all-programs-item::after,
 .recently-used-item::after {
   content: "";
@@ -544,7 +531,7 @@
   background-color: transparent;
   pointer-events: none;
   z-index: -1;
-  transition: background-color 0.05s ease; /* Standardize to ease */
+  transition: background-color 0.05s ease;
 }
 
 .all-programs-item:hover::after,
@@ -552,7 +539,7 @@
   background-color: #2f71cd;
 }
 
-/* Highlight extension for hover */
+/* Highlight extension for hover - COMMON */
 .all-programs-item:hover::before,
 .recently-used-item:hover::before {
   content: "";
@@ -563,24 +550,24 @@
   width: 30px;
   background-color: #2f71cd;
   z-index: 1;
-  transition: background-color 0.05s ease; /* Standardize to ease */
+  transition: background-color 0.05s ease;
 }
 
-/* Make text and icon in submenu items transition together */
+/* Make text and icon in submenu items transition together - COMMON */
 .all-programs-item *,
 .recently-used-item * {
-  transition: color 0.05s ease; /* Standardize to ease */
-  z-index: 2; /* Keep content above the overlay */
+  transition: color 0.05s ease;
+  z-index: 2;
 }
 
-/* Apply color changes to both icon and text simultaneously */
+/* Apply color changes to both icon and text simultaneously - COMMON */
 .all-programs-item:hover *,
 .recently-used-item:hover * {
   color: white;
   filter: brightness(1.1);
 }
 
-/* Icons within submenu items */
+/* Icons within submenu items - COMMON */
 .all-programs-item img,
 .recently-used-item img {
   width: 16px;
@@ -592,26 +579,60 @@
   z-index: 2;
 }
 
-/* Separator within All Programs */
-.all-programs-separator {
+/* Disabled state for submenu items - COMMON */
+.all-programs-item.disabled,
+.recently-used-item.disabled {
+  color: #999 !important;
+  opacity: 0.93 !important;
+  background: none !important;
+  filter: grayscale(0.25) !important;
+  box-shadow: none !important;
+  position: relative;
+}
+
+.all-programs-item.disabled:hover,
+.recently-used-item.disabled:hover,
+.all-programs-item.disabled:focus,
+.recently-used-item.disabled:focus {
+  background: none !important;
+  color: #999 !important;
+  filter: grayscale(0.25) !important;
+  box-shadow: none !important;
+}
+
+.all-programs-item.disabled::before,
+.recently-used-item.disabled::before,
+.all-programs-item.disabled::after,
+.recently-used-item.disabled::after,
+.all-programs-item.disabled:hover::before,
+.recently-used-item.disabled:hover::before,
+.all-programs-item.disabled:hover::after,
+.recently-used-item.disabled:hover::after {
+  background: none !important;
+  content: none !important;
+  box-shadow: none !important;
+}
+
+.all-programs-item.disabled img,
+.recently-used-item.disabled img {
+  filter: grayscale(0.25) !important;
+  opacity: 0.6 !important;
+}
+
+.all-programs-item.disabled:hover img,
+.recently-used-item.disabled:hover img {
+  filter: grayscale(100%) opacity(0.6);
+}
+
+/* Common submenu separator styles */
+.all-programs-separator,
+.recently-used-separator {
   height: 1px;
   background-color: #e0e0e0; /* Updated to lighter grey separator */
   margin: 3px 0;
   padding: 0;
   border: none;
   flex-shrink: 0; /* Prevent shrinking */
-  width: calc(100% - 2px); /* Account for container padding */
-  margin-left: 1px; /* Align with padding */
-}
-
-/* Separator for Recently Used items (similar to All Programs) */
-.recently-used-separator {
-  height: 1px;
-  background-color: #e0e0e0; /* Updated to lighter grey separator */
-  margin: 3px 0; /* Same margin */
-  padding: 0;
-  border: none;
-  flex-shrink: 0;
   width: calc(100% - 2px); /* Account for container padding */
   margin-left: 1px; /* Align with padding */
 }
@@ -639,14 +660,7 @@
 .middle-right .menu-item#menu-program2,
 .middle-right .menu-item#menu-program3,
 .middle-right .menu-item#menu-program4,
-.middle-right .menu-item#menu-program5 {
-  padding: 8px 7.5px 8px 9px;
-  height: 35px;
-  flex: 0 0 35px;
-  box-sizing: border-box;
-}
-
-/* Make program 6 the same height as others */
+.middle-right .menu-item#menu-program5,
 .middle-right .menu-item#menu-program6 {
   padding: 8px 7.5px 8px 9px;
   height: 35px;
@@ -705,51 +719,6 @@
 .middle-right .right-section-divider,
 .middle-right .right-section-divider .divider {
   display: block;
-}
-
-/* Consolidated Disabled Menu Item Styles */
-.recently-used-item.disabled,
-.all-programs-item.disabled {
-  color: #999 !important;
-  opacity: 0.93 !important;
-  background: none !important;
-  filter: grayscale(0.25) !important;
-  box-shadow: none !important;
-  position: relative;
-}
-
-.recently-used-item.disabled:hover,
-.all-programs-item.disabled:hover,
-.recently-used-item.disabled:focus,
-.all-programs-item.disabled:focus {
-  background: none !important;
-  color: #999 !important;
-  filter: grayscale(0.25) !important;
-  box-shadow: none !important;
-}
-
-.recently-used-item.disabled::before,
-.all-programs-item.disabled::before,
-.recently-used-item.disabled::after,
-.all-programs-item.disabled::after,
-.recently-used-item.disabled:hover::before,
-.all-programs-item.disabled:hover::before,
-.recently-used-item.disabled:hover::after,
-.all-programs-item.disabled:hover::after {
-  background: none !important;
-  content: none !important;
-  box-shadow: none !important;
-}
-
-.recently-used-item.disabled img,
-.all-programs-item.disabled img {
-  filter: grayscale(0.25) !important;
-  opacity: 0.6 !important;
-}
-
-.recently-used-item.disabled:hover img,
-.all-programs-item.disabled:hover img {
-  filter: grayscale(100%) opacity(0.6);
 }
 
 /* Media query to disable log off button on mobile */

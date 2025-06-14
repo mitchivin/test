@@ -1,11 +1,6 @@
 /*
- * boot.css — Boot & Login Screen Styles for Windows XP Simulation
- *
- * Styles for:
- * - Boot animation and overlay
- * - Login screen and transitions
- * - Responsive/mobile adjustments
- *
+ * boot.css — Boot & Login screen styles for Windows XP simulation.
+ * Handles boot animation, login screen, transitions, overlays, dialogs, and XP-specific UI details.
  * @file src/styles/gui/boot.css
  */
 
@@ -17,7 +12,9 @@
    ================================================== */
 
 /* ===== Overlay Screens: Boot & Login ===== */
-/* Common styles for overlay screens */
+/*
+  Common styles for overlay screens (boot and login), including fixed positioning, centering, and z-index.
+*/
 #boot-screen,
 #login-screen {
   position: fixed;
@@ -117,10 +114,10 @@
 /* Boot Screen Bottom Corner Elements */
 .boot-bottom-left {
   position: absolute;
-  bottom: 48px; 
-  left: 100px; 
+  bottom: 48px;
+  left: 100px;
   color: #fff;
-  font-size: 16px; 
+  font-size: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* Left-align text */
@@ -176,14 +173,8 @@ body.screen-grayscale-active
 @media (max-width: 480px) {
   .logoff-dialog {
     transform: scale(0.9);
-    /* Optionally, adjust width if scaling causes issues or to fine-tune */
-    /* width: 90%; /* Example: use percentage width with scaling */
-    /* max-width: 320px; /* Example: ensure it doesn't exceed a certain scaled size */
   }
 }
-
-/* Consolidated Media Query for (max-width: 768px) - MOVED TO END FOR PRECEDENCE */
-/* @media (max-width: 768px) { ... rules previously here ... } */
 
 /* Consolidated Media Query for (max-width: 768px) */
 @media (max-width: 768px) {
@@ -379,19 +370,6 @@ body.screen-grayscale-active
     display: flex;
     flex-direction: column;
   }
-  .back-gradient .user {
-  }
-  .back-gradient .user img {
-    width: 80px !important;
-    height: auto !important;
-    margin-bottom: 12px !important;
-  }
-
-  .login-screen {
-  }
-  .login-screen-inner {
-    min-height: 320px;
-  }
   .login-screen-center {
     display: flex !important;
     flex-direction: column !important;
@@ -476,7 +454,6 @@ body.screen-grayscale-active
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     z-index: 4000 !important;
@@ -485,6 +462,9 @@ body.screen-grayscale-active
     margin: 0 !important;
     padding: 0 !important;
     transform: none !important;
+  }
+  .welcome-message.visible {
+    display: flex !important;
   }
   .welcome-message .welcome-image,
   .welcome-message .welcome-image-fallback {
@@ -941,7 +921,6 @@ body.screen-grayscale-active
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0); /* Start transparent */
-  /* backdrop-filter: blur(0px); */ /* REMOVED blur */
   opacity: 0; /* Start invisible */
   z-index: 1; /* Behind the dialog content */
   /* Default fast fade-out when dialog is hidden: no backdrop-filter */
@@ -956,9 +935,7 @@ body.screen-grayscale-active
 
 #logoff-dialog-container.visible::before {
   background-color: rgba(0, 0, 0, 0); /* Target dim color */
-  /* backdrop-filter: blur(1px); */ /* REMOVED blur */
   opacity: 1; /* Target visible */
-  /* Delayed fade-in for dim overlay */
   transition-property: opacity, background-color;
   transition-duration: 0.8s;
   transition-timing-function: ease-in-out;
@@ -984,7 +961,6 @@ body.screen-grayscale-active
 
 .logoff-dialog-body {
   padding: 0; /* Remove padding, sections will manage their own */
-  /* background: #4A68A3; */ /* Main dialog content background (the lighter blue from image) */
   display: flex;
   flex-direction: column;
   align-items: stretch; /* Stretch children to fill width */
@@ -998,7 +974,6 @@ body.screen-grayscale-active
   font-size: 20px; /* Increased font size */
   font-weight: 500;
   font-family: "Arial", "Helvetica", sans-serif; /* Changed font family */
-  /* background-color: #002d99; */ /* Login screen dark blue */
   background: linear-gradient(
     to right,
     #002a8c,
@@ -1049,12 +1024,6 @@ body.screen-grayscale-active
   box-sizing: border-box;
 }
 
-.logoff-dialog-separator-bar-top {
-  /* padding: 15px 25px; */ /* Padding above buttons */
-  /* No border needed if it's just a color band */
-  display: none; /* Hide this element */
-}
-
 .logoff-dialog-separator-bar-bottom {
   padding: 0 15px; /* Adjusted padding, vertical handled by flex */
   /* No border needed if it's just a color band */
@@ -1075,13 +1044,10 @@ body.screen-grayscale-active
 
 .logoff-dialog-button-container {
   display: flex;
-  /* justify-content: center; */
   justify-content: space-evenly; /* Distribute space evenly around items */
-  /* gap: 30px; */ /* Remove gap, space-evenly will handle it */
   width: auto; /* Let it shrink / be centered by parent if body has padding */
   margin: 0; /* Removed margin-bottom, padding now on separator bar */
   padding: 36px 0; /* Reduced padding by 25px top/bottom for 50px total height decrease */
-  /* background-color: #587cdb; */ /* Login screen lighter blue */
   background: linear-gradient(
     to right,
     #587cdb,
@@ -1090,49 +1056,18 @@ body.screen-grayscale-active
   ); /* Lighter blue gradient */
   flex-grow: 1; /* Allow this container to take available vertical space */
   align-items: center; /* Vertically center buttons if container stretches */
-  /* position: relative; */ /* No longer needed for pseudo-element */
 }
 
-/* .logoff-dialog-button-container::before { */ /* Removed this pseudo-element */
-/* content: ""; */
-/* position: absolute; */
-/* top: 50%; */
-/* left: 0; */
-/* right: 0; */
-/* width: 100%; */
-/* height: 3px; */
-/* transform: translateY(-50%); */
-/* background: linear-gradient( */
-/* to right, */
-/* transparent 25%, */
-/* #bad7f8 45%, */
-/* #bad7f8 55%, */
-/* transparent 75% */
-/* ); */
-/* z-index: 0; */
-/* } */
-
 .logoff-dialog-button {
-  /* background-color: transparent; */
-  /* border: none; */ /* Ensure no default border */
   color: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* padding: 10px; */ /* Remove padding to shrink container */
   cursor: pointer; /* Re-add for div elements */
   text-align: center;
   width: 80px; /* Give a fixed width to help with even icon spacing */
   background: none !important;
   border: none !important;
-}
-
-.logoff-dialog-button:hover {
-  /* Reduce brightness for a more subtle effect */
-  filter: brightness(1.02);
-}
-.logoff-dialog-button:active {
-  /* background-color: rgba(0, 0, 0, 0.1); */ /* Remove active background */
 }
 
 .logoff-dialog-button img {
@@ -1158,37 +1093,6 @@ body.screen-grayscale-active
   line-height: 1.2; /* Matched to login screen user title */
   cursor: pointer; /* Indicate clickable area */
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4); /* Added text shadow */
-}
-
-.logoff-dialog-cancel-button {
-  /* Standard XP button styles - mostly deferred to xp.css by adding .xp-button class */
-  /* background-color: #f0f0f0; */
-  /* border: 1px solid #000000; */
-  /* border-top-color: #FFFFFF; */
-  /* border-left-color: #FFFFFF; */
-  /* border-right-color: #6D6D6D; */
-  /* border-bottom-color: #6D6D6D; */
-  /* box-shadow: 1px 1px 0px #6D6D6D, inset 1px 1px 0px #C0C0C0; */
-  /* min-width: 77px; */
-  /* font-family: 'Tahoma', sans-serif; */ /* Should be inherited from xp.css */
-  /* font-size: 11px; */ /* Should be inherited from xp.css */
-  /* cursor: pointer; */ /* Defer to xp.css */
-  /* border-radius: 5px; */ /* Removing to default to xp.css */
-  /* height: auto; */ /* Removing to default to xp.css */
-}
-
-.logoff-dialog-cancel-button:hover {
-  /* border-color: #0078D7; */ /* XP hover highlight - defer to xp.css */
-}
-
-.logoff-dialog-cancel-button:active {
-  /* background-color: #d4d0c8; */
-  /* border-top-color: #6D6D6D; */
-  /* border-left-color: #6D6D6D; */
-  /* border-right-color: #FFFFFF; */
-  /* border-bottom-color: #FFFFFF; */
-  /* box-shadow: inset 1px 1px 0px #6D6D6D; */
-  /* Defer active state to xp.css */
 }
 
 .logoff-dialog-cancel-div-button {

@@ -1,14 +1,8 @@
 /*
  * projects.css — Styles for Projects App in Windows XP Simulation
- * Styles the My Projects window, feed, lightbox, and responsive layout.
+ * Styles the My Projects window, feed, and responsive layout.
+ * @file src/apps/projects/projects.css
  */
-
-/* Universal Reset from example - might need adjustment if conflicting with xp.css */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
 /* ===== Base Layout & Background ===== */
 html,
@@ -16,134 +10,109 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
-  color: #333; /* Original text color, example uses #f2f2f2 */
   width: 100%;
-  background-color: #111; /* Dark background for the lines effect */
-  position: relative; /* For potential pseudo-elements if needed later */
-  overflow-x: hidden; /* Good practice */
-  touch-action: none; /* Disable pinch-zoom and other default touch actions */
+  position: relative; /* For potential pseudo-elements or for positioning child elements like .lines. */
+  overflow-x: hidden; /* Prevent horizontal scrollbars. */
+  touch-action: none; /* Disable pinch-zoom and other default touch actions for a more native app feel. */
 }
 
 html {
+  /* Layered background:
+     1. Repeating thin light lines (0.03 opacity) on a transparent base, creating a subtle grid pattern.
+     2. Larger spacing (80px) for this grid pattern.
+     3. A darker base linear gradient from #4a4a4a to #2c2c2c provides the main backdrop. */
   background:
-    radial-gradient(
-      ellipse at top center,
-      rgba(200, 200, 220, 0.15) 0%,
-      transparent 60%
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.03),
+      /* Subtle horizontal lines */ rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 80px /* Spacing for horizontal lines */
     ),
-    radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0) top left / 3px
-      3px repeat,
-    linear-gradient(
-      to bottom,
-      rgb(55, 55, 55) 0%,
-      rgb(40, 40, 40) 35%,
-      rgb(40, 40, 40) 100%
-    );
-  /* min-height: 100vh; */ /* Removed, html should take 100% of iframe height, not viewport */
-}
-
-/* Soft edge lighting */
-html::before,
-html::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 50%; /* Controls how far the light appears to spread from the edge */
-  pointer-events: none;
-  z-index: 0; /* Above html direct background, below body content (including lines) */
-}
-
-html::before {
-  left: 0;
-  background: radial-gradient(
-    ellipse at left center,
-    rgba(255, 255, 255, 0.25) 0%,
-    /* Increased opacity */ transparent 65% /* Increased spread */
-  );
-}
-
-html::after {
-  right: 0;
-  background: radial-gradient(
-    ellipse at right center,
-    rgba(255, 255, 255, 0.25) 0%,
-    /* Increased opacity */ transparent 65% /* Increased spread */
-  );
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03),
+      /* Subtle vertical lines */ rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 80px /* Spacing for vertical lines */
+    ),
+    linear-gradient(to bottom, #4a4a4a, #2c2c2c); /* Base dark gradient */
+  background-color: transparent; /* Ensures html itself doesn't obscure body; body is also transparent here. */
+  line-height: 1.6; /* Default line height for text content within the app. */
+  position: relative; /* Establishes a positioning context for absolutely positioned children like .lines and .scroll-content. */
 }
 
 body {
-  width: 100%;
-  height: 100%;
-  background-color: transparent; /* Body should be transparent over HTML's #111 bg */
-  color: #f2f2f2; /* Text color from user example - for lines, app content should override */
-  line-height: 1.6;
-  position: relative; /* For .lines positioning and .scroll-content */
-  font-family: sans-serif; /* From user example, can be overridden by app specifics */
+  background-color: transparent; /* Body is transparent to show the HTML element's styled background. */
 }
 
+/* .scroll-content is the main viewport for the project feed, handling internal scrolling. */
 .scroll-content {
   height: 100%;
-  overflow-y: auto;
-  position: relative;
-  z-index: 10; /* High z-index to be on top of lines */
-  background-color: transparent;
-  color: #333; /* Restore app text color for content */
+  overflow-y: auto; /* Enable vertical scrolling for the feed. */
+  position: relative; /* Needed for z-index stacking. */
+  z-index: 10; /* Ensures feed content is above the animated .lines background effect. */
+  background-color: transparent; /* Transparent so HTML background shows through. */
+  color: #333; /* Default text color for content within the scrollable area. */
 }
 
-/* === Animated Lines Styling (Adapted for Left-to-Right Sweep) === */
+/* ===== Animated Decorative Lines Background ===== */
+/* This section creates a subtle background animation of sweeping horizontal lines. */
 .lines {
   position: absolute;
-  top: 30px; /* Shifted down by 30px */
+  top: 30px; /* Lines start 30px from the top of their container (html element). */
   left: 0;
-  /* right: 0; */ /* Not needed if left:0 and width:100% */
-  height: calc(
-    100% - 30px
-  ); /* Adjusted height to fit within viewport after top shift */
-  /* margin: auto; */ /* Not needed if left:0 and width:100% */
-  width: 100%; /* Make lines span full width */
+  height: calc(100% - 30px); /* Lines fill the remaining height. */
+  width: 100%; /* Lines span the full width. */
   display: flex;
-  flex-direction: column; /* Stack horizontal lines vertically */
-  justify-content: space-around; /* Distribute lines vertically */
-  z-index: 1;
-  pointer-events: none;
+  flex-direction: column; /* Stack individual .line elements vertically. */
+  justify-content: space-around; /* Distribute lines evenly within their container. */
+  z-index: 1; /* Positioned behind .scroll-content (z-index: 10) but above html's static background. */
+  pointer-events: none; /* Lines are purely decorative and should not interfere with mouse events. */
 }
 
+/* Each .line acts as a track for an animated pseudo-element. */
 .line {
-  position: relative;
-  width: 100%; /* Line track is full width */
-  height: 1px; /* Thin horizontal line */
-  background-color: transparent; /* Track is invisible */
-  overflow: hidden;
+  position: relative; /* For positioning the ::after pseudo-element. */
+  width: 100%; /* Track is full width. */
+  height: 1px; /* Defines the thickness of the track (and thus the sweeping highlight). */
+  background-color: transparent; /* The track itself is invisible. */
+  overflow: hidden; /* Ensures the ::after element is clipped if it extends beyond track bounds. */
 }
 
+/* The ::after pseudo-element is the visible sweeping highlight. */
 .line::after {
   content: "";
   display: block;
   position: absolute;
-  height: 100%;
-  width: 20vw;
+  height: 100%; /* Matches the .line height (1px). */
+  width: 20vw; /* Width of the sweeping highlight. */
   top: 0;
-  left: 0;
-  transform: translateX(-20vw);
-  opacity: 0; /* Initial state: invisible */
-  /* All lines are now white (slightly transparent white with faded edges) */
+  left: 0; /* Starts at the left edge of the .line. */
+  transform: translateX(
+    -20vw
+  ); /* Initially positioned completely off-screen to the left. */
+  opacity: 0; /* Initially invisible. */
+  /* Gradient for the highlight: fades in, solid core, fades out. */
   background: linear-gradient(
     to right,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.6) 30%,
-    rgba(255, 255, 255, 0.6) 70%,
-    rgba(255, 255, 255, 0) 100%
+    /* Transparent start */ rgba(255, 255, 255, 0.6) 30%,
+    /* Fades to 0.6 opacity white */ rgba(255, 255, 255, 0.6) 70%,
+    /* Solid 0.6 opacity white */ rgba(255, 255, 255, 0) 100%
+      /* Fades to transparent end */
   );
-  animation: sweepLeftToRight 7s 0s infinite;
-  animation-fill-mode: forwards;
-  animation-timing-function: cubic-bezier(0.4, 0.26, 0, 0.97);
+  animation: sweepLeftToRight 7s 0s infinite; /* Applies the sweep animation. */
+  animation-fill-mode: forwards; /* Retains style of last keyframe (though animation is infinite). */
+  animation-timing-function: cubic-bezier(
+    0.4,
+    0.26,
+    0,
+    0.97
+  ); /* Custom easing for the sweep. */
 }
 
-/* Updated animation-delay rules for 5 .line::after for more randomness */
+/* Staggered animation delays for each line to create a cascading effect. */
 .line:nth-child(1)::after {
   animation-delay: 0.5s;
 }
@@ -160,791 +129,218 @@ body {
   animation-delay: 6s;
 }
 
+/* Defines the left-to-right sweep animation for the .line::after pseudo-elements. */
 @keyframes sweepLeftToRight {
   0% {
-    transform: translateX(-20vw);
+    transform: translateX(-20vw); /* Starts off-screen left, invisible. */
     opacity: 0;
   }
   5% {
-    /* Quicker to start becoming visible */
-    transform: translateX(-15vw);
+    transform: translateX(-15vw); /* Slight movement before appearing. */
     opacity: 0;
   }
   15% {
-    /* Quicker to full visibility */
-    transform: translateX(0vw);
+    transform: translateX(0vw); /* Fully on-screen at the left edge, visible. */
     opacity: 1;
   }
   85% {
-    /* Stays visible, then starts to exit */
-    transform: translateX(85vw);
+    transform: translateX(
+      85vw
+    ); /* Sweeps across to the right edge, still visible. */
     opacity: 1;
   }
   95% {
-    /* Quicker to fade out */
-    transform: translateX(100vw);
+    transform: translateX(
+      100vw
+    ); /* Starts moving off-screen right, fading out. */
     opacity: 0;
   }
   100% {
-    transform: translateX(105vw); /* Ensures it's fully off screen */
+    transform: translateX(105vw); /* Fully off-screen right, invisible. */
     opacity: 0;
   }
 }
 
 /* ====== Feed Container & Posts ====== */
+/* .feed-container holds all the project posts and manages the masonry layout. */
 .feed-container {
-  position: relative; /* Added for absolute positioning of posts */
-  padding: 10px;
+  position: relative; /* Establishes a positioning context for absolutely positioned .post elements. */
+  padding: 10px; /* Default padding for mobile. */
   box-sizing: border-box;
-  margin-top: 2px;
+  margin-top: 2px; /* Small top/bottom margin. */
   margin-bottom: 2px;
-  margin-left: auto;
+  margin-left: auto; /* Center the container horizontally. */
   margin-right: auto;
-  opacity: 0; /* Initially hidden to prevent FOUC */
-  transition: opacity 0.3s ease-in-out; /* Smooth transition for reveal */
+  opacity: 0; /* Initially hidden for fade-in effect once layout is ready (class .loaded added by JS). */
+  transition: opacity 0.2s ease-in-out; /* Smooth fade-in transition. */
 }
 
+/* Class added by JS when projects are loaded and masonry layout is applied. */
 .feed-container.loaded {
-  opacity: 1; /* Reveal when content is loaded and layout is applied */
+  opacity: 1;
 }
 
-/* Tablet and Small Desktop: 3 columns (Changed from 2) */
+/* Responsive padding and max-width for the feed container on larger screens. */
+/* Tablet and Small Desktop: Typically 3 columns. */
 @media (min-width: 768px) {
   .feed-container {
-    padding: 20px;
-    max-width: 1072px;
+    padding: 12px 16px 12px 12px; /* Increased padding. */
+    max-width: 1072px; /* Max width to control line length and aesthetics. */
   }
 }
 
-/* Large Desktop: 4 columns (Changed from 3) */
+/* Large Desktop: Typically 4 columns. */
 @media (min-width: 1200px) {
   .feed-container {
+    padding: 24px 24px 24px 24px;
     max-width: 1408px;
   }
 }
 
+/* Individual project post styling. */
 .post {
-  border-radius: 8px;
-  width: 100%; /* JS will set specific width for items in columns */
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.692);
-  overflow: hidden;
-  cursor: pointer;
-  position: relative;
-  border: 2px solid transparent; /* Added for hover effect */
+  border-radius: 8px; /* Rounded corners for posts. */
+  width: 100%; /* Base width, actual width determined by masonry JS. */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.692); /* Default shadow for depth. */
+  overflow: hidden; /* Clips content like images/videos to the rounded corners. */
+  cursor: pointer; /* Indicates posts are clickable. */
+  position: relative; /* For ::after overlay and text container positioning. Actual position set by JS for masonry. */
+  border: 2px solid transparent; /* Transparent border for hover effect without layout shift. */
+  /* Transitions for hover effects. z-index transition is delayed to happen after other transitions. */
   transition:
     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    /* Added for border fade */ z-index 0s 0.25s; /* Delay z-index change until transition starts to prevent flicker */
+    z-index 0s 0.25s; /* Delay z-index change until other transitions are done to prevent clipping issues. */
 }
 
-.post.image-post img {
-  display: block; /* Remove potential bottom space */
-  width: 100%; /* Fill container width */
-  height: auto; /* Maintain aspect ratio */
-}
-
-.post.video-post video {
-  display: block;
-  width: 100%;
-  height: unset;
-  min-height: 180px;
-  aspect-ratio: 9/16;
-  min-width: 100%;
-  object-fit: fill;
-  box-sizing: border-box;
-}
-
-/* Lightbox Styles */
-#project-lightbox {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  display: none; /* display is toggled by JS */
-  justify-content: center;
-  align-items: center;
-  position: fixed;
+/* Darkening overlay shown on post hover. */
+.post::after {
+  content: "";
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100dvh;
-  background-color: rgba(
-    30,
-    30,
-    30,
-    0.9
-  ) !important; /* Inverted: Dark semi-transparent background */
-  z-index: 100010;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-}
-
-#project-lightbox.fade-in {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-#project-lightbox.fade-out {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#lightbox-inner-wrapper {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 1440px;
   height: 100%;
+  background: rgba(0, 0, 0, 0.75); /* Dark semi-transparent background. */
+  opacity: 0; /* Hidden by default. */
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth fade-in/out. */
+  pointer-events: none; /* Overlay does not intercept mouse events. */
+  z-index: 1; /* Positioned above post content (img/video) but below text overlay. */
+  transform: translateZ(
+    0
+  ); /* Promotes to its own compositing layer for smoother animations. */
+}
+
+/* Container for all text elements shown on post hover. */
+.post-text-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 15px 20px 15px 20px; /* Padding within the text overlay. */
   box-sizing: border-box;
-  overflow: visible !important;
-}
-
-#lightbox-content {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-#lightbox-content img,
-#lightbox-content video {
-  display: block;
-  width: 100%;
-  height: auto;
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  padding: 0;
-  border-radius: 20px;
-}
-
-#project-lightbox.fade-in #lightbox-content img,
-#project-lightbox.fade-in #lightbox-content video {
-  opacity: 1;
-}
-
-#project-lightbox.fade-out #lightbox-content img,
-#project-lightbox.fade-out #lightbox-content video {
-  opacity: 0;
-}
-
-#lightbox-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 90vw;
-  text-align: center;
-  background-color: #333;
-  border-radius: 20px;
-  flex-grow: 1;
-  min-height: 0;
-}
-
-/* Mobile Layout (becomes Base Layout) */
-#project-lightbox {
-  height: 100vh;
-  min-height: 100vh;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-}
-#project-lightbox #lightbox-inner-wrapper {
-  height: 100vh;
-  min-height: 100vh;
+  text-align: center; /* Centers text elements by default (for desktop). */
+  opacity: 0; /* Hidden by default. */
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth fade-in/out. */
+  pointer-events: none; /* Text container itself does not intercept mouse events (links inside will have pointer-events: auto). */
+  z-index: 2; /* Positioned above the ::after overlay. */
+  transform: translateZ(0); /* Promotes to its own compositing layer. */
+  /* Flexbox for centering content vertically and horizontally. */
+  flex-grow: 1; /* Allows it to take up space (though it's absolutely positioned, this can influence internal flex children). */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  margin: 0;
 }
-#project-lightbox #lightbox-content {
-  height: 100vh;
-  min-height: 100vh;
-  max-height: 100vh;
-  width: 100vw;
-  max-width: 100vw;
+
+/* Wrapper for main hover text (title and subtitle) to help with centering and grouping. */
+.post-hover-text-main {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  margin: 0;
+  flex-grow: 1; /* Takes up available vertical space to center title/subtitle within .post-text-container. */
 }
 
-#project-lightbox #lightbox-title,
-#project-lightbox #lightbox-description {
-  display: none;
+/* Styling for the "PERSONAL WORK" / "CLIENT WORK" label on hover. */
+.post-hover-project-work-label {
+  font-family: "Wix Madefor Display", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff96; /* Semi-transparent white. */
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  width: 100%; /* Takes full width for alignment purposes (used with text-align in parent). */
 }
 
-#project-lightbox #lightbox-details {
-  justify-content: center;
-  background-color: transparent;
-  padding: 0;
-  flex-grow: 0;
+/* Styling for the main project title on hover. */
+.post-hover-title {
+  color: white;
+  font-family: "Work Sans", sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* Subtle text shadow for readability against varied backgrounds. */
+  margin-bottom: 24px; /* Space below the title before subtitle or dots. */
+  letter-spacing: 0.4px;
+  line-height: 1.15;
+  padding-left: 20px; /* Horizontal padding to prevent text touching edges of the card. */
+  padding-right: 20px;
 }
 
-#project-lightbox #lightbox-content img,
-#project-lightbox #lightbox-content video {
-  max-width: calc(100vw - 24px);
-  max-height: calc(100vh - 24px);
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  display: block;
-  padding: 0;
-  border: none;
+/* Styling for the project subtitle on hover. */
+.post-hover-subtitle {
+  color: #cccccc; /* Lighter grey for subtitle. */
+  font-family: "Work Sans", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  line-height: 1.3;
 }
 
-/* Ensure .video-post is positioned for overlay */
+/* Container for image indicator dots (shown if multiple lightbox images). */
+.post-hover-image-dots {
+  display: flex;
+  justify-content: center; /* Center dots horizontally. */
+  align-items: center;
+  width: 100%;
+  margin-top: auto; /* Pushes dots to the bottom of the .post-text-container (on desktop). */
+  flex-shrink: 0; /* Prevents dots container from shrinking if text content is large. */
+}
+
+/* Individual indicator dot styling. */
+.post-hover-image-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #ffffff96; /* Semi-transparent white. */
+  margin: 0 3px; /* Space between dots. */
+}
+
+/* Styling for images within image-type posts in the grid. */
+.post.image-post img {
+  display: block; /* Remove extra space below image. */
+  width: 100%; /* Image takes full width of its .post container. */
+  height: auto; /* Height adjusts to maintain aspect ratio. */
+}
+
+/* Styling for videos within video-type posts in the grid. */
+.post.video-post video {
+  display: block; /* Remove extra space below video. */
+  width: 100%; /* Video takes full width. */
+  height: auto; /* Allow natural aspect ratio. */
+  min-width: 100%; /* Ensure it fills width. */
+  object-fit: cover; /* Maintain aspect ratio. */
+  box-sizing: border-box;
+}
+
+/* Additional relative positioning for video posts if needed for specific overlays/controls on videos. */
 .video-post {
   position: relative;
 }
 
-@media (min-width: 768px) {
-  #lightbox-content {
-    align-items: center;
-  }
-  .lightbox-media-wrapper {
-    display: flex !important;
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: center;
-    position: relative;
-    min-height: 320px;
-    height: 90vh;
-    width: 90vw; /* Always 90% of viewport width */
-    max-width: 100%; /* Ensures it doesn't exceed its parent's width constraints */
-    margin-left: auto; /* To center the 90vw block */
-    margin-right: auto; /* To center the 90vw block */
-  }
-  .lightbox-desc-card {
-    background: rgba(223, 223, 223, 0.877) !important;
-    width: 95% !important;
-  }
-
-  /* Styling for the PROJECT label */
-  .lightbox-media-wrapper .lightbox-desc-card .card-project-label {
-    font-family: "Wix Madefor Display", sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #3d3d3d; /* Example color, will be faint due to opacity */
-    opacity: 0.25;
-    text-transform: uppercase;
-    margin-bottom: 4px; /* Default spacing */
-    transition:
-      font-size 0.15s ease-out,
-      margin-bottom 0.15s ease-out; /* Faster transition */
-  }
-
-  /* Styling for title, subheading, body within the description card */
-  .lightbox-media-wrapper .lightbox-desc-card .card-title {
-    font-family: "Work Sans", sans-serif;
-    font-size: 1.8rem; /* Default size */
-    font-weight: 700;
-    color: #222 !important; /* Inverted: Dark text */
-    margin-bottom: 12px; /* Default spacing */
-    line-height: 1.2;
-    transition:
-      font-size 0.15s ease-out,
-      margin-bottom 0.15s ease-out; /* Faster transition */
-  }
-
-  /* Styling for the HR divider below the title */
-  .lightbox-media-wrapper .lightbox-desc-card .card-title-divider {
-    border: none; /* Remove default HR border */
-    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Light, subtle top border */
-    height: 1px;
-    margin: 12px 0; /* Default Space above and below the divider */
-    width: 100%; /* Full width of its container */
-    transition: margin 0.15s ease-out; /* Faster transition */
-  }
-
-  /* Styling for the DESCRIPTION label */
-  .lightbox-media-wrapper .lightbox-desc-card .card-description-label {
-    font-family: "Wix Madefor Display", sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #3d3d3d;
-    opacity: 0.25;
-    text-transform: uppercase;
-    margin-bottom: 0px; /* Default Space before body */
-    transition:
-      font-size 0.15s ease-out,
-      margin-bottom 0.15s ease-out; /* Faster transition */
-  }
-
-  .lightbox-media-wrapper .lightbox-desc-card .card-body {
-    font-family: "Work Sans", sans-serif;
-    font-size: 0.9rem; /* Default size */
-    font-weight: 500;
-    color: #333 !important;
-    line-height: 1.3; /* Default line-height */
-    margin-top: 0;
-    margin-bottom: 18px; /* Default spacing */
-    transition:
-      font-size 0.15s ease-out,
-      line-height 0.15s ease-out,
-      margin-bottom 0.15s ease-out; /* Faster transition */
-  }
-
-  /* Styling for the Bullet Points section */
-  .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points {
-    font-family: "Work Sans", sans-serif;
-    /* font-size, line-height, color are on li */
-    margin-top: 12px;
-    margin-bottom: 18px; /* Default spacing */
-    padding-left: 0;
-    text-align: left;
-    transition: margin-bottom 0.15s ease-out; /* Faster transition */
-  }
-
-  .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points ul {
-    list-style-type: disc;
-    margin-left: 20px;
-    padding-left: 0;
-  }
-
-  .lightbox-media-wrapper .lightbox-desc-card .card-bullet-points li {
-    font-size: 0.85rem; /* Default size */
-    font-weight: 500;
-    color: #333;
-    line-height: 1.4; /* Default line-height */
-    margin-bottom: 6px; /* Default spacing */
-    transition:
-      font-size 0.15s ease-out,
-      line-height 0.15s ease-out,
-      margin-bottom 0.15s ease-out; /* Faster transition */
-  }
-
-  /* Styling for the TOOLS USED label */
-  .lightbox-media-wrapper .lightbox-desc-card .card-tools-label {
-    font-family: "Wix Madefor Display", sans-serif;
-    font-size: 1rem; /* Default size */
-    font-weight: 700;
-    color: #3d3d3d;
-    opacity: 0.25;
-    text-transform: uppercase;
-    margin-top: 12px;
-    margin-bottom: 4px; /* Default spacing */
-    transition:
-      font-size 0.15s ease-out,
-      margin-bottom 0.15s ease-out; /* Faster transition */
-  }
-
-  /* Styling for the TOOLS USED list */
-  .lightbox-media-wrapper .lightbox-desc-card .card-tools-list {
-    font-family: "Work Sans", sans-serif;
-    font-size: 0.9rem; /* Default size */
-    line-height: 1.5; /* Default line-height */
-    color: #333; /* Consistent dark color */
-    padding-left: 4px;
-    transition:
-      font-size 0.15s ease-out,
-      line-height 0.15s ease-out; /* Faster transition */
-  }
-
-  body.projects-window-maximized
-    .lightbox-media-wrapper.video-media-active
-    .lightbox-desc-card {
-    padding-right: 64px; /* Apply extra right padding for videos only when maximized */
-  }
-}
-
-/* Hide navigation buttons and hint on mobile */
-@media (max-width: 767px) {
-  .lightbox-media-wrapper {
-    position: relative;
-    overflow: hidden;
-    border-radius: 20px; /* Ensure the clipping container is also rounded */
-  }
-  .lightbox-description-overlay,
-  .lightbox-title-overlay {
-    /* Apply common mobile overlay animation base */
-    position: absolute;
-    left: 0;
-    right: 0;
-    z-index: 10;
-    transition: none !important;
-    opacity: 0;
-    pointer-events: none;
-    animation: none;
-  }
-  .lightbox-title-overlay.show {
-    /* Simplified selector */
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .lightbox-description-overlay.hide-anim,
-  .lightbox-title-overlay.hide-anim {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Specific for bottom description overlay */
-  .lightbox-description-overlay {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
-    padding: 40px 24px 20px 24px;
-    color: #fff;
-    font-size: 0.95rem;
-    font-weight: 500;
-    line-height: 1.4;
-    background: linear-gradient(
-      0deg,
-      rgba(20, 20, 20, 0.95) 0%,
-      rgba(20, 20, 20, 0.95) 40%,
-      rgba(20, 20, 20, 0.9) 50%,
-      rgba(20, 20, 20, 0.8) 60%,
-      rgba(20, 20, 20, 0.65) 70%,
-      rgba(20, 20, 20, 0.45) 80%,
-      rgba(20, 20, 20, 0.25) 90%,
-      rgba(20, 20, 20, 0) 100%
-    );
-    pointer-events: none;
-    transform: translateY(100%);
-    transition: none !important;
-    max-width: 100%;
-    box-sizing: border-box;
-    margin-top: 24px;
-  }
-  .lightbox-description-overlay.show {
-    transform: translateY(0);
-    animation: mobileBottomOverlaySlideIn 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-  .lightbox-description-overlay.hide-anim {
-    transform: translateY(100%);
-    animation: mobileBottomOverlaySlideOut 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards; /* Duration 650ms */
-  }
-
-  /* Specific for top title overlay */
-  .lightbox-title-overlay {
-    top: 0;
-    transform: translateY(-100%);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 18px 24px 20px 24px;
-    background: linear-gradient(
-      180deg,
-      rgba(20, 20, 20, 0.95) 0%,
-      rgba(20, 20, 20, 0.95) 40%,
-      rgba(20, 20, 20, 0.9) 50%,
-      rgba(20, 20, 20, 0.8) 60%,
-      rgba(20, 20, 20, 0.65) 70%,
-      rgba(20, 20, 20, 0.45) 80%,
-      rgba(20, 20, 20, 0.25) 90%,
-      rgba(20, 20, 20, 0) 100%
-    );
-    color: #fff;
-  }
-
-  /* Styling for the "PERSONAL PROJECT" label in mobile top overlay */
-  .mobile-overlay-project-label {
-    font-family: "Wix Madefor Display", sans-serif;
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #adacacc7; /* Slightly lighter than #9c9b9bc7 */
-    opacity: 0.8;
-    text-transform: uppercase;
-    margin-bottom: -6px; /* Pulls title closer */
-    text-align: left;
-    width: 100%;
-  }
-
-  /* Styling for the "DESCRIPTION" label in mobile bottom overlay */
-  .mobile-overlay-description-label {
-    font-family: "Wix Madefor Display", sans-serif;
-    font-size: 1.2rem; /* Consistent with project label */
-    font-weight: 800; /* Consistent with project label */
-    color: #adacacc7; /* Slightly lighter than #9c9b9bc7 */
-    opacity: 0.8; /* Consistent with project label */
-    text-transform: uppercase;
-    margin-top: 12px;
-    margin-bottom: 8px; /* Space before the actual description text */
-    text-align: left;
-    width: 100%;
-  }
-
-  .lightbox-overlay-title-text {
-    flex-grow: 0; /* Do not grow, allow natural size */
-    text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal; /* Allow title to wrap if needed */
-    max-width: 100%; /* Ensure it doesn't overflow its parent */
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.5;
-    color: #fff; /* Ensure title text is white */
-    margin-bottom: 0; /* Adjust as needed, no direct icon after */
-  }
-
-  .lightbox-title-overlay.show {
-    transform: translateY(0);
-    animation: mobileTopOverlaySlideIn 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-  .lightbox-title-overlay.hide-anim {
-    transform: translateY(-100%);
-    animation: mobileTopOverlaySlideOut 650ms cubic-bezier(0.4, 0, 0.2, 1) forwards; /* Duration 650ms */
-  }
-
-  #project-lightbox,
-  #project-lightbox #lightbox-inner-wrapper,
-  #project-lightbox #lightbox-content {
-    height: 100dvh !important;
-    min-height: 100dvh !important;
-    max-height: 100dvh !important;
-  }
-  #project-lightbox #lightbox-content img,
-  #project-lightbox #lightbox-content video {
-    max-width: calc(100vw - 24px) !important;
-    max-height: calc(100dvh - 24px) !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-    display: block;
-    padding: 0;
-    border: none;
-  }
-}
-
-.lightbox-media-wrapper img,
-.lightbox-media-wrapper video {
-  max-height: 100%;
-  min-width: 0;
-  min-height: 0;
-  flex: 0 0 auto;
-  margin-right: 0;
-  display: block;
-  object-fit: contain;
-  z-index: 2;
-}
-
-/* Crucial style for videos wrapped in a div, ensuring they respect container height */
-.lightbox-media-wrapper > div > video {
-  height: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain !important;
-}
-
-/* Base style for the description card in desktop view */
-.lightbox-media-wrapper .lightbox-desc-card {
-  margin-left: auto;
-  margin-right: 0;
-  height: 100%;
-  border-radius: 18px;
-  background: rgba(240, 240, 240, 0.95);
-  display: flex;
-  flex-direction: column;
-  font-size: 1.13rem;
-  font-weight: 500;
-  color: #333;
-  z-index: 1;
-  box-sizing: border-box;
-  opacity: 0;
-  transform: translateX(-40px);
-  transition:
-    opacity 0.5s ease-in-out,
-    transform 0.5s ease-in-out,
-    overflow 0s 0.3s; /* Delay overflow change */
-  overflow: hidden; /* Changed from auto */
-  padding: 30px 30px 30px 30px;
-  text-align: left;
-  white-space: normal;
-  word-break: break-word;
-  flex-shrink: 1;
-}
-
-/* Styles for Maximized Window State */
-body.projects-window-maximized .lightbox-media-wrapper .lightbox-desc-card {
-  /* This rule block should already exist with padding-right for video-media-active */
-  /* Add overflow: auto here, keeping existing styles like padding-right */
-  overflow: auto; /* Allow scrollbars if content overflows in maximized state */
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-project-label {
-  font-size: 1.05rem;
-  margin-bottom: 6px;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-title {
-  font-size: 2.2rem;
-  margin-bottom: 12px;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-title-divider {
-  margin: 16px 0; /* Increased top and bottom margin */
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-description-label {
-  font-size: 1.05rem;
-  margin-bottom: 8px;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-body {
-  font-size: 1rem;
-  line-height: 1.55;
-  margin-bottom: 20px;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-bullet-points {
-  margin-bottom: 20px;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-bullet-points
-  ul
-  li {
-  font-size: 1rem;
-  line-height: 1.65;
-  margin-bottom: 7px;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-tools-section
-  .card-title-divider {
-  /* This rule was targeting the specific divider in tools, ensure its base style also has transition */
-  /* Base style for .card-title-divider already has transition: margin 0.3s ease-out; */
-  margin: 16px 0; /* Increased top and bottom margin */
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-tools-label {
-  font-size: 1.05rem;
-  margin-bottom: 8px;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper
-  .lightbox-desc-card
-  .card-tools-list {
-  font-size: 1rem;
-  line-height: 1.55;
-  color: #333;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper.video-media-active
-  .lightbox-desc-card {
-  padding-right: 64px; /* Apply extra right padding for videos only when maximized */
-}
-
-.lightbox-media-wrapper .lightbox-desc-card .card-tools-section {
-  flex-shrink: 0; /* Prevents this section from shrinking */
-  margin-top: auto; /* This can also help push to bottom if parent has height */
-  /* We are primarily relying on flex-grow of the main content though */
-}
-
-@keyframes mobileBottomOverlaySlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes mobileBottomOverlaySlideOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-}
-
-/* New animations for top title overlay */
-@keyframes mobileTopOverlaySlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes mobileTopOverlaySlideOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-100%);
-  }
-}
-
-.desc-card-anim-wrapper {
-  min-width: 0;
-  max-width: 600px;
-  overflow: hidden;
-  display: flex;
-  flex: 1 1 auto;
-  margin-left: 15px;
-  border-radius: 18px;
-}
-
-.lightbox-media-wrapper.video-media-active .desc-card-anim-wrapper {
-  max-width: 450px;
-}
-
-body.projects-window-maximized
-  .lightbox-media-wrapper.video-media-active
-  .desc-card-anim-wrapper {
-  max-width: 545px;
-}
-
-.lightbox-media-wrapper.desc-visible .desc-card-anim-wrapper {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.lightbox-media-wrapper.desc-visible .lightbox-desc-card {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Allow selection in links (if needed) */
+/* Enable text selection for links within posts, overriding any global user-select: none. */
 .post a,
 a {
   user-select: text;
@@ -953,146 +349,103 @@ a {
   -ms-user-select: text;
 }
 
-.mute-icon-overlay {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  z-index: 10;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.mute-icon-overlay.show {
-  opacity: 1;
-  transition: opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@media (max-width: 768px) {
-  .mute-icon-overlay {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 44px;
-    height: 44px;
-  }
-}
-
-.video-spinner-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px !important;
-  height: 48px !important;
-  min-width: 48px;
-  min-height: 48px;
-  max-width: 48px;
-  max-height: 48px;
-  pointer-events: none;
-}
-.video-spinner {
-  width: 48px !important;
-  height: 48px !important;
-  min-width: 48px;
-  min-height: 48px;
-  max-width: 48px;
-  max-height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.25);
-  border-top: 4px solid #fff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  box-sizing: border-box;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.mute-icon-overlay img {
-  box-shadow: none !important;
-  background: none !important;
-}
-
-/* Push text span to bottom of overlay */
-.lightbox-description-overlay > span {
-  margin-top: auto;
-}
-
-/* DESKTOP ONLY BORDERS for lightbox media */
-@media (min-width: 768px) {
-  .lightbox-media-wrapper > img {
-    border: 2px solid rgb(240, 240, 240) !important;
-    border-radius: 20px !important;
-    box-sizing: border-box;
-  }
-
-  .lightbox-media-wrapper > div:has(> video) {
-    border: 2px solid rgb(240, 240, 240);
-    border-radius: 20px;
-    box-sizing: border-box;
-  }
-
-  /* This rule ensures video element itself doesn't get a double border if its wrapper has one */
-  .lightbox-media-wrapper > div:has(> video) > video {
-    border: none !important; /* Keep this to remove any direct border on video */
-    /* Desktop videos can inherit radius from their wrapper if needed, or have their own.
-         If the wrapper gets border-radius: 20px, video itself might not need it.
-         Let's assume wrapper's radius is sufficient. */
-  }
-}
-
-/* MOBILE: Explicitly set dark borders and radius for lightbox media, and light background for lightbox */
-@media (max-width: 767px) {
-  #project-lightbox {
-    background-color: rgba(
-      184,
-      184,
-      184,
-      0.747
-    ) !important; /* Light semi-transparent background */
-  }
-
-  .lightbox-media-wrapper > img {
-    border: 2px solid rgb(240, 240, 240) !important;
-    border-radius: 20px !important; /* Rounded corners */
-    box-sizing: border-box;
-  }
-
-  .lightbox-media-wrapper > div:has(> video) {
-    border: 2px solid rgb(240, 240, 240) !important;
-    border-radius: 20px !important; /* Rounded corners */
-    box-sizing: border-box;
-  }
-
-  .lightbox-media-wrapper > div:has(> video) > video {
-    border: none !important;
-    border-radius: 20px !important; /* Match wrapper's radius if displayed directly */
-  }
-
-  /* For mobile, the main #lightbox-content might need overflow hidden and radius if media touches edges */
-}
-
-/* Desktop Hover Effect for Posts */
+/* Apply hover effects only on devices that support true hover (e.g., mouse, not primarily touch). */
 @media (hover: hover) and (pointer: fine) {
   .feed-container .post:hover {
-    transform: scale(1.03);
-    z-index: 20; /* Ensure hovered item is above others */
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); /* More pronounced shadow */
-    border-color: #fff; /* Fade in white border */
+    transform: scale(1.03); /* Slight zoom effect on hover. */
+    z-index: 20; /* Bring hovered post to the front to overlap neighbors. */
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); /* Enhanced shadow on hover. */
+    border-color: #fff; /* White border highlight on hover. */
     transition-delay:
-      0s, 0s, 0s, 0s; /* Ensure z-index and border change immediately on hover */
+      0s, 0s, 0s, 0s; /* Ensure all transitions happen immediately on hover, overriding any base delays. */
+  }
+
+  /* Show the ::after overlay and the text container on hover for devices supporting true hover. */
+  .feed-container .post:hover::after,
+  .feed-container .post:hover .post-text-container {
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments for text overlay elements on medium screens and up. */
+@media (min-width: 768px) {
+  /* Adjust vertical positioning of dots and label for better spacing on larger cards. */
+  .post-hover-image-dots {
+    margin-bottom: 18px;
+  }
+  .post-hover-project-work-label {
+    margin-top: 18px;
+  }
+}
+
+/* Styles to show hover overlay via JS on mobile (typically triggered by scroll). */
+/* When .post has class 'hover' (added by JS), show the text and ::after overlay. */
+.feed-container .post.hover .post-text-container,
+.feed-container .post.hover::after {
+  opacity: 1;
+}
+
+/* Responsive adjustments for mobile devices (max-width: 767px). */
+@media (max-width: 767px) {
+  /* Adjust text container padding and alignment for mobile. */
+  .post-text-container {
+    padding: 10px 8px 10px 8px; /* Reduced padding for smaller screens. */
+    justify-content: space-between; /* Space elements vertically. */
+    align-items: stretch; /* Stretch items horizontally to fill container width. */
+    text-align: left; /* Align text to the left for mobile. */
+  }
+
+  /* Mobile styling for project work label. */
+  .post-hover-project-work-label {
+    font-size: 0.7rem; /* Smaller font size. */
+    margin-top: 0; /* Align to top. */
+    margin-bottom: auto; /* Pushes other content down, effectively top-aligning this and bottom-aligning dots. */
+    letter-spacing: 0.2px;
+    align-self: flex-start; /* Align to the start (left) of the flex container. */
+  }
+
+  /* Mobile styling for project title. */
+  .post-hover-title {
+    font-size: 1.3rem; /* Smaller font size. */
+    padding-left: 0; /* Remove horizontal padding as container is narrower. */
+    padding-right: 0;
+    margin-bottom: 12px; /* Reduced margin below title. */
+    line-height: 1.15;
+    align-self: flex-start; /* Align to the left. */
+  }
+
+  /* Mobile styling for project subtitle. */
+  .post-hover-subtitle {
+    font-size: 0.8rem; /* Smaller font size. */
+    margin-top: 0;
+    margin-bottom: 0;
+    align-self: flex-start; /* Align to the left. */
+  }
+
+  /* Mobile styling for image indicator dots. */
+  .post-hover-image-dots {
+    margin-top: auto; /* Pushes to bottom. */
+    margin-bottom: 0;
+    justify-content: flex-start; /* Align dots to the left. */
+    align-self: flex-start; /* Align container to the left. */
+  }
+
+  /* Mobile styling for individual dots. */
+  .post-hover-image-dot {
+    width: 8px; /* Slightly larger dots for better touch visibility/target. */
+    height: 8px;
+    margin: 0 3px;
+  }
+
+  /* Mobile layout for the main text wrapper (which contains title and subtitle). */
+  .post-hover-text-main {
+    flex-grow: 0; /* Does not grow; content determines its size. */
+    order: unset; /* Maintain default DOM order relative to label and dots. */
+    margin-bottom: 0;
+    align-self: stretch; /* Stretches to fill the width of .post-text-container. */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align title/subtitle to the left. */
+    justify-content: center;
   }
 }

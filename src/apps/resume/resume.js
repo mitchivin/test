@@ -1,8 +1,14 @@
-// ==================================================
-//  resume.js — Resume App Interactivity for Windows XP Simulation
-//  Handles zoom, pan, and communication for the resume window.
-// ==================================================
+/*
+  resume.js — Resume App Interactivity for Windows XP Simulation
+  Handles interactivity for the Resume app, including image loading from info.json,
+  zoom-on-click, pan-while-zoomed functionality, and communication with the
+  parent window (e.g., for maximized state).
+  @file src/apps/resume/resume.js
+*/
 
+// ----- Parent Window Message Listener (Maximized State) ----- //
+// Listens for messages from the parent window to toggle a class when the window is maximized or unmaximized.
+// This allows CSS to apply different styles (e.g., padding adjustments) when the app is in maximized mode.
 window.addEventListener("message", function (event) {
   const appRoot = document.getElementById("appRoot");
   if (!appRoot) return;
@@ -14,9 +20,21 @@ window.addEventListener("message", function (event) {
   }
 });
 
+/**
+ * Prepends the necessary path to asset URLs to ensure they load correctly
+ * when the Resume app is displayed within an iframe in the main shell.
+ * If the path is already absolute (http/https) or correctly relative for the iframe context,
+ * it's returned unchanged. Otherwise, it's prefixed with '../../../'.
+ * @param {string} path - The original asset path.
+ * @returns {string} The transformed asset path.
+ */
 function transformAssetPath(path) {
   if (!path) return path;
-  if (path.startsWith("http:") || path.startsWith("https:") || path.startsWith("../../../")) {
+  if (
+    path.startsWith("http:") ||
+    path.startsWith("https:") ||
+    path.startsWith("../../../")
+  ) {
     return path;
   }
   let newPath = path;
@@ -30,11 +48,12 @@ function transformAssetPath(path) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // ----- Element Selections ----- //
   const resumeImage = document.getElementById("resumeImage");
-  const scroller = document.getElementById("appRoot");
-  const downloadBtnId = "resumeDownloadBtn";
+  const scroller = document.getElementById("appRoot"); // The main scrollable container for the resume image.
 
-  // Fetch info.json
+  // ----- Fetch and Process info.json for Resume Image ----- //
+  // Loads the resume image path from an external configuration file.
   let info = null;
   try {
     const response = await fetch("../../../info.json");
@@ -50,53 +69,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     resumeImage.src = transformAssetPath(info.resume.webp);
   }
 
-  // Add or update download button for PDF
-  let downloadBtn = document.getElementById(downloadBtnId);
-  if (!downloadBtn) {
-    downloadBtn = document.createElement("a");
-    downloadBtn.id = downloadBtnId;
-    downloadBtn.textContent = "Download PDF";
-    downloadBtn.href = transformAssetPath(info.resume.pdf);
-    downloadBtn.download = "resumeMitchIvin.pdf";
-    downloadBtn.className = "resume-download-btn";
-    resumeImage?.parentNode?.appendChild(downloadBtn);
-  } else {
-    downloadBtn.href = transformAssetPath(info.resume.pdf);
-  }
-
+  // ----- Initialize Zoom and Pan Functionality ----- //
+  /**
+   * Sets up event listeners for zoom-on-click and pan-while-zoomed functionality on the resume image.
+   */
   function initializeZoomPan() {
-    let isDragging = false;
-    let startX, startY, startScrollLeft, startScrollTop;
-    let didDrag = false;
+    let isDragging = false; // Flag to track if the image is currently being dragged.
+    let startX, startY; // Initial mouse coordinates when dragging starts.
+    let startScrollLeft, startScrollTop; // Initial scroll positions of the scroller when dragging starts.
+    let didDrag = false; // Flag to differentiate between a click and a drag-release.
 
+    // Prevent the browser's default image drag behavior.
     resumeImage.addEventListener("dragstart", (e) => e.preventDefault());
 
+    // Handles click events on the resume image for zooming in and out.
     resumeImage.addEventListener("click", (e) => {
+      // If a drag operation just finished, don't process this as a click for zoom.
       if (didDrag) {
-        didDrag = false;
+        didDrag = false; // Reset flag for next interaction.
         return;
       }
       const isZoomed = resumeImage.classList.contains("zoomed");
+
       if (!isZoomed) {
-        const clickX = e.offsetX;
+        // --- Zoom In --- //
+        const clickX = e.offsetX; // Click position relative to the image element.
         const clickY = e.offsetY;
-        const originalWidth = resumeImage.clientWidth;
+        const originalWidth = resumeImage.clientWidth; // Current displayed width of the image.
         const originalHeight = resumeImage.clientHeight;
 
+        // Avoid division by zero if image dimensions are not yet available.
         if (originalWidth === 0 || originalHeight === 0) {
           return;
         }
 
         resumeImage.classList.add("zoomed");
+
+        // Use requestAnimationFrame to ensure calculations are based on dimensions *after* the .zoomed class is applied and layout is updated.
         requestAnimationFrame(() => {
-          const zoomedWidth = resumeImage.clientWidth;
-          const scale = zoomedWidth / originalWidth;
-          const targetX = clickX * scale;
+          const zoomedWidth = resumeImage.clientWidth; // Width of the image *after* .zoomed class is applied.
+          const scale = zoomedWidth / originalWidth; // Calculate the zoom scale factor.
+
+          // Calculate target scroll positions to center the clicked point in the viewport.
+          const targetX = clickX * scale; // Click position scaled to the new zoomed image size.
           const targetY = clickY * scale;
           const viewportWidth = scroller.clientWidth;
           const viewportHeight = scroller.clientHeight;
+
           let targetScrollLeft = targetX - viewportWidth / 2;
           let targetScrollTop = targetY - viewportHeight / 2;
+
+          // Clamp scroll values to be within the bounds of the scrollable area.
           targetScrollLeft = Math.max(
             0,
             Math.min(targetScrollLeft, scroller.scrollWidth - viewportWidth),
@@ -105,53 +128,61 @@ document.addEventListener("DOMContentLoaded", async () => {
             0,
             Math.min(targetScrollTop, scroller.scrollHeight - viewportHeight),
           );
+
+          // Scroll to the calculated position instantly.
           scroller.scrollTo({
             left: targetScrollLeft,
             top: targetScrollTop,
-            behavior: "auto",
+            behavior: "auto", // Use "auto" for instant scroll, "smooth" for animated.
           });
         });
       } else {
+        // --- Zoom Out --- //
         resumeImage.classList.remove("zoomed");
+        // Reset scroll position to top-left when zooming out.
         scroller.scrollTo({ left: 0, top: 0, behavior: "auto" });
       }
-      // Notify parent of interaction for Start Menu closing
+      // Notify parent window of interaction (e.g., to close Start Menu if open).
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: "resume-interaction" }, "*");
       }
     });
 
+    // Handles mousedown event to initiate panning when the image is zoomed.
     resumeImage.addEventListener("mousedown", (e) => {
-      // Only allow panning if zoomed
+      // Panning is only allowed when the image is zoomed.
       if (!resumeImage.classList.contains("zoomed")) return;
       isDragging = true;
-      didDrag = false;
-      resumeImage.classList.add("dragging");
-      startX = e.clientX;
+      didDrag = false; // Reset drag flag at the start of a potential drag.
+      resumeImage.classList.add("dragging"); // Apply dragging cursor style.
+      startX = e.clientX; // Record initial mouse position.
       startY = e.clientY;
-      startScrollLeft = scroller.scrollLeft;
+      startScrollLeft = scroller.scrollLeft; // Record initial scroll position.
       startScrollTop = scroller.scrollTop;
-      e.preventDefault();
+      e.preventDefault(); // Prevent text selection or other default mousedown actions.
     });
 
+    // Handles mousemove event for panning the image if dragging is active.
     document.addEventListener("mousemove", (e) => {
       if (!isDragging) return;
       e.preventDefault();
-      didDrag = true;
-      const dx = e.clientX - startX;
+      didDrag = true; // Set flag to true as soon as mouse moves while dragging.
+      const dx = e.clientX - startX; // Calculate change in mouse position.
       const dy = e.clientY - startY;
+      // Update scroll position based on mouse movement.
       scroller.scrollLeft = startScrollLeft - dx;
       scroller.scrollTop = startScrollTop - dy;
     });
 
+    // Handles mouseup event to stop panning.
     document.addEventListener("mouseup", () => {
       if (!isDragging) return;
       isDragging = false;
-      resumeImage.classList.remove("dragging");
+      resumeImage.classList.remove("dragging"); // Remove dragging cursor style.
     });
 
+    // Handles mouseleave event to stop panning if the mouse leaves the document area while dragging.
     document.addEventListener("mouseleave", () => {
-      // Changed from resumeImage to document
       if (isDragging) {
         isDragging = false;
         resumeImage.classList.remove("dragging");
@@ -159,18 +190,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Check if the image is already loaded (e.g. from cache)
+  // Initialize zoom/pan functionality after the image is loaded.
+  // This ensures that image dimensions are available for calculations.
   if (resumeImage.complete && resumeImage.naturalWidth !== 0) {
+    // If image is already complete (e.g., cached), initialize immediately.
     initializeZoomPan();
   } else {
-    // Otherwise, wait for the load event
+    // Otherwise, wait for the 'load' event.
     resumeImage.addEventListener("load", initializeZoomPan);
-    resumeImage.addEventListener("error", () => {});
   }
 });
 
+// ----- Global Click Listener for iFrame Interaction ----- //
+// Notifies the parent window of any click within the iframe.
+// This can be used by the shell to manage focus or other iframe-related behaviors.
 document.addEventListener("click", () => {
-  // Optionally: filter out clicks inside your own popouts/menus if needed
   if (window.parent && window.parent !== window) {
     window.parent.postMessage({ type: "iframe-interaction" }, "*");
   }
@@ -234,7 +268,8 @@ document.addEventListener(
   { passive: false },
 );
 
-// Prevent Ctrl+wheel zoom and general wheel events on the body
+// Prevent Ctrl+wheel zoom and general wheel events on the body or html element.
+// This is to avoid interference with the app's custom zoom/scroll or page-level browser zoom.
 document.addEventListener(
   "wheel",
   function (event) {

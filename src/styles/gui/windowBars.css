@@ -1,21 +1,14 @@
 /*
- * windowBars.css — Window Bars, Toolbar, and Address Bar Styles for XP Simulation
- *
- * Styles for:
- * - Menu bar, toolbar, and address bar for app windows
- * - Responsive/mobile adjustments
- *
+ * windowBars.css — Window bars, toolbar, and address bar styles for Windows XP simulation.
+ * Handles menubar, toolbar, and address bar for windows, matching the look and feel of Windows XP.
  * @file src/styles/gui/windowBars.css
  */
 
-/* ==================================================
-   Window Bars, Toolbar, and Address Bar Styles for XP Simulation
-   ==================================================
-   - Handles menubar, toolbar, and address bar for windows.
-   - Matches the look and feel of Windows XP.
-   ================================================== */
-
 /* ===== Menu Bar Styles ===== */
+/*
+  Styles for the window menu bar, including menu items, dropdowns, and separators.
+  Uses z-index: 30 for layering above window content but below overlays.
+*/
 .menu-bar-container {
   width: 100%;
   background: #e9e9e9;
@@ -153,13 +146,7 @@
   }
 }
 
-.toolbar-button:not(.disabled):active {
-  border: 1.5px solid #a0a0a0;
-  box-shadow:
-    inset 1px 1px 2px rgba(0, 0, 0, 0.2),
-    inset -1px -1px 1px rgba(255, 255, 255, 0.7);
-  background: #dadada;
-}
+.toolbar-button:not(.disabled):active,
 .toolbar-button.touch-active {
   border: 1.5px solid #a0a0a0;
   box-shadow:
@@ -173,10 +160,6 @@
 .toolbar-button > img:only-child {
   margin-right: 0;
 }
-
-/* Prevent images within toolbar buttons from being dragged or interfering with button clicks */
-/* Rule for .toolbar-button > img { pointer-events: none; } moved to main.css */
-
 .toolbar-container {
   all: initial; /* Reset inherited styles */
   box-sizing: border-box;

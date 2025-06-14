@@ -1,19 +1,8 @@
 /*
- * main.css — Main Stylesheet for Windows XP Simulation
- *
- * Styles for:
- * - Imports all core and utility stylesheets
- * - Z-index hierarchy, global overrides, window states, iframe apps, and scrollbars
- *
+ * main.css — Main stylesheet for Windows XP simulation.
+ * Imports all core and utility stylesheets, defines z-index hierarchy, global overrides, and XP-inspired UI details.
  * @file src/styles/main.css
  */
-
-/* ==================================================
-   Main Stylesheet for Windows XP Simulation
-   ==================================================
-   - Imports all core and utility stylesheets.
-   - Defines z-index hierarchy and global overrides.
-   ================================================== */
 
 /* ===== Imports ===== */
 @import url("fonts.css");
@@ -26,10 +15,11 @@
 @import url("gui/boot.css");
 @import url("utils/crtEffect.css");
 
-/* ===== Z-Index Hierarchy ===== */
-/* (Moved to reset.css) */
-
 /* ===== Window States & Maximized Styles ===== */
+/*
+  Styles for maximized windows to remove border radius, shadows, and internal scrollbars,
+  ensuring a true "maximized" look as in Windows XP.
+*/
 .window.maximized {
   position: absolute;
   border-radius: 0;
@@ -55,16 +45,13 @@
 /* Add styles here to override or supplement xp.css */
 
 /* ===== Global Layout & Body Styles ===== */
-
+/*
+  Prevents pull-to-refresh, overscroll bounce, and pinch-zoom on mobile devices for a more native XP feel.
+*/
 html,
 body {
   overscroll-behavior: none; /* Prevents pull-to-refresh and overscroll bounce */
   touch-action: none; /* Prevents pinch-zoom and other default touch actions */
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
 }
 
 /* ==================================================
@@ -155,7 +142,10 @@ iframe a {
    Global Mobile Styles (max-width: 768px)
    ================================================== */
 @media (max-width: 768px) {
-  /* From src/styles/gui/window.css - Window sizing on mobile */
+  /*
+    Adjusts window and taskbar sizing for mobile devices.
+    Uses --real-vh and --taskbar-height CSS variables for accurate viewport sizing.
+  */
   .app-window,
   .window-body.iframe-container {
     max-height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px));
@@ -175,7 +165,7 @@ iframe a {
     ) !important;
   }
 
-  /* From src/styles/gui/taskbar.css - Utility class */
+  /* Hide desktop-only elements on mobile */
   .desktop-only {
     display: none !important;
   }
@@ -193,7 +183,9 @@ iframe a {
    - Colors and sizing match XP.css and Windows XP visual style.
    ================================================== */
 
-/* Why: This ensures a professional, immersive, and consistent XP look for all scrollable UI elements, regardless of browser. */
+/*
+  Why: This ensures a professional, immersive, and consistent XP look for all scrollable UI elements, regardless of browser.
+*/
 
 /* WebKit browsers (Chrome, Edge, Safari) */
 .window-body,
@@ -286,15 +278,6 @@ iframe a {
   border-radius: 3px;
 }
 
-/* Global box-sizing and font smoothing */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 /* Add styles here to override or supplement xp.css */
 
 /* --- Prevent Unwanted Dragging and Selection on UI Elements --- */
@@ -342,3 +325,22 @@ iframe a {
 /* ==================================================
    END Main Stylesheet
    ================================================== */
+
+.scroll-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Visually disable button during initial window open on mobile */
+.toolbar-button.button-temporarily-disabled {
+  opacity: 0.5;
+}
+
+/* Visually disable toolbar buttons and menu items during initial window open on mobile */
+.toolbar-container.toolbar-temporarily-disabled .toolbar-button,
+.menu-bar-container.menubar-temporarily-disabled
+  .menu-bar
+  .menu-item:not(.disabled) {
+  opacity: 0.5 !important; /* !important to ensure override if other opacity rules exist */
+}

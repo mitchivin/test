@@ -1,8 +1,11 @@
 /*
  * about.css — Styles for About App in Windows XP Simulation
- * Styles the About Me window, left panel, and main content.
+ * Styles the "About Me" application window, including the main content area,
+ * the collapsible left panel, typography, and responsive adjustments for mobile.
+ * @file src/apps/about/about.css
  */
 
+/* ===== Global & Layout ===== */
 html,
 body {
   height: 100%;
@@ -20,8 +23,6 @@ body {
 
 body {
   flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
 }
 
 .scroll-content {
@@ -44,16 +45,13 @@ body {
   background-repeat: no-repeat;
   background-position: center bottom;
   background-size: cover;
-  background-attachment: fixed;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  background-attachment: fixed; /* Keeps background static during scroll */
 }
 
+/* ===== Main Content Area ===== */
 .main {
   width: 100%;
-  max-width: 700px;
+  max-width: 700px; /* Max width for readability on larger screens */
   padding-left: 36px;
   padding-right: 36px;
   padding-top: 24px;
@@ -63,15 +61,12 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: visible;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 
+/* ===== Left Panel ===== */
 .left-panel {
   width: 190px;
-  min-width: 190px;
+  min-width: 190px; /* Prevent panel from becoming too small */
   max-width: 190px;
   background: linear-gradient(to bottom, #748aff 0%, #4057d3 100%);
   padding: 0;
@@ -83,11 +78,10 @@ body {
   z-index: 1;
   border-right: none;
   flex-shrink: 0;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
+/* Decorative highlight mimicking a 3D edge on the right side of the left panel. */
+/* pointer-events: none ensures this pseudo-element doesn't interfere with mouse interactions on the panel itself. */
+/* z-index: 2 places it above the panel's background gradient but below any interactive elements on the panel. */
 .left-panel::after {
   content: "";
   position: absolute;
@@ -95,7 +89,7 @@ body {
   right: 0;
   width: 1px;
   height: 100%;
-  pointer-events: none;
+  pointer-events: none; /* So it doesn't interfere with mouse events */
   background: linear-gradient(to bottom, #fff 0%, transparent 70%);
   z-index: 2;
   transform: scaleX(0.8);
@@ -113,13 +107,10 @@ body {
   overflow: hidden;
   margin-bottom: 0px;
   padding: 14px 0 0 0;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
+/* Applies additional top padding to the very first card in the left panel for better visual spacing. */
 .left-panel__card:first-child {
-  padding-top: 20px;
+  padding-top: 20px; /* More padding for the first card */
 }
 .left-panel__card:not(:last-child) {
   margin-bottom: 0px;
@@ -133,7 +124,7 @@ body {
   background: linear-gradient(to right, #fff 0%, #f0f0ff 50%, #c2d4ec 100%);
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  cursor: default;
+  cursor: default; /* Standard cursor for non-interactive elements */
 }
 .left-panel__card__content {
   width: 100%;
@@ -148,7 +139,8 @@ body {
   overflow: hidden;
   transition:
     max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.25s;
+    /* Smooth collapse/expand animation using a standard material design easing curve. */
+      opacity 0.25s;
   opacity: 1;
 }
 
@@ -156,9 +148,6 @@ body {
   padding: 5px 10px;
 }
 
-.left-panel__card__header:hover .left-panel__card__header__text {
-  color: #0c327d;
-}
 .left-panel__card__header__text {
   flex: 1;
   font-size: 11px;
@@ -179,14 +168,23 @@ body {
 }
 
 .left-panel__card__header__img:hover {
-  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5)) brightness(1.2);
+  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5)) brightness(1.2); /* Subtle brightness increase on icon hover */
 }
 
-/* Click (active) effect */
+/* Click (active) effect for panel header images */
 .left-panel__card__header__img:active {
-  transform: translate(0.5px, 0.5px);
+  transform: translate(0.5px, 0.5px); /* Slight press down effect */
   filter: drop-shadow(0px 0px 0px rgba(0, 0, 0, 0.4)) brightness(1.1);
-  transition: transform 0.05s ease;
+  transition: transform 0.05s ease; /* Quick transition for active state */
+}
+
+/* Styles for icons within left panel cards (Skills, Software, Socials) */
+.left-panel__card__img {
+  width: 13px;
+  height: 13px;
+  /* Optionally, add other styles like margin-right if needed */
+  margin-right: 6px; /* Example: add some space between icon and text */
+  vertical-align: middle; /* Align icon nicely with text */
 }
 
 .left-panel__card__text {
@@ -194,15 +192,28 @@ body {
   line-height: 14px;
   color: #0c327d;
   text-decoration: none;
-  pointer-events: auto;
+  pointer-events: auto; /* Ensure links within card text are clickable */
 }
 .left-panel__card__row {
   cursor: default;
 }
-.left-panel__card__row:focus-visible {
-  outline: 2px dotted #1976d2;
+
+/* Ensure anchor-based rows (like social links) stack vertically */
+a.left-panel__card__row {
+  display: block;
+  margin-bottom: 2px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+a.left-panel__card__row:focus {
+  outline: none;
+}
+a.left-panel__card__row:hover .left-panel__card__text {
+  text-decoration: underline;
 }
 
+/* ===== Typography & Text Styles ===== */
 .welcome_text {
   color: #fff;
   font-weight: bold;
@@ -222,7 +233,7 @@ body {
 }
 
 .welcome-image-mobile {
-  display: none; /* Hidden by default on desktop */
+  display: none; /* Hidden by default on desktop, shown via media query */
 }
 
 .section_text {
@@ -248,21 +259,24 @@ body {
 }
 
 .section_text a {
-  color: inherit;
+  color: inherit; /* Links inherit color from parent .section_text */
   text-decoration: underline;
-  cursor: pointer;
+  cursor: pointer; /* Standard pointer for links */
 }
 
+/* ===== Spacing ===== */
 .left-panel__card__row + .left-panel__card__row {
-  margin-top: 1px;
+  margin-top: 1px; /* Space between rows in a left panel card */
 }
 
+/* ===== Responsive Adjustments (Mobile) ===== */
 @media (max-width: 768px) {
   .main-window-content {
-    flex-direction: column;
+    flex-direction: column; /* Stack layout vertically on mobile */
   }
+  /* Hide the entire left navigation panel on smaller screens (mobile devices) to save space. */
   .left-panel {
-    display: none !important;
+    display: none !important; /* Hide left panel entirely on mobile */
   }
   .main {
     max-width: 100%;
@@ -329,8 +343,11 @@ body {
   flex: 1;
 }
 
+/* Styles for collapsible cards in the left panel. */
+/* This class is typically added/removed via JavaScript to control the card's expanded/collapsed state. */
+/* When .collapsed is present, the content area animates to a height of 0 and becomes transparent. */
 .left-panel__card.collapsed .left-panel__card__content {
-  max-height: 0;
+  max-height: 0; /* Collapse the content */
   opacity: 0;
   padding: 0;
   transition:
@@ -339,59 +356,41 @@ body {
   pointer-events: none;
 }
 
+/* Specific styling for the social links card header */
 .left-panel__card--social .left-panel__card__header {
   background: linear-gradient(to right, #0059ce 0%, hsl(209, 100%, 59%) 100%);
 }
 
-.left-panel__card--social .left-panel__card__header__text,
-.left-panel__card--social .left-panel__card__header__text:hover,
-.left-panel__card--social .left-panel__card__header__text:focus {
-  color: #fff !important;
-}
-
+/* Styles for clickable link text within cards */
 .left-panel__card__text.link {
-  display: inline;
-  width: auto;
-  padding: 0;
-  margin: 0;
-  pointer-events: auto;
+  text-decoration: none;
   cursor: pointer;
+  color: inherit;
 }
-
+.left-panel__card__text.link:hover,
 .left-panel__card__text.link:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.left-panel__card__content .left-panel__card__img {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
-  flex-shrink: 0;
-  vertical-align: middle;
-  display: inline-block;
-  margin-bottom: 1px;
-  pointer-events: none;
-}
-
-.left-panel__card__row:focus-visible {
-  outline: 2px dotted #1976d2;
-}
-
-.left-panel__card__text.link,
-.left-panel__card__row a .left-panel__card__text {
-  cursor: pointer;
-}
-
-.left-panel__card__row:hover .left-panel__card__text {
   text-decoration: underline;
+  color: inherit;
 }
 
-/* Allow selection in links (if needed) */
-.left-panel__card__text.link,
-a {
-  user-select: text;
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
+/* Focus indication for keyboard navigation on card rows (if they become interactive) */
+.left-panel__card__row:focus-visible {
+  outline: 2px solid #0056b3; /* Example focus style */
+  outline-offset: 1px;
+}
+
+/* General link styling (ensure it's distinct if not using .link class) */
+.left-panel__card__text a,
+.left-panel__card__text.link {
+  pointer-events: auto; /* Ensure links are always interactive */
+}
+
+.left-panel__card--social .left-panel__card__header__text {
+  color: #fff;
+}
+
+.left-panel__card--social
+  .left-panel__card__header:hover
+  .left-panel__card__header__text {
+  color: #fff;
 }

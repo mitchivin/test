@@ -1,125 +1,132 @@
 /*
  * contact.css — Styles for Contact App in Windows XP Simulation
  * Styles the Contact Me window form and layout.
+ * @file src/apps/contact/contact.css
  */
 
-/* Base styles for iframe context */
+/* ===== Base Styles for iFrame Context ===== */
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Body shouldn't scroll */
+  overflow: hidden; /* Body shouldn't scroll, scrolling is handled by .content-wrapper */
   font-family: "Tahoma", Arial, sans-serif;
   font-size: 11px;
   color: #000;
-  background-color: #e9e9e9; /* Updated color */
+  background-color: #e9e9e9; /* Main background color for the contact app window */
   box-sizing: border-box;
-  touch-action: none; /* Disable pinch-zoom and other default touch actions */
+  touch-action: none; /* Disable pinch-zoom and other default touch actions for a native app feel */
 }
 
-/* Primary layout: Flex column with padding and consistent gap */
+/* ===== Primary Layout ===== */
+/* Body is a flex container to stack content vertically and allow the content-wrapper to grow. */
 body {
   display: flex; /* Make body a flex container */
-  flex-direction: column; /* Stack children vertically */
+  flex-direction: column; /* Stack children (content-wrapper) vertically */
 }
 
-/* New wrapper rule */
+/* ===== Content Wrapper ===== */
+/* This wrapper handles internal scrolling if content exceeds available space. */
 .content-wrapper {
-  flex: 1; /* Grow to fill body */
+  flex: 1; /* Allow wrapper to grow and fill available space in the body */
   display: flex;
   flex-direction: column;
-  padding: 8px;
-  gap: 8px;
-  min-height: 0; /* Prevent overflow issues */
-  overflow-y: auto; /* Allow vertical scroll if content (fields + textarea) overflows */
-  overflow-x: hidden;
+  padding: 8px; /* Standard padding around the content */
+  gap: 8px; /* Consistent gap between form elements (field rows and textarea) */
+  min-height: 0; /* Prevent overflow issues in flex children */
+  overflow-y: auto; /* Enable vertical scrolling only if content overflows */
+  overflow-x: hidden; /* Disable horizontal scrolling */
 }
 
-/* Field row container (label + input) */
+/* ===== Field Row (Label + Input) ===== */
 .field {
   display: flex;
-  align-items: center; /* Vertically align label and input */
-  gap: 2px;
-  flex-shrink: 0; /* Prevent rows from shrinking */
+  align-items: center; /* Vertically align label and input within the row */
+  gap: 2px; /* Small gap between label and input */
+  flex-shrink: 0; /* Prevent rows from shrinking, maintaining consistent layout */
 }
 
-/* Label styling */
+/* ===== Label Styling ===== */
 label {
-  display: inline-block; /* Reinforce block context */
-  min-width: 40px; /* Ensure consistent label width */
-  text-align: right; /* Align text to the right */
-  padding-right: 6px; /* Add padding to the right of the text */
-  flex-shrink: 0;
+  display: inline-block; /* Ensure proper block-level behavior for width and alignment */
+  min-width: 40px; /* Establish a consistent minimum width for all labels for alignment */
+  text-align: right; /* Align label text to the right, next to the input field */
+  padding-right: 6px; /* Space between label text and the input field */
+  flex-shrink: 0; /* Prevent labels from shrinking if space is constrained */
 }
 
-/* Shared input/textarea base styles */
+/* ===== Shared Input/Textarea Base Styles ===== */
 .input,
 .textarea {
-  font-family: inherit;
+  font-family: inherit; /* Use the body's font settings */
   font-size: inherit;
   padding: 5px 8px;
-  background-color: #ffffff;
+  background-color: #ffffff; /* Standard white background for input fields */
   box-sizing: border-box;
   border-radius: 2px;
-  /* Force a transparent border to override XP.css inset/outset styles */
-  border: 1px solid transparent !important;
-  /* Default (Desktop) shadow with slightly off-white highlight */
+  /* Overrides default XP.css inset/outset styles with a specific custom shadow for a more modern feel within the XP theme. */
+  border: 1px solid transparent !important; /* Transparent border to negate XP.css default borders effectively. */
+  /* Custom shadow: dark top-left, light bottom-right highlight, and a subtle inner border/shadow. */
   box-shadow:
     inset 1.75px 1.75px 0 #888,
-    /* Top-left shadow (dark) */ inset -1.75px -1.75px 0 #f0f0f0,
-    /* Bottom-right highlight (very light grey) */ inset 0 0 3px 1px #d6d6d6 !important; /* Inner subtle shadow/border */
+    /* Top-left shadow (dark grey) */ inset -1.75px -1.75px 0 #f0f0f0,
+    /* Bottom-right highlight (very light grey) */ inset 0 0 3px 1px #d6d6d6 !important; /* Inner subtle shadow/border for depth */
   color: #000;
 }
 
+/* Styling for placeholder text in input and textarea fields. */
 .input::placeholder,
 .textarea::placeholder {
-  color: #999;
-  opacity: 1;
+  color: #999; /* Light grey placeholder text */
+  opacity: 1; /* Ensure placeholder is fully visible */
   font-style: italic;
 }
 
-/* Input-specific styles */
+/* ===== Input-Specific Styles ===== */
 .input {
-  flex: 1; /* Allow input to grow and fill remaining space */
-  min-width: 0; /* Allow input to shrink if needed */
-  padding-left: 8px !important;
-  /* border: none; */ /* Handled by the shared rule now */
+  flex: 1; /* Allow input to grow and fill remaining space in the .field row */
+  min-width: 0; /* Allow input to shrink if needed, preventing overflow */
+  padding-left: 8px !important; /* Ensure consistent left padding */
 }
 
+/* Styles for readonly input fields to make them visually distinct and non-interactive. */
 .input.readonly {
-  background-color: #8d8d8d1e; /* Darker grey for readonly state */
-  cursor: default;
-  user-select: none;
+  background-color: #8d8d8d1e; /* Light grey background to indicate readonly status */
+  cursor: default; /* Standard cursor as it's not editable */
+  user-select: none; /* Prevent text selection in readonly fields */
 }
 
-/* Textarea-specific styles */
+/* ===== Textarea-Specific Styles ===== */
 .textarea {
-  flex: 1; /* Grow to fill remaining vertical space */
-  resize: none;
+  flex: 1; /* Grow to fill remaining vertical space within the content-wrapper */
+  resize: none; /* Disable user resizing of the textarea */
   line-height: 1.4;
   min-height: 50px; /* Ensure it's not too small initially */
-  overflow: auto; /* Explicitly handle overflow/scrollbar */
-  /* border: none; */ /* Handled by the shared rule now */
+  overflow: auto; /* Explicitly handle overflow/scrollbar within the textarea if content is too long */
 }
 
+/* ===== Responsive Adjustments for Touch Devices ===== */
+/* Targets devices with coarse pointer (e.g., touch) and no hover capability, typically mobile phones. */
 @media (pointer: coarse) and (hover: none) {
   .input,
   .textarea {
-    font-size: 16px !important;
-    min-height: 2em;
+    font-size: 16px !important; /* Increase font size for better readability and touch target on mobile */
+    min-height: 2em; /* Ensure a minimum touch target height based on the larger font size */
     padding: 8px 8px;
     line-height: 1.2;
-    /* Mobile: Remove bottom-right highlight */
+    /* Mobile: Adjust shadow for a flatter appearance, removing the bottom-right highlight for simplicity. */
     box-shadow:
       inset 1.75px 1.75px 0 #888,
       /* Top-left shadow (dark) */ inset 0 0 3px 1px #d6d6d6 !important; /* Inner subtle shadow/border */
   }
   .textarea {
-    min-height: 4em;
+    min-height: 4em; /* Larger minimum height for textarea on touch devices */
   }
 }
 
+/* ===== User Selection Control ===== */
+/* Disable text selection globally for a more app-like feel, preventing accidental text highlighting. */
 body,
 .content-wrapper,
 .field {
@@ -129,7 +136,7 @@ body,
   -ms-user-select: none;
 }
 
-/* Allow selection in input and textarea fields */
+/* Explicitly allow text selection within input and textarea fields for standard form usability. */
 .input,
 .textarea,
 input,

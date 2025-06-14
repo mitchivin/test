@@ -1,0 +1,1040 @@
+/*
+ * lightbox.css — Styles for Project Lightbox in Projects App
+ * Defines the appearance and layout of the lightbox used to display
+ * individual project details (images/videos and textual information).
+ * Includes styles for desktop and mobile views, animations, and
+ * maximized window states.
+ * @file src/apps/projects/lightbox.css
+ */
+
+/* ===== Lightbox Main Container & Fade Transitions ===== */
+/* Initial state for the lightbox: invisible and non-interactive. */
+#project-lightbox {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth fade transition. */
+  display: flex; /* Uses flexbox to center its content. */
+  position: fixed; /* Overlays the entire viewport. */
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(
+    30,
+    30,
+    30,
+    0.9
+  ); /* Semi-transparent dark background. */
+  z-index: 100010; /* High z-index to appear above other UI elements. */
+  box-sizing: border-box;
+
+  /* Full viewport height by default (mobile-first approach). */
+  height: 100vh;
+  min-height: 100vh;
+  align-items: center; /* Center content vertically. */
+  justify-content: center; /* Center content horizontally. */
+  padding: 0; /* No padding by default on the main container. */
+  margin: 0;
+  overflow: hidden; /* Prevents scrollbars on the lightbox itself. */
+  /* border: 1px solid red; DEBUG BORDER */
+}
+
+/* Styles for when the lightbox is fading in. */
+#project-lightbox.fade-in {
+  opacity: 1;
+  pointer-events: auto; /* Becomes interactive. */
+}
+
+/* Styles for when the lightbox is fading out. */
+#project-lightbox.fade-out {
+  opacity: 0;
+  pointer-events: none; /* Becomes non-interactive. */
+}
+
+/* Inner wrapper to help structure content within the lightbox. */
+#project-lightbox #lightbox-inner-wrapper {
+  display: contents; /* TEST: Effectively remove from layout */
+  /* border: 1px solid blue; DEBUG BORDER - will still show as it's on the element itself */
+}
+
+/* Opacity transitions for media elements (images/videos) during lightbox fade-in/out. */
+#project-lightbox.fade-in #lightbox-content img,
+#project-lightbox.fade-in #lightbox-content video {
+  opacity: 1;
+}
+
+#project-lightbox.fade-out #lightbox-content img,
+#project-lightbox.fade-out #lightbox-content video {
+  opacity: 0;
+}
+
+/* Container for textual project details (title, description, etc.). */
+/* Its role and visibility change significantly between mobile and desktop. */
+#project-lightbox #lightbox-details {
+  display: contents; /* TEST: Effectively remove from layout */
+  /* border: 1px solid orange; DEBUG BORDER - will still show */
+}
+
+/* ===== Base Mobile Layout (Default) ===== */
+/* These styles define the mobile-first appearance of the lightbox. */
+/* #project-lightbox base styles above already set up fullscreen behavior. */
+
+#project-lightbox #lightbox-inner-wrapper {
+  height: 100vh; /* Ensures inner wrapper also takes full viewport height. */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally. */
+  justify-content: center; /* Center content vertically. */
+  padding: 0;
+  margin: 0;
+}
+
+/* Content area (media display) for mobile. */
+#project-lightbox #lightbox-content {
+  position: relative; /* Original */
+  height: 100vh; /* Original */
+  min-height: 100vh; /* Original */
+  max-height: 100vh; /* Original */
+  width: 100vw; /* Original */
+  max-width: 95vw; /* Original */
+  display: flex; /* Original */
+  align-items: center; /* Original */
+  justify-content: center; /* Original */
+  padding: 0; /* Original */
+  margin: 0; /* Original */
+  /* display: contents; */ /* TESTED AND REVERTED */
+  /* border: 1px solid green; DEBUG BORDER - will still show */
+  box-sizing: border-box; /* Ensure padding is included in width/height */
+  padding-right: 12px; /* Add right padding */
+}
+
+/* Desktop-style title and description sections are hidden on mobile by default. */
+/* Mobile uses overlays for this information. */
+#project-lightbox #lightbox-title,
+#project-lightbox #lightbox-description {
+  display: none;
+}
+
+/* On mobile, the main #lightbox-details container doesn't usually show directly; info is in overlays. */
+#project-lightbox #lightbox-details {
+  justify-content: center;
+  background-color: transparent;
+  padding: 0;
+  flex-grow: 0; /* Does not take up significant space itself on mobile. */
+}
+
+/* Styling for images and videos within the lightbox content area on mobile. */
+#project-lightbox #lightbox-content img,
+#project-lightbox #lightbox-content video {
+  position: relative; /* For z-index stacking if needed. */
+  z-index: 1; /* Base z-index for media. */
+  margin: 0;
+  max-width: calc(
+    100vw - 24px
+  ); /* Max width with some padding from viewport edges. */
+  max-height: calc(
+    100dvh - 24px
+  ); /* Max height using dynamic viewport height unit, with padding. */
+  width: auto; /* Maintain aspect ratio. */
+  height: auto; /* Maintain aspect ratio. */
+  object-fit: cover !important; /* Changed from contain to cover */
+  display: block;
+  padding: 0;
+  border: none; /* Reverted back to no border for mobile too */
+}
+
+/* ===== Desktop Layout Adjustments (min-width: 768px) ===== */
+@media (min-width: 768px) {
+  /* Add padding around the lightbox on desktop. */
+  #project-lightbox {
+    padding: 20px;
+    overflow-y: hidden; /* Prevent scrollbars on the main lightbox container (content scrolls within description card if needed). */
+  }
+
+  #project-lightbox #lightbox-content {
+    align-items: center; /* Align media container content (media wrapper). */
+  }
+
+  /* Wrapper for media (image/video) and the description card, allowing side-by-side layout. */
+  #project-lightbox .lightbox-media-wrapper {
+    display: flex;
+    flex-direction: row; /* Media and description card side-by-side. */
+    align-items: stretch; /* Stretch items to fill the height of the wrapper. */
+    justify-content: center;
+    position: relative;
+    min-height: 320px; /* Minimum height for the media area. */
+    height: 90vh; /* Takes up most of the viewport height. */
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    pointer-events: none; /* Wrapper itself is not interactive; children manage their own pointer events. */
+    /* border: 1px solid purple; DEBUG BORDER */
+    padding-left: 12px; /* Add left padding to the media container */
+    box-sizing: border-box; /* Ensure padding is included in width/height */
+  }
+
+  /* When displaying video, the media wrapper might take full width if description is hidden or integrated differently. */
+  #project-lightbox .lightbox-media-wrapper.video-media-active {
+    width: 100%;
+  }
+
+  /* Styling for the description card displayed next to the media on desktop. */
+  #project-lightbox .lightbox-desc-card {
+    flex: 0 1 500px; /* Flex properties: no grow, can shrink, base width 450px. */
+    min-width: auto; /* Minimum width for the card. */
+    max-width: 600px; /* Maximum width for the card. */
+    background: rgba(
+      223,
+      223,
+      223,
+      0.877
+    ); /* Semi-transparent light background. */
+    border-radius: 20px;
+    padding: 30px;
+    overflow-y: auto; /* Enable scrolling within the card if content overflows. */
+    scrollbar-width: none; /* For Firefox - hide scrollbar */
+    -ms-overflow-style: none; /* For IE and Edge (older) - hide scrollbar */
+    margin-left: 15px; /* Space between media and description card. */
+    z-index: 5; /* Ensures card is above media if overlapping slightly during transitions. */
+    box-sizing: border-box;
+    word-break: break-word; /* Prevent long words from breaking layout. */
+    display: flex; /* Uses flex to structure its internal content (main content + tools section). */
+    flex-direction: column;
+    opacity: 0; /* Initially hidden for slide-in animation. */
+    transform: translateX(-30px); /* Initially shifted left for slide-in. */
+    transition:
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out,
+      flex-basis 0.3s ease-out; /* Smooth transitions for appearance and size. */
+    pointer-events: auto; /* Card is interactive. */
+    /* border: 1px solid lime; DEBUG BORDER */
+  }
+
+  /* Main content area within the description card. */
+  #project-lightbox .lightbox-desc-card .card-main-content {
+    flex-grow: 1; /* Allows this section to take up available vertical space. */
+  }
+  /* Tools section within the description card, does not grow. */
+  #project-lightbox .lightbox-desc-card .card-tools-section {
+    flex-shrink: 0;
+  }
+
+  /* Hide scrollbar for Webkit browsers (Chrome, Safari, new Edge) */
+  #project-lightbox .lightbox-desc-card::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for Firefox */
+  #project-lightbox .lightbox-desc-card {
+    scrollbar-width: none; /* This will be part of the existing rule, just adding the property */
+  }
+
+  /* Navigation dots for switching between media items (desktop). */
+  #project-lightbox .lightbox-nav-dots {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Individual navigation dot styling (desktop). */
+  #project-lightbox .lightbox-nav-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #b0b0b0; /* Default dot color. */
+    border: none;
+    margin: 0 6px; /* Spacing between dots. */
+    padding: 0;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease; /* Smooth transitions for hover/active states. */
+    appearance: none; /* Remove default button styling. */
+  }
+
+  #project-lightbox .lightbox-nav-dot:hover {
+    background-color: #888888; /* Darker on hover. */
+  }
+
+  #project-lightbox .lightbox-nav-dot.active {
+    background-color: #333333; /* Darkest for active dot. */
+    transform: scale(1.2); /* Slightly larger for active dot. */
+  }
+
+  /* Styling for labels and text within the description card (desktop). */
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-project-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3d3d3d;
+    opacity: 0.25; /* Subtle label. */
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out; /* Transitions for maximized state changes. */
+  }
+
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-title-main-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3d3d3d;
+    opacity: 0.25;
+    text-transform: uppercase;
+    margin-bottom: 0px;
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out;
+  }
+
+  #project-lightbox .lightbox-media-wrapper .lightbox-desc-card .card-title {
+    font-family: "Work Sans", sans-serif;
+    font-size: 1.9rem; /* Slightly decreased from 2rem */
+    font-weight: 700;
+    color: #222; /* Dark text color for title. */
+    margin-bottom: 0; /* Adjusted from 12px, row now handles it */
+    line-height: 1.2;
+    letter-spacing: -0.5px; /* Slightly decreased letter spacing */
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out;
+  }
+
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-title-divider {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Subtle divider line. */
+    height: 1px;
+    margin: 24px 0; /* Spacing around divider. */
+    width: 100%;
+    transition: margin 0.15s ease-out;
+  }
+
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-description-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3d3d3d;
+    opacity: 0.25;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out;
+  }
+
+  #project-lightbox .lightbox-media-wrapper .lightbox-desc-card .card-body {
+    font-family: "Work Sans", sans-serif;
+    font-size: 0.9rem; /* Standard body text size. */
+    font-weight: 500;
+    color: #333;
+    line-height: 1.3;
+    margin-top: 0;
+    margin-bottom: 18px;
+    transition:
+      font-size 0.15s ease-out,
+      line-height 0.15s ease-out,
+      margin-bottom 0.15s ease-out;
+  }
+
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-bullet-points {
+    font-family: "Work Sans", sans-serif;
+    margin-top: 12px;
+    margin-bottom: 18px;
+    padding-left: 0; /* Reset padding for custom list styling. */
+    text-align: left; /* Ensure bullet points are left-aligned. */
+    transition: margin-bottom 0.15s ease-out;
+  }
+
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-bullet-points
+    ul {
+    list-style-type: disc; /* Standard disc bullets. */
+    margin-left: 20px; /* Indentation for bullet list. */
+    padding-left: 0;
+  }
+
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-bullet-points
+    li {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 6px; /* Space between bullet items. */
+    transition:
+      font-size 0.15s ease-out,
+      line-height 0.15s ease-out,
+      margin-bottom 0.15s ease-out;
+  }
+
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-tools-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3d3d3d;
+    opacity: 0.25;
+    text-transform: uppercase;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    transition:
+      font-size 0.15s ease-out,
+      margin-bottom 0.15s ease-out;
+  }
+
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-tools-list {
+    font-family: "Work Sans", sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #333;
+    padding-left: 4px; /* Slight indent for tools list. */
+    transition:
+      font-size 0.15s ease-out,
+      line-height 0.15s ease-out;
+  }
+
+  /* When window is maximized and displaying video, slightly adjust description card padding. */
+  body.projects-window-maximized
+    #project-lightbox
+    .lightbox-media-wrapper.video-media-active
+    .lightbox-desc-card {
+    padding-right: 64px;
+  }
+
+  /* Ensure media elements (direct image or video within a div) have rounded corners on desktop. */
+  #project-lightbox .lightbox-media-wrapper > img {
+    border-radius: 20px;
+    box-sizing: border-box;
+    border: 2px solid white !important;
+  }
+
+  #project-lightbox .lightbox-media-wrapper > div:has(> video) {
+    border-radius: 20px;
+    box-sizing: border-box;
+    border: 2px solid white;
+  }
+
+  #project-lightbox .lightbox-media-wrapper > div:has(> video) > video {
+    border-radius: 20px;
+    box-sizing: border-box;
+  }
+
+  /* New rule for the title row container */
+  #project-lightbox
+    .lightbox-media-wrapper
+    .lightbox-desc-card
+    .card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px; /* Space before the divider */
+  }
+}
+
+/* ===== Mobile Specific Overlays & Interactions (max-width: 767px) ===== */
+@media (max-width: 767px) {
+  /* Wrapper for media, used for overflow control with rounded corners on mobile. */
+  #project-lightbox .lightbox-media-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px; /* Rounded corners for the media area on mobile. */
+  }
+
+  /* Base styles for mobile title and description overlays. */
+  #project-lightbox .lightbox-description-overlay,
+  #project-lightbox .lightbox-title-overlay {
+    position: absolute; /* Positioned over the media content. */
+    left: 0;
+    right: 0;
+    z-index: 10; /* Above media, below potential close buttons etc. */
+    transition: none; /* Animations handled by keyframes. */
+    opacity: 0; /* Initially hidden. */
+    pointer-events: none; /* Non-interactive by default. */
+    animation: none; /* No animation by default. */
+    /* Assigning individual borders below for clarity */
+  }
+
+  /* Class to show mobile overlays. */
+  #project-lightbox .lightbox-title-overlay.show,
+  #project-lightbox .lightbox-description-overlay.show {
+    opacity: 1;
+    pointer-events: auto; /* Becomes interactive when shown. */
+  }
+
+  /* Class to trigger hide animation for mobile overlays. */
+  #project-lightbox .lightbox-description-overlay.hide-anim,
+  #project-lightbox .lightbox-title-overlay.hide-anim {
+    opacity: 0; /* Will be animated to 0 by keyframes. */
+    pointer-events: none;
+  }
+
+  /* Specific styling for the bottom description overlay on mobile. */
+  #project-lightbox .lightbox-description-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0; /* Aligned to the bottom. */
+    z-index: 2; /* Ensure it's above the media content. */
+    display: flex;
+    flex-direction: column;
+    padding: 40px 24px 20px 24px; /* Padding for content. */
+    color: #fff; /* White text. */
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    /* Gradient background fading from dark to transparent for a soft edge. */
+    background: linear-gradient(
+      0deg,
+      rgba(20, 20, 20, 0.95) 0%,
+      rgba(20, 20, 20, 0.95) 40%,
+      rgba(20, 20, 20, 0.9) 50%,
+      rgba(20, 20, 20, 0.8) 60%,
+      rgba(20, 20, 20, 0.65) 70%,
+      rgba(20, 20, 20, 0.45) 80%,
+      rgba(20, 20, 20, 0.25) 90%,
+      rgba(20, 20, 20, 0) 100%
+    );
+    pointer-events: none; /* Overlay itself is not interactive by default when hidden. */
+    transform: translateY(100%); /* Initially positioned off-screen below. */
+    transition: none; /* Animation handled by keyframes. */
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-top: 24px; /* Space above if it were to stack. */
+    /* border: 1px solid aqua; DEBUG BORDER */
+  }
+
+  /* Apply slide-in animation when .show class is added. */
+  #project-lightbox .lightbox-description-overlay.show {
+    transform: translateY(0);
+    animation: mobileBottomOverlaySlideIn 650ms cubic-bezier(0.4, 0, 0.2, 1)
+      forwards;
+  }
+
+  /* Apply slide-out animation when .hide-anim class is added. */
+  #project-lightbox .lightbox-description-overlay.hide-anim {
+    transform: translateY(100%);
+    animation: mobileBottomOverlaySlideOut 650ms cubic-bezier(0.4, 0, 0.2, 1)
+      forwards;
+  }
+
+  /* Specific styling for the top title overlay on mobile. */
+  #project-lightbox .lightbox-title-overlay {
+    top: 0; /* Aligned to the top. */
+    transform: translateY(-100%); /* Initially positioned off-screen above. */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align text to the left. */
+    justify-content: center;
+    padding: 18px 24px 20px 24px;
+    /* Gradient background fading from dark to transparent. */
+    background: linear-gradient(
+      180deg,
+      rgba(20, 20, 20, 0.95) 0%,
+      rgba(20, 20, 20, 0.95) 40%,
+      rgba(20, 20, 20, 0.9) 50%,
+      rgba(20, 20, 20, 0.8) 60%,
+      rgba(20, 20, 20, 0.65) 70%,
+      rgba(20, 20, 20, 0.45) 80%,
+      rgba(20, 20, 20, 0.25) 90%,
+      rgba(20, 20, 20, 0) 100%
+    );
+    color: #fff;
+    /* border: 1px solid fuchsia; DEBUG BORDER */
+  }
+
+  /* Apply slide-in animation when .show class is added. */
+  #project-lightbox .lightbox-title-overlay.show {
+    transform: translateY(0);
+    animation: mobileTopOverlaySlideIn 650ms cubic-bezier(0.4, 0, 0.2, 1)
+      forwards;
+  }
+
+  /* Apply slide-out animation when .hide-anim class is added. */
+  #project-lightbox .lightbox-title-overlay.hide-anim {
+    transform: translateY(-100%);
+    animation: mobileTopOverlaySlideOut 650ms cubic-bezier(0.4, 0, 0.2, 1)
+      forwards;
+  }
+
+  /* Styling for the project type label (e.g., "PERSONAL PROJECT") in mobile top overlay. */
+  #project-lightbox .mobile-overlay-project-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #adacacc7; /* Subtle greyish color. */
+    opacity: 0.8;
+    text-transform: uppercase;
+    margin-bottom: -6px; /* Negative margin to pull title closer. */
+    text-align: left;
+    width: 100%;
+  }
+
+  /* Styling for the "DESCRIPTION" label in mobile bottom overlay. */
+  #project-lightbox .mobile-overlay-description-label {
+    font-family: "Wix Madefor Display", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #adacacc7;
+    opacity: 0.8;
+    text-transform: uppercase;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    text-align: left;
+    width: 100%;
+  }
+
+  /* Styling for the main project title text within the mobile top overlay. */
+  #project-lightbox .lightbox-overlay-title-text {
+    flex-grow: 0; /* Does not grow. */
+    text-align: center;
+    overflow: hidden; /* Prevents text from overflowing. */
+    text-overflow: ellipsis; /* Adds ellipsis if text is too long (though white-space: normal might make this less effective). */
+    white-space: normal; /* Allow title to wrap to multiple lines. */
+    width: 100%;
+    font-size: 2.1rem; /* Large title font. */
+    font-weight: 700;
+    line-height: 1.5;
+    color: #fff;
+    margin-bottom: 0;
+  }
+
+  /* Styling for the description text (direct span child) in mobile bottom overlay. */
+  #project-lightbox .lightbox-description-overlay > span {
+    margin-top: auto; /* Pushes description to the bottom of the overlay if there's other content. */
+    font-family: "Work Sans", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #fff;
+    text-align: left;
+    width: 100%;
+  }
+
+  /* Ensure lightbox and its main wrappers use dynamic viewport height (dvh) for mobile consistency. */
+  #project-lightbox,
+  #project-lightbox #lightbox-inner-wrapper,
+  #project-lightbox #lightbox-content {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+  }
+  /* Ensure media also respects dvh with padding on mobile, overriding broader media styles if necessary. */
+  #project-lightbox #lightbox-content img,
+  #project-lightbox #lightbox-content video {
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: cover !important; /* Changed from contain to cover */
+    display: block;
+    padding: 0;
+    border: none;
+  }
+
+  /* Navigation dots for mobile, typically shown within one of the overlays. */
+  #project-lightbox .mobile-lightbox-nav-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px; /* Spacing between dots. */
+    margin-bottom: 12px;
+    margin-top: 0;
+    width: 100%;
+    pointer-events: auto; /* Dots are interactive. */
+    z-index: 3; /* Above overlay background but potentially below other controls. */
+    padding-top: 12px;
+  }
+  /* Individual mobile navigation dot styling. */
+  #project-lightbox .mobile-lightbox-nav-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0.4; /* Dimmed for inactive dots. */
+    transition:
+      opacity 0.2s,
+      background 0.2s,
+      transform 0.2s;
+    border: none;
+    display: inline-block;
+    pointer-events: auto;
+    touch-action: manipulation; /* Optimize touch interaction. */
+  }
+  #project-lightbox .mobile-lightbox-nav-dot.active {
+    opacity: 1; /* Fully opaque for active dot. */
+    background: #fff;
+    transform: scale(1.33); /* Larger active dot. */
+    box-shadow:
+      0 0 0 2px #fff3,
+      0 2px 8px #0002; /* Subtle shadow for active dot. */
+  }
+
+  /* Mute icon positioning for mobile: centered over the video. */
+  /* Increased specificity to ensure override. */
+  body #project-lightbox .mute-icon-overlay,
+  body .video-outer-wrapper .mute-icon-overlay,
+  body .lightbox-media-wrapper .video-outer-wrapper .mute-icon-overlay {
+    top: 50%;
+    left: 50%;
+    right: auto; /* Clear desktop positioning. */
+    bottom: auto; /* Clear desktop positioning. */
+    transform: translate(-50%, -50%); /* Center the icon. */
+    width: 44px; /* Touch-friendly size. */
+    height: 44px;
+  }
+
+  /* Fallback/override background for the lightbox on mobile, if needed for contrast or theme. */
+  #project-lightbox {
+    background-color: rgba(
+      184,
+      184,
+      184,
+      0.747 /* Lighter, slightly more transparent background on mobile. */
+    );
+  }
+
+  /* Ensure media wrapper children (image or video container) have rounded corners on mobile. */
+  #project-lightbox #lightbox-content .lightbox-media-wrapper > img,
+  #project-lightbox
+    #lightbox-content
+    .lightbox-media-wrapper
+    > div:has(> video) {
+    border-radius: 20px;
+    box-sizing: border-box;
+    border: 2px solid white; /* This SHOULD apply the border */
+  }
+
+  /* Ensure video itself within a wrapper also has rounded corners and no border. */
+  #project-lightbox .lightbox-media-wrapper > div:has(> video) > video {
+    border: none;
+    border-radius: 20px;
+  }
+}
+/* ===== End Mobile Specific Overlays & Interactions ===== */
+
+/* ===== General Media Styling within Lightbox ===== */
+/* Common styles for images and videos within the lightbox media wrapper. */
+#project-lightbox .lightbox-media-wrapper img,
+#project-lightbox .lightbox-media-wrapper video {
+  max-height: 100%; /* Media should not exceed the height of its wrapper. */
+  min-width: 0; /* Important for flex item sizing. */
+  min-height: 0; /* Important for flex item sizing. */
+  margin-right: 0; /* No right margin by default. */
+  display: block;
+  object-fit: cover; /* Changed from contain to cover */
+  z-index: 2; /* Position media above default background but below overlays/controls. */
+}
+
+/* Ensures direct image children of the media wrapper attempt to fill width initially (aspect ratio maintained by object-fit). */
+#project-lightbox .lightbox-media-wrapper > img {
+  width: 100%;
+}
+
+/* Crucial for videos wrapped in a div: ensure video scales to container height and maintains aspect ratio. */
+#project-lightbox .lightbox-media-wrapper > div > video {
+  height: 100% !important; /* Force video to take full height of its parent div. */
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* ===== Styles for Maximized Window State (Desktop) ===== */
+/* These styles apply when the parent application window is maximized, typically making text larger. */
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card {
+  overflow: auto; /* Ensure scrollability if content overflows due to larger text. */
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-project-label {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-title-main-label {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-title {
+  font-size: 2.5rem; /* Larger title in maximized state. */
+  margin-bottom: 12px;
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-title-divider {
+  margin: 20px 0; /* Increased spacing for divider. */
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-description-label {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-body {
+  font-size: 1rem; /* Larger body text. */
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-bullet-points {
+  margin-bottom: 20px;
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-bullet-points
+  ul
+  li {
+  font-size: 1rem; /* Larger bullet text. */
+  line-height: 1.65;
+  margin-bottom: 7px;
+}
+
+/* Spacing for tools section divider in maximized state. */
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-tools-section
+  .card-title-divider {
+  margin: 16px 0;
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-tools-label {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+body.projects-window-maximized
+  #project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-tools-list {
+  font-size: 1rem; /* Larger tools list text. */
+  line-height: 1.55;
+  color: #333;
+}
+
+/* Ensures tools section stays at the bottom of the description card. */
+#project-lightbox
+  .lightbox-media-wrapper
+  .lightbox-desc-card
+  .card-tools-section {
+  flex-shrink: 0; /* Prevents shrinking. */
+  margin-top: auto; /* Pushes it to the bottom if card-main-content doesn't fill height. */
+}
+
+/* ===== Keyframe Animations for Mobile Overlays ===== */
+/* Animation for sliding in the bottom description overlay on mobile. */
+@keyframes mobileBottomOverlaySlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(100%); /* Starts off-screen below. */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* Slides into view. */
+  }
+}
+
+/* Animation for sliding out the bottom description overlay on mobile. */
+@keyframes mobileBottomOverlaySlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0); /* Starts in view. */
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%); /* Slides off-screen below. */
+  }
+}
+
+/* Animation for sliding in the top title overlay on mobile. */
+@keyframes mobileTopOverlaySlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-100%); /* Starts off-screen above. */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* Slides into view. */
+  }
+}
+
+/* Animation for sliding out the top title overlay on mobile. */
+@keyframes mobileTopOverlaySlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0); /* Starts in view. */
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%); /* Slides off-screen above. */
+  }
+}
+
+/* ===== Mute Icon, Spinner, and Video-Specific Styles ===== */
+/* Styling for the mute/unmute icon overlay on videos. */
+#project-lightbox .mute-icon-overlay {
+  position: absolute;
+  top: 18px; /* Default desktop positioning. */
+  left: 18px;
+  z-index: 10; /* Above video, below other controls. */
+  opacity: 0; /* Hidden by default, shown on hover or if video is playing. */
+  pointer-events: none; /* Icon itself is not interactive; wrapper might be. */
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#project-lightbox .mute-icon-overlay.show {
+  opacity: 1;
+  transition: opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1); /* Quicker fade-in when shown. */
+}
+
+/* Styling for the video loading spinner overlay. */
+#project-lightbox .video-spinner-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the spinner. */
+  z-index: 20; /* Above video and mute icon. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  pointer-events: none; /* Spinner is not interactive. */
+}
+/* The actual spinning animation element. */
+#project-lightbox .video-spinner {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.25); /* Light border for the track. */
+  border-top: 4px solid #fff; /* Solid white for the spinning part. */
+  border-radius: 50%;
+  animation: spin 1s linear infinite; /* Applies the spin animation. */
+  box-sizing: border-box;
+}
+/* Keyframes for the spinner animation. */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ensure mute icon image has no unwanted inherited styles. */
+#project-lightbox .mute-icon-overlay img {
+  box-shadow: none !important;
+  background: none !important;
+}
+
+/* Ensures description text span is pushed to the bottom of its overlay container on mobile. */
+#project-lightbox .lightbox-description-overlay > span {
+  margin-top: auto;
+}
+
+/* ===== Pointer Events Management ===== */
+/* The main media wrapper itself does not handle pointer events. */
+#project-lightbox .lightbox-media-wrapper {
+  pointer-events: none;
+}
+/* Specific children (video wrapper, description card) handle their own pointer events. */
+#project-lightbox .lightbox-media-wrapper > .video-outer-wrapper,
+#project-lightbox .lightbox-media-wrapper > .lightbox-desc-card {
+  pointer-events: auto;
+}
+
+/* Ensure direct image children of the media wrapper are also interactive. */
+#project-lightbox .lightbox-media-wrapper > img {
+  pointer-events: auto;
+}
+
+/* Default styling for mute icon overlay within a video wrapper (desktop context). */
+.video-outer-wrapper .mute-icon-overlay {
+  width: 66px; /* Larger on desktop. */
+  height: 36px;
+  position: absolute;
+  top: 12px;
+  right: 12px; /* Top-right position. */
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Show mute icon on hover of the video wrapper (desktop). */
+/* More robust: when .desc-card-overlay-mode is present in the same wrapper */
+.lightbox-media-wrapper .video-outer-wrapper:hover .mute-icon-overlay {
+  opacity: 1;
+  transition: opacity 0.1s ease-in-out;
+}

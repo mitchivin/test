@@ -1,20 +1,9 @@
 /**
- * taskbar.js — Taskbar Component for Windows XP Simulation
- *
- * Handles the taskbar UI, including:
- * - Start menu integration and toggling
- * - System tray and clock management
- * - Responsive layout and event-driven updates
- *
- * Usage:
- *   import Taskbar from './taskbar.js';
- *   const taskbar = new Taskbar(eventBus);
- *
- * Edge Cases:
- *   - If required DOM elements are missing, some features are disabled.
- *   - Tooltips and clock are initialized on startup.
- *
- * @module taskbar
+ * @fileoverview Taskbar manager for Windows XP simulation.
+ * @description Manages the taskbar UI, start button, system tray, clock, and taskbar items. Integrates with the Start Menu and handles responsive layout and balloon tooltips.
+ * @module scripts/gui/taskbar
+ * @see {@link module:scripts/gui/startMenu.StartMenu}
+ * @see {@link module:scripts/utils/eventBus.EVENTS}
  */
 import StartMenu from "./startMenu.js";
 import { EVENTS } from "../utils/eventBus.js";
@@ -22,32 +11,50 @@ import { setupTooltips } from "./tooltip.js"; // Corrected path from utils
 import { isMobileDevice } from "../utils/device.js";
 import { balloonSound } from "./boot.js"; // Import balloonSound
 
+let taskbarSharedEventBus = null; // Module-level variable to hold the eventBus instance
+
 /**
- * Clock class for managing the system clock display and time updates.
- *
- * @class
+ * @class Clock
+ * @description Manages the display and regular updates of the system clock
+ *              typically shown in the taskbar's system tray.
  * @example
- * const clock = new Clock('.time');
- * clock.destroy(); // Stop updates
+ * const clockDisplayElement = document.querySelector('.time');
+ * const clock = new Clock(clockDisplayElement);
+ * // To stop updates when no longer needed:
+ * // clock.destroy();
+ * @private
  */
 class Clock {
+  /** @type {HTMLElement | null} The DOM element used to display the time. Null if the selector doesn't find an element. */
   #clockElement;
+  /** @type {number | null} ID for the interval timer that updates the clock every minute. Null if not set. */
   #intervalId = null;
+  /** @type {number | null} ID for the initial timeout used to align the first clock update to the start of the next minute. Null if not set. */
   #initialTimeoutId = null;
+  /** @type {Intl.DateTimeFormat} Formatter for displaying the time in HH:MM AM/PM format. */
   #timeFormatter = new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
   });
 
+  /**
+   * Initializes a new Clock instance.
+   * @param {string} selector - CSS selector for the DOM element that will display the time.
+   */
   constructor(selector) {
     this.#clockElement = document.querySelector(selector);
-    if (!this.#clockElement) {
-      return;
-    }
+    if (!this.#clockElement) return;
     this.setupClockUpdates();
   }
 
+  /**
+   * Sets up the mechanism for updating the clock display.
+   * @description Calculates the delay until the next minute and then sets up an interval
+   * to update the clock every 60 seconds. Ensures the clock updates accurately on the minute.
+   * @returns {void} Nothing.
+   * @private
+   */
   setupClockUpdates() {
     clearTimeout(this.#initialTimeoutId);
     clearInterval(this.#intervalId);
@@ -61,31 +68,52 @@ class Clock {
     }, msUntilNextMinute);
   }
 
+  /**
+   * Updates the clock display with the current time.
+   * Formats the time to a standard (e.g., "1:30 PM").
+   * @returns {void} Nothing.
+   * @private
+   */
   updateClock() {
     if (!this.#clockElement) return;
     this.#clockElement.textContent = this.#timeFormatter.format(new Date());
   }
 
+  /**
+   * Clears any pending timeouts or intervals for clock updates.
+   * Call this when the clock is no longer needed to prevent memory leaks.
+   * @returns {void} Nothing.
+   */
   destroy() {
     clearTimeout(this.#initialTimeoutId);
     clearInterval(this.#intervalId);
-    this.#clockElement = null;
   }
 }
 
 /**
- * Taskbar class manages the Windows XP taskbar, including start button, clock, and taskbar items.
+ * @class Taskbar
+ * @description Manages the main taskbar UI, including the Start button,
+ * system tray, clock, and taskbar items for open applications.
  */
 export default class Taskbar {
   /**
-   * @param {Object} eventBus - Event bus for communication.
+   * Constructs the Taskbar manager.
+   * @param {EventBus} eventBus - The global event bus instance.
+   * @see {@link module:scripts/utils/eventBus.EventBus}
    */
   constructor(eventBus) {
+    /** @type {EventBus} The global event bus for inter-component communication. */
     this.eventBus = eventBus;
+    taskbarSharedEventBus = eventBus; // Assign to module-level variable
+    /** @type {HTMLElement} The main Start button DOM element. */
     this.startButton = document.getElementById("start-button");
+    /** @type {StartMenu} Instance of the StartMenu class, managing the start menu's behavior. */
     this.startMenuComponent = new StartMenu(this.eventBus);
+    /** @type {HTMLElement} The DOM element that contains taskbar program items (icons for open applications). */
     this.programsContainer = document.querySelector(".taskbar-programs");
+    /** @type {HTMLElement} The DOM element representing the system tray area of the taskbar. */
     this.systemTray = document.querySelector(".system-tray");
+    /** @type {HTMLElement} The main taskbar DOM element. */
     this.taskbar = document.querySelector(".taskbar");
 
     // Always use the desktop start button asset
@@ -109,16 +137,18 @@ export default class Taskbar {
 
     this.subscribeToEvents();
 
-    // Listen for fullscreen changes to reset the network balloon
+    // Listen for fullscreen changes
     document.addEventListener("fullscreenchange", () => {
-      localStorage.removeItem("networkBalloonShown");
-      // Adjust based on final requirements
-      // Ensure it doesn't conflict with other UI elements
+      // TODO: Implement UI updates or state changes based on fullscreen mode transitions if needed.
     });
   }
 
   /**
-   * Subscribe to event bus events
+   * Subscribes to relevant global events from the event bus.
+   * @description Handles events like Start Menu open/close and window creation/closure
+   * to update the taskbar's state and layout accordingly.
+   * @returns {void} Nothing.
+   * @private
    */
   subscribeToEvents() {
     this.eventBus.subscribe(EVENTS.STARTMENU_OPENED, () => {
@@ -136,11 +166,58 @@ export default class Taskbar {
     this.eventBus.subscribe(EVENTS.WINDOW_CLOSED, () => {
       this.updateTaskbarLayout();
     });
+
+    this.eventBus.subscribe(EVENTS.MUSIC_PLAYER_PLAYING, (data) => {
+      setTimeout(() => {
+        if (data && data.programId === "musicPlayer") {
+          const musicPlayerButton = document.querySelector(
+            '.taskbar-item[data-program-id="musicPlayer-window"]',
+          );
+          if (musicPlayerButton) {
+            const textElement = musicPlayerButton.querySelector("span");
+            const imgElement = musicPlayerButton.querySelector("img");
+            if (textElement && imgElement) {
+              const originalTitle = imgElement.alt;
+              const existingIndicator = textElement.querySelector(
+                ".music-playing-indicator",
+              );
+              if (!existingIndicator) {
+                textElement.innerHTML = `${originalTitle}<span class="music-playing-indicator" style="color: white; margin-left: 4px;">🔊</span>`;
+              }
+            }
+          }
+        }
+      }, 250); // Short delay to ensure taskbar item is in DOM before attempting to modify it
+    });
+
+    this.eventBus.subscribe(EVENTS.MUSIC_PLAYER_STOPPED, (data) => {
+      setTimeout(() => {
+        if (data && data.programId === "musicPlayer") {
+          const musicPlayerButton = document.querySelector(
+            '.taskbar-item[data-program-id="musicPlayer-window"]',
+          );
+          if (musicPlayerButton) {
+            const textElement = musicPlayerButton.querySelector("span");
+            const imgElement = musicPlayerButton.querySelector("img");
+            if (textElement && imgElement) {
+              const originalTitle = imgElement.alt;
+              const existingIndicator = textElement.querySelector(
+                ".music-playing-indicator",
+              );
+              if (existingIndicator) {
+                textElement.innerHTML = originalTitle;
+              }
+            }
+          }
+        }
+      }, 250); // Short delay to ensure taskbar item is in DOM before attempting to modify it
+    });
   }
 
   /**
-   * Set up hover and click effects for the Start button.
-   * @returns {void}
+   * Sets up click event listeners for the Start button to toggle the Start Menu.
+   * @returns {void} Nothing.
+   * @private
    */
   setupStartButtonEffects() {
     this.startButton.addEventListener("click", (e) => {
@@ -150,8 +227,12 @@ export default class Taskbar {
   }
 
   /**
-   * Set up responsive behavior for the taskbar on window resize.
-   * @returns {void}
+   * Initializes responsive behavior for the taskbar.
+   * @description Calls `updateTaskbarLayout` initially and sets up listeners
+   * for window resize and DOM changes within the programs container to
+   * trigger layout updates.
+   * @returns {void} Nothing.
+   * @private
    */
   setupResponsiveTaskbar() {
     this.updateTaskbarLayout();
@@ -171,8 +252,12 @@ export default class Taskbar {
   }
 
   /**
-   * Updates the taskbar layout, adjusting program item widths based on available space
-   * This ensures the taskbar remains usable and visually balanced regardless of window count.
+   * Updates the layout of taskbar program items.
+   * @description Calculates available width in the taskbar and determines the appropriate
+   * layout mode (default, compact text, or icon only) for program items.
+   * Then applies this layout to ensure items fit and the taskbar remains usable.
+   * @returns {void} Nothing.
+   * @private
    */
   updateTaskbarLayout() {
     const taskbarItems = document.querySelectorAll(".taskbar-item");
@@ -187,6 +272,11 @@ export default class Taskbar {
     this._applyTaskbarLayout(taskbarItems, layoutMode, availableWidth);
   }
 
+  /**
+   * Calculates the available width for program items within the taskbar.
+   * @returns {number} The width in pixels available for taskbar program items.
+   * @private
+   */
   _calculateAvailableWidth() {
     const taskbarWidth = this.taskbar.offsetWidth;
     const startButtonWidth = this.startButton.offsetWidth;
@@ -194,8 +284,15 @@ export default class Taskbar {
     return taskbarWidth - startButtonWidth - systemTrayWidth;
   }
 
+  /**
+   * Determines the appropriate layout mode for taskbar items based on count and available width.
+   * @param {number} itemCount - The number of active taskbar items.
+   * @param {number} availableWidth - The total width available for these items.
+   * @returns {string} The layout mode: "default", "reduced", or "icon-only".
+   * @private
+   */
   _determineLayoutMode(itemCount, availableWidth) {
-    const defaultWidth = 160;
+    const defaultWidth = 168; // Increased by 8px to match maxWidth
     const minTextWidth = 80;
     const iconOnlyWidth = 36;
 
@@ -205,9 +302,18 @@ export default class Taskbar {
     return "overflow";
   }
 
+  /**
+   * Applies the determined layout mode to all taskbar items.
+   * @description Sets the width of each taskbar item and toggles the "icon-only"
+   * class based on the calculated `layoutMode` and `availableWidth`.
+   * @param {NodeListOf<HTMLElement>} taskbarItems - The list of taskbar item elements.
+   * @param {string} layoutMode - The layout mode ("default", "reduced", "icon-only", "overflow").
+   * @param {number} availableWidth - The total width available for items.
+   * @private
+   */
   _applyTaskbarLayout(taskbarItems, layoutMode, availableWidth) {
     const minWidth = 36; // Minimum width for icon-only
-    const maxWidth = 160; // Default max width
+    const maxWidth = 168; // Default max width (increased by 8px for desktop)
     const itemCount = taskbarItems.length;
     let itemWidth = Math.floor(availableWidth / itemCount);
     if (itemWidth > maxWidth) itemWidth = maxWidth;
@@ -223,6 +329,12 @@ export default class Taskbar {
     });
   }
 
+  /**
+   * Ensures the Start button image is set to the default desktop asset.
+   * @description This method explicitly sets the `src` for the Start button's image.
+   * It's called during initialization and on resize to maintain the correct image.
+   * @private
+   */
   _setStartButtonImage() {
     const img = this.startButton.querySelector("img");
     if (!img) return;
@@ -231,8 +343,20 @@ export default class Taskbar {
 }
 
 // --- Balloon Tooltip for Network Icon ---
+/**
+ * Stores timeout IDs for the network balloon tooltip to manage its appearance and dismissal.
+ * @type {Array<number>}
+ * @private
+ */
 let balloonTimeouts = [];
 
+/**
+ * Hides and removes the network connection balloon tooltip.
+ * @param {boolean} [instant=false] - If true, removes the balloon immediately without animation.
+ *                                    Otherwise, a fade-out animation is applied.
+ * @returns {void} Nothing.
+ * @exported Yes, this is an exported function.
+ */
 export function hideBalloon(instant = false) {
   const balloonRoot = document.getElementById("balloon-root");
   if (!balloonRoot) return;
@@ -250,6 +374,16 @@ export function hideBalloon(instant = false) {
   }, 1000);
 }
 
+/**
+ * Displays a network connection balloon tooltip, typically anchored to the network tray icon.
+ * @description Creates and shows a balloon notification. The content (header and body text)
+ * is fetched from `system.json`. The balloon automatically hides after a delay.
+ * Plays a sound effect when shown. Prevents multiple balloons from appearing.
+ * Does not show if the login screen is active.
+ * @async
+ * @returns {Promise<void>} A promise that resolves when the function has completed its setup.
+ * @exported Yes, this is an exported function.
+ */
 export async function showNetworkBalloon() {
   // Prevent balloon if login screen is visible
   const loginScreen = document.getElementById("login-screen");
@@ -267,7 +401,9 @@ export async function showNetworkBalloon() {
   // Play the balloon sound
   if (balloonSound) {
     balloonSound.currentTime = 0;
-    balloonSound.play().catch(error => console.error("Error playing balloon sound:", error));
+    balloonSound
+      .play()
+      .catch((error) => console.error("Error playing balloon sound:", error));
   }
 
   const icon = document.querySelector(".tray-network-icon");
@@ -279,8 +415,8 @@ export async function showNetworkBalloon() {
   document.body.appendChild(balloonRoot);
 
   // Fetch system.json for balloon content
-  let headerText = "Welcome to my portfolio";
-  let mainText = "It's also the most accurate XP recreation online.<br>Built from scratch, to the pixel, by me :)";
+  let headerText = "";
+  let mainText = "";
   try {
     const response = await fetch("./system.json");
     const system = await response.json();
@@ -288,7 +424,9 @@ export async function showNetworkBalloon() {
       if (system.balloon.title) headerText = system.balloon.title;
       if (system.balloon.body) mainText = system.balloon.body;
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error("Error fetching system.json for balloon:", e);
+  }
 
   balloonRoot.innerHTML = `
     <div class="balloon">
@@ -298,9 +436,48 @@ export async function showNetworkBalloon() {
         <span class="balloon__header__text">${headerText}</span>
       </div>
       <p class="balloon__text__first" style="padding: 0 8px 0 2px;">${mainText}</p>
+      <p class="balloon__text__second" style="padding: 0 8px 0 2px; margin-top: 8px;">
+        Get Started: <a href="#" id="balloon-about-link" style="color: blue; text-decoration: underline;">About Me</a> | <a href="#" id="balloon-projects-link" style="color: blue; text-decoration: underline;">My Projects</a>
+      </p>
       <div class="balloon-pointer-anchor" style="position:absolute;bottom:-19px;right:24px;width:0;height:0;"></div>
     </div>
   `;
+
+  // Add event listener for the new "My Projects" link
+  const projectsLink = balloonRoot.querySelector("#balloon-projects-link");
+  if (projectsLink) {
+    projectsLink.addEventListener("click", (event) => {
+      event.preventDefault(); // Prevent default link behavior
+
+      if (taskbarSharedEventBus && EVENTS) {
+        taskbarSharedEventBus.publish(EVENTS.PROGRAM_OPEN, {
+          programName: "projects",
+        });
+      } else {
+        console.error(
+          "taskbarSharedEventBus or EVENTS not available for balloon link.",
+        );
+      }
+    });
+  }
+
+  // Add event listener for the new "About Me" link
+  const aboutLink = balloonRoot.querySelector("#balloon-about-link");
+  if (aboutLink) {
+    aboutLink.addEventListener("click", (event) => {
+      event.preventDefault(); // Prevent default link behavior
+      if (taskbarSharedEventBus && EVENTS) {
+        taskbarSharedEventBus.publish(EVENTS.PROGRAM_OPEN, {
+          programName: "about",
+        });
+      } else {
+        console.error(
+          "taskbarSharedEventBus or EVENTS not available for balloon link (About Me).",
+        );
+      }
+    });
+  }
+
   setTimeout(() => {
     const iconRect = icon.getBoundingClientRect();
     const balloon = balloonRoot.querySelector(".balloon");
@@ -311,11 +488,13 @@ export async function showNetworkBalloon() {
       // Calculate the center of the icon
       const iconCenterX = iconRect.left + iconRect.width / 2 + window.scrollX;
       // Calculate the center of the pointer anchor
-      const pointerCenterX = pointerRect.left + pointerRect.width / 2 + window.scrollX;
+      const pointerCenterX =
+        pointerRect.left + pointerRect.width / 2 + window.scrollX;
       // Adjust horizontally by -8px (left) and vertically by -12px (higher)
       const offsetX = iconCenterX - pointerCenterX - 8;
-      balloonRoot.style.left = (balloonRoot.offsetLeft + offsetX) + "px";
-      balloonRoot.style.top = (iconRect.top - balloon.offsetHeight - 8 - 12 + window.scrollY) + "px";
+      balloonRoot.style.left = balloonRoot.offsetLeft + offsetX + "px";
+      balloonRoot.style.top =
+        iconRect.top - balloon.offsetHeight - 8 - 12 + window.scrollY + "px";
     });
   }, 0);
   const balloon = balloonRoot.querySelector(".balloon");
@@ -333,7 +512,10 @@ export async function showNetworkBalloon() {
   balloonTimeouts.push(setTimeout(() => hideBalloon(), removeDelay));
 }
 
-// Instead, show balloon on click of the network icon
+/**
+ * Sets up a click event listener on the network tray icon to show the network balloon tooltip.
+ * @private
+ */
 const setupBalloonClick = () => {
   const icon = document.querySelector(".tray-network-icon");
   if (!icon) return;

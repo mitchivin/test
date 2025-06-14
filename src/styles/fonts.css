@@ -1,8 +1,16 @@
 /*
- * fonts.css — Font Definitions for Windows XP Simulation
- * @file fonts.css
+ * fonts.css — Font definitions for Windows XP simulation.
+ * Provides Tahoma font faces (normal and bold) to match the Windows XP UI aesthetic.
+ * @file src/styles/fonts.css
  */
 
+/* ===== Font Face Definitions ===== */
+/*
+  Defines the Tahoma font family in both normal and bold weights.
+  These are used throughout the UI to closely mimic the original Windows XP look.
+*/
+
+/* Tahoma Regular (Normal weight) */
 @font-face {
   font-family: "Tahoma";
   src:
@@ -13,6 +21,7 @@
   font-display: swap;
 }
 
+/* Tahoma Bold (Bold weight) */
 @font-face {
   font-family: "Tahoma";
   src:

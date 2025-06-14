@@ -1,83 +1,104 @@
 /*
  * resume.css — Styles for Resume App in Windows XP Simulation
  * Styles the My Resume window, image, and responsive layout.
+ * @file src/apps/resume/resume.css
  */
+
+/* ===== Global & Root Styles ===== */
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  touch-action: none; /* Disable pinch-zoom and other default touch actions */
+  touch-action: none; /* Disable pinch-zoom and other default touch actions for a native app feel */
 }
 body {
-  background: #97958f; /* Slightly darker than #ece9d8 */
+  background: #97958f; /* Background color for the resume app window, slightly darker than default XP.css window bg */
   color: #000; /* XP default text color */
-  font-family: Tahoma, Verdana, sans-serif; /* Default XP font */
+  font-family: Tahoma, Verdana, sans-serif; /* Default XP font stack */
   font-size: 11px; /* Default XP font size */
-  overflow: hidden; /* Prevent body scroll, let .app-root handle its own. */
-}
-.app-root {
-  box-sizing: border-box;
-  padding: 16px;
-  height: 100%;
-  width: 100%;
-  overflow: auto;
+  overflow: hidden; /* Prevent body scroll; scrolling is handled by .app-root. */
 }
 
-/* Mobile specific padding */
+/* .app-root is the main container for the resume content, handling padding and scrolling. */
+.app-root {
+  box-sizing: border-box;
+  padding: 16px; /* Default padding around the resume image */
+  height: 100%;
+  width: 100%;
+  overflow: auto; /* Enable scrolling if the resume image is larger than the viewport */
+}
+
+/* ===== Responsive Padding for .app-root ===== */
+/* Reduced padding on smaller screens (mobile devices) for better use of space. */
 @media (max-width: 767px) {
   .app-root {
     padding: 8px;
   }
 }
 
-/* Desktop maximized padding override */
+/* Specific padding override for desktop when the window is maximized. */
+/* Removes side padding to allow image to potentially span closer to window edges if very wide. */
 @media (min-width: 768px) {
   .maximized-mode.app-root {
-    padding: 16px 0;
+    padding: 16px 0; /* Vertical padding retained, horizontal padding removed */
   }
 }
+
+/* ===== Resume Image Styling ===== */
 .resume-image {
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  cursor: zoom-in;
+  display: block; /* Ensures proper margin auto behavior and layout */
+  margin: 0 auto; /* Centers the image horizontally */
+  max-width: 100%; /* Ensures image is responsive and does not overflow its container by default */
+  width: auto; /* Default width based on image aspect ratio, constrained by max-width */
+  height: auto; /* Default height based on image aspect ratio */
+  object-fit: contain; /* Scales the image to fit within its bounds while maintaining aspect ratio */
+  cursor: zoom-in; /* Indicates the image is clickable for zooming */
   transition:
     max-width 0.2s,
-    max-height 0.2s,
+    /* Smooth transition for zoom effects */ max-height 0.2s,
     width 0.2s,
     height 0.2s;
-  box-sizing: content-box;
+  box-sizing: content-box; /* Ensures padding/border do not affect the explicit width/height of the image content itself. */
 }
+
+/* Styles for the resume image when it is zoomed in. */
 .resume-image.zoomed {
-  max-width: none;
-  max-height: none;
-  width: 160%;
-  height: auto;
-  cursor: zoom-out;
+  max-width: none; /* Allows image to exceed container width when zoomed */
+  max-height: none; /* Allows image to exceed container height when zoomed */
+  width: 160%; /* Default zoomed width (can be overridden by JS or more specific rules) */
+  height: auto; /* Height adjusts based on aspect ratio of the new width */
+  cursor: zoom-out; /* Indicates the image can be clicked to zoom out */
 }
+
+/* Responsive adjustment for zoomed image on larger screens. */
+/* Caps the zoomed width to a fixed value or 90% of viewport width, whichever is smaller. */
 @media (min-width: 700px) {
   .resume-image.zoomed {
-    width: 850px;
-    max-width: 90vw;
+    width: 850px; /* Specific width for larger screens */
+    max-width: 90vw; /* Ensures it doesn't become excessively wide on very large displays */
   }
 }
+
+/* Cursor style when the image is being dragged (panned). */
 .resume-image.dragging {
   cursor: grabbing;
 }
+
+/* Styles for the resume image when the parent window is maximized, but the image itself is not in its .zoomed state. */
+/* Aims to fit the image to the height of the container while maintaining aspect ratio. */
 .maximized-mode .resume-image:not(.zoomed) {
-  width: auto;
-  height: 100%;
-  max-width: 100%;
-  object-fit: contain;
+  width: auto; /* Width adjusts to maintain aspect ratio based on the new height */
+  height: 100%; /* Image takes full available height of the .app-root container */
+  max-width: 100%; /* Still respects container width if aspect ratio makes it wider than tall */
+  object-fit: contain; /* Ensures the entire image is visible and scaled appropriately */
   margin-bottom: 0;
   display: block;
 }
 
+/* ===== User Selection Control ===== */
+/* Disable text selection globally for a more app-like feel. */
 body,
 .app-root,
 .resume-image {
@@ -87,7 +108,7 @@ body,
   -ms-user-select: none;
 }
 
-/* Allow selection in input and textarea fields (if any) */
+/* Explicitly allow text selection within input and textarea fields if they were to be used in this app. */
 input,
 textarea {
   user-select: text;

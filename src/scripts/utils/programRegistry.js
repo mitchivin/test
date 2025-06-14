@@ -1,7 +1,7 @@
-/**
- * programRegistry.js — Program Registry for Windows XP Simulation
- * Centralized configuration for all available applications, including window properties, icons, and content sources.
- * @module programRegistry
+/*
+ * programRegistry.js — Centralized registry for all application configurations in the Windows XP simulation.
+ * Includes window properties, icons, menu bars, toolbars, and helper functions for consistent program definitions.
+ * @file src/scripts/utils/programRegistry.js
  */
 
 import { isMobileDevice } from "./device.js";
@@ -10,51 +10,77 @@ import { isMobileDevice } from "./device.js";
 //  Program Registry for Windows XP Simulation
 // ==================================================
 
-// ===== Default Templates & Helpers =====
+// ===== Default Templates & Internal Helper Functions =====
+// Provides base configuration templates and utility functions for program definitions.
 
 /**
- * Default configuration templates for program properties
- *
- * @type {Object}
+ * Default configuration templates used by `createProgram`.
+ * Provides base settings for program properties like iframe dimensions.
+ * @type {object}
+ * @property {object} iframe Default settings for iframe-based programs.
+ * @property {string} iframe.template Default template key.
+ * @property {object} iframe.dimensions Default width and height.
+ * @property {object} iframe.minDimensions Default minimum dimensions.
+ * @private
  */
 const defaults = {
   iframe: {
     template: "iframe-standard",
     dimensions: { width: 550, height: 400 },
+    minDimensions: { width: 250, height: 200 }, // Default minimum dimensions
   },
 };
 
 /**
- * Generates a standardized window ID from program name
- * @param {string} name - Program name
- * @returns {string} Formatted window ID
+ * Generates a standardized window ID from a program key.
+ * Appends "-window" to the program key.
+ * @param {string} name - The unique program key (e.g., "notepad").
+ * @returns {string} The formatted window ID (e.g., "notepad-window").
+ * @private
  */
 const makeId = (name) => `${name}-window`;
 
 /**
- * Creates a program configuration with consistent properties
- * @param {string} key - Unique program identifier
- * @param {string} title - Window title displayed in titlebar
- * @param {string} icon - Relative path to program icon
- * @param {Object} [extraProps={}] - Additional program-specific properties
- * @returns {Object} Complete program configuration object
+ * Factory function to create a program configuration object with consistent properties.
+ * Merges default settings with program-specific properties.
+ * @param {string} key - Unique program identifier (e.g., "notepad").
+ * @param {string} title - Window title displayed in the title bar.
+ * @param {string} icon - Filename of the program icon (e.g., "start-menu/notepad.webp").
+ *                        This path is relative to `./assets/gui/`.
+ * @param {object} [extraProps={}] - Additional program-specific properties to override or extend defaults.
+ * @returns {object} The complete program configuration object.
+ * @private
  */
 const createProgram = (key, title, icon, extraProps = {}) => ({
   id: makeId(key),
   title,
   icon: `./assets/gui/${icon}`,
-  ...defaults.iframe,
-  ...extraProps,
+  ...defaults.iframe, // Merge in default iframe settings
+  // Merge extraProps.minDimensions deeply if it exists, otherwise use default
+  minDimensions: {
+    ...defaults.iframe.minDimensions,
+    ...(extraProps.minDimensions || {}),
+  },
+  ...extraProps, // Override or extend with program-specific properties
 });
 
-// Shared dropdown templates
+// ===== Shared Menu Dropdown Configurations =====
+// Standardized dropdown menu configurations for reuse across multiple programs.
+
+/**
+ * Standard configuration for a "View" menu dropdown.
+ * Includes options for Close, Maximize, and Minimize.
+ * Maximize is disabled on mobile devices.
+ * @type {Array<object>} // Array of menu item configuration objects
+ * @private
+ */
 const VIEW_DROPDOWN = [
   { key: "close", text: "Close", enabled: true, action: "exitProgram" },
   { type: "separator" },
   {
     key: "maximize",
     text: "Maximize",
-    enabled: !isMobileDevice(),
+    enabled: !isMobileDevice(), // Disable maximize on mobile
     action: "maximizeWindow",
   },
   {
@@ -65,7 +91,12 @@ const VIEW_DROPDOWN = [
   },
 ];
 
-// Common File menu variant: Only Exit enabled
+/**
+ * Common "File" menu dropdown configuration where only "Exit" is enabled.
+ * Used for programs with minimal file operations.
+ * @type {Array<object>} // Array of menu item configuration objects
+ * @private
+ */
 const FILE_DROPDOWN_EXIT_ONLY = [
   { key: "open", text: "Open...", enabled: false, action: "fileOpen" },
   { key: "saveAs", text: "Save as...", enabled: false, action: "fileSaveAs" },
@@ -81,7 +112,12 @@ const FILE_DROPDOWN_EXIT_ONLY = [
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
 
-// File menu for Notepad (New enabled)
+/**
+ * "File" menu dropdown configuration tailored for "Notepad".
+ * Includes "New", with other file operations typically disabled in this simulation.
+ * @type {Array<object>} // Array of menu item configuration objects
+ * @private
+ */
 const FILE_DROPDOWN_NOTEPAD = [
   { key: "new", text: "New", enabled: true, action: "fileNew" },
   { key: "open", text: "Open...", enabled: false, action: "fileOpen" },
@@ -99,7 +135,12 @@ const FILE_DROPDOWN_NOTEPAD = [
   { key: "exit", text: "Exit", enabled: true, action: "exitProgram" },
 ];
 
-// Custom File dropdown for Contact App
+/**
+ * Custom "File" menu dropdown configuration for the "Contact Me" application.
+ * Includes app-specific actions like "New Message" and "Send Message".
+ * @type {Array<object>} // Array of menu item configuration objects
+ * @private
+ */
 const FILE_DROPDOWN_CONTACT = [
   {
     key: "newMessage",
@@ -126,14 +167,33 @@ const FILE_DROPDOWN_CONTACT = [
 ];
 
 // ===== Program Data Registry =====
+// The main registry of all application configurations, keyed by unique program identifier.
+// Each entry defines all properties needed to create and manage that program's window.
 
 /**
- * Complete registry of all application configurations
- *
- * Each entry defines the properties needed to create and manage a program window,
- * including dimensions, content source, and UI behavior.
- *
- * @type {Object.<string, Object>}
+ * @typedef {object} ProgramConfig
+ * @property {string} id - The unique window ID, typically `key + "-window"`.
+ * @property {string} title - The title displayed in the window's title bar.
+ * @property {string} icon - The full path to the program's icon.
+ * @property {string} [template="iframe-standard"] - The window template to use.
+ * @property {object} dimensions - Default window dimensions.
+ * @property {number} dimensions.width - Default width in pixels.
+ * @property {number} dimensions.height - Default height in pixels.
+ * @property {string} [contentSrc] - Path to the iframe content for the program.
+ * @property {object} [menuBarConfig] - Configuration for the window's menu bar.
+ * @property {Array<object>} menuBarConfig.items - Array of menu items.
+ * @property {object} [toolBarConfig] - Configuration for the window's toolbar.
+ * @property {Array<object>} toolBarConfig.buttons - Array of toolbar buttons.
+ * @property {boolean} [isSingleton=false] - If true, only one instance of the program can be open.
+ * @property {boolean} [hideFromTaskbar=false] - If true, the program won't show on the taskbar.
+ * @property {string} [tooltip] - Tooltip text for the program's icon.
+ * @property {boolean} [isFullScreen=false] - If true, attempts to open in a full-screen like mode.
+ * @property {boolean} [isUtility=false] - If true, might have different handling (e.g., no close button).
+ * @property {string} [instanceGroup] - Groups instances for specific behaviors (e.g. "explorer").
+ * @property {boolean} [resizable=true] - Whether the window is resizable.
+ * @property {object} [minDimensions] - Minimum dimensions for resizing.
+ * @property {number} minDimensions.width - Minimum width.
+ * @property {number} minDimensions.height - Minimum height.
  */
 const programData = {
   // Communication and Messaging
@@ -150,25 +210,12 @@ const programData = {
     "Music Player",
     "start-menu/music.webp",
     {
-      dimensions: { width: 400, height: 450 }, // Typical music player size
-      // Basic menubar similar to other simple apps
-      menuBarConfig: {
-        items: [
-          {
-            key: "file",
-            text: "File",
-            enabled: true,
-            dropdown: FILE_DROPDOWN_EXIT_ONLY, // File > Exit
-          },
-          {
-            key: "view",
-            text: "View",
-            enabled: true,
-            dropdown: VIEW_DROPDOWN, // View > Minimize/Maximize
-          },
-          { key: "help", text: "Help", enabled: false },
-        ],
-      },
+      appPath: "src/apps/musicPlayer/musicplayer.html",
+      dimensions: { width: 420, height: 255 },
+      minDimensions: { width: 420, height: 255 },
+      resizable: false,
+      canMaximize: false,
+      position: { type: "custom", x: 24, y: 24, relativeTo: "right" },
     },
   ),
 
@@ -201,6 +248,7 @@ const programData = {
   // Portfolio Content
   about: createProgram("about", "About Me", "desktop/about.webp", {
     dimensions: { width: 800, height: 600 },
+    minDimensions: { width: 430, height: 400 },
     statusBarText: "Viewing Mitch's background",
     appPath: "src/apps/about/about.html",
     toolbarConfig: {
@@ -270,6 +318,7 @@ const programData = {
   }),
   resume: createProgram("resume", "My Resume", "desktop/resume.webp", {
     dimensions: { width: 600, height: 725 },
+    minDimensions: { width: 305, height: 350 },
     statusBarText: isMobileDevice()
       ? "Tap to zoom & pan"
       : "Click to zoom & pan",
@@ -385,7 +434,8 @@ const programData = {
 
   // Project Showcase Programs
   projects: createProgram("projects", "My Projects", "desktop/projects.webp", {
-    dimensions: { width: 1000, height: 700 },
+    dimensions: { width: 1060, height: 800 },
+    minDimensions: { width: 790, height: 500 },
     statusBarText: isMobileDevice()
       ? "Open a project and navigate with the toolbar or swipe"
       : "Open a project and navigate with the toolbar",
@@ -433,7 +483,6 @@ const programData = {
           text: "Next",
           action: "navigateNext",
         },
-        { type: "separator" },
         {
           key: "view-description",
           enabled: false,
@@ -441,6 +490,7 @@ const programData = {
           text: "Show more",
           action: "viewDescription",
         },
+        { type: "separator" },
         {
           key: "search",
           enabled: false,
@@ -471,6 +521,7 @@ const programData = {
   }),
   contact: createProgram("contact", "Contact Me", "desktop/contact.webp", {
     dimensions: { width: 600, height: 450 },
+    minDimensions: { width: 470, height: 300 }, // Custom minimum dimensions for Contact Me
     statusBarText: "Get in touch with Mitch",
     appPath: "src/apps/contact/contact.html",
     toolbarConfig: {

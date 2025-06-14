@@ -1,53 +1,39 @@
 /*
- * desktop.css — Desktop Styles for Windows XP Simulation
- *
- * Styles for:
- * - Desktop background and wallpaper
- * - Icon grid, selection overlays, and icon states
- * - Responsive/mobile adjustments
- *
+ * desktop.css — Desktop styles for Windows XP simulation.
+ * Handles desktop background, icon grid, selection overlays, icon states, and responsive/mobile adjustments.
+ * Matches the look and feel of Windows XP.
  * @file src/styles/gui/desktop.css
  */
 
-/* ==================================================
-   Desktop Styles for Windows XP Simulation
-   ==================================================
-   - Handles desktop background, icon grid, selection overlays, and icon states.
-   - Matches the look and feel of Windows XP.
-   ================================================== */
-
 /* ===== Root Variables ===== */
 :root {
-  --desktop-selection-color: rgb(49 106 197 / 15%);
-  --desktop-selection-hover: rgb(49 106 197 / 25%);
-  --taskbar-height: 30px;
-  --selection-border: 1px dotted rgba(255, 255, 255, 0.5);
-  --icon-border-radius: 3px;
-  --xp-bg-main: #ece9d8;
-  --xp-bg-accent: #0f61cb;
-  --xp-border-main: #aca899;
-  --icon-hover-bg: rgb(49 106 197 / 22%);
-  --icon-selected-bg: rgb(49 106 197 / 50%);
+  --desktop-selection-color: rgb(
+    49 106 197 / 15%
+  ); /* Selection box background */
+  --desktop-selection-hover: rgb(
+    49 106 197 / 25%
+  ); /* Selection hover background */
+  --taskbar-height: 30px; /* Height of the taskbar (used for layout calculations) */
+  --selection-border: 1px dotted rgba(255, 255, 255, 0.5); /* Selection box border */
+  --icon-border-radius: 3px; /* Border radius for desktop icons and selection */
+  --xp-bg-main: #ece9d8; /* Main XP background color */
+  --xp-bg-accent: #0f61cb; /* Accent color for XP UI */
+  --xp-border-main: #aca899; /* Main border color for XP UI */
+  --icon-hover-bg: rgb(49 106 197 / 22%); /* Icon hover background */
+  --icon-selected-bg: rgb(49 106 197 / 50%); /* Icon selected background */
 }
 
 /* ===== Desktop Container & Wallpaper ===== */
-/* Main desktop container */
+/*
+  Main desktop container. Uses background-size: cover for wallpaper.
+  Ultrawide screens center the image both vertically and horizontally.
+*/
 .desktop {
   width: 100%;
   height: 100%;
   background-size: cover;
 }
 
-/* Wallpaper classes */
-.desktop.wallpaper-default {
-  /* background-image: url("../../../assets/gui/bgs/bliss.webp"); */
-}
-
-.desktop.wallpaper-mobile {
-  /* background-image: url("../../../assets/gui/bgs/blissMobile.webp"); */
-}
-
-/* Ultrawide screens: center the image vertically and horizontally */
 @media (min-aspect-ratio: 21/9) {
   .desktop.wallpaper-default {
     background-position: center center;
@@ -55,7 +41,10 @@
 }
 
 /* ===== Selection Overlay & Box ===== */
-/* Selection overlay – sits behind everything, handles drag logic */
+/*
+  .selection-overlay sits behind everything and handles drag logic for selection.
+  .selection-box is the visible selection rectangle.
+*/
 .selection-overlay {
   position: fixed;
   top: 0;
@@ -66,7 +55,6 @@
   cursor: default;
 }
 
-/* Selection box (must live inside .selection-overlay) */
 .selection-box {
   position: absolute;
   border: var(--selection-border);
@@ -77,7 +65,7 @@
 
 /* Hover effect for selected icons */
 .desktop-icon.selected:hover {
-  background-color: rgb(49 106 197 / 30%);
+  background-color: rgba(49, 106, 197, 0.384);
 }
 
 /* Hover-by-selection highlight */
@@ -86,21 +74,23 @@
 }
 
 /* ===== Desktop Icon Grid & Icons ===== */
-/* Desktop icon grid */
+/*
+  .desktop-icons is a grid container for desktop icons.
+  Each .desktop-icon is a flex column with icon and label.
+*/
 .desktop-icons {
   padding: 16px 0 0 16px;
   display: grid;
-  grid-template-columns: 90px;
-  grid-auto-rows: 90px;
+  grid-template-columns: 100px;
+  grid-auto-rows: 100px;
   grid-gap: 6px;
   place-content: start start;
-  height: calc(100% - 30px);
+  height: calc(100% - 30px); /* Subtract taskbar height */
 }
 
-/* Individual icon */
 .desktop-icon {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -122,20 +112,19 @@
 .desktop-icon.selected {
   background-color: var(--icon-selected-bg);
   border: 1px dotted rgba(255, 255, 255, 0.5);
-  border-radius: var(--icon-border-radius);
 }
 
 /* Icon image */
 .desktop-icon img {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 6px;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 7px;
 }
 
 /* Icon label */
 .desktop-icon span {
-  font-size: 13.5px;
-  line-height: 16px;
+  font-size: 15px;
+  line-height: 18px;
   text-align: center;
   color: white;
   text-shadow:
@@ -149,13 +138,15 @@
   display: block;
 }
 
-/* Hide second icon row by default on desktop */
-.desktop-icons-second-row {
-  display: none;
-}
+
 
 /* ===== Responsive: Mobile Adjustments ===== */
 @media (max-width: 768px) {
+  /*
+    Adjusts desktop and icon grid for mobile devices.
+    Increases icon size and changes grid layout for touch usability.
+    Hides the resume icon and sets explicit order for main icons.
+  */
   .desktop {
     background-position: top center !important;
     display: block;
@@ -163,8 +154,8 @@
 
   .desktop-icons {
     display: grid;
-    grid-template-columns: 110px;
-    grid-auto-rows: 110px;
+    grid-template-columns: 122px;
+    grid-auto-rows: 122px;
     grid-gap: 6px;
     padding: 24px 0 0 12px;
     place-content: start start;
@@ -175,48 +166,45 @@
     height: calc(100% - var(--taskbar-height, 30px));
   }
 
-  .desktop-icons-second-row {
-    display: none;
-  }
+
 
   /* Set specific order for main mobile icons */
   .desktop-icons .desktop-icon[data-program-name="about"] {
     order: 1;
   }
-  .desktop-icons .desktop-icon[data-program-name="projects"] {
+  .desktop-icons .desktop-icon[data-program-name="contact"] {
     order: 2;
   }
-  .desktop-icons .desktop-icon[data-program-name="contact"] {
+  .desktop-icons .desktop-icon[data-program-name="projects"] {
     order: 3;
   }
-  /* Resume icon is hidden, its order property is not needed if display: none */
-  /* .desktop-icons .desktop-icon[data-program-name="resume"] { order: initial; } */
-
   .desktop-icons .desktop-icon[data-program-name="resume"] {
     display: none;
   }
   .desktop-icon {
     flex: initial;
     min-width: initial;
-    width: 110px;
-    height: 110px;
+    width: 122px;
+    height: 122px;
     padding: 7px;
     margin: 0;
     box-sizing: border-box;
-    border-radius: var(--icon-border-radius);
-    border: 1px solid transparent;
   }
   .desktop-icon img {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 6px;
+    width: 68px;
+    height: 68px;
+    margin-bottom: 7px;
   }
   .desktop-icon span {
-    font-size: 15px;
-    line-height: 18px;
+    font-size: 16.5px;
+    line-height: 20px;
   }
 }
 
+/* ===== Landscape Orientation Block ===== */
+/*
+  #landscape-block overlays the desktop on mobile landscape orientation to prompt users to rotate their device.
+*/
 #landscape-block {
   display: none;
   position: fixed;
@@ -225,14 +213,19 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(30, 30, 30, 0.97);
+  background: rgb(0, 0, 0);
   color: #fff;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  text-align: center;
-  font-size: 1.5rem;
-  padding: 32px;
+  padding-top: 18vh;
   box-sizing: border-box;
 }
 
-/* Handles desktop background, icon grid, selection overlays, and icon states for Windows XP simulation. Matches the look and feel of Windows XP. */
+#landscape-block .landscape-message {
+  font-family: Tahoma, Verdana, Geneva, sans-serif;
+  color: #fff;
+  font-size: 1rem;
+  margin-top: 24px;
+  text-align: center;
+  letter-spacing: 0.01em;
+}

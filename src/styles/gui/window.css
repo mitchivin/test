@@ -1,26 +1,20 @@
 /*
- * window.css — Window Styles for Windows XP Simulation
- *
- * Styles for:
- * - App window container, title bar, controls, status bar, overlays, and animations
- * - Responsive/mobile adjustments
- *
+ * window.css — Window styles for Windows XP simulation.
+ * Handles app window container, title bar, controls, status bar, animations, overlays, and XP-specific UI details.
+ * Matches the look and feel of Windows XP.
  * @file src/styles/gui/window.css
  */
 
-/* ==================================================
-   Window Styles for Windows XP Simulation
-   ==================================================
-   - Handles app window container, title bar, controls, status bar, animations, and overlays.
-   - Matches the look and feel of Windows XP.
-   ================================================== */
-
 /* ===== App Window Container ===== */
+/*
+  Main app window container, styled with XP borders, radius, and shadow.
+  Uses z-index: var(--z-window) to layer above base content but below taskbar/start menu.
+*/
 .app-window {
   border: 2px solid #284ffd;
   border-top-width: 1.5px;
   border-radius: 8px 8px 0px 0px;
-  box-shadow: 1px 1px 6px rgb(0 0 0 / 40%);
+  box-shadow: 1px 1px 4px rgb(0 0 0 / 50%);
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.1s ease;
@@ -33,15 +27,11 @@
   z-index: var(--z-window);
 }
 
-.app-window.active {
-  box-shadow: 1px 1px 4px rgb(0 0 0 / 50%);
-}
-
 .app-window:not(.active) {
-  box-shadow: 1px 1px 4px rgb(0 0 0 / 50%);
   border-color: #3d7bff;
 }
 
+/* ===== Title Bar & Controls ===== */
 .app-window .title-bar {
   border-radius: 6px 6px 0 0;
   margin: 0 -1px;
@@ -91,6 +81,7 @@
   cursor: not-allowed;
 }
 
+/* ===== Window Body & Content ===== */
 .app-window .window-body {
   margin: 0;
   padding: 0;
@@ -109,7 +100,10 @@
 }
 
 /* ===== Status Bar ===== */
-
+/*
+  Status bar at the bottom of the window, styled to match XP.
+  Uses flex layout for multiple fields and ensures it stays at the bottom.
+*/
 .app-window .status-bar {
   background-color: #e9e9e9; /* Updated to new dark-ish grey */
   padding: 1px 3px;
@@ -140,6 +134,10 @@
   flex-grow: 1; /* Allow last field to take remaining space if needed */
 }
 
+/* ===== Window Inactive Mask ===== */
+/*
+  Overlay mask for inactive windows, adds a translucent white bar over the title bar.
+*/
 .window-inactive-mask {
   display: none;
   position: absolute;
@@ -194,12 +192,17 @@
   pointer-events: none;
 }
 
+/* ===== Maximized Window Styles ===== */
 .app-window.maximized,
 .window.maximized {
   max-width: 100vw !important;
-  max-height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)) !important;
+  max-height: calc(
+    var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)
+  ) !important;
   width: 100vw !important;
-  height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)) !important;
+  height: calc(
+    var(--real-vh, 1vh) * 100 - var(--taskbar-height, 30px)
+  ) !important;
   left: 0 !important;
   top: 0 !important;
   margin: 0 !important;
@@ -218,8 +221,10 @@
   min-width: 0;
   box-sizing: border-box;
 }
+
 .app-window .window-body > iframe,
-.iframe-container > iframe {
+.iframe-container > iframe,
+.app-window .window-content > iframe {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -227,9 +232,14 @@
   border: none;
   display: block;
   box-sizing: border-box;
+  flex-grow: 1;
+  transition: opacity 0.35s;
 }
 
 /* ===== Animations ===== */
+/*
+  Keyframes for window open/close/minimize/restore animations, matching XP's snappy feel.
+*/
 @keyframes windowOpenFadeSlide {
   from {
     opacity: 0;
@@ -292,9 +302,15 @@
 
 /* ===== Responsive: Mobile Adjustments ===== */
 @media (max-width: 767px) {
+  /*
+    Adjusts window sizing and layout for mobile devices.
+    Removes border radius, shadow, and ensures full viewport usage.
+  */
   .app-window {
     max-width: 100vw !important; /* Full width */
-    max-height: calc(var(--real-vh, 1vh) * 100 - var(--taskbar-height)) !important; /* Full height minus taskbar */
+    max-height: calc(
+      var(--real-vh, 1vh) * 100 - var(--taskbar-height)
+    ) !important; /* Full height minus taskbar */
     left: 0 !important;
     top: 0 !important;
     transform: none !important;
@@ -314,11 +330,6 @@
   }
 }
 
-.app-window .window-body > iframe,
-.iframe-container > iframe {
-  transition: opacity 0.35s;
-}
-
 /* Base styles for .app-window .window-content, might affect iframe sizing indirectly */
 .app-window .window-content {
   flex-grow: 1;
@@ -327,16 +338,99 @@
   height: 100%; /* Ensure it tries to fill .window-body */
 }
 
-/* Ensure the iframe itself is flexible if direct child of window-body */
-.app-window .window-body > iframe,
-.app-window .window-content > iframe { /* If iframe is wrapped in window-content */
-  flex-grow: 1;
-  border: none;
-  width: 100%;
-  height: 100%; /* Make iframe take full height of its container */
-  display: block; /* remove extra space below iframe */
-}
-
 /* ==================================================
    END Window Styles
    ================================================== */
+
+/* Resizer styles */
+.resizer {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: transparent; /* Make them invisible, cursor change is the indicator */
+  z-index: 10; /* Ensure they are above content but below other UI like modals if any */
+}
+
+.resizer-n {
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 10px;
+  width: calc(100% - 10px); /* Avoid corners */
+  cursor: ns-resize;
+}
+
+.resizer-ne {
+  top: -5px;
+  right: -5px;
+  cursor: nesw-resize;
+  width: 10px;
+  height: 10px;
+}
+
+.resizer-e {
+  top: 50%;
+  right: -5px;
+  transform: translateY(-50%);
+  width: 10px;
+  height: calc(100% - 10px); /* Avoid corners */
+  cursor: ew-resize;
+}
+
+.resizer-se {
+  bottom: -5px;
+  right: -5px;
+  cursor: nwse-resize;
+  width: 10px;
+  height: 10px;
+}
+
+.resizer-s {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 10px;
+  width: calc(100% - 10px); /* Avoid corners */
+  cursor: ns-resize;
+}
+
+.resizer-sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: nesw-resize;
+  width: 10px;
+  height: 10px;
+}
+
+.resizer-w {
+  top: 50%;
+  left: -5px;
+  transform: translateY(-50%);
+  width: 10px;
+  height: calc(100% - 10px); /* Avoid corners */
+  cursor: ew-resize;
+}
+
+.resizer-nw {
+  top: -5px;
+  left: -5px;
+  cursor: nwse-resize;
+  width: 10px;
+  height: 10px;
+}
+
+/* Optionally, add a class when resizing to prevent text selection, etc. */
+.resizing-window {
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+}
+
+.resizing-window iframe {
+  pointer-events: none !important;
+}
+
+.app-window.maximized .resizer {
+  display: none; /* Hide resizers when window is maximized */
+}

@@ -1,31 +1,34 @@
 /*
- * crtEffect.css — CRT Visual Effects Styles for Windows XP Simulation
- *
- * Styles for:
- * - CRT scanlines, flicker, noise, vignette, aberration, and overlays
- * - Animation keyframes and customizable variables
- *
+ * crtEffect.css — CRT visual effects styles for Windows XP simulation.
+ * Provides CRT scanlines, flicker, noise, vignette, chromatic aberration, overlays, and related keyframes.
+ * Custom properties and z-index values are tuned for immersive CRT simulation.
  * @file src/styles/utils/crtEffect.css
  */
 
 /* ===== CRT Customizable Variables ===== */
 :root {
-  --crt-background: rgb(15 20 25);
-  --crt-glow-color: rgb(0 150 150 / 12%);
-  --crt-scanline-opacity: 0.15;
-  --crt-scanline-width: 1px;
-  --crt-scanline-gap: 1px;
-  --crt-moving-scanline-color: rgb(255 255 255 / 15%);
-  --crt-flicker-opacity: 0.01;
-  --crt-text-color: rgb(120 255 120 / 70%);
-  --crt-curvature: 0px;
-  --crt-vignette-opacity: 0.15;
-  --crt-aberration-offset: 1.2px;
-  --crt-aberration-opacity: 0.05;
-  --header-glow-color: rgb(120 255 150 / 40%);
+  --crt-background: rgb(15 20 25); /* CRT screen background color */
+  --crt-glow-color: rgb(0 150 150 / 12%); /* Subtle glow for CRT effect */
+  --crt-scanline-opacity: 0.15; /* Opacity for scanline overlays */
+  --crt-scanline-width: 1px; /* Width of each scanline */
+  --crt-scanline-gap: 1px; /* Gap between scanlines */
+  --crt-moving-scanline-color: rgb(
+    255 255 255 / 15%
+  ); /* Color for moving scanline */
+  --crt-flicker-opacity: 0.01; /* Opacity for flicker overlay */
+  --crt-text-color: rgb(120 255 120 / 70%); /* CRT green text color */
+  --crt-curvature: 0px; /* Border radius for CRT curvature */
+  --crt-vignette-opacity: 0.15; /* Opacity for vignette overlay */
+  --crt-aberration-offset: 1.2px; /* Offset for chromatic aberration */
+  --crt-aberration-opacity: 0.05; /* Opacity for chromatic aberration overlay */
+  --header-glow-color: rgb(120 255 150 / 40%); /* Glow color for CRT headers */
 }
 
 /* ===== Animation Keyframes ===== */
+/*
+  Keyframes for CRT scanline movement, flicker, noise, turn-on, blink, chromatic aberration, and header glow.
+  These drive the dynamic CRT effects.
+*/
 @keyframes scanline {
   0% {
     transform: translateY(-100%);

@@ -1,21 +1,13 @@
 /*
- * reset.css — Modern CSS Reset for Windows XP Simulation
- *
- * Styles for:
- * - Resets browser defaults and applies XP-specific adjustments
- * - Z-index hierarchy and global containers
- *
+ * reset.css — Modern CSS reset for Windows XP simulation.
+ * Resets browser defaults, applies XP-specific adjustments, and ensures consistent look and feel across browsers.
  * @file src/styles/reset.css
  */
 
-/* ==================================================
-   Modern CSS Reset for Windows XP Simulation
-   ==================================================
-   - Resets browser defaults and applies XP-specific adjustments.
-   - Ensures consistent look and feel across browsers.
-   ================================================== */
-
 /* ===== Universal Box Sizing & Font Smoothing ===== */
+/*
+  Applies border-box sizing to all elements and enables font smoothing for a cleaner look.
+*/
 *,
 *::before,
 *::after {
@@ -27,6 +19,10 @@
 }
 
 /* ===== Document & Body ===== */
+/*
+  Sets base font size, disables browser text size adjustments, and ensures full viewport height.
+  Body uses Tahoma to match Windows XP, with 11px font size for authenticity.
+*/
 html {
   font-size: 100%;
   height: 100%;
@@ -40,23 +36,30 @@ body {
   height: 100%;
   overflow: hidden;
   font-family: Tahoma, Arial, sans-serif;
-  font-size: 11px;
+  font-size: 11px; /* Windows XP default UI font size */
   line-height: 1.5;
 }
 
-/* Windows XP User Interaction Adjustments */
+/* ===== Windows XP User Interaction Adjustments ===== */
+/*
+  Ensures default (arrow) cursor for all desktop elements, matching XP behavior.
+*/
 .desktop,
 .desktop * {
   cursor: default;
 }
 
 /* ===== List Styles ===== */
+/* Removes default list styling for a clean slate. */
 ul,
 ol {
   list-style: none;
 }
 
 /* ===== Image Styles ===== */
+/*
+  Ensures images and SVGs align with text and scale responsively.
+*/
 img,
 svg {
   vertical-align: middle;
@@ -65,12 +68,18 @@ svg {
 }
 
 /* ===== Table Styles ===== */
+/*
+  Collapses table borders and removes spacing for consistent table rendering.
+*/
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
 /* ===== Form Styles ===== */
+/*
+  Sets form element font size to match XP UI and allows text selection in inputs.
+*/
 button,
 input,
 select,
@@ -83,12 +92,19 @@ textarea {
 }
 
 /* ===== Link Styles ===== */
+/*
+  Removes default link color and underline for custom styling.
+*/
 a {
   color: inherit;
   text-decoration: none;
 }
 
 /* ===== Selection Styles ===== */
+/*
+  Disables text selection globally except for form fields (overridden above).
+  This mimics the Windows XP desktop, where most UI text is not selectable.
+*/
 * {
   user-select: none !important; /* Standard */
   -webkit-user-select: none !important;
@@ -96,11 +112,15 @@ a {
   -ms-user-select: none !important;
 }
 
-/* ==================================================
-   END Modern CSS Reset
-   ================================================== */
-
-/* Z-Index Variables */
+/* ===== Z-Index Variables ===== */
+/*
+  Defines stacking order for major UI layers. These values are referenced throughout the app's CSS.
+  - --z-base: Base layer for most content.
+  - --z-window: Application windows.
+  - --z-taskbar: Taskbar and related overlays.
+  - --z-tooltip: Tooltips (above windows/taskbar).
+  - --z-startmenu: Start menu (highest layer).
+*/
 :root {
   --z-base: 1;
   --z-window: 100;
@@ -111,5 +131,9 @@ a {
 
 #windows-container {
   position: absolute;
-  z-index: 100;
+  z-index: 100; /* Matches --z-window for window stacking */
 }
+
+/*
+ * END reset.css
+ */

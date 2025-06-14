@@ -1,25 +1,38 @@
 /**
- * startMenu.js — Start Menu Component for Windows XP Simulation
+ * @fileoverview Manages the Windows XP style Start Menu component.
+ * @description This module defines the `StartMenu` class, responsible for creating, displaying,
+ * and managing all interactions within the Start Menu. This includes rendering the main menu,
+ * the "All Programs" flyout menu, handling recently used items (currently vanity items),
+ * integrating social media links, and responding to system events like window focus changes
+ * to correctly close the menu. It dynamically builds menu structures from predefined lists
+ * and fetched data.
  *
- * Handles the start menu UI, including:
- * - Menu display, toggling, and submenu logic
- * - Dynamic menu building for programs, socials, and recently used
- * - Event-driven integration with the rest of the system
+ * Key Functionalities:
+ * - Toggling Start Menu visibility.
+ * - Dynamic generation of main menu, "All Programs" menu, and "Recently Used" (vanity) items.
+ * - Handling submenu interactions (e.g., "All Programs").
+ * - Launching programs and opening URLs from menu items.
+ * - Closing the menu on various events (clicks outside, window focus, Escape key).
  *
- * Usage:
- *   import StartMenu from './startMenu.js';
- *   const startMenu = new StartMenu(eventBus);
- *
- * Edge Cases:
- *   - If #start-button is missing, menu cannot be toggled by user.
- *   - If .startmenu already exists, it is replaced.
- *   - Submenus are dynamically created and destroyed as needed.
- *
- * @module startMenu
+ * @module scripts/gui/startMenu
+ * @see {@link module:scripts/utils/eventBus.EVENTS}
  */
 import { EVENTS } from "../utils/eventBus.js";
 import { isMobileDevice } from "../utils/device.js";
 
+/**
+ * Base configuration for items in the "All Programs" flyout menu.
+ * Social media links are dynamically appended to this list.
+ * Each object defines a menu item or separator.
+ * @type {Array<object>}
+ * @property {string} type - Type of item ("program", "separator", "link").
+ * @property {string} [programName] - Key for programData if type is "program".
+ * @property {string} icon - Path to the menu item's icon.
+ * @property {string} label - Display text for the menu item.
+ * @property {string} [url] - URL if type is "link".
+ * @property {boolean} [disabled=false] - If true, the item is visually disabled.
+ * @private
+ */
 const ALL_PROGRAMS_ITEMS_BASE = [
   // Main apps first
   {
@@ -66,7 +79,7 @@ const ALL_PROGRAMS_ITEMS_BASE = [
     programName: "musicPlayer",
     icon: "./assets/gui/start-menu/music.webp",
     label: "Music Player",
-    disabled: true,
+    disabled: false,
   },
   {
     type: "program",
@@ -86,7 +99,17 @@ const ALL_PROGRAMS_ITEMS_BASE = [
   // Socials will be appended dynamically
 ];
 
-// Add menu item arrays for abstraction
+/**
+ * Configuration for items in the "Recently Used" section of the Start Menu.
+ * These are currently vanity items for display purposes and are marked as disabled.
+ * @type {Array<object>}
+ * @property {string} type - Always "program" for these items.
+ * @property {string} programName - A unique key for the item.
+ * @property {string} icon - Path to the item's icon.
+ * @property {string} label - Display text for the item.
+ * @property {boolean} [disabled=true] - If true, the item is visually disabled.
+ * @private
+ */
 const RECENTLY_USED_ITEMS = [
   {
     type: "program",
@@ -160,32 +183,62 @@ const RECENTLY_USED_ITEMS = [
   },
 ];
 
+/** @type {Array<object>} Cache for social media link data loaded from `info.json`. */
 let SOCIALS = [];
+/** @type {object | null} Cache for system assets (e.g., user icon path) loaded from `system.json`. */
 let systemAssets = null;
 
+/**
+ * Fetches system asset data (e.g., user icon path) from `system.json`.
+ * Implements a simple cache (`systemAssets`) to avoid redundant fetches.
+ * @async
+ * @private
+ * @function getSystemAssets
+ * @returns {Promise<object>} A promise that resolves to the system assets object.
+ *                            Returns an empty object on fetch failure.
+ */
 async function getSystemAssets() {
   if (systemAssets) return systemAssets;
   try {
     const response = await fetch("./system.json");
     systemAssets = await response.json();
     return systemAssets;
-  } catch (e) {
+  } catch (_e) {
     systemAssets = {};
     return systemAssets;
   }
 }
 
+/**
+ * Fetches social media link data from `info.json` and populates the `SOCIALS` array.
+ * Also caches the full response in `infoData` for potential other uses.
+ * @async
+ * @private
+ * @function loadSocials
+ * @returns {Promise<object>} A promise that resolves to the full info.json content.
+ *                            The `SOCIALS` array is updated as a side effect. On failure,
+ *                            `SOCIALS` is an empty array and an empty object is returned.
+ */
 async function loadSocials() {
   try {
     const response = await fetch("./info.json");
     const info = await response.json();
     SOCIALS = Array.isArray(info.socials) ? info.socials : [];
-  } catch (e) {
+    return info;
+  } catch (_e) {
     SOCIALS = [];
+    return {};
   }
 }
 
-// Helper to build menu HTML from item array
+/**
+ * Builds an HTML string for a menu list from an array of item configurations.
+ * @param {Array<object>} items - Array of menu item configuration objects.
+ * @param {string} itemClass - Base CSS class for each `<li>` item.
+ * @param {string} [ulClass] - Optional CSS class for the `<ul>` element.
+ * @returns {string} The generated HTML string for the menu.
+ * @private
+ */
 function buildMenuHTML(items, itemClass, ulClass) {
   return (
     `<ul${ulClass ? ` class="${ulClass}"` : ""}>` +
@@ -195,7 +248,7 @@ function buildMenuHTML(items, itemClass, ulClass) {
           return `<li class="${itemClass}-separator"></li>`;
         } else if (item.type === "program") {
           return (
-            `<li class="${itemClass}-item${item.disabled ? " disabled" : ""}" data-program-name="${item.programName}">
+            `<li class="${itemClass}-item${item.disabled ? " disabled" : ""}" data-action="open-program" data-program-name="${item.programName}">
 ` +
             `<img src="${item.icon}" alt="${item.label}">
 ` +
@@ -221,7 +274,15 @@ function buildMenuHTML(items, itemClass, ulClass) {
   );
 }
 
-// Helper to attach menu item effects (mousedown, mouseup, etc.)
+/**
+ * Attaches visual feedback event listeners (mousedown, mouseup, mouseleave, mouseout)
+ * to menu items within a given menu element.
+ * This provides the "clicked" visual state for menu items.
+ * @param {HTMLElement} menuElement - The parent menu element containing the items.
+ * @param {string} itemSelector - CSS selector to identify the menu items.
+ * @private
+ * @returns {void} Nothing.
+ */
 function attachMenuItemEffects(menuElement, itemSelector) {
   const items = menuElement.querySelectorAll(itemSelector);
   items.forEach((item) => {
@@ -241,19 +302,34 @@ function attachMenuItemEffects(menuElement, itemSelector) {
 //  Start Menu Module for Windows XP Simulation
 // ==================================================
 /**
- * StartMenu class manages the Windows XP start menu, including menu items, submenus, and event handling.
+ * @class StartMenu
+ * @description Manages the Windows XP Start Menu component, including its structure,
+ * content (programs, social links, recently used items), display logic,
+ * and user interactions.
  */
 export default class StartMenu {
   /**
-   * @param {Object} eventBus - Event bus for communication.
+   * Constructs the StartMenu manager.
+   * @param {EventBus} eventBus - The global event bus instance.
+   * @see {@link module:scripts/utils/eventBus.EventBus}
    */
   constructor(eventBus) {
+    /** @type {EventBus} The global event bus instance for inter-component communication. */
     this.eventBus = eventBus;
+    /** @type {HTMLElement} The main Start Button DOM element. */
     this.startButton = document.getElementById("start-button");
+    /** @type {HTMLElement | null} The main Start Menu DOM element. Created dynamically. */
     this.startMenu = null;
+    /** @type {HTMLElement | null} The "All Programs" flyout menu DOM element. Created dynamically. */
     this.allProgramsMenu = null;
+    /** @type {HTMLElement | null} The "Recently Used" flyout menu DOM element. Created dynamically. */
     this.recentlyUsedMenu = null;
+    /** @type {HTMLElement | null} Tracks the currently active content click overlay (if any) to manage its state. */
     this.activeWindowOverlay = null; // Keep track of which overlay is active
+    /** @type {object} Stores data fetched from `info.json`, primarily for user details and social links. */
+    this.infoData = {}; // Initialize infoData on the instance
+    /** @type {object | null} Stores data fetched from `system.json`, primarily for system asset paths like user icons. */
+    this.systemAssets = null; // Initialize systemAssets on the instance
 
     this._init();
 
@@ -272,17 +348,26 @@ export default class StartMenu {
     });
   }
 
+  /**
+   * Asynchronously initializes the Start Menu by loading necessary data (socials, system assets)
+   * and then setting up the UI elements and event listeners.
+   * @async
+   * @private
+   * @returns {Promise<void>} A promise that resolves when initialization is complete.
+   */
   async _init() {
-    await loadSocials();
+    this.infoData = await loadSocials(); // Store fetched info data
+    this.systemAssets = await getSystemAssets(); // Fetch system assets before creating menu element
     this.createStartMenuElement();
     this.setupEventListeners();
-    this.systemAssets = await getSystemAssets();
   }
 
   /**
-   * Create and insert the main start menu DOM element.
-   * Replaces any existing .startmenu element.
-   * @returns {void}
+   * Creates the main Start Menu DOM element and appends it to the body.
+   * @description If an existing Start Menu element is found, it's removed first.
+   * Populates the menu using `getMenuTemplate`, sets the username,
+   * and then initializes submenus and item event handlers.
+   * @returns {void} Nothing.
    */
   createStartMenuElement() {
     const existingMenu = document.querySelector(".startmenu");
@@ -299,15 +384,11 @@ export default class StartMenu {
     document.body.appendChild(startMenu);
     this.startMenu = startMenu;
 
-    // Dynamically set username from info.json
-    fetch('./info.json')
-      .then(r => r.json())
-      .then(info => {
-        const name = info?.contact?.name || 'Mitch Ivin';
-        startMenu.querySelectorAll('.menutopbar .username').forEach(span => {
-          span.textContent = name;
-        });
-      });
+    // Dynamically set username from this.infoData (already fetched)
+    const name = this.infoData?.contact?.name || "Mitch Ivin";
+    startMenu.querySelectorAll(".menutopbar .username").forEach((span) => {
+      span.textContent = name;
+    });
 
     this.createAllProgramsMenu();
     this.createRecentlyUsedMenu();
@@ -316,11 +397,13 @@ export default class StartMenu {
   }
 
   /**
-   * Helper function to create a submenu element.
+   * Creates a submenu DOM element if it doesn't already exist and appends it to the body.
    * @param {string} className - The CSS class for the submenu container.
-   * @param {string} menuHTML - The HTML content for the submenu.
-   * @param {string} propertyName - The name of the class property to assign the element to.
-   * @returns {HTMLElement} The created submenu element.
+   * @param {string} menuHTML - The inner HTML content for the submenu.
+   * @param {string} propertyName - The name of the class property (e.g., `this.allProgramsMenu`)
+   *                              to which the created submenu element will be assigned.
+   * @returns {HTMLElement} The created or existing submenu DOM element.
+   * @private
    */
   _createSubMenu(className, menuHTML, propertyName) {
     if (!this[propertyName]) {
@@ -335,15 +418,18 @@ export default class StartMenu {
   }
 
   /**
-   * Generalized helper to create a submenu and attach effects/handlers.
-   * @param {Object} options - Options for submenu creation
-   * @param {Array} options.items - Array of menu items
-   * @param {string} options.itemClass - Base class for menu items
-   * @param {string} options.ulClass - Class for the <ul> element
-   * @param {string} options.menuClass - Class for the submenu container
-   * @param {string} options.propertyName - Property name to assign the menu element to
-   * @param {string} options.itemSelector - Selector for menu items
-   * @param {boolean} [options.attachClickHandler] - Whether to attach the click handler
+   * A generalized helper function to create a submenu, populate it with items,
+   * and attach standard menu item interaction effects.
+   * @param {object} options - Configuration options for creating the menu.
+   * @param {Array<object>} options.items - Array of item configurations for the menu.
+   * @param {string} options.itemClass - Base CSS class for individual menu items.
+   * @param {string} [options.ulClass] - Optional CSS class for the `<ul>` element.
+   * @param {string} options.menuClass - CSS class for the submenu's container div.
+   * @param {string} options.propertyName - Class property name to store the created menu element.
+   * @param {string} options.itemSelector - CSS selector for the items within the created menu.
+   * @param {boolean} [options.attachClickHandler=false] - If true, attaches a generic click handler (usually for submenus).
+   * @returns {HTMLElement} The created submenu element.
+   * @private
    */
   _createMenuWithEffects({
     items,
@@ -364,8 +450,11 @@ export default class StartMenu {
   }
 
   /**
-   * Create the All Programs submenu and attach to DOM.
-   * @returns {void}
+   * Creates the "All Programs" flyout menu element.
+   * @description Uses the `_createMenuWithEffects` helper to build the menu
+   * from `getAllProgramsItems()` and attaches necessary event handlers.
+   * The created element is stored in `this.allProgramsMenu`.
+   * @returns {void} Nothing.
    */
   createAllProgramsMenu() {
     this._createMenuWithEffects({
@@ -380,8 +469,11 @@ export default class StartMenu {
   }
 
   /**
-   * Create the Recently Used submenu and attach to DOM.
-   * @returns {void}
+   * Creates the "Recently Used" programs section/menu element.
+   * @description Uses the `_createMenuWithEffects` helper to build the menu
+   * from `RECENTLY_USED_ITEMS`. This menu currently contains vanity items.
+   * The created element is stored in `this.recentlyUsedMenu`.
+   * @returns {void} Nothing.
    */
   createRecentlyUsedMenu() {
     this._createMenuWithEffects({
@@ -396,11 +488,30 @@ export default class StartMenu {
   }
 
   /**
-   * Get the HTML template string for the main start menu.
-   * @returns {string} HTML string for the start menu.
+   * Generates the complete HTML string for the main Start Menu structure.
+   * @description This complex method dynamically constructs the Start Menu layout,
+   * including the user panel, pinned items, recently used section placeholder,
+   * and the bottom control bar (Log Off, Turn Off Computer).
+   * It uses `renderMenuItem` to generate individual item HTML and adapts content
+   * based on device type (mobile/desktop) and fetched system/social data.
+   * @returns {string} The HTML string for the Start Menu.
+   * @private
    */
   getMenuTemplate() {
-    // Helper to render a menu item with optional disabling
+    /**
+     * Renders the HTML for a single Start Menu item.
+     * @param {object} itemConfig - Configuration object for the menu item.
+     * @param {string} itemConfig.id - Unique ID for the menu item (often programName).
+     * @param {string} itemConfig.icon - Path to the item's icon.
+     * @param {string} itemConfig.title - Main display text for the item.
+     * @param {string} [itemConfig.description] - Optional subtitle or description.
+     * @param {string} [itemConfig.programName] - Program key if it launches a program.
+     * @param {string} [itemConfig.action] - Data action attribute (e.g., "open-program", "open-url").
+     * @param {string} [itemConfig.url] - URL if the action is "open-url".
+     * @param {boolean} [itemConfig.disabledOverride] - Explicitly sets the disabled state, overriding default logic.
+     * @returns {string} HTML string for the menu item `<li>`.
+     * @private
+     */
     function renderMenuItem({
       id,
       icon,
@@ -439,7 +550,7 @@ export default class StartMenu {
           : "";
       const dataUrl = url ? `data-url="${url}"` : "";
       const isProjects = (programName || id) === "projects";
-      const titleSpan = `<span class="item-title${isProjects ? ' projects-bold' : ''}">${title}</span>`;
+      const titleSpan = `<span class="item-title${isProjects ? " projects-bold" : ""}">${title}</span>`;
       return `<li class="menu-item${disabledClass}" id="menu-${programName || id}" ${dataAction} ${dataProgram} ${dataUrl} tabindex="${shouldDisable ? "-1" : "0"}" aria-disabled="${shouldDisable ? "true" : "false"}">
         <img src="${icon}" alt="${title}">
         <div class="item-content">
@@ -450,11 +561,16 @@ export default class StartMenu {
     }
 
     const mobile = isMobileDevice();
+    const userPic =
+      this.systemAssets?.userIcon || "./assets/gui/boot/userlogin.webp";
+    const userName = this.infoData?.contact?.name || "Mitch Ivin"; // Already correctly using this.infoData for name
 
-    // Define configurations for the items that will be swapped
-    const socialItems = SOCIALS.map(social => ({
+    // Use SOCIALS array (populated by loadSocials via this.infoData)
+    const socialItems = SOCIALS.map((social) => ({
       id: social.key,
-      icon: social.icon ? "./" + social.icon.replace(/^\.\//, '').replace(/^\//, '') : '', // Corrected path
+      icon: social.icon
+        ? "./" + social.icon.replace(/^\.\//, "").replace(/^\//, "")
+        : "",
       title: social.name,
       url: social.url,
       action: "open-url",
@@ -468,7 +584,7 @@ export default class StartMenu {
         title: "Media Player",
         programName: "mediaPlayer",
         action: "open-program",
-        disabledOverride: true, // These are always disabled
+        disabledOverride: true,
       },
       {
         id: "my-pictures",
@@ -476,7 +592,7 @@ export default class StartMenu {
         title: "My Photos",
         programName: "my-pictures",
         action: "open-program",
-        disabledOverride: true, // These are always disabled
+        disabledOverride: true,
       },
       {
         id: "musicPlayer",
@@ -484,7 +600,7 @@ export default class StartMenu {
         title: "Music Player",
         programName: "musicPlayer",
         action: "open-program",
-        disabledOverride: true, // These are always disabled
+        disabledOverride: isMobileDevice(), // Conditionally disable on mobile
       },
     ];
 
@@ -502,9 +618,10 @@ export default class StartMenu {
       rightSlot2Mobile = appItemsToSwap[1];
       rightSlot3Mobile = appItemsToSwap[2];
     } else {
-      leftSlot1 = appItemsToSwap[0];
-      leftSlot2 = appItemsToSwap[1];
-      leftSlot3 = appItemsToSwap[2];
+      // New order for desktop slots 5, 6, 7:
+      leftSlot1 = appItemsToSwap[1]; // My Photos
+      leftSlot2 = appItemsToSwap[2]; // Music Player
+      leftSlot3 = appItemsToSwap[0]; // Media Player
       // On desktop, these slots in the right column will be the social items
       rightSlot1Desktop = socialItems[0];
       rightSlot2Desktop = socialItems[1];
@@ -562,8 +679,8 @@ export default class StartMenu {
 
     return `
       <div class="menutopbar">
-        <img src="./assets/gui/boot/userlogin.webp" alt="User" class="userpicture">
-        <span class="username">Mitch Ivin</span>
+        <img src="${userPic}" alt="User" class="userpicture">
+        <span class="username">${userName}</span>
       </div>
       <div class="start-menu-middle">
         <div class="middle-section middle-left">
@@ -763,25 +880,15 @@ export default class StartMenu {
       window.open(url, "_blank");
       this.closeStartMenu();
     } else if (action === "log-off") {
-      // Instead of direct logoff, request confirmation
-      this.eventBus.publish(EVENTS.LOG_OFF_CONFIRMATION_REQUESTED);
-      this.closeStartMenu(); // Close start menu after clicking
+      this.eventBus.publish(EVENTS.LOG_OFF_CONFIRMATION_REQUESTED, {
+        dialogType: "logOff",
+      });
+      this.closeStartMenu();
     } else if (action === "shut-down") {
-      sessionStorage.removeItem("logged_in");
-      window.location.reload();
-    }
-
-    // Handle All Programs menu items: open or restore program window for non-social links
-    if (
-      target.classList.contains("all-programs-item") &&
-      target.hasAttribute("data-program-name")
-    ) {
-      const programName = target.getAttribute("data-program-name");
-      if (programName) {
-        this.openProgram(programName); // Will open or restore the window
-        this.closeStartMenu();
-        return;
-      }
+      this.eventBus.publish(EVENTS.LOG_OFF_CONFIRMATION_REQUESTED, {
+        dialogType: "shutDown",
+      });
+      this.closeStartMenu();
     }
   }
 
@@ -789,13 +896,15 @@ export default class StartMenu {
    * Sets up delegated event listeners for the start menu.
    */
   _setupDelegatedEventHandlers() {
-    [this.startMenu, this.allProgramsMenu, this.recentlyUsedMenu].forEach(
-      (menu) => {
-        if (menu) {
-          menu.addEventListener("click", this._handleMenuClick.bind(this));
-        }
-      },
-    );
+    // Only attach to the main startMenu here.
+    // Submenus (allProgramsMenu, recentlyUsedMenu) have their handlers attached
+    // during their creation in _createMenuWithEffects.
+    if (this.startMenu) {
+      this.startMenu.addEventListener(
+        "click",
+        this._handleMenuClick.bind(this),
+      );
+    }
   }
 
   /**
@@ -991,6 +1100,16 @@ export default class StartMenu {
   }
 
   // New helper method to manage overlay activation
+  /**
+   * Manages the display and state of a content click overlay on application windows.
+   * When the Start Menu is open, an overlay is typically shown on the active application window.
+   * This overlay allows clicks to pass to the window content but also triggers the Start Menu to close.
+   * This method activates the overlay for the given `activeWindowId` and deactivates any previous one.
+   * If `activeWindowId` is null, it deactivates any active overlay.
+   * @param {string | null} activeWindowId - The ID of the window to activate the overlay for, or null to deactivate all.
+   * @private
+   * @returns {void} Nothing.
+   */
   updateContentOverlay(activeWindowId) {
     // Deactivate previously active overlay (if any)
     if (this.activeWindowOverlay) {
@@ -1142,29 +1261,39 @@ export default class StartMenu {
 // ==================================================
 
 function getAllProgramsItems() {
-  return [
+  const allItems = [
     ...ALL_PROGRAMS_ITEMS_BASE,
-    ...SOCIALS.map(social => ({
+    ...SOCIALS.map((social) => ({
       type: "url",
       url: social.url,
-      icon: social.icon ? "./" + social.icon.replace(/^\.\//, '').replace(/^\//, '') : '', // Corrected path
+      icon: social.icon
+        ? "./" + social.icon.replace(/^\.\//, "").replace(/^\//, "")
+        : "", // Corrected path
       label: social.name,
     })),
   ];
+
+  // If on mobile, find and disable the musicPlayer program
+  if (isMobileDevice()) {
+    const musicPlayerItem = allItems.find(
+      (item) => item.type === "program" && item.programName === "musicPlayer",
+    );
+    if (musicPlayerItem) {
+      musicPlayerItem.disabled = true;
+    }
+  }
+
+  return allItems;
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const system = await getSystemAssets();
-  document.querySelectorAll('.menutopbar .userpicture').forEach(img => {
-    if (system.userIcon) img.src = system.userIcon;
-  });
-  // Set username from info.json
-  try {
-    const response = await fetch("./info.json");
-    const info = await response.json();
-    const name = info?.contact?.name || "Mitch Ivin";
-    document.querySelectorAll('.menutopbar .username').forEach(span => {
-      span.textContent = name;
-    });
-  } catch (e) {}
+  // The .menutopbar .userpicture in StartMenu is now handled by getMenuTemplate directly. No additional DOM update is needed here.
+  // The following code in DOMContentLoaded for login screen elements is fine and separate:
+  // document.querySelectorAll('.login-screen .user img').forEach(img => { ... });
+  // document.querySelectorAll('.login-screen .name').forEach(span => { ... });
+  // So, no changes needed for those parts if they exist elsewhere or are intended for non-StartMenu elements.
+  // The part for boot logo is also fine:
+  // const bootLogo = document.getElementById("boot-logo");
+  // if (bootLogo && system.loading) bootLogo.src = system.loading;
+  // document.querySelectorAll(".xp-logo-image").forEach(img => { ... });
 });

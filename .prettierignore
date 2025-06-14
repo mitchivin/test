@@ -1,0 +1,19 @@
+# Build output
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Minified files (common pattern)
+*.min.js
+*.min.css
+
+# Config files that might have specific formatting
+eslint.config.mjs
+.prettierrc.json 
